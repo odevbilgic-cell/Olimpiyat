@@ -3,22 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Olimpiyat Kokoreç Menü</title>
+  <title>Olimpiyat Kokoreç Menü - Kullanıcı Arayüzü</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   
-  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
-
   <style>
     body { background-color: #fff7f0; }
     .active-tab { background-color: #fb923c; color: white; }
     #categoryTabs::-webkit-scrollbar { display: none; }
     #categoryTabs { -ms-overflow-style: none; scrollbar-width: none; }
+    .price-update-info { font-size: 0.7rem; color: #6b7280; margin-top: 5px; }
   </style>
 </head>
 <body class="text-gray-800">
+  
+  <div id="viewCountListener" style="display:none;"></div> 
+
   <header class="bg-orange-500 text-white p-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
     <h1 class="text-2xl font-bold">Olimpiyat Kokoreç</h1>
     <div class="flex items-center gap-2">
@@ -44,9 +46,9 @@
     <img id="modalImage" class="max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl transition-transform">
   </div>
 
-  <div id="adminPanel" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+  <div id="adminLoginModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
     <div class="bg-white rounded-xl shadow-lg p-6 w-96 relative">
-      <button id="closeAdmin" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
+      <button id="closeAdminLogin" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
       <h2 class="text-xl font-bold mb-3 text-orange-600">Yönetici Girişi</h2>
       <input id="passwordInput" type="password" placeholder="Şifreyi giriniz" class="border w-full p-2 rounded mb-3 focus:ring-orange-500 focus:border-orange-500" />
       <button id="checkPassword" class="bg-orange-500 text-white px-4 py-2 rounded w-full hover:bg-orange-600 transition">Giriş Yap</button>
@@ -54,67 +56,8 @@
     </div>
   </div>
 
-  <div id="editPanel" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-    <div class="bg-white rounded-xl shadow-lg p-6 w-[600px] relative max-h-[90vh] overflow-y-auto">
-      <button id="closeEdit" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
-      <h2 class="text-xl font-bold mb-3 text-orange-600">Ürün Yönetimi</h2>
-      
-      <div class="flex flex-col gap-2 mb-4 p-4 border rounded-lg bg-orange-50">
-        <h3 class="font-bold text-lg mb-1">Yeni Ürün Ekle</h3>
-        <input id="productName" placeholder="Ürün Adı (TR)" class="border p-2 rounded" />
-        <input id="productDesc" placeholder="Açıklama (TR)" class="border p-2 rounded" />
-        <input id="productDescEN" placeholder="Açıklama (EN)" class="border p-2 rounded" />
-        <input id="productPrice" type="number" placeholder="Fiyat (₺)" class="border p-2 rounded" />
-        
-        <div class="p-3 border rounded-lg bg-gray-50">
-            <h3 class="font-semibold mb-2">Görsel Yükle</h3>
-            <button id="uploadNewImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition w-full">Görsel Yükle (Pop-up Açılacak)</button>
-            <img id="newImagePreview" class="w-full h-32 object-cover rounded-lg mt-2 border border-gray-300 hidden" src="https://images.unsplash.com/photo-1543825700-6c9233634125" alt="Yeni Görsel Önizleme">
-            <input type="hidden" id="productImageURL" value="https://images.unsplash.com/photo-1543825700-6c9233634125" />
-        </div>
-        
-        <select id="productCategory" class="border p-2 rounded"></select>
-        <button id="addProduct" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition">Ürün Ekle</button>
-      </div>
-
-      <h3 class="font-semibold mb-2">Mevcut Ürünler</h3>
-      <div class="flex gap-2 mb-2">
-        <select id="filterCategory" class="border p-2 rounded flex-1"></select>
-      </div>
-      <ul id="productList" class="flex flex-col gap-2"></ul>
-    </div>
-  </div>
-
-  <div id="editProductModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-    <div class="bg-white rounded-xl shadow-lg p-6 w-[500px] relative max-h-[90vh] overflow-y-auto">
-      <button id="closeEditProductModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
-      <h2 class="text-xl font-bold mb-3 text-orange-600">Ürün Düzenle</h2>
-      
-      <input type="hidden" id="editProductKey" />
-      
-      <div class="flex flex-col gap-3">
-        
-        <div class="p-3 border rounded-lg bg-gray-50">
-            <h3 class="font-semibold mb-2">Görsel Düzenleme</h3>
-            <img id="editImagePreview" class="w-full h-32 object-cover rounded-lg mb-2 border border-gray-300" src="" alt="Ürün Görseli Önizleme">
-            <button id="uploadEditImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition w-full">Yeni Görsel Yükle (Pop-up Açılacak)</button>
-            <input type="hidden" id="editImageURL" value="" />
-        </div>
-
-        <input id="editName" placeholder="Ürün Adı (TR)" class="border p-2 rounded" />
-        <input id="editNameEN" placeholder="Product Name (EN)" class="border p-2 rounded" />
-        <input id="editDesc" placeholder="Açıklama (TR)" class="border p-2 rounded" />
-        <input id="editDescEN" placeholder="Description (EN)" class="border p-2 rounded" />
-        <input id="editPrice" type="number" placeholder="Fiyat (₺)" class="border p-2 rounded" />
-        <select id="editCategory" class="border p-2 rounded"></select>
-
-        <button id="saveEditProduct" class="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600 transition">Değişiklikleri Kaydet</button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // --- Firebase Yapılandırması (DÜZELTİLMİŞ URL) ---
+    // --- Firebase Yapılandırması ---
     const firebaseConfig = {
         apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
         authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
@@ -122,30 +65,22 @@
         messagingSenderId: "987017604417",
         appId: "1:987017604417:web:b6c4858712dc66d14745c0",
         measurementId: "G-HB0J7BFZ9N",
-        // DÜZELTİLMİŞ DATABASE URL (Bölgesel uyarıyı çözer)
         databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app"
     };
 
-    // CLOUDINARY BİLGİLERİ (Sizin Tarafınızdan Girildi)
-    const CLOUDINARY_CLOUD_NAME = 'dtkrwqofx';      
-    const CLOUDINARY_UPLOAD_PRESET = 'olimpiyat_menu'; 
-
-    // Firebase'i başlat
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const productsRef = database.ref('products');
+    const visitorsRef = database.ref('visitors'); // Yeni ziyaretçi sayacı referansı
 
     // --- HTML Element Tanımlamaları ---
     const adminLoginBtn = document.getElementById('adminLoginBtn');
-    const adminPanel = document.getElementById('adminPanel');
-    const editPanel = document.getElementById('editPanel');
+    const adminLoginModal = document.getElementById('adminLoginModal');
     const checkPassword = document.getElementById('checkPassword');
     const passwordInput = document.getElementById('passwordInput');
     const loginError = document.getElementById('loginError');
-    const closeAdmin = document.getElementById('closeAdmin');
-    const closeEdit = document.getElementById('closeEdit');
+    const closeAdminLogin = document.getElementById('closeAdminLogin');
     const menuContainer = document.getElementById('menuContainer');
-    const productList = document.getElementById('productList');
     const contactSection = document.getElementById('contactSection');
     const imageModal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
@@ -153,32 +88,9 @@
     const langEN = document.getElementById('langEN');
     const contactTitle = document.getElementById('contactTitle');
     const contactAddress = document.getElementById('contactAddress');
-    const adminLoginButton = document.getElementById('adminLoginBtn');
     const tabButtonsContainer = document.getElementById('categoryTabs');
-    const productNameInput = document.getElementById('productName');
-    const productDescInput = document.getElementById('productDesc');
-    const productDescENInput = document.getElementById('productDescEN');
-    const productPriceInput = document.getElementById('productPrice');
-    const productImageURLInput = document.getElementById('productImageURL'); 
-    const productCategorySelect = document.getElementById('productCategory');
-    const addProductButton = document.getElementById('addProduct');
-    const filterCategorySelect = document.getElementById('filterCategory');
-    const editProductModal = document.getElementById('editProductModal');
-    const closeEditProductModal = document.getElementById('closeEditProductModal');
-    const editProductKeyInput = document.getElementById('editProductKey'); 
-    const editNameInput = document.getElementById('editName');
-    const editNameENInput = document.getElementById('editNameEN');
-    const editDescInput = document.getElementById('editDesc');
-    const editDescENInput = document.getElementById('editDescEN');
-    const editPriceInput = document.getElementById('editPrice');
-    const editCategorySelect = document.getElementById('editCategory');
-    const saveEditProductButton = document.getElementById('saveEditProduct');
-    const editImagePreview = document.getElementById('editImagePreview');
-    const editImageURLInput = document.getElementById('editImageURL');
-    const uploadNewImageBtn = document.getElementById('uploadNewImageBtn'); 
-    const uploadEditImageBtn = document.getElementById('uploadEditImageBtn'); 
-    const newImagePreview = document.getElementById('newImagePreview'); 
-    
+    const viewCountListener = document.getElementById('viewCountListener');
+
     let language = 'TR'; 
     let products = []; 
 
@@ -188,17 +100,51 @@
       'Köfte': 'Meatballs', 'Ciğer': 'Liver', 'Hamburger': 'Hamburger',
       'Yan Lezzetler': 'Side Dishes', 'İçecekler': 'Drinks', 'İletişim': 'Contact'
     };
-
     let categoriesTR = Object.keys(categoryTranslations);
     let categoriesEN = Object.values(categoryTranslations);
 
-    // --- FIREBASE CRUD İŞLEMLERİ ---
+    // --- ZAMAN VE TARİH YARDIMCI FONKSİYONLARI ---
+
+    /**
+     * Unix zaman damgasını alarak göreceli bir tarih metni döndürür (Bugün, Dün, 1 hafta önce, gg.aa.yyyy).
+     * @param {number} timestamp - Unix zaman damgası (miliseconds)
+     * @returns {string} Göreceli tarih metni
+     */
+    function formatRelativeDate(timestamp) {
+        if (!timestamp) return "";
+        
+        const now = new Date();
+        const date = new Date(timestamp);
+        const diffTime = Math.abs(now.getTime() - date.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+            return language === 'TR' ? 'Bugün' : 'Today';
+        } else if (diffDays === 2) {
+            return language === 'TR' ? 'Dün' : 'Yesterday';
+        } else if (diffDays <= 7) {
+            return language === 'TR' ? `${diffDays - 1} gün önce` : `${diffDays - 1} days ago`;
+        } else if (diffDays <= 14) {
+            return language === 'TR' ? '1 hafta önce' : '1 week ago';
+        } else {
+            // dd.mm.yyyy formatı
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+    }
+
+
+    // --- FIREBASE VERİ İŞLEME ---
 
     function transformProducts(dataSnapshot) {
       const productsArray = [];
       dataSnapshot.forEach(childSnapshot => {
         const product = childSnapshot.val();
         product.key = childSnapshot.key;
+        // lastUpdated alanı yoksa, şu anki zamanı varsayılan olarak atar.
+        product.lastUpdated = product.lastUpdated || Date.now(); 
         productsArray.push(product);
       });
       return productsArray;
@@ -212,57 +158,68 @@
                 products = [];
             }
             updateLanguageContent(); 
-            if (!editPanel.classList.contains('hidden')) {
-                const currentFilter = filterCategorySelect.value || 'Tümü'; 
-                renderEditList(currentFilter);
-            }
         }, (error) => {
             console.error("Firebase veri okuma hatası:", error);
-            alert("Menüyü yüklerken bir hata oluştu. (Veritabanı bağlantısı veya kuralını kontrol edin)");
+            alert("Menüyü yüklerken bir hata oluştu.");
         });
     }
 
-    async function updateProductInFirebase(key, updates) {
-        await productsRef.child(key).update(updates);
-    }
+    // --- ZİYARETÇİ SAYACI İŞLEVİ ---
 
-    async function deleteProductFromFirebase(key) {
-        await productsRef.child(key).remove();
-    }
+    function trackVisitor() {
+        // Ziyaretçi takibi sadece anasayfada yapılır.
+        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const counterRef = visitorsRef.child(today);
+        
+        // Bu veriyi sadece okumak için bir dinleyici ekliyoruz.
+        // Bu dinleyicinin varlığı, tarayıcının Firebase ile iletişim kurmasını sağlar.
+        counterRef.once('value', snapshot => {
+            // Burası sadece okuma işlemi. Arttırma işlemini Firebase kuralı ile yapıyoruz
+        });
 
-    // --- CLOUDINARY YÜKLEME WIDGET FONKSİYONU ---
-    
-    function openCloudinaryWidget(urlInput, previewImg) {
-        if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
-            alert("Hata: Lütfen Cloudinary ayarlarınızı (Cloud Name/Preset) kodda kontrol edin.");
-            return;
-        }
+        // Firebase Realtime Database'in sunucu tarafı özelliğini kullanarak
+        // mevcut değeri okumadan direkt 1 arttırma (atomic increment) işlemini yapıyoruz.
+        counterRef.transaction(currentCount => {
+            return (currentCount || 0) + 1;
+        });
 
-        const widget = window.cloudinary.createUploadWidget(
-            {
-                cloudName: CLOUDINARY_CLOUD_NAME,
-                uploadPreset: CLOUDINARY_UPLOAD_PRESET,
-                sources: ['local', 'url', 'camera'], 
-            },
-            (error, result) => {
-                if (!error && result && result.event === "success") {
-                    const url = result.info.secure_url;
-                    urlInput.value = url; // Gizli inputa URL'yi yazar
-                    previewImg.src = url; // Önizlemeyi günceller
-                    previewImg.classList.remove('hidden'); // Yeni üründe gizli ise göster
-                    alert("Görsel Cloudinary'ye yüklendi ve URL otomatik olarak kaydedildi.");
-                } else if (error) {
-                    console.error("Cloudinary yükleme hatası:", error);
-                    alert("Görsel yüklenirken bir hata oluştu: " + error.message);
-                }
-            }
-        );
-        widget.open();
+        // Not: Sayaç sıfırlama işlevini (her gün) bir Cloud Function veya sunucu görevi
+        // gerektirdiği için şimdilik sadece sayaç gün bazında saymaya devam edecektir.
+        // Sıfırlama işlevi "admin.html" içinde basitçe yönetilecektir.
     }
 
 
-    // --- UYGULAMA MANTIĞI VE UI GÜNCELLEMELERİ ---
+    // --- UI GÜNCELLEMELERİ ---
 
+    function renderMenu(category='Tümü'){
+      menuContainer.innerHTML='';
+      const filtered = category==='Tümü'?products:products.filter(p=>p.category===category);
+
+      filtered.forEach(p=>{
+        const card=document.createElement('div');
+        card.className='bg-white rounded-xl shadow p-4 flex flex-col hover:shadow-lg transition-shadow duration-200';
+        
+        const name = language==='TR'?p.name:p.nameEN||p.name;
+        const desc = language==='TR'?p.desc:p.descEN||p.desc||'';
+        const priceUpdateText = formatRelativeDate(p.lastUpdated);
+        const lastUpdateLabel = language === 'TR' ? 'Fiyat güncellendi:' : 'Price updated:';
+
+
+        card.innerHTML=`
+          <img src='${p.image}' alt='${name}' class='w-full h-40 object-cover rounded-lg mb-3 cursor-pointer'>
+          <h3 class='font-bold text-xl mb-1'>${name}</h3>
+          <p class='text-gray-600 text-sm mb-3 flex-grow'>${desc}</p>
+          <div class="flex justify-between items-end">
+            <p class='bg-orange-100 text-orange-700 inline-block px-3 py-1 rounded-full font-bold text-lg self-start'>${p.price} ₺</p>
+            <p class='price-update-info text-right'>${lastUpdateLabel} ${priceUpdateText}</p>
+          </div>
+        `;
+        card.querySelector('img').addEventListener('click',()=>{modalImage.src=p.image;imageModal.classList.remove('hidden');});
+        menuContainer.appendChild(card);
+      });
+    }
+
+    // (Diğer UI ve Navigasyon fonksiyonları aynı kalır)
     function createCategoryTabs(){
         tabButtonsContainer.innerHTML = '';
         const categoriesToIterate = categoriesTR;
@@ -296,37 +253,15 @@
         });
     }
 
-    function renderMenu(category='Tümü'){
-      menuContainer.innerHTML='';
-      const filtered = category==='Tümü'?products:products.filter(p=>p.category===category);
-
-      filtered.forEach(p=>{
-        const card=document.createElement('div');
-        card.className='bg-white rounded-xl shadow p-4 flex flex-col hover:shadow-lg transition-shadow duration-200';
-        
-        const name = language==='TR'?p.name:p.nameEN||p.name;
-        const desc = language==='TR'?p.desc:p.descEN||p.desc||'';
-
-        card.innerHTML=`
-          <img src='${p.image}' alt='${name}' class='w-full h-40 object-cover rounded-lg mb-3 cursor-pointer'>
-          <h3 class='font-bold text-xl mb-1'>${name}</h3>
-          <p class='text-gray-600 text-sm mb-3 flex-grow'>${desc}</p>
-          <p class='bg-orange-100 text-orange-700 inline-block px-3 py-1 rounded-full font-bold text-lg self-start'>${p.price} ₺</p>
-        `;
-        card.querySelector('img').addEventListener('click',()=>{modalImage.src=p.image;imageModal.classList.remove('hidden');});
-        menuContainer.appendChild(card);
-      });
-    }
-    
     function updateLanguageContent() {
         if (language === 'TR') {
-            adminLoginButton.innerHTML = '⚙️ Yönetici Girişi';
+            adminLoginBtn.innerHTML = '⚙️ Yönetici Girişi';
             contactTitle.textContent = 'İletişim';
             contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
             langTR.style.fontWeight = 'bold';
             langEN.style.fontWeight = 'normal';
         } else { 
-            adminLoginButton.innerHTML = '⚙️ Admin Login';
+            adminLoginBtn.innerHTML = '⚙️ Admin Login';
             contactTitle.textContent = 'Contact';
             contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - Istanbul (Turkey)';
             langTR.style.fontWeight = 'normal';
@@ -346,174 +281,29 @@
         }
     }
 
-    function populateCategorySelects() {
-        const options = categoriesTR.filter(c => c !== 'Tümü' && c !== 'İletişim');
-        
-        [productCategorySelect, filterCategorySelect, editCategorySelect].forEach(select => {
-            select.innerHTML = ''; 
-            options.forEach(cat => {
-                const option = document.createElement('option');
-                option.textContent = cat;
-                select.appendChild(option);
-            });
-            if (select === filterCategorySelect) {
-                const allOption = document.createElement('option');
-                allOption.textContent = 'Tümü';
-                select.insertBefore(allOption, select.firstChild);
-                select.value = 'Tümü';
-            }
-        });
-    }
-
-    function renderEditList(filter='Tümü') {
-      productList.innerHTML = '';
-      const filtered = filter==='Tümü'?products:products.filter(p=>p.category===filter);
-
-      filtered.forEach((p) => {
-        const item = document.createElement('li');
-        item.className = 'flex justify-between items-center bg-white p-3 rounded border shadow-sm';
-        item.innerHTML = `
-          <span class="font-medium text-sm">${p.name} (${p.category}) - ${p.price} ₺</span>
-          <div>
-            <button data-key="${p.key}" class="editBtn bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition mr-2">Düzenle</button>
-            <button data-key="${p.key}" class="deleteBtn bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 transition">Sil</button>
-          </div>
-        `;
-        productList.appendChild(item);
-      });
-
-      document.querySelectorAll('.deleteBtn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const productKeyToDelete = e.target.dataset.key;
-          if (confirm("Bu ürünü silmek istediğinizden emin misiniz?")) {
-              try { await deleteProductFromFirebase(productKeyToDelete); alert("Ürün silindi."); } 
-              catch (error) { alert("Silme işlemi başarısız oldu: " + error.message); }
-          }
-        });
-      });
-
-      document.querySelectorAll('.editBtn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const productKeyToEdit = e.target.dataset.key;
-          const productToEdit = products.find(p => p.key === productKeyToEdit);
-          
-          if (productToEdit) {
-            editProductKeyInput.value = productKeyToEdit; 
-            editNameInput.value = productToEdit.name;
-            editNameENInput.value = productToEdit.nameEN;
-            editDescInput.value = productToEdit.desc;
-            editDescENInput.value = productToEdit.descEN;
-            editPriceInput.value = productToEdit.price;
-            editCategorySelect.value = productToEdit.category;
-            
-            // Mevcut görsel URL'sini ve önizlemeyi doldur
-            editImageURLInput.value = productToEdit.image;
-            editImagePreview.src = productToEdit.image;
-            
-            editProductModal.classList.remove('hidden');
-          }
-        });
-      });
-    }
 
     // --- EVENT LISTENERS ---
 
-    // Cloudinary Butonları
-    uploadNewImageBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        openCloudinaryWidget(productImageURLInput, newImagePreview);
-    });
-
-    uploadEditImageBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        openCloudinaryWidget(editImageURLInput, editImagePreview);
-    });
-
-    // Diğer UI Butonları
     langTR.addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
     langEN.addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
     imageModal.addEventListener('click',()=>imageModal.classList.add('hidden'));
-    adminLoginBtn.addEventListener('click',()=>adminPanel.classList.remove('hidden'));
-    closeAdmin.addEventListener('click',()=>adminPanel.classList.add('hidden'));
-    closeEdit.addEventListener('click',()=>editPanel.classList.add('hidden'));
-    closeEditProductModal.addEventListener('click',()=>editProductModal.classList.add('hidden'));
+    adminLoginBtn.addEventListener('click',()=>adminLoginModal.classList.remove('hidden'));
+    closeAdminLogin.addEventListener('click',()=>adminLoginModal.classList.add('hidden'));
 
     checkPassword.addEventListener('click',()=>{
       if(passwordInput.value==='admin123'){ 
-        adminPanel.classList.add('hidden');
-        editPanel.classList.remove('hidden');
-        loginError.classList.add('hidden');
-        passwordInput.value='';
-        populateCategorySelects();
-        renderEditList(); 
+        // Başarılı giriş: Yönetici paneli sayfasına yönlendir
+        adminLoginModal.classList.add('hidden');
+        window.location.href = 'admin.html'; 
       } else {
         loginError.classList.remove('hidden');
       }
     });
 
-    filterCategorySelect.addEventListener('change', (e) => {
-      renderEditList(e.target.value);
-    });
-
-    // YENİ ÜRÜN EKLEME
-    addProductButton.addEventListener('click', async () => {
-      const name = productNameInput.value.trim();
-      const desc = productDescInput.value.trim();
-      const descEN = productDescENInput.value.trim();
-      const price = parseFloat(productPriceInput.value);
-      const category = productCategorySelect.value;
-      const imageURL = productImageURLInput.value.trim() || 'https://images.unsplash.com/photo-1543825700-6c9233634125'; 
-
-      if (!name || isNaN(price) || !category) { alert('Lütfen gerekli alanları doldurunuz.'); return; }
-
-      const newProduct = {
-        name, nameEN: name, desc, descEN: descEN || desc,
-        price, image: imageURL, category
-      };
-
-      try {
-          await database.ref('products').push(newProduct); 
-          alert(`"${name}" ürünü başarıyla eklendi.`);
-          // Formu temizle ve varsayılan görsele döndür
-          productNameInput.value = ''; productDescInput.value = ''; productDescENInput.value = ''; 
-          productPriceInput.value = ''; 
-          productImageURLInput.value = 'https://images.unsplash.com/photo-1543825700-6c9233634125'; 
-          newImagePreview.src = 'https://images.unsplash.com/photo-1543825700-6c9233634125';
-          newImagePreview.classList.add('hidden');
-      } catch (error) {
-          alert("Ekleme işlemi başarısız oldu: " + error.message);
-      }
-    });
-    
-    // ÜRÜN DÜZENLEME KAYDETME İŞLEVİ
-    saveEditProductButton.addEventListener('click', async () => {
-        const productKey = editProductKeyInput.value;
-        const newImageURL = editImageURLInput.value.trim(); 
-
-        const updates = {
-            name: editNameInput.value.trim(),
-            nameEN: editNameENInput.value.trim(),
-            desc: editDescInput.value.trim(),
-            descEN: editDescENInput.value.trim(),
-            price: parseFloat(editPriceInput.value),
-            category: editCategorySelect.value,
-            image: newImageURL
-        };
-        
-        if (isNaN(updates.price)) { alert('Lütfen geçerli bir fiyat giriniz.'); return; }
-
-        try {
-            await updateProductInFirebase(productKey, updates); 
-            editProductModal.classList.add('hidden');
-            alert(`"${updates.name}" ürünü başarıyla güncellendi.`);
-        } catch (error) {
-            alert("Güncelleme işlemi başarısız oldu: " + error.message);
-        }
-    });
-
     // --- İlk Yükleme ---
     document.addEventListener('DOMContentLoaded', () => {
       setupFirebaseListener(); 
+      trackVisitor(); // Ziyaretçi sayacını çalıştır
     });
   </script>
 </body>
