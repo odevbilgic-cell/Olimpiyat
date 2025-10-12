@@ -77,7 +77,7 @@
             messagingSenderId: "987017604417",
             appId: "1:987017604417:web:b6c4858712dc66d14745c0",
             measurementId: "G-HB0J7BFZ9N",
-            databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app"
+            databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebaseio.com" 
         };
         const CLOUDINARY_CLOUD_NAME = 'dtkrwqofx';      
         const CLOUDINARY_UPLOAD_PRESET = 'olimpiyat_menu'; 
@@ -118,7 +118,6 @@
 
         // --- CLOUDINARY WIDGET FONKSİYONU ---
         function openCloudinaryWidget(urlInput, previewImg) {
-            // ... (index.html'deki ile aynı fonksiyon içeriği) ...
             if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
                 alert("Hata: Cloudinary ayarları eksik.");
                 return;
@@ -286,69 +285,86 @@
             setActiveTab('showBulkUpdate');
             loadModule(`
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">💸 Toplu Fiyat Değiştirme</h2>
-                <div class="p-6 bg-white rounded-lg shadow-md max-w-xl">
-                    <p class="mb-4 text-gray-600">Seçtiğiniz kategori veya tüm ürünlerin fiyatlarını toplu olarak artırın veya azaltın.</p>
+                <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
+                    <p class="mb-4 text-gray-600">Aşağıdaki listede ürünlerin mevcut fiyatlarını değiştirebilir veya Toplu Değişim araçlarını kullanabilirsiniz.</p>
                     
-                    <label class="block mb-2 font-semibold">Uygulanacak Kategori:</label>
-                    <select id="bulkCategory" class="border p-3 rounded w-full mb-4">
-                        <option value="Tümü">Tüm Ürünler</option>
-                        ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                    </select>
+                    <div class="border p-4 mb-6 rounded-lg bg-gray-50">
+                        <h3 class="font-bold mb-3 text-orange-600">Toplu Değişim Araçları</h3>
+                        <label class="block mb-2 font-semibold text-sm">Uygulanacak Kategori:</label>
+                        <select id="bulkCategory" class="border p-2 rounded w-full mb-3">
+                            <option value="Tümü">Tüm Ürünler</option>
+                            ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                        </select>
 
-                    <label class="block mb-2 font-semibold">Değişim Tipi:</label>
-                    <div class="flex gap-4 mb-4">
-                        <label class="flex items-center"><input type="radio" name="updateType" value="percent" checked class="mr-2"> Yüzdesel (%)</label>
-                        <label class="flex items-center"><input type="radio" name="updateType" value="fixed" class="mr-2"> Sabit Değer (₺)</label>
+                        <label class="block mb-2 font-semibold text-sm">Değişim Tipi:</label>
+                        <div class="flex gap-4 mb-3">
+                            <label class="flex items-center"><input type="radio" name="updateType" value="percent" checked class="mr-2"> Yüzdesel (%)</label>
+                            <label class="flex items-center"><input type="radio" name="updateType" value="fixed" class="mr-2"> Sabit Değer (₺)</label>
+                        </div>
+
+                        <input id="updateValue" type="number" placeholder="Örn: 10 (₺10 artış) veya -5 (%5 indirim)" class="border p-2 rounded w-full mb-4" />
+                        
+                        <button id="applyBulkAdjustment" class="bg-blue-500 text-white px-4 py-2 rounded font-semibold hover:bg-blue-600 transition w-full">Seçili Ürünlere Toplu Ayar Uygula</button>
                     </div>
 
-                    <input id="updateValue" type="number" placeholder="Örn: 10 (₺10 artış) veya -5 (%5 indirim)" class="border p-3 rounded w-full mb-4" />
+                    <h3 class="font-bold text-xl mb-3 text-gray-800">Ürün Fiyatlarını Manuel Düzenle</h3>
+                    <div class="flex font-bold text-sm bg-gray-100 p-2 rounded mb-2">
+                        <span class="w-1/2">Ürün Adı</span>
+                        <span class="w-1/4 text-right">Mevcut Fiyat</span>
+                        <span class="w-1/4 text-right">Yeni Fiyat (₺)</span>
+                    </div>
+                    <form id="bulkUpdateForm" class="flex flex-col gap-2">
+                        <p class="text-gray-500">Ürünler yükleniyor...</p>
+                        </form>
                     
-                    <button id="applyBulkUpdate" class="bg-red-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-red-600 transition w-full">Toplu Fiyat Güncellemesini Uygula</button>
-                    <p id="bulkStatus" class="mt-4 text-center text-sm text-red-600 hidden"></p>
+                    <button id="saveManualPrices" class="mt-6 bg-red-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-red-600 transition w-full">Girdiğim Yeni Fiyatları Kaydet</button>
+                    <p id="bulkStatus" class="mt-4 text-center text-sm text-green-600 hidden"></p>
                 </div>
-                <h3 class="text-xl font-bold mt-8 mb-4">Ürün Önizlemesi</h3>
-                <ul id="bulkProductList" class="flex flex-col gap-2"></ul>
             `);
 
             // Event Listener'lar
-            document.getElementById('bulkCategory').addEventListener('change', () => updateBulkPreview());
-            document.getElementById('updateValue').addEventListener('input', () => updateBulkPreview());
-            document.querySelectorAll('input[name="updateType"]').forEach(radio => radio.addEventListener('change', () => updateBulkPreview()));
-            document.getElementById('applyBulkUpdate').addEventListener('click', applyBulkUpdate);
-            updateBulkPreview(); // İlk yüklemede önizlemeyi göster
-        }
-
-        function updateBulkPreview() {
-            const listEl = document.getElementById('bulkProductList');
-            const category = document.getElementById('bulkCategory').value;
-            const updateType = document.querySelector('input[name="updateType"]:checked').value;
-            const value = parseFloat(document.getElementById('updateValue').value) || 0;
+            document.getElementById('bulkCategory').addEventListener('change', () => renderBulkPriceList(document.getElementById('bulkCategory').value));
+            document.getElementById('applyBulkAdjustment').addEventListener('click', applyBulkAdjustment);
+            document.getElementById('saveManualPrices').addEventListener('click', saveManualPrices);
             
-            listEl.innerHTML = '';
-            const filtered = category === 'Tümü' ? products : products.filter(p => p.category === category);
+            // İlk yüklemede listeyi göster
+            renderBulkPriceList(document.getElementById('bulkCategory').value);
+        }
+        
+        // Yeni: Toplu fiyat listesini düzenlenebilir inputlarla render eder
+        function renderBulkPriceList(filter='Tümü') {
+            const formEl = document.getElementById('bulkUpdateForm');
+            if (!formEl) return;
+            formEl.innerHTML = '';
+
+            const filtered = filter === 'Tümü' ? products : products.filter(p => p.category === filter);
+
+            if (filtered.length === 0) {
+                formEl.innerHTML = '<p class="p-4 bg-white rounded shadow text-gray-500">Bu kategoride ürün bulunmamaktadır.</p>';
+                return;
+            }
 
             filtered.forEach(p => {
-                let newPrice;
-                if (updateType === 'percent') {
-                    newPrice = p.price * (1 + (value / 100));
-                } else { // fixed
-                    newPrice = p.price + value;
-                }
-                newPrice = Math.max(0, parseFloat(newPrice.toFixed(2))); // 0'dan küçük olamaz
-
-                const item = document.createElement('li');
-                item.className = 'flex justify-between items-center bg-white p-3 rounded border text-sm';
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center bg-white p-2 rounded border text-sm';
                 item.innerHTML = `
                     <span class="w-1/2">${p.name}</span>
                     <span class="w-1/4 text-right">${p.price} ₺</span>
-                    <span class="w-1/4 text-right font-semibold text-green-600">${newPrice} ₺</span>
+                    <input 
+                        type="number" 
+                        step="0.01" 
+                        placeholder="${p.price}" 
+                        value="${p.price}"
+                        data-key="${p.key}" 
+                        class="bulk-price-input w-1/4 text-right border p-1 rounded focus:border-orange-500"
+                    />
                 `;
-                listEl.appendChild(item);
+                formEl.appendChild(item);
             });
         }
 
-        async function applyBulkUpdate() {
-            const category = document.getElementById('bulkCategory').value;
+        // Yeni: Toplu yüzdesel/sabit ayarı input alanlarına uygular
+        function applyBulkAdjustment() {
             const updateType = document.querySelector('input[name="updateType"]:checked').value;
             const value = parseFloat(document.getElementById('updateValue').value);
             const statusEl = document.getElementById('bulkStatus');
@@ -357,55 +373,113 @@
             if (isNaN(value) || value === 0) {
                 statusEl.textContent = 'Lütfen geçerli bir değişim değeri girin.';
                 statusEl.classList.remove('hidden');
+                statusEl.classList.remove('text-green-600');
+                statusEl.classList.add('text-red-600');
                 return;
             }
 
-            const confirmMessage = `
-                ${category === 'Tümü' ? 'TÜM' : category} kategorisindeki ürünlerin fiyatları,
-                ${updateType === 'percent' ? value + '% ' : value + ' ₺ '} 
-                ${value > 0 ? 'ARTIRILACAK' : 'AZALTILACAK'}. 
-                Bu işlemi ONAYLIYOR MUSUNUZ?
-            `;
+            const inputs = document.querySelectorAll('#bulkUpdateForm .bulk-price-input');
+            let updatedCount = 0;
 
-            if (!confirm(confirmMessage)) return;
+            inputs.forEach(input => {
+                const productKey = input.dataset.key;
+                const currentProduct = products.find(p => p.key === productKey);
+                if (!currentProduct) return;
 
-            const productsToUpdate = category === 'Tümü' ? products : products.filter(p => p.category === category);
-            const updates = {};
-            const currentTime = Date.now();
-
-            productsToUpdate.forEach(p => {
                 let newPrice;
+                const basePrice = currentProduct.price; // Mevcut Firebase fiyatını kullan
+
                 if (updateType === 'percent') {
-                    newPrice = p.price * (1 + (value / 100));
-                } else {
-                    newPrice = p.price + value;
+                    newPrice = basePrice * (1 + (value / 100));
+                } else { // fixed
+                    newPrice = basePrice + value;
                 }
                 newPrice = Math.max(0, parseFloat(newPrice.toFixed(2)));
-
-                // Firebase'e gönderilecek güncelleme nesnesini hazırla
-                updates[p.key] = {
-                    price: newPrice,
-                    lastUpdated: currentTime // Güncel fiyat değişim tarihi
-                };
+                
+                // Yeni fiyatı input alanına yaz
+                input.value = newPrice;
+                updatedCount++;
             });
+
+            if (updatedCount > 0) {
+                statusEl.textContent = `${updatedCount} ürünün fiyatı güncellendi. Lütfen "Kaydet" butonuna basarak değişiklikleri veritabanına işleyin.`;
+                statusEl.classList.remove('hidden');
+                statusEl.classList.remove('text-red-600');
+                statusEl.classList.add('text-green-600');
+            } else {
+                 statusEl.textContent = 'Güncellenecek ürün bulunamadı.';
+                 statusEl.classList.remove('hidden');
+                 statusEl.classList.remove('text-green-600');
+                 statusEl.classList.add('text-red-600');
+            }
+        }
+
+
+        // Yeni: Manuel girilen fiyatları Firebase'e kaydeder
+        async function saveManualPrices() {
+            const inputs = document.querySelectorAll('#bulkUpdateForm .bulk-price-input');
+            const updates = {};
+            const currentTime = Date.now();
+            const statusEl = document.getElementById('bulkStatus');
+            let changesMade = 0;
+
+            if (inputs.length === 0) {
+                statusEl.textContent = 'Kaydedilecek ürün bulunamadı.';
+                statusEl.classList.remove('hidden');
+                statusEl.classList.remove('text-green-600');
+                statusEl.classList.add('text-red-600');
+                return;
+            }
+
+            inputs.forEach(input => {
+                const productKey = input.dataset.key;
+                const newPrice = parseFloat(input.value);
+                const currentProduct = products.find(p => p.key === productKey);
+
+                if (isNaN(newPrice) || newPrice < 0) {
+                    alert(`${currentProduct.name} ürünü için geçersiz fiyat girdiniz. Lütfen kontrol edin.`);
+                    return; // İlerlemeyi durdur
+                }
+                
+                // Sadece fiyatı değişenleri güncelle
+                if (currentProduct && currentProduct.price !== newPrice) {
+                    updates[productKey] = {
+                        price: newPrice,
+                        lastUpdated: currentTime // Güncel fiyat değişim tarihi
+                    };
+                    changesMade++;
+                }
+            });
+
+            if (changesMade === 0) {
+                statusEl.textContent = 'Herhangi bir fiyat değişikliği tespit edilmedi.';
+                statusEl.classList.remove('hidden');
+                statusEl.classList.remove('text-red-600');
+                statusEl.classList.add('text-green-600');
+                return;
+            }
+            
+            if (!confirm(`${changesMade} ürünün fiyatı güncellenecektir. Onaylıyor musunuz?`)) {
+                return;
+            }
 
             try {
                 // Firebase'e toplu güncelleme (multi-path update) gönder
                 await productsRef.update(updates);
-                statusEl.textContent = `${productsToUpdate.length} ürün başarıyla güncellendi.`;
+                statusEl.textContent = `${changesMade} ürün fiyatı başarıyla kaydedildi ve ana menü güncellendi.`;
                 statusEl.classList.remove('hidden');
                 statusEl.classList.remove('text-red-600');
                 statusEl.classList.add('text-green-600');
-                document.getElementById('updateValue').value = '';
-                updateBulkPreview(); // Önizlemeyi temizle
+                // Listeyi yeniden render et (Firebase dinleyicisi de bunu yapmalı, ancak emin olmak için)
+                renderBulkPriceList(document.getElementById('bulkCategory').value);
             } catch (error) {
-                statusEl.textContent = 'Toplu güncelleme başarısız oldu: ' + error.message;
+                statusEl.textContent = 'Fiyatları kaydetme başarısız oldu: ' + error.message;
                 statusEl.classList.remove('hidden');
                 statusEl.classList.remove('text-green-600');
                 statusEl.classList.add('text-red-600');
             }
         }
-
+        
         // --- MODÜL: İSTATİSTİKLER (STATS) ---
         function renderStatsModule() {
             setActiveTab('showStats');
@@ -487,9 +561,23 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Firebase Dinleyicisi
             productsRef.on('value', (snapshot) => {
-                products = snapshot.exists() ? Object.values(snapshot.val()).map((val, key) => ({...val, key: Object.keys(snapshot.val())[key]})) : [];
+                products = [];
+                snapshot.forEach(childSnapshot => {
+                    const product = childSnapshot.val();
+                    product.key = childSnapshot.key;
+                    products.push(product);
+                });
+                
                 // Admin paneli açılırken varsayılan modülü yükle
-                renderProductsModule(); 
+                if (contentContainer.innerHTML === '') {
+                   renderProductsModule(); 
+                } else if (document.getElementById('bulkUpdateForm')) {
+                    // Toplu fiyat modülündeyken listeyi yenile
+                    renderBulkPriceList(document.getElementById('bulkCategory').value);
+                } else if (document.getElementById('productList')) {
+                    // Ürün yönetimi modülündeyken listeyi yenile
+                     renderProductList(document.getElementById('filterCategory').value);
+                }
             });
 
             // Navigasyon Butonları
@@ -522,7 +610,7 @@
                     await updateProductInFirebase(productKey, updates); 
                     editProductModal.classList.add('hidden');
                     alert(`"${updates.name}" ürünü başarıyla güncellendi.`);
-                    renderProductList(document.getElementById('filterCategory').value); // Listeyi yenile
+                    // Listeyi yenileme Firebase dinleyicisi tarafından halledilir
                 } catch (error) {
                     alert("Güncelleme işlemi başarısız oldu: " + error.message);
                 }
