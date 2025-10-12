@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Olimpiyat Kokoreç Menü - Kullanıcı Arayüzü</title>
+  <title>Olimpiyat Kokoreç Menü</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -14,7 +14,8 @@
     .active-tab { background-color: #fb923c; color: white; }
     #categoryTabs::-webkit-scrollbar { display: none; }
     #categoryTabs { -ms-overflow-style: none; scrollbar-width: none; }
-    .price-update-info { font-size: 0.7rem; color: #6b7280; margin-top: 5px; }
+    /* Tarih bilgisini sağ altta ve küçük tutar */
+    .price-update-info { font-size: 0.7rem; color: #6b7280; margin-top: 5px; } 
   </style>
 </head>
 <body class="text-gray-800">
@@ -57,7 +58,7 @@
   </div>
 
   <script>
-    // --- Firebase Yapılandırması ---
+    // --- Firebase Yapılandırması (DÜZELTİLMİŞ URL) ---
     const firebaseConfig = {
         apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
         authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
@@ -65,13 +66,14 @@
         messagingSenderId: "987017604417",
         appId: "1:987017604417:web:b6c4858712dc66d14745c0",
         measurementId: "G-HB0J7BFZ9N",
-        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app"
+        // Bölgesel uyarıyı çözen URL
+        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebaseio.com" 
     };
 
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     const productsRef = database.ref('products');
-    const visitorsRef = database.ref('visitors'); // Yeni ziyaretçi sayacı referansı
+    const visitorsRef = database.ref('visitors'); 
 
     // --- HTML Element Tanımlamaları ---
     const adminLoginBtn = document.getElementById('adminLoginBtn');
@@ -103,35 +105,69 @@
     let categoriesTR = Object.keys(categoryTranslations);
     let categoriesEN = Object.values(categoryTranslations);
 
-    // --- ZAMAN VE TARİH YARDIMCI FONKSİYONLARI ---
+    // --- YENİ VE GÜNCELLENMİŞ ZAMAN VE TARİH YARDIMCI FONKSİYONU ---
 
     /**
-     * Unix zaman damgasını alarak göreceli bir tarih metni döndürür (Bugün, Dün, 1 hafta önce, gg.aa.yyyy).
+     * Unix zaman damgasını alarak istenilen göreceli bir tarih metni döndürür (1 dakika önce, 2 saat önce, 1 gün önce, vb.).
      * @param {number} timestamp - Unix zaman damgası (miliseconds)
      * @returns {string} Göreceli tarih metni
      */
     function formatRelativeDate(timestamp) {
         if (!timestamp) return "";
         
-        const now = new Date();
-        const date = new Date(timestamp);
-        const diffTime = Math.abs(now.getTime() - date.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const now = Date.now();
+        const diffTime = now - timestamp; // Fark milisaniye cinsinden
 
-        if (diffDays === 1) {
-            return language === 'TR' ? 'Bugün' : 'Today';
-        } else if (diffDays === 2) {
-            return language === 'TR' ? 'Dün' : 'Yesterday';
+        const diffSeconds = Math.floor(diffTime / 1000);
+        const diffMinutes = Math.floor(diffSeconds / 60);
+        const diffHours = Math.floor(diffMinutes / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        const TR = {
+            min: (m) => `${m} dakika önce`,
+            hour: (h) => `${h} saat önce`,
+            day: (d) => `${d} gün önce`,
+            today: 'Bugün',
+            yesterday: 'Dün',
+            week: '1 hafta önce',
+            date: (d, m, y) => `${d}.${m}.${y}`
+        };
+
+        const EN = {
+            min: (m) => `${m} minutes ago`,
+            hour: (h) => `${h} hours ago`,
+            day: (d) => `${d} days ago`,
+            today: 'Today',
+            yesterday: 'Yesterday',
+            week: '1 week ago',
+            date: (d, m, y) => `${d}/${m}/${y}`
+        };
+
+        const t = language === 'TR' ? TR : EN;
+
+        if (diffMinutes < 60) {
+            // 0 - 59 dakika aralığı
+            if (diffMinutes === 0) return t.today; 
+            return t.min(diffMinutes);
+        } else if (diffHours < 24) {
+            // 1 saat - 23 saat aralığı
+            return t.hour(diffHours);
+        } else if (diffDays === 1) {
+            // 24 saat tamamlandığında
+             return t.day(1); // 1 gün önce
         } else if (diffDays <= 7) {
-            return language === 'TR' ? `${diffDays - 1} gün önce` : `${diffDays - 1} days ago`;
+            // 2 gün ile 7 gün arası
+            return t.day(diffDays); 
         } else if (diffDays <= 14) {
-            return language === 'TR' ? '1 hafta önce' : '1 week ago';
+            // 1 hafta öncesi
+            return t.week;
         } else {
-            // dd.mm.yyyy formatı
+            // Tarih gösterimi (gg.aa.yyyy veya mm/dd/yyyy)
+            const date = new Date(timestamp);
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const year = date.getFullYear();
-            return `${day}.${month}.${year}`;
+            return t.date(day, month, year);
         }
     }
 
@@ -164,28 +200,18 @@
         });
     }
 
-    // --- ZİYARETÇİ SAYACI İŞLEVİ ---
+    // --- ZİYARETÇİ SAYACI İŞLEVİ (Admin.html'den gelen ziyaretçiyi sayar) ---
 
     function trackVisitor() {
-        // Ziyaretçi takibi sadece anasayfada yapılır.
         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
         const counterRef = visitorsRef.child(today);
         
-        // Bu veriyi sadece okumak için bir dinleyici ekliyoruz.
-        // Bu dinleyicinin varlığı, tarayıcının Firebase ile iletişim kurmasını sağlar.
-        counterRef.once('value', snapshot => {
-            // Burası sadece okuma işlemi. Arttırma işlemini Firebase kuralı ile yapıyoruz
-        });
-
-        // Firebase Realtime Database'in sunucu tarafı özelliğini kullanarak
-        // mevcut değeri okumadan direkt 1 arttırma (atomic increment) işlemini yapıyoruz.
+        counterRef.once('value', snapshot => {}); // Okuma dinleyicisi
+        
+        // Atomic increment (Mevcut değeri okumadan 1 arttırma)
         counterRef.transaction(currentCount => {
             return (currentCount || 0) + 1;
         });
-
-        // Not: Sayaç sıfırlama işlevini (her gün) bir Cloud Function veya sunucu görevi
-        // gerektirdiği için şimdilik sadece sayaç gün bazında saymaya devam edecektir.
-        // Sıfırlama işlevi "admin.html" içinde basitçe yönetilecektir.
     }
 
 
@@ -201,7 +227,8 @@
         
         const name = language==='TR'?p.name:p.nameEN||p.name;
         const desc = language==='TR'?p.desc:p.descEN||p.desc||'';
-        const priceUpdateText = formatRelativeDate(p.lastUpdated);
+        // YENİ GÜNCELLENMİŞ TARİH FORMATI KULLANILIYOR
+        const priceUpdateText = formatRelativeDate(p.lastUpdated); 
         const lastUpdateLabel = language === 'TR' ? 'Fiyat güncellendi:' : 'Price updated:';
 
 
