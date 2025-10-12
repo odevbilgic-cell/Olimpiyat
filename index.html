@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Olimpiyat Kokoreç Menü</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 
   <style>
     body { background-color: #fff7f0; }
@@ -62,7 +65,14 @@
         <input id="productDesc" placeholder="Açıklama (TR)" class="border p-2 rounded" />
         <input id="productDescEN" placeholder="Açıklama (EN)" class="border p-2 rounded" />
         <input id="productPrice" type="number" placeholder="Fiyat (₺)" class="border p-2 rounded" />
-        <input id="productImageFile" type="file" accept="image/*" class="border p-2 rounded bg-white" />
+        
+        <div class="p-3 border rounded-lg bg-gray-50">
+            <h3 class="font-semibold mb-2">Görsel Yükle</h3>
+            <button id="uploadNewImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition w-full">Görsel Yükle (Pop-up Açılacak)</button>
+            <img id="newImagePreview" class="w-full h-32 object-cover rounded-lg mt-2 border border-gray-300 hidden" src="https://images.unsplash.com/photo-1543825700-6c9233634125" alt="Yeni Görsel Önizleme">
+            <input type="hidden" id="productImageURL" value="https://images.unsplash.com/photo-1543825700-6c9233634125" />
+        </div>
+        
         <select id="productCategory" class="border p-2 rounded"></select>
         <button id="addProduct" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition">Ürün Ekle</button>
       </div>
@@ -87,13 +97,8 @@
         <div class="p-3 border rounded-lg bg-gray-50">
             <h3 class="font-semibold mb-2">Görsel Düzenleme</h3>
             <img id="editImagePreview" class="w-full h-32 object-cover rounded-lg mb-2 border border-gray-300" src="" alt="Ürün Görseli Önizleme">
-            
-            <label class="block text-sm font-medium mb-1">Yeni Görsel URL'si:</label>
-            <input id="editImageURL" placeholder="Yeni Görsel URL'si girin" class="border w-full p-2 rounded mb-2 text-sm" />
-
-            <label class="block text-sm font-medium mb-1">Veya Yeni Görsel Yükle:</label>
-            <input id="editImageFile" type="file" accept="image/*" class="border w-full p-1 rounded bg-white text-sm" />
-            <p class="text-xs text-gray-500 mt-1">Dosya seçilirse URL alanı yok sayılır.</p>
+            <button id="uploadEditImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition w-full">Yeni Görsel Yükle (Pop-up Açılacak)</button>
+            <input type="hidden" id="editImageURL" value="" />
         </div>
 
         <input id="editName" placeholder="Ürün Adı (TR)" class="border p-2 rounded" />
@@ -109,22 +114,25 @@
   </div>
 
   <script>
-    // --- Firebase Yapılandırması (KULLANICI TARAFINDAN GÜNCELLENDİ) ---
+    // --- Firebase Yapılandırması (DÜZELTİLMİŞ URL) ---
     const firebaseConfig = {
         apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
         authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
         projectId: "olimpiyatkokorecmenu",
-        storageBucket: "olimpiyatkokorecmenu.firebasestorage.app",
         messagingSenderId: "987017604417",
         appId: "1:987017604417:web:b6c4858712dc66d14745c0",
         measurementId: "G-HB0J7BFZ9N",
-        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app"
+        // DÜZELTİLMİŞ DATABASE URL (Bölgesel uyarıyı çözer)
+        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebaseio.com" 
     };
+
+    // CLOUDINARY BİLGİLERİ (Sizin Tarafınızdan Girildi)
+    const CLOUDINARY_CLOUD_NAME = 'dtkrwqofx';      
+    const CLOUDINARY_UPLOAD_PRESET = 'olimpiyat_menu'; 
 
     // Firebase'i başlat
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    // 'products' referansını, Firebase Realtime Database'deki ana ürün dizinini işaret eder.
     const productsRef = database.ref('products');
 
     // --- HTML Element Tanımlamaları ---
@@ -139,7 +147,6 @@
     const menuContainer = document.getElementById('menuContainer');
     const productList = document.getElementById('productList');
     const contactSection = document.getElementById('contactSection');
-    const tabButtonsContainer = document.getElementById('categoryTabs');
     const imageModal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
     const langTR = document.getElementById('langTR');
@@ -147,13 +154,12 @@
     const contactTitle = document.getElementById('contactTitle');
     const contactAddress = document.getElementById('contactAddress');
     const adminLoginButton = document.getElementById('adminLoginBtn');
-
-    // Yönetim/Düzenleme Elementleri
+    const tabButtonsContainer = document.getElementById('categoryTabs');
     const productNameInput = document.getElementById('productName');
     const productDescInput = document.getElementById('productDesc');
     const productDescENInput = document.getElementById('productDescEN');
     const productPriceInput = document.getElementById('productPrice');
-    const productImageFileInput = document.getElementById('productImageFile');
+    const productImageURLInput = document.getElementById('productImageURL'); 
     const productCategorySelect = document.getElementById('productCategory');
     const addProductButton = document.getElementById('addProduct');
     const filterCategorySelect = document.getElementById('filterCategory');
@@ -169,10 +175,12 @@
     const saveEditProductButton = document.getElementById('saveEditProduct');
     const editImagePreview = document.getElementById('editImagePreview');
     const editImageURLInput = document.getElementById('editImageURL');
-    const editImageFile = document.getElementById('editImageFile');
+    const uploadNewImageBtn = document.getElementById('uploadNewImageBtn'); 
+    const uploadEditImageBtn = document.getElementById('uploadEditImageBtn'); 
+    const newImagePreview = document.getElementById('newImagePreview'); 
     
     let language = 'TR'; 
-    let products = []; // Ürünler Firebase'den çekilecek
+    let products = []; 
 
     // Kategori çevirileri
     const categoryTranslations = {
@@ -186,11 +194,9 @@
 
     // --- FIREBASE CRUD İŞLEMLERİ ---
 
-    // Gelen Firebase verisini dizinize dönüştürür
     function transformProducts(dataSnapshot) {
       const productsArray = [];
       dataSnapshot.forEach(childSnapshot => {
-        // Firebase key'i (Benzersiz anahtar) al ve ürüne ekle
         const product = childSnapshot.val();
         product.key = childSnapshot.key;
         productsArray.push(product);
@@ -198,7 +204,6 @@
       return productsArray;
     }
 
-    // Gerçek zamanlı dinleyici. Veri değiştiğinde otomatik çalışır.
     function setupFirebaseListener() {
         productsRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
@@ -206,41 +211,59 @@
             } else {
                 products = [];
             }
-            // Veri değiştiği anda tüm arayüzü güncelle
             updateLanguageContent(); 
-
-            // Eğer admin paneli açıksa, listeyi de güncelle
             if (!editPanel.classList.contains('hidden')) {
-                // Filtre kategorisi seçili olmayabilir, bu yüzden kontrol ekledik
                 const currentFilter = filterCategorySelect.value || 'Tümü'; 
                 renderEditList(currentFilter);
             }
         }, (error) => {
             console.error("Firebase veri okuma hatası:", error);
-            alert("Menüyü yüklerken bir hata oluştu: " + error.message);
+            alert("Menüyü yüklerken bir hata oluştu. (Veritabanı bağlantısı veya kuralını kontrol edin)");
         });
     }
 
-    // Ürün Ekle
-    async function addProductToFirebase(product) {
-        await productsRef.push(product);
-    }
-
-    // Ürün Güncelle
     async function updateProductInFirebase(key, updates) {
         await productsRef.child(key).update(updates);
     }
 
-    // Ürün Sil
     async function deleteProductFromFirebase(key) {
         await productsRef.child(key).remove();
+    }
+
+    // --- CLOUDINARY YÜKLEME WIDGET FONKSİYONU ---
+    
+    function openCloudinaryWidget(urlInput, previewImg) {
+        if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+            alert("Hata: Lütfen Cloudinary ayarlarınızı (Cloud Name/Preset) kodda kontrol edin.");
+            return;
+        }
+
+        const widget = window.cloudinary.createUploadWidget(
+            {
+                cloudName: CLOUDINARY_CLOUD_NAME,
+                uploadPreset: CLOUDINARY_UPLOAD_PRESET,
+                sources: ['local', 'url', 'camera'], 
+            },
+            (error, result) => {
+                if (!error && result && result.event === "success") {
+                    const url = result.info.secure_url;
+                    urlInput.value = url; // Gizli inputa URL'yi yazar
+                    previewImg.src = url; // Önizlemeyi günceller
+                    previewImg.classList.remove('hidden'); // Yeni üründe gizli ise göster
+                    alert("Görsel Cloudinary'ye yüklendi ve URL otomatik olarak kaydedildi.");
+                } else if (error) {
+                    console.error("Cloudinary yükleme hatası:", error);
+                    alert("Görsel yüklenirken bir hata oluştu: " + error.message);
+                }
+            }
+        );
+        widget.open();
     }
 
 
     // --- UYGULAMA MANTIĞI VE UI GÜNCELLEMELERİ ---
 
     function createCategoryTabs(){
-        const tabButtonsContainer = document.getElementById('categoryTabs');
         tabButtonsContainer.innerHTML = '';
         const categoriesToIterate = categoriesTR;
 
@@ -294,7 +317,7 @@
         menuContainer.appendChild(card);
       });
     }
-
+    
     function updateLanguageContent() {
         if (language === 'TR') {
             adminLoginButton.innerHTML = '⚙️ Yönetici Girişi';
@@ -322,8 +345,7 @@
             renderMenu(activeCategoryKey);
         }
     }
-    
-    // Kategori dropdown'larını doldurur
+
     function populateCategorySelects() {
         const options = categoriesTR.filter(c => c !== 'Tümü' && c !== 'İletişim');
         
@@ -360,23 +382,16 @@
         productList.appendChild(item);
       });
 
-      // Silme işlevi
       document.querySelectorAll('.deleteBtn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
           const productKeyToDelete = e.target.dataset.key;
-          
-          if (confirm("Bu ürünü silmek istediğinizden emin misiniz? (Firebase'den Silinecek)")) {
-              try {
-                  await deleteProductFromFirebase(productKeyToDelete);
-                  alert("Ürün başarıyla silindi ve Firebase'e kaydedildi.");
-              } catch (error) {
-                  alert("Silme işlemi başarısız oldu: " + error.message);
-              }
+          if (confirm("Bu ürünü silmek istediğinizden emin misiniz?")) {
+              try { await deleteProductFromFirebase(productKeyToDelete); alert("Ürün silindi."); } 
+              catch (error) { alert("Silme işlemi başarısız oldu: " + error.message); }
           }
         });
       });
 
-      // DÜZENLEME İŞLEVİ
       document.querySelectorAll('.editBtn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const productKeyToEdit = e.target.dataset.key;
@@ -391,9 +406,9 @@
             editPriceInput.value = productToEdit.price;
             editCategorySelect.value = productToEdit.category;
             
+            // Mevcut görsel URL'sini ve önizlemeyi doldur
             editImageURLInput.value = productToEdit.image;
             editImagePreview.src = productToEdit.image;
-            editImageFile.value = null; 
             
             editProductModal.classList.remove('hidden');
           }
@@ -403,18 +418,21 @@
 
     // --- EVENT LISTENERS ---
 
-    langTR.addEventListener('click',()=>{
-      language='TR';
-      updateLanguageContent();
+    // Cloudinary Butonları
+    uploadNewImageBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openCloudinaryWidget(productImageURLInput, newImagePreview);
     });
 
-    langEN.addEventListener('click',()=>{
-      language='EN';
-      updateLanguageContent();
+    uploadEditImageBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openCloudinaryWidget(editImageURLInput, editImagePreview);
     });
 
+    // Diğer UI Butonları
+    langTR.addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
+    langEN.addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
     imageModal.addEventListener('click',()=>imageModal.classList.add('hidden'));
-
     adminLoginBtn.addEventListener('click',()=>adminPanel.classList.remove('hidden'));
     closeAdmin.addEventListener('click',()=>adminPanel.classList.add('hidden'));
     closeEdit.addEventListener('click',()=>editPanel.classList.add('hidden'));
@@ -437,20 +455,16 @@
       renderEditList(e.target.value);
     });
 
-    // ÜRÜN EKLEME (Firebase)
+    // YENİ ÜRÜN EKLEME
     addProductButton.addEventListener('click', async () => {
       const name = productNameInput.value.trim();
       const desc = productDescInput.value.trim();
       const descEN = productDescENInput.value.trim();
       const price = parseFloat(productPriceInput.value);
       const category = productCategorySelect.value;
-      
-      if (!name || isNaN(price) || !category) {
-        alert('Lütfen ürün adı, geçerli fiyat ve kategoriyi giriniz.');
-        return;
-      }
-      
-      const imageURL = 'https://images.unsplash.com/photo-1543825700-6c9233634125'; // Placeholder
+      const imageURL = productImageURLInput.value.trim() || 'https://images.unsplash.com/photo-1543825700-6c9233634125'; 
+
+      if (!name || isNaN(price) || !category) { alert('Lütfen gerekli alanları doldurunuz.'); return; }
 
       const newProduct = {
         name, nameEN: name, desc, descEN: descEN || desc,
@@ -458,27 +472,23 @@
       };
 
       try {
-          await addProductToFirebase(newProduct); 
-          alert(`"${name}" ürünü başarıyla eklendi ve Firebase'e kaydedildi.`);
-          // Inputları temizle
+          await database.ref('products').push(newProduct); 
+          alert(`"${name}" ürünü başarıyla eklendi.`);
+          // Formu temizle ve varsayılan görsele döndür
           productNameInput.value = ''; productDescInput.value = ''; productDescENInput.value = ''; 
-          productPriceInput.value = ''; productImageFileInput.value = '';
+          productPriceInput.value = ''; 
+          productImageURLInput.value = 'https://images.unsplash.com/photo-1543825700-6c9233634125'; 
+          newImagePreview.src = 'https://images.unsplash.com/photo-1543825700-6c9233634125';
+          newImagePreview.classList.add('hidden');
       } catch (error) {
           alert("Ekleme işlemi başarısız oldu: " + error.message);
       }
     });
     
-    // ÜRÜN DÜZENLEME KAYDETME İŞLEVİ (Firebase)
+    // ÜRÜN DÜZENLEME KAYDETME İŞLEVİ
     saveEditProductButton.addEventListener('click', async () => {
         const productKey = editProductKeyInput.value;
-        
-        let newImageURL = editImageURLInput.value.trim(); 
-
-        if (editImageFile.files.length > 0) {
-             // NOT: Gerçek projede Firebase Storage entegrasyonu gerekir.
-             alert("Görsel dosyası yükleme işlemi için Firebase Storage entegrasyonu gereklidir. Şimdilik sadece URL kullanıldı.");
-             // İstenirse burada geçici bir URL atanabilir: newImageURL = URL.createObjectURL(editImageFile.files[0]);
-        } 
+        const newImageURL = editImageURLInput.value.trim(); 
 
         const updates = {
             name: editNameInput.value.trim(),
@@ -490,24 +500,19 @@
             image: newImageURL
         };
         
-        if (isNaN(updates.price)) {
-            alert('Lütfen geçerli bir fiyat giriniz.');
-            return;
-        }
+        if (isNaN(updates.price)) { alert('Lütfen geçerli bir fiyat giriniz.'); return; }
 
         try {
             await updateProductInFirebase(productKey, updates); 
             editProductModal.classList.add('hidden');
-            alert(`"${updates.name}" ürünü başarıyla güncellendi ve Firebase'e kaydedildi.`);
+            alert(`"${updates.name}" ürünü başarıyla güncellendi.`);
         } catch (error) {
             alert("Güncelleme işlemi başarısız oldu: " + error.message);
         }
     });
 
-
     // --- İlk Yükleme ---
     document.addEventListener('DOMContentLoaded', () => {
-      // Firebase'den anlık veri akışını başlat
       setupFirebaseListener(); 
     });
   </script>
