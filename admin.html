@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönetici Paneli | Olimpiyat Kokoreç</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    <style>
+        body { background-color: #f3f4f6; }
+        .tab-button.active { background-color: #fb923c; color: white; }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen">
+        <div class="w-64 bg-orange-600 text-white flex flex-col p-4 shadow-xl">
+            <h1 class="text-3xl font-bold mb-8 border-b border-orange-400 pb-2">Admin Panel</h1>
+            <button id="showProducts" class="tab-button active text-left p-3 rounded hover:bg-orange-500 transition mb-2">
+                📦 Ürün Yönetimi
+            </button>
+            <button id="showAddProduct" class="tab-button text-left p-3 rounded hover:bg-orange-500 transition mb-2">
+                ➕ Yeni Ürün Ekle
+            </button>
+            <button id="showBulkUpdate" class="tab-button text-left p-3 rounded hover:bg-orange-500 transition mb-2">
+                💸 Toplu Fiyat Değiştirme
+            </button>
+            <button id="showStats" class="tab-button text-left p-3 rounded hover:bg-orange-500 transition mb-2">
+                📊 İstatistikler
+            </button>
+            <a href="index.html" class="mt-auto p-3 bg-red-500 text-center rounded hover:bg-red-600 transition">
+                Çıkış Yap
+            </a>
+        </div>
+
+        <main class="flex-1 p-8 overflow-y-auto">
+            <div id="contentContainer">
+                </div>
+        </main>
+    </div>
+
+    <div id="editProductModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-[500px] relative max-h-[90vh] overflow-y-auto">
+            <button id="closeEditProductModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
+            <h2 class="text-xl font-bold mb-3 text-orange-600">Ürün Düzenle</h2>
+            
+            <input type="hidden" id="editProductKey" />
+            
+            <div class="flex flex-col gap-3">
+                <div class="p-3 border rounded-lg bg-gray-50">
+                    <h3 class="font-semibold mb-2">Görsel Düzenleme</h3>
+                    <img id="editImagePreview" class="w-full h-32 object-cover rounded-lg mb-2 border border-gray-300" src="" alt="Ürün Görseli Önizleme">
+                    <button id="uploadEditImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition w-full">Yeni Görsel Yükle (Pop-up Açılacak)</button>
+                    <input type="hidden" id="editImageURL" value="" />
+                </div>
+
+                <input id="editName" placeholder="Ürün Adı (TR)" class="border p-2 rounded" />
+                <input id="editNameEN" placeholder="Product Name (EN)" class="border p-2 rounded" />
+                <input id="editDesc" placeholder="Açıklama (TR)" class="border p-2 rounded" />
+                <input id="editDescEN" placeholder="Description (EN)" class="border p-2 rounded" />
+                <input id="editPrice" type="number" placeholder="Fiyat (₺)" class="border p-2 rounded" />
+                <select id="editCategory" class="border p-2 rounded"></select>
+
+                <button id="saveEditProduct" class="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600 transition">Değişiklikleri Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Sabitler ve Ayarlar ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
+            authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
+            projectId: "olimpiyatkokorecmenu",
+            messagingSenderId: "987017604417",
+            appId: "1:987017604417:web:b6c4858712dc66d14745c0",
+            measurementId: "G-HB0J7BFZ9N",
+            databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebaseio.com" 
+        };
+        const CLOUDINARY_CLOUD_NAME = 'dtkrwqofx';      
+        const CLOUDINARY_UPLOAD_PRESET = 'olimpiyat_menu'; 
+
+        // Firebase'i başlat
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const productsRef = database.ref('products');
+        const visitorsRef = database.ref('visitors');
+        
+        let products = []; 
+        const categoriesTR = ['Menüler', 'Kokoreç', 'Tavuk Döner', 'Köfte', 'Ciğer', 'Hamburger', 'Yan Lezzetler', 'İçecekler']; // Sadece ürün kategorileri
+        
+        // --- HTML Element Tanımlamaları ---
+        const contentContainer = document.getElementById('contentContainer');
+        const showProductsBtn = document.getElementById('showProducts');
+        const showAddProductBtn = document.getElementById('showAddProduct');
+        const showBulkUpdateBtn = document.getElementById('showBulkUpdate');
+        const showStatsBtn = document.getElementById('showStats');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const editProductModal = document.getElementById('editProductModal');
+        const closeEditProductModal = document.getElementById('closeEditProductModal');
+        const editImageURLInput = document.getElementById('editImageURL');
+        const editImagePreview = document.getElementById('editImagePreview');
+        const uploadEditImageBtn = document.getElementById('uploadEditImageBtn');
+        const saveEditProductButton = document.getElementById('saveEditProduct');
+        
+        // --- MODÜL VE UI YÖNETİMİ ---
+
+        function setActiveTab(buttonId) {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(buttonId).classList.add('active');
+        }
+
+        function loadModule(htmlContent) {
+            contentContainer.innerHTML = htmlContent;
+        }
+
+        // --- CLOUDINARY WIDGET FONKSİYONU ---
+        function openCloudinaryWidget(urlInput, previewImg) {
+            // ... (index.html'deki ile aynı fonksiyon içeriği) ...
+            if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+                alert("Hata: Cloudinary ayarları eksik.");
+                return;
+            }
+
+            const widget = window.cloudinary.createUploadWidget(
+                {
+                    cloudName: CLOUDINARY_CLOUD_NAME,
+                    uploadPreset: CLOUDINARY_UPLOAD_PRESET,
+                    sources: ['local', 'url', 'camera'], 
+                },
+                (error, result) => {
+                    if (!error && result && result.event === "success") {
+                        const url = result.info.secure_url;
+                        urlInput.value = url; 
+                        previewImg.src = url; 
+                        previewImg.classList.remove('hidden'); 
+                        alert("Görsel yüklendi ve URL kaydedildi.");
+                    } else if (error) {
+                        console.error("Cloudinary yükleme hatası:", error);
+                        alert("Görsel yüklenirken bir hata oluştu: " + error.message);
+                    }
+                }
+            );
+            widget.open();
+        }
+
+        // --- FIREBASE CRUD & GÜNCELLEME İŞLEVLERİ ---
+        
+        // Ürün ekleme/güncelleme sırasında lastUpdated alanı otomatik güncellenir
+        async function updateProductInFirebase(key, updates) {
+            updates.lastUpdated = Date.now(); // Fiyat değişimi tarihini kaydet
+            await productsRef.child(key).update(updates);
+        }
+
+        async function deleteProductFromFirebase(key) {
+            await productsRef.child(key).remove();
+        }
+
+        // --- MODÜL: ÜRÜN YÖNETİMİ (PRODUCTS) ---
+        function renderProductsModule() {
+            setActiveTab('showProducts');
+            loadModule(`
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">📦 Ürün Yönetimi</h2>
+                <div class="flex gap-4 mb-4">
+                    <select id="filterCategory" class="border p-2 rounded flex-1">
+                        <option value="Tümü">Tümü</option>
+                        ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                    </select>
+                </div>
+                <ul id="productList" class="flex flex-col gap-3">
+                    <li class="p-4 bg-white rounded shadow text-gray-500">Ürünler yükleniyor...</li>
+                </ul>
+            `);
+            // Event Listener'ları Modül yüklendikten sonra eklenir
+            const filterSelect = document.getElementById('filterCategory');
+            filterSelect.addEventListener('change', () => renderProductList(filterSelect.value));
+            renderProductList(filterSelect.value);
+        }
+
+        function renderProductList(filter='Tümü') {
+            const listEl = document.getElementById('productList');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            const filtered = filter === 'Tümü' ? products : products.filter(p => p.category === filter);
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<li class="p-4 bg-white rounded shadow text-gray-500">Bu kategoride ürün bulunmamaktadır.</li>';
+                return;
+            }
+
+            filtered.forEach((p) => {
+                const item = document.createElement('li');
+                item.className = 'flex justify-between items-center bg-white p-3 rounded border shadow-sm';
+                item.innerHTML = `
+                    <span class="font-medium text-base">${p.name} (${p.category}) - ${p.price} ₺</span>
+                    <div>
+                        <button data-key="${p.key}" class="editBtn bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition mr-2">Düzenle</button>
+                        <button data-key="${p.key}" class="deleteBtn bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition">Sil</button>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+
+            // Delete Event
+            document.querySelectorAll('.deleteBtn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const productKeyToDelete = e.target.dataset.key;
+                    if (confirm("Bu ürünü silmek istediğinizden emin misiniz?")) {
+                        try { await deleteProductFromFirebase(productKeyToDelete); alert("Ürün silindi."); } 
+                        catch (error) { alert("Silme işlemi başarısız oldu: " + error.message); }
+                    }
+                });
+            });
+            // Edit Event
+            document.querySelectorAll('.editBtn').forEach(btn => btn.addEventListener('click', (e) => openEditModal(e.target.dataset.key)));
+        }
+
+        // --- MODÜL: YENİ ÜRÜN EKLEME (ADD PRODUCT) ---
+        function renderAddProductModule() {
+            setActiveTab('showAddProduct');
+            loadModule(`
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">➕ Yeni Ürün Ekle</h2>
+                <div class="flex flex-col gap-4 p-6 border rounded-lg bg-white shadow-md max-w-lg">
+                    <input id="productName" placeholder="Ürün Adı (TR)" class="border p-3 rounded" />
+                    <input id="productNameEN" placeholder="Product Name (EN) (Opsiyonel)" class="border p-3 rounded" />
+                    <input id="productDesc" placeholder="Açıklama (TR)" class="border p-3 rounded" />
+                    <input id="productDescEN" placeholder="Description (EN) (Opsiyonel)" class="border p-3 rounded" />
+                    <input id="productPrice" type="number" placeholder="Fiyat (₺)" class="border p-3 rounded" />
+                    <select id="productCategory" class="border p-3 rounded">
+                        <option value="">-- Kategori Seçiniz --</option>
+                        ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                    </select>
+
+                    <div class="p-4 border rounded-lg bg-gray-50">
+                        <h3 class="font-semibold mb-2">Görsel Yükle</h3>
+                        <button id="uploadNewImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition w-full">Görsel Yükle (Pop-up Açılacak)</button>
+                        <img id="newImagePreview" class="w-full h-32 object-cover rounded-lg mt-3 border border-gray-300 hidden" src="" alt="Yeni Görsel Önizleme">
+                        <input type="hidden" id="productImageURL" value="" />
+                    </div>
+                    
+                    <button id="addProduct" class="bg-orange-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-orange-600 transition">Ürünü Kaydet</button>
+                </div>
+            `);
+            // Event Listener'lar
+            document.getElementById('uploadNewImageBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                openCloudinaryWidget(document.getElementById('productImageURL'), document.getElementById('newImagePreview'));
+            });
+            document.getElementById('addProduct').addEventListener('click', addProduct);
+        }
+
+        async function addProduct() {
+            const name = document.getElementById('productName').value.trim();
+            const nameEN = document.getElementById('productNameEN').value.trim();
+            const desc = document.getElementById('productDesc').value.trim();
+            const descEN = document.getElementById('productDescEN').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const category = document.getElementById('productCategory').value;
+            const imageURL = document.getElementById('productImageURL').value.trim(); 
+
+            if (!name || isNaN(price) || !category || !imageURL) { 
+                alert('Lütfen tüm zorunlu alanları (Ad, Fiyat, Kategori ve Görsel) doldurunuz.'); return; 
+            }
+            
+            const newProduct = {
+                name, nameEN: nameEN || name, desc, descEN: descEN || desc,
+                price, image: imageURL, category,
+                lastUpdated: Date.now() // İlk oluşturma tarihini kaydet
+            };
+
+            try {
+                await database.ref('products').push(newProduct); 
+                alert(`"${name}" ürünü başarıyla eklendi.`);
+                // Formu temizle
+                document.querySelectorAll('#contentContainer input, #contentContainer select').forEach(el => el.value = '');
+                document.getElementById('newImagePreview').classList.add('hidden');
+            } catch (error) {
+                alert("Ekleme işlemi başarısız oldu: " + error.message);
+            }
+        }
+
+        // --- MODÜL: TOPLU FİYAT DEĞİŞTİRME (BULK UPDATE) ---
+        function renderBulkUpdateModule() {
+            setActiveTab('showBulkUpdate');
+            loadModule(`
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">💸 Toplu Fiyat Değiştirme</h2>
+                <div class="p-6 bg-white rounded-lg shadow-md max-w-xl">
+                    <p class="mb-4 text-gray-600">Seçtiğiniz kategori veya tüm ürünlerin fiyatlarını toplu olarak artırın veya azaltın.</p>
+                    
+                    <label class="block mb-2 font-semibold">Uygulanacak Kategori:</label>
+                    <select id="bulkCategory" class="border p-3 rounded w-full mb-4">
+                        <option value="Tümü">Tüm Ürünler</option>
+                        ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                    </select>
+
+                    <label class="block mb-2 font-semibold">Değişim Tipi:</label>
+                    <div class="flex gap-4 mb-4">
+                        <label class="flex items-center"><input type="radio" name="updateType" value="percent" checked class="mr-2"> Yüzdesel (%)</label>
+                        <label class="flex items-center"><input type="radio" name="updateType" value="fixed" class="mr-2"> Sabit Değer (₺)</label>
+                    </div>
+
+                    <input id="updateValue" type="number" placeholder="Örn: 10 (₺10 artış) veya -5 (%5 indirim)" class="border p-3 rounded w-full mb-4" />
+                    
+                    <button id="applyBulkUpdate" class="bg-red-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-red-600 transition w-full">Toplu Fiyat Güncellemesini Uygula</button>
+                    <p id="bulkStatus" class="mt-4 text-center text-sm text-red-600 hidden"></p>
+                </div>
+                <h3 class="text-xl font-bold mt-8 mb-4">Ürün Önizlemesi</h3>
+                <ul id="bulkProductList" class="flex flex-col gap-2"></ul>
+            `);
+
+            // Event Listener'lar
+            document.getElementById('bulkCategory').addEventListener('change', () => updateBulkPreview());
+            document.getElementById('updateValue').addEventListener('input', () => updateBulkPreview());
+            document.querySelectorAll('input[name="updateType"]').forEach(radio => radio.addEventListener('change', () => updateBulkPreview()));
+            document.getElementById('applyBulkUpdate').addEventListener('click', applyBulkUpdate);
+            updateBulkPreview(); // İlk yüklemede önizlemeyi göster
+        }
+
+        function updateBulkPreview() {
+            const listEl = document.getElementById('bulkProductList');
+            const category = document.getElementById('bulkCategory').value;
+            const updateType = document.querySelector('input[name="updateType"]:checked').value;
+            const value = parseFloat(document.getElementById('updateValue').value) || 0;
+            
+            listEl.innerHTML = '';
+            const filtered = category === 'Tümü' ? products : products.filter(p => p.category === category);
+
+            filtered.forEach(p => {
+                let newPrice;
+                if (updateType === 'percent') {
+                    newPrice = p.price * (1 + (value / 100));
+                } else { // fixed
+                    newPrice = p.price + value;
+                }
+                newPrice = Math.max(0, parseFloat(newPrice.toFixed(2))); // 0'dan küçük olamaz
+
+                const item = document.createElement('li');
+                item.className = 'flex justify-between items-center bg-white p-3 rounded border text-sm';
+                item.innerHTML = `
+                    <span class="w-1/2">${p.name}</span>
+                    <span class="w-1/4 text-right">${p.price} ₺</span>
+                    <span class="w-1/4 text-right font-semibold text-green-600">${newPrice} ₺</span>
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        async function applyBulkUpdate() {
+            const category = document.getElementById('bulkCategory').value;
+            const updateType = document.querySelector('input[name="updateType"]:checked').value;
+            const value = parseFloat(document.getElementById('updateValue').value);
+            const statusEl = document.getElementById('bulkStatus');
+            statusEl.classList.add('hidden');
+
+            if (isNaN(value) || value === 0) {
+                statusEl.textContent = 'Lütfen geçerli bir değişim değeri girin.';
+                statusEl.classList.remove('hidden');
+                return;
+            }
+
+            const confirmMessage = `
+                ${category === 'Tümü' ? 'TÜM' : category} kategorisindeki ürünlerin fiyatları,
+                ${updateType === 'percent' ? value + '% ' : value + ' ₺ '} 
+                ${value > 0 ? 'ARTIRILACAK' : 'AZALTILACAK'}. 
+                Bu işlemi ONAYLIYOR MUSUNUZ?
+            `;
+
+            if (!confirm(confirmMessage)) return;
+
+            const productsToUpdate = category === 'Tümü' ? products : products.filter(p => p.category === category);
+            const updates = {};
+            const currentTime = Date.now();
+
+            productsToUpdate.forEach(p => {
+                let newPrice;
+                if (updateType === 'percent') {
+                    newPrice = p.price * (1 + (value / 100));
+                } else {
+                    newPrice = p.price + value;
+                }
+                newPrice = Math.max(0, parseFloat(newPrice.toFixed(2)));
+
+                // Firebase'e gönderilecek güncelleme nesnesini hazırla
+                updates[p.key] = {
+                    price: newPrice,
+                    lastUpdated: currentTime // Güncel fiyat değişim tarihi
+                };
+            });
+
+            try {
+                // Firebase'e toplu güncelleme (multi-path update) gönder
+                await productsRef.update(updates);
+                statusEl.textContent = `${productsToUpdate.length} ürün başarıyla güncellendi.`;
+                statusEl.classList.remove('hidden');
+                statusEl.classList.remove('text-red-600');
+                statusEl.classList.add('text-green-600');
+                document.getElementById('updateValue').value = '';
+                updateBulkPreview(); // Önizlemeyi temizle
+            } catch (error) {
+                statusEl.textContent = 'Toplu güncelleme başarısız oldu: ' + error.message;
+                statusEl.classList.remove('hidden');
+                statusEl.classList.remove('text-green-600');
+                statusEl.classList.add('text-red-600');
+            }
+        }
+
+        // --- MODÜL: İSTATİSTİKLER (STATS) ---
+        function renderStatsModule() {
+            setActiveTab('showStats');
+            loadModule(`
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">📊 İstatistikler</h2>
+                <div class="grid grid-cols-2 gap-6 max-w-xl">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold mb-2 text-orange-600">Bugünkü Görüntüleme</h3>
+                        <p id="todayCount" class="text-4xl font-bold text-gray-800">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold mb-2 text-orange-600">Toplam Görüntüleme</h3>
+                        <p id="totalCount" class="text-4xl font-bold text-gray-800">0</p>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <button id="resetCounter" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Sayaçları Sıfırla (Manuel)</button>
+                    <p class="text-sm text-gray-500 mt-2">NOT: Günlük sayaç Firebase'de gün bazında tutulur. Bu buton tüm sayaç geçmişini siler.</p>
+                </div>
+            `);
+            fetchVisitorCounts();
+            document.getElementById('resetCounter').addEventListener('click', resetVisitorCounts);
+        }
+
+        function fetchVisitorCounts() {
+            const today = new Date().toISOString().slice(0, 10);
+            
+            // Bugünkü sayacı getir
+            visitorsRef.child(today).once('value', snapshot => {
+                document.getElementById('todayCount').textContent = snapshot.val() || 0;
+            });
+
+            // Toplam sayacı getir
+            visitorsRef.once('value', snapshot => {
+                let total = 0;
+                snapshot.forEach(child => {
+                    total += child.val();
+                });
+                document.getElementById('totalCount').textContent = total;
+            });
+        }
+        
+        async function resetVisitorCounts() {
+            if (confirm("Tüm ziyaretçi verilerini sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz.")) {
+                try {
+                    await visitorsRef.remove();
+                    alert("Ziyaretçi sayaçları başarıyla sıfırlandı.");
+                    fetchVisitorCounts(); // UI'ı güncelle
+                } catch (error) {
+                    alert("Sayaç sıfırlama başarısız oldu: " + error.message);
+                }
+            }
+        }
+
+        // --- EDİT MODAL ORTAK KULLANIM FONKSİYONLARI ---
+        function openEditModal(productKey) {
+            const productToEdit = products.find(p => p.key === productKey);
+            
+            if (productToEdit) {
+                document.getElementById('editProductKey').value = productKey; 
+                document.getElementById('editName').value = productToEdit.name;
+                document.getElementById('editNameEN').value = productToEdit.nameEN || '';
+                document.getElementById('editDesc').value = productToEdit.desc || '';
+                document.getElementById('editDescEN').value = productToEdit.descEN || '';
+                document.getElementById('editPrice').value = productToEdit.price;
+                
+                const editCategorySelect = document.getElementById('editCategory');
+                editCategorySelect.innerHTML = categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+                editCategorySelect.value = productToEdit.category;
+                
+                editImageURLInput.value = productToEdit.image;
+                editImagePreview.src = productToEdit.image;
+                
+                editProductModal.classList.remove('hidden');
+            }
+        }
+
+        // --- GENEL EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Firebase Dinleyicisi
+            productsRef.on('value', (snapshot) => {
+                products = snapshot.exists() ? Object.values(snapshot.val()).map((val, key) => ({...val, key: Object.keys(snapshot.val())[key]})) : [];
+                // Admin paneli açılırken varsayılan modülü yükle
+                renderProductsModule(); 
+            });
+
+            // Navigasyon Butonları
+            showProductsBtn.addEventListener('click', renderProductsModule);
+            showAddProductBtn.addEventListener('click', renderAddProductModule);
+            showBulkUpdateBtn.addEventListener('click', renderBulkUpdateModule);
+            showStatsBtn.addEventListener('click', renderStatsModule);
+            
+            // Edit Modal Butonları
+            closeEditProductModal.addEventListener('click', () => editProductModal.classList.add('hidden'));
+            uploadEditImageBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openCloudinaryWidget(editImageURLInput, editImagePreview);
+            });
+            saveEditProductButton.addEventListener('click', async () => {
+                const productKey = document.getElementById('editProductKey').value;
+                const updates = {
+                    name: document.getElementById('editName').value.trim(),
+                    nameEN: document.getElementById('editNameEN').value.trim(),
+                    desc: document.getElementById('editDesc').value.trim(),
+                    descEN: document.getElementById('editDescEN').value.trim(),
+                    price: parseFloat(document.getElementById('editPrice').value),
+                    category: document.getElementById('editCategory').value,
+                    image: editImageURLInput.value.trim()
+                };
+                
+                if (isNaN(updates.price)) { alert('Lütfen geçerli bir fiyat giriniz.'); return; }
+
+                try {
+                    await updateProductInFirebase(productKey, updates); 
+                    editProductModal.classList.add('hidden');
+                    alert(`"${updates.name}" ürünü başarıyla güncellendi.`);
+                    renderProductList(document.getElementById('filterCategory').value); // Listeyi yenile
+                } catch (error) {
+                    alert("Güncelleme işlemi başarısız oldu: " + error.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
