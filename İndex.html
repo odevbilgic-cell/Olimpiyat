@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Olimpiyat Kokoreç Menü</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #fff7f0; }
+    .active-tab { background-color: #fb923c; color: white; }
+    /* Menü sekmelerinin görünümü için kaydırma çubuğunu gizle */
+    #categoryTabs::-webkit-scrollbar { display: none; }
+    #categoryTabs { -ms-overflow-style: none; /* IE and Edge */ scrollbar-width: none; /* Firefox */ }
+  </style>
+</head>
+<body class="text-gray-800">
+  <header class="bg-orange-500 text-white p-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
+    <h1 class="text-2xl font-bold">Olimpiyat Kokoreç</h1>
+    <div class="flex items-center gap-2">
+      <button id="langTR" class="bg-white text-orange-600 px-3 py-1 rounded font-bold">TR</button>
+      <button id="langEN" class="bg-white text-orange-600 px-3 py-1 rounded">EN</button>
+      <button id="adminLoginBtn" class="bg-white text-orange-600 px-3 py-1 rounded">⚙️ Yönetici Girişi</button>
+    </div>
+  </header>
+
+  <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-[64px] z-10"></nav>
+
+  <main class="p-4">
+    <div id="menuContainer" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        </div>
+
+    <div id="contactSection" class="hidden text-center mt-6 bg-white rounded-xl shadow p-6 max-w-lg mx-auto">
+      <h2 id="contactTitle" class="text-2xl font-bold text-orange-600 mb-3">İletişim</h2>
+      <p id="contactAddress" class="mb-3">📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul</p>
+      <p class="mt-2">📞 <a href="tel:02163357920" id="contactPhone" class="text-orange-600 font-semibold text-lg hover:underline">0216 335 79 20</a></p>
+    </div>
+  </main>
+
+  <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50 transition-opacity">
+    <img id="modalImage" class="max-h-[90vh] max-w-[90vw] rounded-xl shadow-2xl transition-transform">
+  </div>
+
+  <div id="adminPanel" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+    <div class="bg-white rounded-xl shadow-lg p-6 w-96 relative">
+      <button id="closeAdmin" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
+      <h2 class="text-xl font-bold mb-3 text-orange-600">Yönetici Girişi</h2>
+      <input id="passwordInput" type="password" placeholder="Şifreyi giriniz" class="border w-full p-2 rounded mb-3 focus:ring-orange-500 focus:border-orange-500" />
+      <button id="checkPassword" class="bg-orange-500 text-white px-4 py-2 rounded w-full hover:bg-orange-600 transition">Giriş Yap</button>
+      <p id="loginError" class="text-red-600 text-sm mt-2 hidden">Hatalı şifre!</p>
+    </div>
+  </div>
+
+  <div id="editPanel" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+    <div class="bg-white rounded-xl shadow-lg p-6 w-[600px] relative max-h-[90vh] overflow-y-auto">
+      <button id="closeEdit" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
+      <h2 class="text-xl font-bold mb-3 text-orange-600">Ürün Yönetimi</h2>
+      
+      <div class="flex flex-col gap-2 mb-4 p-4 border rounded-lg bg-orange-50">
+        <h3 class="font-bold text-lg mb-1">Yeni Ürün Ekle</h3>
+        <input id="productName" placeholder="Ürün Adı (TR)" class="border p-2 rounded" />
+        <input id="productDesc" placeholder="Açıklama (TR)" class="border p-2 rounded" />
+        <input id="productDescEN" placeholder="Açıklama (EN)" class="border p-2 rounded" />
+        <input id="productPrice" type="number" placeholder="Fiyat (₺)" class="border p-2 rounded" />
+        <input id="productImageFile" type="file" accept="image/*" class="border p-2 rounded bg-white" />
+        <select id="productCategory" class="border p-2 rounded">
+          </select>
+        <button id="addProduct" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition">Ürün Ekle</button>
+      </div>
+
+      <h3 class="font-semibold mb-2">Mevcut Ürünler</h3>
+      <div class="flex gap-2 mb-2">
+        <select id="filterCategory" class="border p-2 rounded flex-1"></select>
+      </div>
+      <ul id="productList" class="flex flex-col gap-2"></ul>
+    </div>
+  </div>
+
+  <div id="editProductModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+    <div class="bg-white rounded-xl shadow-lg p-6 w-[500px] relative max-h-[90vh] overflow-y-auto">
+      <button id="closeEditProductModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
+      <h2 class="text-xl font-bold mb-3 text-orange-600">Ürün Düzenle</h2>
+      
+      <input type="hidden" id="editProductIndex" />
+      
+      <div class="flex flex-col gap-3">
+        
+        <div class="p-3 border rounded-lg bg-gray-50">
+            <h3 class="font-semibold mb-2">Görsel Düzenleme</h3>
+            <img id="editImagePreview" class="w-full h-32 object-cover rounded-lg mb-2 border border-gray-300" src="" alt="Ürün Görseli Önizleme">
+            
+            <label class="block text-sm font-medium mb-1">Yeni Görsel URL'si:</label>
+            <input id="editImageURL" placeholder="Yeni Görsel URL'si girin" class="border w-full p-2 rounded mb-2 text-sm" />
+
+            <label class="block text-sm font-medium mb-1">Veya Yeni Görsel Yükle:</label>
+            <input id="editImageFile" type="file" accept="image/*" class="border w-full p-1 rounded bg-white text-sm" />
+            <p class="text-xs text-gray-500 mt-1">Dosya seçilirse URL alanı yok sayılır.</p>
+        </div>
+
+        <input id="editName" placeholder="Ürün Adı (TR)" class="border p-2 rounded" />
+        <input id="editNameEN" placeholder="Product Name (EN)" class="border p-2 rounded" />
+        <input id="editDesc" placeholder="Açıklama (TR)" class="border p-2 rounded" />
+        <input id="editDescEN" placeholder="Description (EN)" class="border p-2 rounded" />
+        <input id="editPrice" type="number" placeholder="Fiyat (₺)" class="border p-2 rounded" />
+        <select id="editCategory" class="border p-2 rounded"></select>
+
+        <button id="saveEditProduct" class="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600 transition">Değişiklikleri Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- HTML Element Tanımlamaları ---
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const adminPanel = document.getElementById('adminPanel');
+    const editPanel = document.getElementById('editPanel');
+    const checkPassword = document.getElementById('checkPassword');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginError = document.getElementById('loginError');
+    const closeAdmin = document.getElementById('closeAdmin');
+    const closeEdit = document.getElementById('closeEdit');
+    const menuContainer = document.getElementById('menuContainer');
+    const productList = document.getElementById('productList');
+    const contactSection = document.getElementById('contactSection');
+    const tabButtonsContainer = document.getElementById('categoryTabs');
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const langTR = document.getElementById('langTR');
+    const langEN = document.getElementById('langEN');
+    const contactTitle = document.getElementById('contactTitle');
+    const contactAddress = document.getElementById('contactAddress');
+    const adminLoginButton = document.getElementById('adminLoginBtn');
+
+    // Yeni Ürün Ekleme Elementleri
+    const productNameInput = document.getElementById('productName');
+    const productDescInput = document.getElementById('productDesc');
+    const productDescENInput = document.getElementById('productDescEN');
+    const productPriceInput = document.getElementById('productPrice');
+    const productImageFileInput = document.getElementById('productImageFile');
+    const productCategorySelect = document.getElementById('productCategory');
+    const addProductButton = document.getElementById('addProduct');
+    const filterCategorySelect = document.getElementById('filterCategory');
+
+    // ÜRÜN DÜZENLEME MODAL Elementleri
+    const editProductModal = document.getElementById('editProductModal');
+    const closeEditProductModal = document.getElementById('closeEditProductModal');
+    const editProductIndexInput = document.getElementById('editProductIndex');
+    const editNameInput = document.getElementById('editName');
+    const editNameENInput = document.getElementById('editNameEN');
+    const editDescInput = document.getElementById('editDesc');
+    const editDescENInput = document.getElementById('editDescEN');
+    const editPriceInput = document.getElementById('editPrice');
+    const editCategorySelect = document.getElementById('editCategory');
+    const saveEditProductButton = document.getElementById('saveEditProduct');
+    
+    // GÖRSEL DÜZENLEME ELEMENTLERİ
+    const editImagePreview = document.getElementById('editImagePreview');
+    const editImageURLInput = document.getElementById('editImageURL');
+    const editImageFile = document.getElementById('editImageFile');
+
+
+    let language = 'TR'; // Varsayılan dil Türkçe
+    let products = []; // Ürünler artık API'dan çekilecek
+
+    // Kategori çevirileri
+    const categoryTranslations = {
+      'Tümü': 'All',
+      'Menüler': 'Menus',
+      'Kokoreç': 'Kokoreç',
+      'Tavuk Döner': 'Chicken Döner',
+      'Köfte': 'Meatballs',
+      'Ciğer': 'Liver',
+      'Hamburger': 'Hamburger',
+      'Yan Lezzetler': 'Side Dishes',
+      'İçecekler': 'Drinks',
+      'İletişim': 'Contact'
+    };
+
+    let categoriesTR = Object.keys(categoryTranslations);
+    let categoriesEN = Object.values(categoryTranslations);
+
+    // --- MOCK API (Bulut/Sunucu Simülasyonu) ---
+    
+    // Başlangıç verileri (Bu veriler, sayfa her yüklendiğinde simülasyon sunucusu görevi gören
+    // localStorage'a kaydedilir. Gerçek bir senaryoda bu verilere doğrudan DB'den ulaşılır.)
+    const initialProducts = [
+      {id: 1, name:'Kokoreç Ekmek Arası',nameEN:'Kokoreç Sandwich',desc:'Izgara kokoreç, baharatlı',descEN:'Grilled kokoreç, seasoned with spices',price:150,image:'https://images.unsplash.com/photo-1608032156297-6b1c7b7a6a64',category:'Kokoreç'},
+      {id: 2, name:'Yarım Ekmek Köfte',nameEN:'Half Bread Meatball',desc:'Izgarada nefis kasap köftesi',descEN:'Delicious butcher meatballs on the grill',price:180,image:'https://images.unsplash.com/photo-1544025166-0a30b999e485',category:'Köfte'},
+      {id: 3, name:'Tavuk Döner Dürüm',nameEN:'Chicken Döner Wrap',desc:'Taze lavaşta tavuk döner',descEN:'Chicken döner in fresh lavash wrap',price:90,image:'https://images.unsplash.com/photo-1617196034796-73bf8b2f1d1a',category:'Tavuk Döner'},
+      {id: 4, name:'Klasik Hamburger Menü',nameEN:'Classic Hamburger Menu',desc:'Ev yapımı köfte, patates ve içecek',descEN:'Homemade patty, fries and a drink',price:130,image:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd',category:'Hamburger'}
+    ];
+    
+    function getProductsFromMockDB() {
+        // Gerçek bir senaryoda bu bir fetch('/api/products') çağrısı olurdu.
+        // Simülasyon için localStorage'ı "Mock DB" olarak kullanıyoruz.
+        const stored = localStorage.getItem('mockDB_products');
+        return stored ? JSON.parse(stored) : initialProducts;
+    }
+
+    function saveProductsToMockDB(data) {
+        // Gerçek bir senaryoda bu bir veritabanı yazma işlemi olurdu.
+        localStorage.setItem('mockDB_products', JSON.stringify(data));
+    }
+    
+    // Ürünleri okuma (GET) simülasyonu
+    async function fetchProducts() {
+        // Gerçek API gecikmesini simüle etmek için bir bekleme ekleyelim
+        await new Promise(resolve => setTimeout(resolve, 300)); 
+        products = getProductsFromMockDB();
+        return products;
+    }
+
+    // Ürün kaydetme (POST) simülasyonu
+    async function saveProduct(product) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        let currentProducts = getProductsFromMockDB();
+        
+        let nextId = currentProducts.length > 0 ? Math.max(...currentProducts.map(p => p.id)) + 1 : 1;
+        product.id = nextId;
+        
+        currentProducts.push(product);
+        saveProductsToMockDB(currentProducts);
+        
+        return product; // Kaydedilen ürünü geri döndür
+    }
+
+    // Ürün güncelleme (PUT) simülasyonu
+    async function updateProduct(updatedProduct) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        let currentProducts = getProductsFromMockDB();
+        
+        const index = currentProducts.findIndex(p => p.id === updatedProduct.id);
+        if (index > -1) {
+            currentProducts[index] = updatedProduct;
+            saveProductsToMockDB(currentProducts);
+            return updatedProduct;
+        }
+        throw new Error("Güncellenecek ürün bulunamadı!");
+    }
+
+    // Ürün silme (DELETE) simülasyonu
+    async function deleteProduct(productId) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        let currentProducts = getProductsFromMockDB();
+        
+        const index = currentProducts.findIndex(p => p.id === productId);
+        if (index > -1) {
+            currentProducts.splice(index, 1);
+            saveProductsToMockDB(currentProducts);
+            return true;
+        }
+        return false;
+    }
+
+    // --- Uygulama Mantığı ---
+
+    // Bu fonksiyon, menüyü ve admin panelini API'dan gelen en son verilere göre yeniden yükler
+    async function refreshAppUI() {
+        await fetchProducts(); // Veriyi "buluttan" çek
+        
+        updateLanguageContent();
+        
+        // Admin paneli açıksa, listeyi de güncelle
+        if (!editPanel.classList.contains('hidden')) {
+             renderEditList(filterCategorySelect.value);
+        }
+    }
+
+
+    // Kategori sekmelerini oluşturur ve aktif dile göre isimlerini ayarlar
+    function createCategoryTabs(){
+      tabButtonsContainer.innerHTML = '';
+      const categoriesToIterate = categoriesTR;
+
+      categoriesToIterate.forEach((catTR, index) => {
+        let btn = document.createElement('button');
+        const catName = language === 'TR' ? catTR : categoriesEN[index];
+
+        btn.className='tabBtn px-3 py-1 rounded whitespace-nowrap transition-colors duration-150 hover:bg-orange-200';
+        btn.dataset.category=catTR;
+        btn.textContent=catName;
+
+        if(catTR==='Tümü') {
+             btn.classList.add('active-tab');
+        }
+
+        btn.addEventListener('click',()=>{
+          document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active-tab'));
+          btn.classList.add('active-tab');
+          const categoryKey = btn.dataset.category;
+
+          if(categoryKey==='İletişim'){
+            menuContainer.innerHTML='';
+            contactSection.classList.remove('hidden');
+          } else {
+            contactSection.classList.add('hidden');
+            renderMenu(categoryKey);
+          }
+        });
+        tabButtonsContainer.appendChild(btn);
+      });
+    }
+
+    // Menü kartlarını render eder
+    function renderMenu(category='Tümü'){
+      menuContainer.innerHTML='';
+      const filtered = category==='Tümü'?products:products.filter(p=>p.category===category);
+
+      filtered.forEach(p=>{
+        const card=document.createElement('div');
+        card.className='bg-white rounded-xl shadow p-4 flex flex-col hover:shadow-lg transition-shadow duration-200';
+        
+        const name = language==='TR'?p.name:p.nameEN||p.name;
+        const desc = language==='TR'?p.desc:p.descEN||p.desc||'';
+
+        card.innerHTML=`
+          <img src='${p.image}' alt='${name}' class='w-full h-40 object-cover rounded-lg mb-3 cursor-pointer'>
+          <h3 class='font-bold text-xl mb-1'>${name}</h3>
+          <p class='text-gray-600 text-sm mb-3 flex-grow'>${desc}</p>
+          <p class='bg-orange-100 text-orange-700 inline-block px-3 py-1 rounded-full font-bold text-lg self-start'>${p.price} ₺</p>
+        `;
+        card.querySelector('img').addEventListener('click',()=>{modalImage.src=p.image;imageModal.classList.remove('hidden');});
+        menuContainer.appendChild(card);
+      });
+    }
+
+    // --- Dil Değiştirme ve İçerik Güncelleme ---
+
+    function updateLanguageContent() {
+      if (language === 'TR') {
+        adminLoginButton.innerHTML = '⚙️ Yönetici Girişi';
+        contactTitle.textContent = 'İletişim';
+        contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
+        langTR.style.fontWeight = 'bold';
+        langEN.style.fontWeight = 'normal';
+      } else { 
+        adminLoginButton.innerHTML = '⚙️ Admin Login';
+        contactTitle.textContent = 'Contact';
+        contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - Istanbul (Turkey)';
+        langTR.style.fontWeight = 'normal';
+        langEN.style.fontWeight = 'bold';
+      }
+
+      createCategoryTabs();
+      const activeTab = document.querySelector('.tabBtn.active-tab');
+      const activeCategoryKey = activeTab ? activeTab.dataset.category : 'Tümü';
+      
+      if (activeCategoryKey === 'İletişim') {
+        menuContainer.innerHTML = '';
+        contactSection.classList.remove('hidden');
+      } else {
+        contactSection.classList.add('hidden');
+        renderMenu(activeCategoryKey);
+      }
+    }
+
+
+    langTR.addEventListener('click',()=>{
+      language='TR';
+      updateLanguageContent();
+    });
+
+    langEN.addEventListener('click',()=>{
+      language='EN';
+      updateLanguageContent();
+    });
+
+    // --- Modal Yönetimi ---
+
+    imageModal.addEventListener('click',()=>imageModal.classList.add('hidden'));
+
+    adminLoginBtn.addEventListener('click',()=>adminPanel.classList.remove('hidden'));
+    closeAdmin.addEventListener('click',()=>adminPanel.classList.add('hidden'));
+    closeEdit.addEventListener('click',()=>editPanel.classList.add('hidden'));
+    closeEditProductModal.addEventListener('click',()=>editProductModal.classList.add('hidden'));
+
+    checkPassword.addEventListener('click',()=>{
+      if(passwordInput.value==='admin123'){ 
+        adminPanel.classList.add('hidden');
+        editPanel.classList.remove('hidden');
+        loginError.classList.add('hidden');
+        passwordInput.value='';
+        populateCategorySelects();
+        renderEditList(); // Admin girişi başarılıysa listeyi yükle
+      } else {
+        loginError.classList.remove('hidden');
+      }
+    });
+
+    // --- Yönetici Ürün Yönetimi ---
+
+    function populateCategorySelects() {
+      // Sadece 'Menüler'den 'İçecekler'e kadar olan kategorileri al
+      const options = categoriesTR.filter(c => c !== 'Tümü' && c !== 'İletişim');
+      
+      [productCategorySelect, filterCategorySelect, editCategorySelect].forEach(select => {
+        select.innerHTML = ''; 
+        options.forEach(cat => {
+          const option = document.createElement('option');
+          option.textContent = cat;
+          select.appendChild(option);
+        });
+        if (select === filterCategorySelect) {
+          const allOption = document.createElement('option');
+          allOption.textContent = 'Tümü';
+          select.insertBefore(allOption, select.firstChild);
+          select.value = 'Tümü';
+        }
+      });
+    }
+
+    function renderEditList(filter='Tümü') {
+      productList.innerHTML = '';
+      const filtered = filter==='Tümü'?products:products.filter(p=>p.category===filter);
+
+      filtered.forEach((p) => {
+        const item = document.createElement('li');
+        item.className = 'flex justify-between items-center bg-white p-3 rounded border shadow-sm';
+        item.innerHTML = `
+          <span class="font-medium text-sm">${p.name} (${p.category}) - ${p.price} ₺</span>
+          <div>
+            <button data-id="${p.id}" class="editBtn bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition mr-2">Düzenle</button>
+            <button data-id="${p.id}" class="deleteBtn bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 transition">Sil</button>
+          </div>
+        `;
+        productList.appendChild(item);
+      });
+
+      // Silme işlevi
+      document.querySelectorAll('.deleteBtn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const productIdToDelete = parseInt(e.target.dataset.id);
+          
+          if (confirm("Bu ürünü silmek istediğinizden emin misiniz? (Buluttan Silinecek)")) {
+              try {
+                  await deleteProduct(productIdToDelete); // API çağrısı
+                  await refreshAppUI(); // UI'ı yeni verilerle güncelle
+                  alert("Ürün başarıyla silindi ve buluta kaydedildi.");
+              } catch (error) {
+                  alert("Silme işlemi başarısız oldu: " + error.message);
+              }
+          }
+        });
+      });
+
+      // DÜZENLEME İŞLEVİ
+      document.querySelectorAll('.editBtn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const productIdToEdit = parseInt(e.target.dataset.id);
+          const productToEdit = products.find(p => p.id === productIdToEdit);
+          
+          if (productToEdit) {
+            // Modal inputlarını doldur
+            editProductIndexInput.value = productIdToEdit;
+            editNameInput.value = productToEdit.name;
+            editNameENInput.value = productToEdit.nameEN;
+            editDescInput.value = productToEdit.desc;
+            editDescENInput.value = productToEdit.descEN;
+            editPriceInput.value = productToEdit.price;
+            editCategorySelect.value = productToEdit.category;
+            
+            // Görsel alanlarını doldur ve önizlemeyi göster
+            editImageURLInput.value = productToEdit.image;
+            editImagePreview.src = productToEdit.image;
+            editImageFile.value = null; // File inputunu temizle
+            
+            editProductModal.classList.remove('hidden');
+          }
+        });
+      });
+    }
+
+    filterCategorySelect.addEventListener('change', (e) => {
+      renderEditList(e.target.value);
+    });
+
+    // ÜRÜN EKLEME
+    addProductButton.addEventListener('click', async () => {
+      const name = productNameInput.value.trim();
+      const desc = productDescInput.value.trim();
+      const descEN = productDescENInput.value.trim();
+      const price = parseFloat(productPriceInput.value);
+      const category = productCategorySelect.value;
+      const imageFile = productImageFileInput.files[0];
+
+      if (!name || !price || !category) {
+        alert('Lütfen ürün adı, fiyatı ve kategoriyi giriniz.');
+        return;
+      }
+      
+      // NOT: Görsel yükleme sadece bir mock URL atamasıdır.
+      const imageURL = 'https://images.unsplash.com/photo-1543825700-6c9233634125'; 
+
+      const newProduct = {
+        name,
+        nameEN: name,
+        desc,
+        descEN: descEN || desc,
+        price,
+        image: imageURL,
+        category
+      };
+
+      try {
+          await saveProduct(newProduct); // API (Mock) çağrısı
+          await refreshAppUI(); // UI'ı yeni verilerle güncelle
+          alert(`"${name}" ürünü başarıyla eklendi ve buluta kaydedildi.`);
+
+          // Giriş alanlarını temizle
+          productNameInput.value = '';
+          productDescInput.value = '';
+          productDescENInput.value = '';
+          productPriceInput.value = '';
+          productImageFileInput.value = '';
+          
+      } catch (error) {
+          alert("Ekleme işlemi başarısız oldu: " + error.message);
+      }
+    });
+    
+    // ÜRÜN DÜZENLEME KAYDETME İŞLEVİ
+    saveEditProductButton.addEventListener('click', async () => {
+        const productId = parseInt(editProductIndexInput.value);
+        const productToUpdate = products.find(p => p.id === productId);
+
+        if (productToUpdate) {
+            
+            // --- Görsel URL'si Güncelleme Mantığı ---
+            let newImageURL = productToUpdate.image; 
+
+            if (editImageFile.files.length > 0) {
+                // Mock: Dosya seçildiyse, yeni bir mock URL'si ata (Gerçekte sunucuya yüklenir)
+                newImageURL = URL.createObjectURL(editImageFile.files[0]); 
+            } else if (editImageURLInput.value.trim() !== '') {
+                // Dosya seçilmediyse ve URL alanı doluysa, URL'yi kullan
+                newImageURL = editImageURLInput.value.trim();
+            }
+
+            // Ürünü güncelleme için hazırlar
+            const updatedProduct = {
+                id: productId,
+                name: editNameInput.value.trim(),
+                nameEN: editNameENInput.value.trim(),
+                desc: editDescInput.value.trim(),
+                descEN: editDescENInput.value.trim(),
+                price: parseFloat(editPriceInput.value),
+                category: editCategorySelect.value,
+                image: newImageURL
+            };
+            
+            try {
+                await updateProduct(updatedProduct); // API (Mock) çağrısı
+                editProductModal.classList.add('hidden');
+                await refreshAppUI(); // UI'ı yeni verilerle güncelle
+                alert(`"${updatedProduct.name}" ürünü başarıyla güncellendi ve buluta kaydedildi.`);
+            } catch (error) {
+                alert("Güncelleme işlemi başarısız oldu: " + error.message);
+            }
+
+        } else {
+            alert('Hata: Ürün bulunamadı!');
+        }
+    });
+
+
+    // --- İlk Yükleme ---
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshAppUI(); // Sayfa yüklendiğinde veriyi buluttan çek ve UI'ı hazırla
+    });
+  </script>
+</body>
+</html>
