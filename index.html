@@ -16,18 +16,21 @@
     #categoryTabs { -ms-overflow-style: none; scrollbar-width: none; }
     /* Tarih bilgisini sağ altta ve küçük tutar */
     .price-update-info { font-size: 0.7rem; color: #6b7280; margin-top: 5px; } 
+    #mainHeader { 
+        height: 4rem; /* p-3 (12) + text-2xl (32) + 2x border/gap */
+    }
   </style>
 </head>
 <body class="text-gray-800">
   
   <div id="viewCountListener" style="display:none;"></div> 
 
-  <header class="bg-orange-500 text-white p-4 flex justify-between items-center sticky top-0 z-10 shadow-md">
+  <header class="bg-orange-500 text-white p-3 flex justify-between items-center sticky top-0 z-10 shadow-md">
     <h1 class="text-2xl font-bold">Olimpiyat Kokoreç</h1>
     <div class="flex items-center gap-2">
-      <button id="langTR" class="bg-white text-orange-600 px-3 py-1 rounded font-bold">TR</button>
-      <button id="langEN" class="bg-white text-orange-600 px-3 py-1 rounded">EN</button>
-      <button id="adminLoginBtn" class="bg-white text-orange-600 px-3 py-1 rounded">⚙️ Yönetici Girişi</button>
+      <button id="langTR" class="bg-white text-orange-600 px-2 py-1 rounded font-bold">TR</button>
+      <button id="langEN" class="bg-white text-orange-600 px-2 py-1 rounded">EN</button>
+      <button id="adminLoginBtn" class="bg-white text-orange-600 px-2 py-1 rounded">⚙️</button>
     </div>
   </header>
 
