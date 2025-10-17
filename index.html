@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Olimpiyat Kokoreç Menü</title>
+  <title>Olimpiyat Kokoreç Menü - Kullanıcı Arayüzü</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -16,8 +16,11 @@
     #categoryTabs { -ms-overflow-style: none; scrollbar-width: none; }
     /* Tarih bilgisini sağ altta ve küçük tutar */
     .price-update-info { font-size: 0.7rem; color: #6b7280; margin-top: 5px; } 
+
+    /* Header'ı sabitlemek ve kategori nav ile çakışmasını önlemek için sabit yükseklik */
     #mainHeader { 
-        height: 4rem; /* p-3 (12) + text-2xl (32) + 2x border/gap */
+        /* p-3 (12) + text-2xl (32) + padding = ~64px (Tailwind h-16) */
+        height: 4rem; 
     }
   </style>
 </head>
@@ -25,16 +28,16 @@
   
   <div id="viewCountListener" style="display:none;"></div> 
 
-  <header class="bg-orange-500 text-white p-3 flex justify-between items-center sticky top-0 z-10 shadow-md">
+  <header id="mainHeader" class="bg-orange-500 text-white p-3 flex justify-between items-center sticky top-0 z-20 shadow-md">
     <h1 class="text-2xl font-bold">Olimpiyat Kokoreç</h1>
     <div class="flex items-center gap-2">
-      <button id="langTR" class="bg-white text-orange-600 px-2 py-1 rounded font-bold">TR</button>
-      <button id="langEN" class="bg-white text-orange-600 px-2 py-1 rounded">EN</button>
-      <button id="adminLoginBtn" class="bg-white text-orange-600 px-2 py-1 rounded">⚙️</button>
+      <button id="langTR" class="bg-white text-orange-600 px-2 py-1 rounded text-sm font-bold">TR</button>
+      <button id="langEN" class="bg-white text-orange-600 px-2 py-1 rounded text-sm">EN</button>
+      <button id="adminLoginBtn" class="bg-white text-orange-600 px-2 py-1 rounded text-lg font-bold ml-2">⚙️</button>
     </div>
   </header>
 
-  <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-[64px] z-10"></nav>
+  <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
 
   <main class="p-4">
     <div id="menuContainer" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -61,7 +64,7 @@
   </div>
 
   <script>
-    // --- Firebase Yapılandırması (DÜZELTİLMİŞ URL) ---
+    // --- Firebase Yapılandırması ---
     const firebaseConfig = {
         apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
         authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
@@ -69,8 +72,8 @@
         messagingSenderId: "987017604417",
         appId: "1:987017604417:web:b6c4858712dc66d14745c0",
         measurementId: "G-HB0J7BFZ9N",
-        // Bölgesel uyarıyı çözen URL
-        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app" 
+        // Doğru bölgesel database URL'si
+        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebaseio.com" 
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -99,27 +102,33 @@
     let language = 'TR'; 
     let products = []; 
 
-    // Kategori çevirileri
+    // Kategori çevirileri (Tavuk Kokoreç, Patso, Tost, Midye eklendi ve sıralandı)
     const categoryTranslations = {
-      'Tümü': 'All', 'Menüler': 'Menus', 'Kokoreç': 'Kokorec', 'Tavuk Kokoreç': 'Chicken Kokorec', 'Tavuk Döner': 'Chicken Döner', 'Patso': 'Patso',
-      'Köfte': 'Meatballs', 'Ciğer': 'Liver', 'Hamburger': 'Hamburger', 'Midye': 'Midye', 'Tost': 'Toast',
-      'Yan Lezzetler': 'Side Dishes', 'İçecekler': 'Drinks', 'İletişim': 'Contact'
+      'Tümü': 'All', 
+      'Menüler': 'Menus', 
+      'Kokoreç': 'Kokoreç', 
+      'Tavuk Kokoreç': 'Chicken Kokoreç', // YENİ
+      'Tavuk Döner': 'Chicken Döner', 
+      'Patso': 'Patso',                  // YENİ
+      'Köfte': 'Meatballs', 
+      'Ciğer': 'Liver', 
+      'Hamburger': 'Hamburger', 
+      'Midye': 'Mussel',
+      'Yan Lezzetler': 'Side Dishes', 
+      'Tost': 'Toast',                   // YENİ
+      'İçecekler': 'Drinks', 
+      'İletişim': 'Contact'
     };
     let categoriesTR = Object.keys(categoryTranslations);
     let categoriesEN = Object.values(categoryTranslations);
 
-    // --- YENİ VE GÜNCELLENMİŞ ZAMAN VE TARİH YARDIMCI FONKSİYONU ---
+    // --- ZAMAN VE TARİH YARDIMCI FONKSİYONU ---
 
-    /**
-     * Unix zaman damgasını alarak istenilen göreceli bir tarih metni döndürür (1 dakika önce, 2 saat önce, 1 gün önce, vb.).
-     * @param {number} timestamp - Unix zaman damgası (miliseconds)
-     * @returns {string} Göreceli tarih metni
-     */
     function formatRelativeDate(timestamp) {
         if (!timestamp) return "";
         
         const now = Date.now();
-        const diffTime = now - timestamp; // Fark milisaniye cinsinden
+        const diffTime = now - timestamp; 
 
         const diffSeconds = Math.floor(diffTime / 1000);
         const diffMinutes = Math.floor(diffSeconds / 60);
@@ -149,23 +158,17 @@
         const t = language === 'TR' ? TR : EN;
 
         if (diffMinutes < 60) {
-            // 0 - 59 dakika aralığı
             if (diffMinutes === 0) return t.today; 
             return t.min(diffMinutes);
         } else if (diffHours < 24) {
-            // 1 saat - 23 saat aralığı
             return t.hour(diffHours);
         } else if (diffDays === 1) {
-            // 24 saat tamamlandığında
-             return t.day(1); // 1 gün önce
+             return t.day(1); 
         } else if (diffDays <= 7) {
-            // 2 gün ile 7 gün arası
             return t.day(diffDays); 
         } else if (diffDays <= 14) {
-            // 1 hafta öncesi
             return t.week;
         } else {
-            // Tarih gösterimi (gg.aa.yyyy veya mm/dd/yyyy)
             const date = new Date(timestamp);
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -182,7 +185,6 @@
       dataSnapshot.forEach(childSnapshot => {
         const product = childSnapshot.val();
         product.key = childSnapshot.key;
-        // lastUpdated alanı yoksa, şu anki zamanı varsayılan olarak atar.
         product.lastUpdated = product.lastUpdated || Date.now(); 
         productsArray.push(product);
       });
@@ -203,15 +205,14 @@
         });
     }
 
-    // --- ZİYARETÇİ SAYACI İŞLEVİ (Admin.html'den gelen ziyaretçiyi sayar) ---
+    // --- ZİYARETÇİ SAYACI İŞLEVİ ---
 
     function trackVisitor() {
-        const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const today = new Date().toISOString().slice(0, 10); 
         const counterRef = visitorsRef.child(today);
         
-        counterRef.once('value', snapshot => {}); // Okuma dinleyicisi
+        counterRef.once('value', snapshot => {}); 
         
-        // Atomic increment (Mevcut değeri okumadan 1 arttırma)
         counterRef.transaction(currentCount => {
             return (currentCount || 0) + 1;
         });
@@ -230,13 +231,19 @@
         
         const name = language==='TR'?p.name:p.nameEN||p.name;
         const desc = language==='TR'?p.desc:p.descEN||p.desc||'';
-        // YENİ GÜNCELLENMİŞ TARİH FORMATI KULLANILIYOR
         const priceUpdateText = formatRelativeDate(p.lastUpdated); 
         const lastUpdateLabel = language === 'TR' ? 'Fiyat güncellendi:' : 'Price updated:';
+        
+        // Boş görsel kontrolü
+        const imageUrl = p.image && p.image.trim() !== '' 
+                         ? p.image 
+                         : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="10" fill="%239ca3af">Görsel Yüklenmedi</text></svg>';
+        
+        const imageClass = p.image && p.image.trim() !== '' ? 'cursor-pointer' : 'opacity-70';
 
 
         card.innerHTML=`
-          <img src='${p.image}' alt='${name}' class='w-full h-40 object-cover rounded-lg mb-3 cursor-pointer'>
+          <img src='${imageUrl}' alt='${name}' class='w-full h-40 object-cover rounded-lg mb-3 ${imageClass}'>
           <h3 class='font-bold text-xl mb-1'>${name}</h3>
           <p class='text-gray-600 text-sm mb-3 flex-grow'>${desc}</p>
           <div class="flex justify-between items-end">
@@ -244,12 +251,16 @@
             <p class='price-update-info text-right'>${lastUpdateLabel} ${priceUpdateText}</p>
           </div>
         `;
-        card.querySelector('img').addEventListener('click',()=>{modalImage.src=p.image;imageModal.classList.remove('hidden');});
+        
+        // Sadece görsel varsa modal açma olayını ekle
+        if (p.image && p.image.trim() !== '') {
+            card.querySelector('img').addEventListener('click',()=>{modalImage.src=p.image;imageModal.classList.remove('hidden');});
+        }
+        
         menuContainer.appendChild(card);
       });
     }
 
-    // (Diğer UI ve Navigasyon fonksiyonları aynı kalır)
     function createCategoryTabs(){
         tabButtonsContainer.innerHTML = '';
         const categoriesToIterate = categoriesTR;
@@ -285,17 +296,16 @@
 
     function updateLanguageContent() {
         if (language === 'TR') {
-            adminLoginBtn.innerHTML = '⚙️ Yönetici Girişi';
-            contactTitle.textContent = 'İletişim';
-            contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
+            // Admin butonu metni kaldırıldığı için burayı sadece stil için güncelliyoruz
             langTR.style.fontWeight = 'bold';
             langEN.style.fontWeight = 'normal';
+            contactTitle.textContent = 'İletişim';
+            contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
         } else { 
-            adminLoginBtn.innerHTML = '⚙️ Admin Login';
-            contactTitle.textContent = 'Contact';
-            contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - Istanbul (Turkey)';
             langTR.style.fontWeight = 'normal';
             langEN.style.fontWeight = 'bold';
+            contactTitle.textContent = 'Contact';
+            contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - Istanbul (Turkey)';
         }
 
         createCategoryTabs();
@@ -322,7 +332,6 @@
 
     checkPassword.addEventListener('click',()=>{
       if(passwordInput.value==='admin123'){ 
-        // Başarılı giriş: Yönetici paneli sayfasına yönlendir
         adminLoginModal.classList.add('hidden');
         window.location.href = 'admin.html'; 
       } else {
