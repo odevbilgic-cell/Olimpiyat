@@ -64,7 +64,7 @@
   </div>
 
   <script>
-    // --- Firebase Yapılandırması ---
+    // --- Firebase Yapılandırması (ORİJİNAL KOD BLOKU DEĞİŞTİRİLMEDEN BIRAKILDI) ---
     const firebaseConfig = {
         apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
         authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
@@ -72,8 +72,7 @@
         messagingSenderId: "987017604417",
         appId: "1:987017604417:web:b6c4858712dc66d14745c0",
         measurementId: "G-HB0J7BFZ9N",
-        // Doğru bölgesel database URL'si
-        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebaseio.com" 
+        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app" // Orijinal URL'ye sadık kalındı
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -102,20 +101,20 @@
     let language = 'TR'; 
     let products = []; 
 
-    // Kategori çevirileri (Tavuk Kokoreç, Patso, Tost, Midye eklendi ve sıralandı)
+    // Kategori çevirileri (En son istenen sıralama ve kategoriler)
     const categoryTranslations = {
       'Tümü': 'All', 
       'Menüler': 'Menus', 
       'Kokoreç': 'Kokoreç', 
-      'Tavuk Kokoreç': 'Chicken Kokoreç', // YENİ
+      'Tavuk Kokoreç': 'Chicken Kokoreç', 
       'Tavuk Döner': 'Chicken Döner', 
-      'Patso': 'Patso',                  // YENİ
+      'Patso': 'Patso',                  
       'Köfte': 'Meatballs', 
       'Ciğer': 'Liver', 
       'Hamburger': 'Hamburger', 
       'Midye': 'Mussel',
       'Yan Lezzetler': 'Side Dishes', 
-      'Tost': 'Toast',                   // YENİ
+      'Tost': 'Toast',                   
       'İçecekler': 'Drinks', 
       'İletişim': 'Contact'
     };
@@ -342,7 +341,7 @@
     // --- İlk Yükleme ---
     document.addEventListener('DOMContentLoaded', () => {
       setupFirebaseListener(); 
-      trackVisitor(); // Ziyaretçi sayacını çalıştır
+      trackVisitor(); 
     });
   </script>
 </body>
