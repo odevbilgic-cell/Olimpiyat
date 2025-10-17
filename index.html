@@ -72,7 +72,7 @@
         messagingSenderId: "987017604417",
         appId: "1:987017604417:web:b6c4858712dc66d14745c0",
         measurementId: "G-HB0J7BFZ9N",
-        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app" // Orijinal URL'ye sadık kalındı
+        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app" 
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -187,6 +187,11 @@
         product.lastUpdated = product.lastUpdated || Date.now(); 
         productsArray.push(product);
       });
+      
+      // *** YENİ: order alanına göre sıralama mantığı eklendi ***
+      // order alanı olmayanları (undefined) listenin sonuna atar (9999 kabul eder)
+      productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
+      
       return productsArray;
     }
 
@@ -222,6 +227,7 @@
 
     function renderMenu(category='Tümü'){
       menuContainer.innerHTML='';
+      // Ürünler zaten transformProducts içinde order'a göre sıralandı
       const filtered = category==='Tümü'?products:products.filter(p=>p.category===category);
 
       filtered.forEach(p=>{
