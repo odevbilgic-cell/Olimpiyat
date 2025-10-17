@@ -172,6 +172,13 @@
             await productsRef.child(key).remove();
         }
 
+        // Ürünleri 'order' alanına göre sıralayan yardımcı fonksiyon
+        function sortProductsByOrder(productsArray) {
+            // 'order' alanı olmayan ürünleri listenin en sonuna atar (9999)
+            return productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
+        }
+
+
         // --- MODÜL: ÜRÜN YÖNETİMİ (PRODUCTS) ---
         function renderProductsModule() {
             setActiveTab('showProducts');
@@ -198,8 +205,8 @@
             if (!listEl) return;
             listEl.innerHTML = '';
             
-            // Sıralama yap: Önce category, sonra order (küçükten büyüğe)
-            const sortedProducts = products.sort((a, b) => (a.order || 9999) - (b.order || 9999));
+            // Sıralama yap: Mevcut ürün listesini order'a göre sırala
+            const sortedProducts = sortProductsByOrder([...products]); // products'ı kopyalayıp sırala
             
             const filtered = filter === 'Tümü' ? sortedProducts : sortedProducts.filter(p => p.category === filter);
 
@@ -253,7 +260,7 @@
                     <label class="block mb-2 font-semibold text-sm">Sıralanacak Kategori Seçin:</label>
                     <select id="sortCategory" class="border p-2 rounded w-full mb-6">
                         <option value="">-- Kategori Seçiniz --</option>
-                        ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                        <option value="Tümü">Tümü (Tüm Ürünler)</option> ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
                     </select>
 
                     <ul id="sortableList" class="flex flex-col gap-2 p-2 border rounded bg-gray-50 min-h-[100px]">
@@ -286,9 +293,12 @@
             }
             
             // Seçili kategoriye göre filtrele ve mevcut 'order' alanına göre sırala
-            const filteredAndSorted = products
-                .filter(p => p.category === category)
-                .sort((a, b) => (a.order || 9999) - (b.order || 9999)); 
+            const filteredProducts = category === 'Tümü'
+                ? products
+                : products.filter(p => p.category === category);
+            
+            const filteredAndSorted = sortProductsByOrder(filteredProducts);
+
 
             if (filteredAndSorted.length === 0) {
                 listEl.innerHTML = `<li class="text-gray-500 text-center py-4">"${category}" kategorisinde ürün bulunmamaktadır.</li>`;
@@ -435,7 +445,9 @@
             }
             
             // Yeni ürüne, tüm ürünlerin en sonuna atılmasını sağlamak için büyük bir sıra numarası verilir.
-            const maxOrder = products.length > 0 ? Math.max(...products.map(p => p.order || 0)) : 0;
+            const maxOrder = products.length > 0 
+                ? Math.max(...products.map(p => p.order === undefined ? 0 : p.order)) // undefined olanları 0 kabul et
+                : 0;
             
             const newProduct = {
                 name, nameEN: nameEN || name, desc, descEN: descEN || desc,
@@ -518,7 +530,7 @@
             formEl.innerHTML = '';
             
             // Ürünleri 'order' alanına göre sırala
-            const sortedProducts = products.sort((a, b) => (a.order || 9999) - (b.order || 9999));
+            const sortedProducts = sortProductsByOrder([...products]);
 
             const filtered = filter === 'Tümü' ? sortedProducts : sortedProducts.filter(p => p.category === filter);
 
@@ -747,8 +759,9 @@
                 snapshot.forEach(childSnapshot => {
                     const product = childSnapshot.val();
                     product.key = childSnapshot.key;
-                    // Eğer 'order' alanı yoksa, varsayılan olarak büyük bir değer atarız.
-                    product.order = product.order !== undefined ? product.order : 9999;
+                    // Eğer 'order' alanı yoksa, menüde en sona atılması için bir değer atarız (render sırasında sıralanacak)
+                    // Ancak Firebase'e yazarken varsayılan bir değer atamayız, sadece okurken işleriz.
+                    // Ürün eklenirken zaten order alıyor.
                     products.push(product);
                 });
                 
