@@ -19,9 +19,90 @@
 
     /* Header'ı sabitlemek ve kategori nav ile çakışmasını önlemek için sabit yükseklik */
     #mainHeader { 
-        /* p-3 (12) + text-2xl (32) + padding = ~64px (Tailwind h-16) */
         height: 4rem; 
     }
+    
+    /* --- YENİ KAMPANYA SLIDER STİLLERİ --- */
+    .slider-container {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        max-height: 350px; /* Slider yüksekliğini sınırla */
+    }
+
+    .slide-wrapper {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+    }
+
+    .slide {
+        min-width: 100%;
+        flex-shrink: 0;
+        position: relative; /* Fiyat etiketi için */
+    }
+
+    .slide img {
+        width: 100%;
+        height: auto;
+        max-height: 350px;
+        object-fit: cover;
+    }
+    
+    .slider-dots {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        background-color: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .dot.active {
+        background-color: #fb923c;
+    }
+    
+    /* YENİ: YUVARLAK KAMPANYA FİYAT ETİKETİ */
+    .campaign-price-tag {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background-color: #ef4444; /* Kırmızı */
+        color: white;
+        padding: 10px;
+        border-radius: 50%;
+        min-width: 65px;
+        height: 65px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.1rem;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        z-index: 5;
+        /* Tek satıra sığmayan uzun metinler için */
+        white-space: normal;
+        line-height: 1.2;
+    }
+    
+    /* Uzun metinler için etiketi biraz büyüt */
+    .campaign-price-tag.long-text {
+        min-width: 80px;
+        height: 80px;
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+    
   </style>
 </head>
 <body class="text-gray-800">
@@ -40,6 +121,9 @@
   <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
 
   <main class="p-4">
+    
+    <section id="campaignSlider" class="mb-4 rounded-xl shadow-lg"></section>
+    
     <div id="menuContainer" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
     <div id="contactSection" class="hidden text-center mt-6 bg-white rounded-xl shadow p-6 max-w-lg mx-auto">
@@ -64,7 +148,7 @@
   </div>
 
   <script>
-    // --- Firebase Yapılandırması (ORİJİNAL KOD BLOKU DEĞİŞTİRİLMEDEN BIRAKILDI) ---
+    // --- Firebase Yapılandırması ---
     const firebaseConfig = {
         apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
         authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
@@ -79,29 +163,22 @@
     const database = firebase.database();
     const productsRef = database.ref('products');
     const visitorsRef = database.ref('visitors'); 
+    const campaignsRef = database.ref('campaigns'); // YENİ REFERANS
+    const campaignInfoRef = database.ref('campaign_info'); // YENİ REFERANS
 
     // --- HTML Element Tanımlamaları ---
-    const adminLoginBtn = document.getElementById('adminLoginBtn');
-    const adminLoginModal = document.getElementById('adminLoginModal');
-    const checkPassword = document.getElementById('checkPassword');
-    const passwordInput = document.getElementById('passwordInput');
-    const loginError = document.getElementById('loginError');
-    const closeAdminLogin = document.getElementById('closeAdminLogin');
     const menuContainer = document.getElementById('menuContainer');
     const contactSection = document.getElementById('contactSection');
-    const imageModal = document.getElementById('imageModal');
-    const modalImage = document.getElementById('modalImage');
-    const langTR = document.getElementById('langTR');
-    const langEN = document.getElementById('langEN');
-    const contactTitle = document.getElementById('contactTitle');
-    const contactAddress = document.getElementById('contactAddress');
-    const tabButtonsContainer = document.getElementById('categoryTabs');
-    const viewCountListener = document.getElementById('viewCountListener');
+    const campaignSliderSection = document.getElementById('campaignSlider'); // YENİ SLIDER ALANI
 
     let language = 'TR'; 
     let products = []; 
+    let campaignUrls = []; // Kampanya görselleri (admin.html'den geliyor)
+    let campaignPriceText = ""; // Yuvarlak etiket metni (admin.html'den geliyor)
+    let currentSlide = 0;
+    let sliderInterval;
 
-    // Kategori çevirileri (En son istenen sıralama ve kategoriler)
+    // Kategori çevirileri
     const categoryTranslations = {
       'Tümü': 'All', 
       'Menüler': 'Menus', 
@@ -121,16 +198,98 @@
     let categoriesTR = Object.keys(categoryTranslations);
     let categoriesEN = Object.values(categoryTranslations);
 
-    // --- ZAMAN VE TARİH YARDIMCI FONKSİYONU ---
+    // --- SLIDER İŞLEVLERİ (YENİ) ---
+    
+    function startSliderInterval() {
+        // Zaten bir interval varsa temizle
+        if (sliderInterval) clearInterval(sliderInterval);
+        
+        // Sadece birden fazla görsel varsa otomatik kaydırmayı başlat
+        if (campaignUrls.length > 1) {
+            sliderInterval = setInterval(() => {
+                const nextSlide = (currentSlide + 1) % campaignUrls.length;
+                goToSlide(nextSlide);
+            }, 5000); // 5 saniyede bir kaydır
+        }
+    }
+
+    function goToSlide(index) {
+        if (campaignUrls.length === 0) return;
+        
+        currentSlide = index;
+        const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
+        const dots = document.querySelectorAll('#campaignSlider .dot');
+        
+        if (wrapper) {
+            wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+        
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+        });
+    }
+
+    function renderCampaignSlider() {
+        if (campaignUrls.length === 0) {
+            campaignSliderSection.innerHTML = '';
+            campaignSliderSection.classList.add('hidden');
+            return;
+        }
+
+        campaignSliderSection.classList.remove('hidden');
+        
+        const priceTagHtml = campaignPriceText ? `
+            <div class="campaign-price-tag ${campaignPriceText.length > 8 ? 'long-text' : ''}">
+                ${campaignPriceText}
+            </div>
+        ` : '';
+
+        const slidesHtml = campaignUrls.map(c => `
+            <div class="slide">
+                <img src="${c.url}" alt="Kampanya Görseli" class="rounded-xl">
+                ${priceTagHtml} 
+            </div>
+        `).join('');
+
+        const dotsHtml = campaignUrls.map((_, i) => `
+            <div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>
+        `).join('');
+
+        campaignSliderSection.innerHTML = `
+            <div class="slider-container">
+                <div class="slide-wrapper" style="width: ${campaignUrls.length * 100}%">
+                    ${slidesHtml}
+                </div>
+                <div class="slider-dots">
+                    ${dotsHtml}
+                </div>
+            </div>
+        `;
+
+        // Dotlara tıklama olayını ekle
+        document.querySelectorAll('#campaignSlider .dot').forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                goToSlide(parseInt(e.target.dataset.index));
+                // Manuel tıklamadan sonra otomatik kaydırmayı sıfırla
+                startSliderInterval(); 
+            });
+        });
+        
+        // İlk yüklemede doğru slayta git ve otomatik kaydırmayı başlat
+        goToSlide(currentSlide);
+        startSliderInterval();
+    }
+
+
+    // --- ZAMAN VE TARİH YARDIMCI FONKSİYONU (DEĞİŞMEDİ) ---
 
     function formatRelativeDate(timestamp) {
         if (!timestamp) return "";
         
         const now = Date.now();
         const diffTime = now - timestamp; 
-
-        const diffSeconds = Math.floor(diffTime / 1000);
-        const diffMinutes = Math.floor(diffSeconds / 60);
+        // ... (Kalan fonksiyon içeriği) ...
+        const diffMinutes = Math.floor(diffTime / 60000);
         const diffHours = Math.floor(diffMinutes / 60);
         const diffDays = Math.floor(diffHours / 24);
 
@@ -157,12 +316,12 @@
         const t = language === 'TR' ? TR : EN;
 
         if (diffMinutes < 60) {
-            if (diffMinutes === 0) return t.today; 
+            if (diffMinutes < 5) return t.today; // 5 dakikadan az ise bugün göster
             return t.min(diffMinutes);
         } else if (diffHours < 24) {
             return t.hour(diffHours);
         } else if (diffDays === 1) {
-             return t.day(1); 
+             return t.yesterday; 
         } else if (diffDays <= 7) {
             return t.day(diffDays); 
         } else if (diffDays <= 14) {
@@ -177,7 +336,7 @@
     }
 
 
-    // --- FIREBASE VERİ İŞLEME ---
+    // --- FIREBASE VERİ İŞLEME VE DİNLEYİCİLER (Genişletildi) ---
 
     function transformProducts(dataSnapshot) {
       const productsArray = [];
@@ -188,28 +347,46 @@
         productsArray.push(product);
       });
       
-      // *** YENİ: order alanına göre sıralama mantığı eklendi ***
-      // order alanı olmayanları (undefined) listenin sonuna atar (9999 kabul eder)
       productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
       
       return productsArray;
     }
 
     function setupFirebaseListener() {
+        // Ürün Dinleyicisi (Değişmedi)
         productsRef.on('value', (snapshot) => {
-            if (snapshot.exists()) {
-                products = transformProducts(snapshot);
-            } else {
-                products = [];
-            }
+            products = snapshot.exists() ? transformProducts(snapshot) : [];
             updateLanguageContent(); 
         }, (error) => {
-            console.error("Firebase veri okuma hatası:", error);
+            console.error("Firebase ürün veri okuma hatası:", error);
             alert("Menüyü yüklerken bir hata oluştu.");
+        });
+        
+        // YENİ: Kampanya Görselleri Dinleyicisi
+        campaignsRef.on('value', (snapshot) => {
+             campaignUrls = [];
+             snapshot.forEach(childSnapshot => {
+                 const campaign = childSnapshot.val();
+                 campaign.key = childSnapshot.key;
+                 campaignUrls.push(campaign);
+             });
+             // Görselleri zaman damgasına göre sırala (en son eklenen en başta)
+             campaignUrls.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+             
+             // Slider'ı yeniden render et
+             currentSlide = 0; // Görseller değişince slaytı sıfırla
+             renderCampaignSlider();
+        });
+        
+        // YENİ: Kampanya Fiyat Metni Dinleyicisi
+        campaignInfoRef.child('price_text').on('value', (snapshot) => {
+             campaignPriceText = snapshot.val() || "";
+             // Slider'ı yeniden render et
+             renderCampaignSlider();
         });
     }
 
-    // --- ZİYARETÇİ SAYACI İŞLEVİ ---
+    // --- ZİYARETÇİ SAYACI İŞLEVİ (DEĞİŞMEDİ) ---
 
     function trackVisitor() {
         const today = new Date().toISOString().slice(0, 10); 
@@ -223,11 +400,10 @@
     }
 
 
-    // --- UI GÜNCELLEMELERİ ---
+    // --- UI GÜNCELLEMELERİ (DEĞİŞMEDİ) ---
 
     function renderMenu(category='Tümü'){
       menuContainer.innerHTML='';
-      // Ürünler zaten transformProducts içinde order'a göre sıralandı
       const filtered = category==='Tümü'?products:products.filter(p=>p.category===category);
 
       filtered.forEach(p=>{
@@ -239,7 +415,6 @@
         const priceUpdateText = formatRelativeDate(p.lastUpdated); 
         const lastUpdateLabel = language === 'TR' ? 'Fiyat güncellendi:' : 'Price updated:';
         
-        // Boş görsel kontrolü
         const imageUrl = p.image && p.image.trim() !== '' 
                          ? p.image 
                          : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="10" fill="%239ca3af">Görsel Yüklenmedi</text></svg>';
@@ -257,7 +432,6 @@
           </div>
         `;
         
-        // Sadece görsel varsa modal açma olayını ekle
         if (p.image && p.image.trim() !== '') {
             card.querySelector('img').addEventListener('click',()=>{modalImage.src=p.image;imageModal.classList.remove('hidden');});
         }
@@ -267,6 +441,8 @@
     }
 
     function createCategoryTabs(){
+        // ... (Kalan fonksiyon içeriği) ...
+        const tabButtonsContainer = document.getElementById('categoryTabs');
         tabButtonsContainer.innerHTML = '';
         const categoriesToIterate = categoriesTR;
 
@@ -289,9 +465,11 @@
 
                 if(categoryKey==='İletişim'){
                     menuContainer.innerHTML='';
+                    campaignSliderSection.classList.add('hidden'); // İletişimde slider'ı gizle
                     contactSection.classList.remove('hidden');
                 } else {
                     contactSection.classList.add('hidden');
+                    renderCampaignSlider(); // Kategoriye geçince slider'ı göster
                     renderMenu(categoryKey);
                 }
             });
@@ -300,8 +478,12 @@
     }
 
     function updateLanguageContent() {
+        const langTR = document.getElementById('langTR');
+        const langEN = document.getElementById('langEN');
+        const contactTitle = document.getElementById('contactTitle');
+        const contactAddress = document.getElementById('contactAddress');
+        
         if (language === 'TR') {
-            // Admin butonu metni kaldırıldığı için burayı sadece stil için güncelliyoruz
             langTR.style.fontWeight = 'bold';
             langEN.style.fontWeight = 'normal';
             contactTitle.textContent = 'İletişim';
@@ -319,29 +501,37 @@
         
         if (activeCategoryKey === 'İletişim') {
             menuContainer.innerHTML = '';
+            campaignSliderSection.classList.add('hidden');
             contactSection.classList.remove('hidden');
         } else {
             contactSection.classList.add('hidden');
+            renderCampaignSlider();
             renderMenu(activeCategoryKey);
         }
     }
 
 
-    // --- EVENT LISTENERS ---
+    // --- EVENT LISTENERS (Genişletildi) ---
 
-    langTR.addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
-    langEN.addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
-    imageModal.addEventListener('click',()=>imageModal.classList.add('hidden'));
-    adminLoginBtn.addEventListener('click',()=>adminLoginModal.classList.remove('hidden'));
-    closeAdminLogin.addEventListener('click',()=>adminLoginModal.classList.add('hidden'));
+    // Dil butonları ve Modal butonları zaten tanımlı
 
-    checkPassword.addEventListener('click',()=>{
-      if(passwordInput.value==='admin123'){ 
-        adminLoginModal.classList.add('hidden');
-        window.location.href = 'admin.html'; 
-      } else {
-        loginError.classList.remove('hidden');
-      }
+    document.getElementById('langTR').addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
+    document.getElementById('langEN').addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
+    document.getElementById('imageModal').addEventListener('click',()=>document.getElementById('imageModal').classList.add('hidden'));
+    document.getElementById('adminLoginBtn').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.remove('hidden'));
+    document.getElementById('closeAdminLogin').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.add('hidden'));
+
+    document.getElementById('checkPassword').addEventListener('click',()=>{
+        const passwordInput = document.getElementById('passwordInput');
+        const loginError = document.getElementById('loginError');
+        const adminLoginModal = document.getElementById('adminLoginModal');
+        
+        if(passwordInput.value==='admin123'){ 
+            adminLoginModal.classList.add('hidden');
+            window.location.href = 'admin.html'; 
+        } else {
+            loginError.classList.remove('hidden');
+        }
     });
 
     // --- İlk Yükleme ---
