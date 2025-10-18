@@ -22,19 +22,21 @@
         height: 4rem; 
     }
     
-    /* --- GÜNCELLENMİŞ KAMPANYA SLIDER STİLLERİ (Ürün Kutucuklarına Benzer Yükseklik) --- */
+    /* --- GÜNCELLENMİŞ KAMPANYA SLIDER STİLLERİ (Oran Koruma ve Tam Sığdırma) --- */
+    /* Slider'ın kapsayıcısı olan .bg-white div'i p-0 ile padding'i sıfırladık. */
+    
     .slider-container {
         position: relative;
         overflow: hidden;
         width: 100%;
-        /* YENİ: Sabit yükseklik (Örn: 200px veya Tailwind h-52'ye karşılık gelen bir değer) */
-        height: 200px; 
+        /* YENİ: Sabit yükseklik veya max-height kaldırıldı. İçerik belirleyecek. */
+        height: auto; 
     }
 
     .slide-wrapper {
         display: flex;
         transition: transform 0.5s ease-in-out;
-        height: 100%; /* Slider container yüksekliğini alır */
+        height: auto; 
         /* ELLE KAYDIRMA İÇİN EKLENDİ */
         cursor: grab; /* Fare imleci görünümü */
         user-select: none; /* Metin seçimini engelle */
@@ -48,15 +50,16 @@
         min-width: 100%;
         flex-shrink: 0;
         position: relative; 
-        height: 100%; /* Slaytın container yüksekliğini almasını sağla */
+        height: auto; 
     }
 
     .slide img {
         width: 100%;
-        /* YENİ: Slider container yüksekliğini alır */
-        height: 100%; 
-        /* Gelen görselleri kutuya sığdırmak için kırpar (ürün kartları gibi) */
-        object-fit: cover; 
+        /* YENİ: Yüksekliği otomatik olarak görselin oranına göre ayarlar */
+        height: auto; 
+        /* EN İYİ ÇÖZÜM: Görseli kırpmadan, kutu içine tamamını sığdırır. */
+        object-fit: contain; 
+        /* Yatay görsel sığdırılırken kenarda kalan kısımlar için siyah arka plan (görselinizin siyah temasına uygun) */
         background-color: black; 
         border-radius: 0.75rem; /* rounded-xl'a karşılık gelir */
     }
