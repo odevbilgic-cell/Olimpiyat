@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Olimpiyat Kokoreç Menü</title>
+  <title>Olimpiyat Kokoreç Menü - Kullanıcı Arayüzü</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -22,13 +22,13 @@
         height: 4rem; 
     }
     
-    /* --- GÜNCELLENMİŞ KAMPANYA SLIDER STİLLERİ (Yatay Format Desteği) --- */
+    /* --- GÜNCELLENMİŞ KAMPANYA SLIDER STİLLERİ (Mobil Tam Görünüm İçin Optimize Edildi) --- */
     .slider-container {
         position: relative;
         overflow: hidden;
         width: 100%;
-        /* YENİ: Gönderdiğiniz görsele uygun max-height ayarı */
-        max-height: 350px; /* Örneğin 350px, görselinize daha iyi uymalı */
+        /* YENİ: Yüksekliği zorlamıyoruz. İçindeki görselin oranına bırakıyoruz. */
+        max-height: none; 
     }
 
     .slide-wrapper {
@@ -47,14 +47,18 @@
         min-width: 100%;
         flex-shrink: 0;
         position: relative; /* Fiyat etiketi için */
-        height: 100%; /* Slaytın container yüksekliğini almasını sağla */
+        height: auto; /* Yüksekliği kaldırıldı */
     }
 
     .slide img {
         width: 100%;
-        /* YENİ: Yüksekliği container yüksekliğine sabitle */
-        height: 350px; /* slider-container'ın max-height değeri ile aynı */
-        object-fit: cover; /* Görselin yatay formata sığarken bozulmamasını sağlar */
+        /* YENİ: Yüksekliği genişliğe göre otomatik ayarlar. */
+        height: auto; 
+        /* EN ÖNEMLİ DEĞİŞİKLİK: Görseli kırpmak yerine, kutu içine tamamını sığdırır. */
+        object-fit: contain; 
+        /* Görselin arka planı siyah olduğu için, boş kalan yerlerin siyah görünmesini sağlar */
+        background-color: black; 
+        border-radius: 0.75rem; /* rounded-xl'a karşılık gelir */
     }
     
     .slider-dots {
@@ -83,7 +87,7 @@
     /* YUVARLAK KAMPANYA FİYAT ETİKETİ */
     .campaign-price-tag {
         position: absolute;
-        bottom: 15px; /* Yatay kutuya uysun diye biraz yukarı çektik */
+        bottom: 15px; 
         right: 15px;
         background-color: #ef4444; /* Kırmızı */
         color: white;
