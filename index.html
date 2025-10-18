@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Olimpiyat Kokoreç Menü - Kullanıcı Arayüzü</title>
+  <title>Olimpiyat Kokoreç Menü</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -22,30 +22,39 @@
         height: 4rem; 
     }
     
-    /* --- YENİ KAMPANYA SLIDER STİLLERİ --- */
+    /* --- GÜNCELLENMİŞ KAMPANYA SLIDER STİLLERİ (Yatay Format Desteği) --- */
     .slider-container {
         position: relative;
         overflow: hidden;
         width: 100%;
-        max-height: 350px; /* Slider yüksekliğini sınırla */
+        /* YENİ: Gönderdiğiniz görsele uygun max-height ayarı */
+        max-height: 350px; /* Örneğin 350px, görselinize daha iyi uymalı */
     }
 
     .slide-wrapper {
         display: flex;
         transition: transform 0.5s ease-in-out;
+        /* ELLE KAYDIRMA İÇİN EKLENDİ */
+        cursor: grab; /* Fare imleci görünümü */
+        user-select: none; /* Metin seçimini engelle */
+    }
+    
+    .slide-wrapper:active {
+        cursor: grabbing; /* Sürükleme sırasında imleç */
     }
 
     .slide {
         min-width: 100%;
         flex-shrink: 0;
         position: relative; /* Fiyat etiketi için */
+        height: 100%; /* Slaytın container yüksekliğini almasını sağla */
     }
 
     .slide img {
         width: 100%;
-        height: auto;
-        max-height: 350px;
-        object-fit: cover;
+        /* YENİ: Yüksekliği container yüksekliğine sabitle */
+        height: 350px; /* slider-container'ın max-height değeri ile aynı */
+        object-fit: cover; /* Görselin yatay formata sığarken bozulmamasını sağlar */
     }
     
     .slider-dots {
@@ -71,36 +80,35 @@
         background-color: #fb923c;
     }
     
-    /* YENİ: YUVARLAK KAMPANYA FİYAT ETİKETİ */
+    /* YUVARLAK KAMPANYA FİYAT ETİKETİ */
     .campaign-price-tag {
         position: absolute;
-        bottom: 20px;
-        right: 20px;
+        bottom: 15px; /* Yatay kutuya uysun diye biraz yukarı çektik */
+        right: 15px;
         background-color: #ef4444; /* Kırmızı */
         color: white;
         padding: 10px;
         border-radius: 50%;
-        min-width: 65px;
-        height: 65px;
+        min-width: 60px;
+        height: 60px;
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: bold;
         text-align: center;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         z-index: 5;
-        /* Tek satıra sığmayan uzun metinler için */
         white-space: normal;
         line-height: 1.2;
     }
     
     /* Uzun metinler için etiketi biraz büyüt */
     .campaign-price-tag.long-text {
-        min-width: 80px;
-        height: 80px;
-        font-size: 0.9rem;
-        padding: 8px;
+        min-width: 70px;
+        height: 70px;
+        font-size: 0.85rem;
+        padding: 6px;
     }
     
   </style>
@@ -163,20 +171,27 @@
     const database = firebase.database();
     const productsRef = database.ref('products');
     const visitorsRef = database.ref('visitors'); 
-    const campaignsRef = database.ref('campaigns'); // YENİ REFERANS
-    const campaignInfoRef = database.ref('campaign_info'); // YENİ REFERANS
+    const campaignsRef = database.ref('campaigns'); 
+    const campaignInfoRef = database.ref('campaign_info'); 
 
     // --- HTML Element Tanımlamaları ---
     const menuContainer = document.getElementById('menuContainer');
     const contactSection = document.getElementById('contactSection');
-    const campaignSliderSection = document.getElementById('campaignSlider'); // YENİ SLIDER ALANI
+    const campaignSliderSection = document.getElementById('campaignSlider'); 
 
     let language = 'TR'; 
     let products = []; 
-    let campaignUrls = []; // Kampanya görselleri (admin.html'den geliyor)
-    let campaignPriceText = ""; // Yuvarlak etiket metni (admin.html'den geliyor)
+    let campaignUrls = []; 
+    let campaignPriceText = ""; 
     let currentSlide = 0;
     let sliderInterval;
+    
+    // ELLE KAYDIRMA İÇİN YENİ DEĞİŞKENLER
+    let isDragging = false;
+    let startPos = 0;
+    let currentTranslate = 0;
+    let prevTranslate = 0;
+    const DRAG_THRESHOLD = 50; // Slayt değiştirmek için minimum sürükleme mesafesi (piksel)
 
     // Kategori çevirileri
     const categoryTranslations = {
@@ -198,8 +213,85 @@
     let categoriesTR = Object.keys(categoryTranslations);
     let categoriesEN = Object.values(categoryTranslations);
 
-    // --- SLIDER İŞLEVLERİ (YENİ) ---
     
+    // --- SLIDER İŞLEVLERİ (GÜNCELLEMİŞ) ---
+    
+    function setPositionByIndex() {
+        if (campaignUrls.length === 0) return;
+        const slideWidth = document.querySelector('.slide').clientWidth;
+        currentTranslate = currentSlide * -slideWidth;
+        setSliderPosition();
+    }
+    
+    function setSliderPosition() {
+        const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
+        if (wrapper) {
+            wrapper.style.transform = `translateX(${currentTranslate}px)`;
+        }
+    }
+    
+    function transitionStart() {
+        const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
+        if (wrapper) {
+            wrapper.style.transition = 'none';
+        }
+    }
+    
+    function transitionEnd() {
+        const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
+        if (wrapper) {
+            wrapper.style.transition = 'transform 0.5s ease-in-out';
+        }
+    }
+    
+    // Sürükleme Olayları
+    function dragStart(e) {
+        if (campaignUrls.length <= 1) return;
+        isDragging = true;
+        // Dokunmatik veya fare başlangıç konumu
+        startPos = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+        transitionStart();
+        prevTranslate = currentTranslate; // Sürükleme başlangıcındaki mevcut konumu kaydet
+        // Otomatik kaydırmayı durdur
+        if (sliderInterval) clearInterval(sliderInterval);
+    }
+    
+    function drag(e) {
+        if (!isDragging) return;
+        e.preventDefault(); // Kaydırma sırasında tarayıcının varsayılan hareketini engelle (özellikle mobilde)
+        
+        const currentPosition = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+        const diff = currentPosition - startPos;
+        
+        // Yeni konumu hesapla (eski konum + sürükleme farkı)
+        currentTranslate = prevTranslate + diff;
+        setSliderPosition();
+    }
+    
+    function dragEnd(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        transitionEnd();
+        
+        const movedBy = currentTranslate - prevTranslate;
+        
+        // 1. Eşiği Geçti mi? (Sağa veya Sola)
+        if (movedBy < -DRAG_THRESHOLD && currentSlide < campaignUrls.length - 1) {
+            // Sola sürükle (bir sonraki slayt)
+            currentSlide++;
+        } else if (movedBy > DRAG_THRESHOLD && currentSlide > 0) {
+            // Sağa sürükle (bir önceki slayt)
+            currentSlide--;
+        }
+        
+        // Son konuma hareket et (kaydırma eşiğini geçse de geçmese de)
+        setPositionByIndex();
+        
+        // Otomatik kaydırmayı tekrar başlat
+        startSliderInterval(); 
+    }
+    
+    // Ana Slider Fonksiyonları
     function startSliderInterval() {
         // Zaten bir interval varsa temizle
         if (sliderInterval) clearInterval(sliderInterval);
@@ -217,12 +309,10 @@
         if (campaignUrls.length === 0) return;
         
         currentSlide = index;
-        const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
         const dots = document.querySelectorAll('#campaignSlider .dot');
         
-        if (wrapper) {
-            wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
-        }
+        setPositionByIndex();
+        transitionEnd(); // Animasyonu etkinleştir
         
         dots.forEach((dot, i) => {
             dot.classList.toggle('active', i === currentSlide);
@@ -266,6 +356,21 @@
             </div>
         `;
 
+        // Sürükleme Olaylarını Ekle
+        const sliderWrapper = document.querySelector('#campaignSlider .slide-wrapper');
+        
+        // Dokunmatik olaylar (Mobil)
+        sliderWrapper.addEventListener('touchstart', dragStart);
+        sliderWrapper.addEventListener('touchend', dragEnd);
+        sliderWrapper.addEventListener('touchmove', drag);
+        
+        // Fare olayları (Masaüstü)
+        sliderWrapper.addEventListener('mousedown', dragStart);
+        sliderWrapper.addEventListener('mouseup', dragEnd);
+        sliderWrapper.addEventListener('mouseleave', dragEnd); // Fare kaydırıcının dışına çıkarsa bırak
+        sliderWrapper.addEventListener('mousemove', drag);
+        
+        
         // Dotlara tıklama olayını ekle
         document.querySelectorAll('#campaignSlider .dot').forEach(dot => {
             dot.addEventListener('click', (e) => {
@@ -281,14 +386,14 @@
     }
 
 
-    // --- ZAMAN VE TARİH YARDIMCI FONKSİYONU (DEĞİŞMEDİ) ---
+    // --- ZAMAN VE TARİH YARDIMCI FONKSİYONU ---
 
     function formatRelativeDate(timestamp) {
         if (!timestamp) return "";
         
         const now = Date.now();
         const diffTime = now - timestamp; 
-        // ... (Kalan fonksiyon içeriği) ...
+        
         const diffMinutes = Math.floor(diffTime / 60000);
         const diffHours = Math.floor(diffMinutes / 60);
         const diffDays = Math.floor(diffHours / 24);
@@ -316,7 +421,7 @@
         const t = language === 'TR' ? TR : EN;
 
         if (diffMinutes < 60) {
-            if (diffMinutes < 5) return t.today; // 5 dakikadan az ise bugün göster
+            if (diffMinutes < 5) return t.today; 
             return t.min(diffMinutes);
         } else if (diffHours < 24) {
             return t.hour(diffHours);
@@ -336,7 +441,7 @@
     }
 
 
-    // --- FIREBASE VERİ İŞLEME VE DİNLEYİCİLER (Genişletildi) ---
+    // --- FIREBASE VERİ İŞLEME VE DİNLEYİCİLER ---
 
     function transformProducts(dataSnapshot) {
       const productsArray = [];
@@ -353,7 +458,7 @@
     }
 
     function setupFirebaseListener() {
-        // Ürün Dinleyicisi (Değişmedi)
+        // Ürün Dinleyicisi
         productsRef.on('value', (snapshot) => {
             products = snapshot.exists() ? transformProducts(snapshot) : [];
             updateLanguageContent(); 
@@ -362,7 +467,7 @@
             alert("Menüyü yüklerken bir hata oluştu.");
         });
         
-        // YENİ: Kampanya Görselleri Dinleyicisi
+        // Kampanya Görselleri Dinleyicisi
         campaignsRef.on('value', (snapshot) => {
              campaignUrls = [];
              snapshot.forEach(childSnapshot => {
@@ -378,7 +483,7 @@
              renderCampaignSlider();
         });
         
-        // YENİ: Kampanya Fiyat Metni Dinleyicisi
+        // Kampanya Fiyat Metni Dinleyicisi
         campaignInfoRef.child('price_text').on('value', (snapshot) => {
              campaignPriceText = snapshot.val() || "";
              // Slider'ı yeniden render et
@@ -386,7 +491,7 @@
         });
     }
 
-    // --- ZİYARETÇİ SAYACI İŞLEVİ (DEĞİŞMEDİ) ---
+    // --- ZİYARETÇİ SAYACI İŞLEVİ ---
 
     function trackVisitor() {
         const today = new Date().toISOString().slice(0, 10); 
@@ -400,7 +505,7 @@
     }
 
 
-    // --- UI GÜNCELLEMELERİ (DEĞİŞMEDİ) ---
+    // --- UI GÜNCELLEMELERİ ---
 
     function renderMenu(category='Tümü'){
       menuContainer.innerHTML='';
@@ -441,7 +546,6 @@
     }
 
     function createCategoryTabs(){
-        // ... (Kalan fonksiyon içeriği) ...
         const tabButtonsContainer = document.getElementById('categoryTabs');
         tabButtonsContainer.innerHTML = '';
         const categoriesToIterate = categoriesTR;
@@ -465,11 +569,11 @@
 
                 if(categoryKey==='İletişim'){
                     menuContainer.innerHTML='';
-                    campaignSliderSection.classList.add('hidden'); // İletişimde slider'ı gizle
+                    campaignSliderSection.classList.add('hidden'); 
                     contactSection.classList.remove('hidden');
                 } else {
                     contactSection.classList.add('hidden');
-                    renderCampaignSlider(); // Kategoriye geçince slider'ı göster
+                    renderCampaignSlider(); 
                     renderMenu(categoryKey);
                 }
             });
@@ -511,9 +615,7 @@
     }
 
 
-    // --- EVENT LISTENERS (Genişletildi) ---
-
-    // Dil butonları ve Modal butonları zaten tanımlı
+    // --- EVENT LISTENERS ---
 
     document.getElementById('langTR').addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
     document.getElementById('langEN').addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
