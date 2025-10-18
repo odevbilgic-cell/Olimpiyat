@@ -22,18 +22,19 @@
         height: 4rem; 
     }
     
-    /* --- GÜNCELLENMİŞ KAMPANYA SLIDER STİLLERİ (Mobil Tam Görünüm İçin Optimize Edildi) --- */
+    /* --- GÜNCELLENMİŞ KAMPANYA SLIDER STİLLERİ (Ürün Kutucuklarına Benzer Yükseklik) --- */
     .slider-container {
         position: relative;
         overflow: hidden;
         width: 100%;
-        /* YENİ: Yüksekliği zorlamıyoruz. İçindeki görselin oranına bırakıyoruz. */
-        max-height: none; 
+        /* YENİ: Sabit yükseklik (Örn: 200px veya Tailwind h-52'ye karşılık gelen bir değer) */
+        height: 200px; 
     }
 
     .slide-wrapper {
         display: flex;
         transition: transform 0.5s ease-in-out;
+        height: 100%; /* Slider container yüksekliğini alır */
         /* ELLE KAYDIRMA İÇİN EKLENDİ */
         cursor: grab; /* Fare imleci görünümü */
         user-select: none; /* Metin seçimini engelle */
@@ -46,17 +47,16 @@
     .slide {
         min-width: 100%;
         flex-shrink: 0;
-        position: relative; /* Fiyat etiketi için */
-        height: auto; /* Yüksekliği kaldırıldı */
+        position: relative; 
+        height: 100%; /* Slaytın container yüksekliğini almasını sağla */
     }
 
     .slide img {
         width: 100%;
-        /* YENİ: Yüksekliği genişliğe göre otomatik ayarlar. */
-        height: auto; 
-        /* EN ÖNEMLİ DEĞİŞİKLİK: Görseli kırpmak yerine, kutu içine tamamını sığdırır. */
-        object-fit: contain; 
-        /* Görselin arka planı siyah olduğu için, boş kalan yerlerin siyah görünmesini sağlar */
+        /* YENİ: Slider container yüksekliğini alır */
+        height: 100%; 
+        /* Gelen görselleri kutuya sığdırmak için kırpar (ürün kartları gibi) */
+        object-fit: cover; 
         background-color: black; 
         border-radius: 0.75rem; /* rounded-xl'a karşılık gelir */
     }
@@ -134,7 +134,9 @@
 
   <main class="p-4">
     
-    <section id="campaignSlider" class="mb-4 rounded-xl shadow-lg"></section>
+    <div class="bg-white rounded-xl shadow mb-4 p-0"> 
+        <section id="campaignSlider"></section>
+    </div>
     
     <div id="menuContainer" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
@@ -222,7 +224,11 @@
     
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
-        const slideWidth = document.querySelector('.slide').clientWidth;
+        // Slayt genişliğini alırken null kontrolü
+        const slideElement = document.querySelector('.slide');
+        if (!slideElement) return;
+        
+        const slideWidth = slideElement.clientWidth;
         currentTranslate = currentSlide * -slideWidth;
         setSliderPosition();
     }
@@ -326,11 +332,11 @@
     function renderCampaignSlider() {
         if (campaignUrls.length === 0) {
             campaignSliderSection.innerHTML = '';
-            campaignSliderSection.classList.add('hidden');
+            campaignSliderSection.parentElement.classList.add('hidden'); // Kapsayıcı div'i gizle
             return;
         }
 
-        campaignSliderSection.classList.remove('hidden');
+        campaignSliderSection.parentElement.classList.remove('hidden'); // Kapsayıcı div'i göster
         
         const priceTagHtml = campaignPriceText ? `
             <div class="campaign-price-tag ${campaignPriceText.length > 8 ? 'long-text' : ''}">
@@ -338,10 +344,11 @@
             </div>
         ` : '';
 
-        const slidesHtml = campaignUrls.map(c => `
+        // Görselin üzerindeki fiyat etiketini sadece ilk görsel için render et
+        const slidesHtml = campaignUrls.map((c, index) => `
             <div class="slide">
                 <img src="${c.url}" alt="Kampanya Görseli" class="rounded-xl">
-                ${priceTagHtml} 
+                ${index === 0 ? priceTagHtml : ''} 
             </div>
         `).join('');
 
@@ -573,7 +580,7 @@
 
                 if(categoryKey==='İletişim'){
                     menuContainer.innerHTML='';
-                    campaignSliderSection.classList.add('hidden'); 
+                    campaignSliderSection.parentElement.classList.add('hidden'); 
                     contactSection.classList.remove('hidden');
                 } else {
                     contactSection.classList.add('hidden');
@@ -609,7 +616,7 @@
         
         if (activeCategoryKey === 'İletişim') {
             menuContainer.innerHTML = '';
-            campaignSliderSection.classList.add('hidden');
+            campaignSliderSection.parentElement.classList.add('hidden');
             contactSection.classList.remove('hidden');
         } else {
             contactSection.classList.add('hidden');
