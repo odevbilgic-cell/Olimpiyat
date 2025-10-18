@@ -21,6 +21,34 @@
             background: #ffe6cc; 
             border: 2px dashed #fb923c;
         }
+        /* Kampanya Görseli Önizlemeleri İçin Yeni Stil */
+        .campaign-image-preview {
+            width: 100%;
+            height: 120px; 
+            object-fit: cover; 
+            border-radius: 0.5rem;
+            margin-top: 0.75rem;
+            border: 1px solid #d1d5db;
+        }
+        /* Kampanya Listesindeki Görseller için */
+        .campaign-item-img {
+            width: 80px;
+            height: 45px; 
+            object-fit: cover;
+            border-radius: 0.25rem;
+            border: 1px solid #d1d5db;
+            margin-right: 0.75rem;
+        }
+        .price-box-preview-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 50%;
+            margin-top: 8px;
+            border: 2px solid #fb923c;
+            background-color: white;
+            padding: 5px;
+        }
     </style>
 </head>
 <body>
@@ -92,7 +120,6 @@
             projectId: "olimpiyatkokorecmenu",
             messagingSenderId: "987017604417",
             appId: "1:987017604417:web:b6c4858712dc66d14745c0",
-            measurementId: "G-HB0J7BFZ9N",
             databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app" 
         };
         const CLOUDINARY_CLOUD_NAME = 'dtkrwqofx';      
@@ -103,12 +130,14 @@
         const database = firebase.database();
         const productsRef = database.ref('products');
         const visitorsRef = database.ref('visitors');
-        const campaignsRef = database.ref('campaigns'); // YENİ: Kampanya Görselleri
-        const campaignInfoRef = database.ref('campaign_info'); // YENİ: Kampanya Fiyat Metni
+        const campaignsRef = database.ref('campaigns'); 
+        const campaignInfoRef = database.ref('campaign_info'); 
+        const priceBoxUrlRef = database.ref('campaign_info/price_box_url'); // YENİ: Fiyat Kutucuğu Görseli URL'si
         
         let products = []; 
         let campaignUrls = []; 
         let campaignPriceText = ""; 
+        let campaignPriceBoxUrl = ""; // YENİ: Fiyat Kutucuğu URL'si için değişken
         const categoriesTR = ['Menüler', 'Kokoreç', 'Tavuk Kokoreç', 'Tavuk Döner', 'Patso', 'Köfte', 'Ciğer', 'Hamburger', 'Tost', 'Midye', 'Yan Lezzetler', 'İçecekler']; 
         
         // --- HTML Element Tanımlamaları ---
@@ -175,7 +204,6 @@
             await productsRef.child(key).remove();
         }
         
-        // Kampanya Görselini Silme Fonksiyonu
         async function deleteCampaignUrl(key) {
              await campaignsRef.child(key).remove();
         }
@@ -201,7 +229,9 @@
             `);
             const filterSelect = document.getElementById('filterCategory');
             filterSelect.addEventListener('change', () => renderProductList(filterSelect.value));
-            renderProductList(filterSelect.value);
+            if (products.length > 0) {
+                 renderProductList(filterSelect.value);
+            }
         }
 
         function renderProductList(filter='Tümü') {
@@ -286,8 +316,8 @@
             saveBtn.classList.add('hidden');
             listEl.innerHTML = '';
             
-            if (!category) {
-                listEl.innerHTML = '<li class="text-gray-500 text-center py-4">Lütfen yukarıdan bir kategori seçiniz.</li>';
+            if (!category || products.length === 0) {
+                listEl.innerHTML = `<li class="text-gray-500 text-center py-4">${products.length === 0 ? 'Ürün verileri yükleniyor...' : 'Lütfen yukarıdan bir kategori seçiniz.'}</li>`;
                 return;
             }
             
@@ -390,20 +420,30 @@
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">🖼️ Kampanya Görselleri Yönetimi</h2>
                 <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
                     <p class="mb-4 text-gray-600">Bu görseller ana sayfadaki otomatik dönen banner (slider) alanında kullanılır.</p>
+
+                    <div class="border p-4 mb-6 rounded-lg bg-red-50">
+                        <h3 class="font-bold mb-3 text-red-700">📌 Kampanya Fiyat Kutucuğu Görseli</h3>
+                        <p class="text-sm text-gray-600 mb-3">Bu görsel, kampanyaların üzerinde sabit duran şık fiyat etiketidir. (Örn: Sarı-Siyah Daire)</p>
+                        
+                        <img id="priceBoxImagePreview" class="price-box-preview-img ${campaignPriceBoxUrl ? '' : 'hidden'}" src="${campaignPriceBoxUrl}" alt="Fiyat Kutucuğu Önizleme">
+                        
+                        <button id="uploadPriceBoxImageBtn" class="mt-3 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition w-full font-semibold">Kutucuk Görseli Yükle / Değiştir</button>
+                        <input type="hidden" id="priceBoxImageURL" value="${campaignPriceBoxUrl}" />
+                    </div>
                     
                     <div class="border p-4 mb-6 rounded-lg bg-yellow-50">
-                        <h3 class="font-bold mb-3 text-red-600">Tek Kampanya Fiyat Metni (Yuvarlak Etiket)</h3>
-                        <p class="text-sm text-gray-600 mb-3">Bu metin, tüm kampanya görsellerinin sağ altında **yuvarlak bir kutucukta** gösterilir. (Örn: "79 ₺", "%20 İndirim", "Süper Fiyat")</p>
-                        <input id="campaignPriceTextInput" type="text" placeholder="Örn: 79 ₺" value="${campaignPriceText}" class="border p-2 rounded w-full mb-3" />
+                        <h3 class="font-bold mb-3 text-red-600">Toplu Kampanya Fiyat Metni</h3>
+                        <p class="text-sm text-gray-600 mb-3">Bu metin, yüklediğiniz **kutucuk görseli içinde** gösterilir. (Örn: "250 ₺", "%20 İndirim")</p>
+                        <input id="campaignPriceTextInput" type="text" placeholder="Örn: 250 ₺" value="${campaignPriceText}" class="border p-2 rounded w-full mb-3" />
                         <button id="saveCampaignPriceTextBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition w-full font-semibold">Fiyat Metnini Kaydet</button>
                         <p id="campaignPriceStatus" class="mt-2 text-sm text-green-600 hidden"></p>
                     </div>
 
                     <div class="border p-4 mb-6 rounded-lg bg-gray-50">
-                        <h3 class="font-bold mb-3 text-orange-600">Yeni Görsel Yükle</h3>
+                        <h3 class="font-bold mb-3 text-orange-600">Yeni Banner Görseli Yükle</h3>
                         <p class="text-sm text-gray-600 mb-3">Önerilen görsel boyutu: Geniş ve yatay (Örn: 800x300 piksel).</p>
                         <button id="uploadNewCampaignImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition w-full">Görsel Yükle (Cloudinary)</button>
-                        <img id="newCampaignImagePreview" class="w-full h-32 object-cover rounded-lg mt-3 border border-gray-300 hidden" src="" alt="Yeni Kampanya Görseli Önizleme">
+                        <img id="newCampaignImagePreview" class="campaign-image-preview hidden" src="" alt="Yeni Kampanya Görseli Önizleme">
                         <input type="hidden" id="newCampaignImageURL" value="" />
                         <button id="addCampaignUrlBtn" class="mt-3 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition w-full hidden">Görseli Listeye Ekle</button>
                     </div>
@@ -414,7 +454,30 @@
                 </div>
             `);
             
-            // Event Listeners (Görsel Yükleme ve Silme)
+            // Event Listeners (Fiyat Kutucuğu)
+            const priceBoxUrlInput = document.getElementById('priceBoxImageURL');
+            const priceBoxPreview = document.getElementById('priceBoxImagePreview');
+
+            document.getElementById('uploadPriceBoxImageBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                openCloudinaryWidget(priceBoxUrlInput, priceBoxPreview);
+                // Kutucuk görseli yüklendiğinde Firebase'e kaydet
+                priceBoxUrlInput.addEventListener('change', async () => {
+                    const newUrl = priceBoxUrlInput.value.trim();
+                    if(newUrl) {
+                         try {
+                             await priceBoxUrlRef.set(newUrl);
+                             campaignPriceBoxUrl = newUrl; // Global değişkeni güncelle
+                             alert("Kutucuk görseli başarıyla güncellendi.");
+                         } catch (error) {
+                             alert("Kutucuk görselini kaydetme başarısız oldu: " + error.message);
+                         }
+                    }
+                }, { once: true });
+            });
+
+
+            // Event Listeners (Banner Görseli Yükleme ve Silme)
             const urlInput = document.getElementById('newCampaignImageURL');
             const previewImg = document.getElementById('newCampaignImagePreview');
             const addBtn = document.getElementById('addCampaignUrlBtn');
@@ -431,8 +494,11 @@
             document.getElementById('saveCampaignPriceTextBtn').addEventListener('click', saveCampaignPriceText);
             
             renderCampaignList();
+            
+             // Input değerlerini Firebase'den gelen veriye göre ayarla
+            document.getElementById('campaignPriceTextInput').value = campaignPriceText;
         }
-
+        
         // Kampanya Fiyat Metnini Firebase'e kaydeder
         async function saveCampaignPriceText() {
             const textInput = document.getElementById('campaignPriceTextInput');
@@ -464,19 +530,20 @@
                 listEl.innerHTML = '<li class="text-gray-500 text-center py-4">Henüz kampanya görseli eklenmedi.</li>';
                 return;
             }
+            
+            const sortedCampaigns = [...campaignUrls].sort((a, b) => b.timestamp - a.timestamp);
 
-            campaignUrls.forEach((c) => {
+            sortedCampaigns.forEach((c) => {
                 const item = document.createElement('li');
                 item.className = 'flex items-center bg-white p-3 rounded shadow-sm border border-gray-200';
                 item.innerHTML = `
-                    <img src="${c.url}" class="w-20 h-10 object-cover rounded mr-3 border" alt="Kampanya Görseli">
+                    <img src="${c.url}" class="campaign-item-img" alt="Kampanya Görseli">
                     <span class="text-sm flex-1 truncate">${c.url}</span>
                     <button data-key="${c.key}" class="deleteCampaignBtn bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition ml-3">Sil</button>
                 `;
                 listEl.appendChild(item);
             });
 
-            // Silme Olayı
             document.querySelectorAll('.deleteCampaignBtn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const keyToDelete = e.target.dataset.key;
@@ -501,11 +568,11 @@
             }
 
             try {
-                // Burada timestamp eklenerek index.html'de sıralama sağlanır
                 await campaignsRef.push({ url: url, timestamp: Date.now() }); 
                 alert("Kampanya görseli başarıyla listeye eklendi.");
                 
                 document.getElementById('newCampaignImageURL').value = '';
+                document.getElementById('newCampaignImagePreview').src = '';
                 document.getElementById('newCampaignImagePreview').classList.add('hidden');
                 document.getElementById('addCampaignUrlBtn').classList.add('hidden');
                 
@@ -547,7 +614,6 @@
             });
             document.getElementById('addProduct').addEventListener('click', addProduct);
 
-            // Modül yüklendiğinde varsayılan görseli ayarla
             document.getElementById('newImagePreview').src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e5e7eb'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%236b7280'>Görsel Yok</text></svg>";
         }
 
@@ -599,7 +665,7 @@
             loadModule(`
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">💸 Toplu Fiyat Değiştirme</h2>
                 <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
-                    <p class="mb-4 text-gray-600">Aşağıdaki listede ürünlerin mevcut fiyatlarını değiştirebilir veya Toplu Değişim araçlarını kullanabilirsiniz.</p>
+                    <p class="mb-4 text-gray-600">Aşağıdaki listede ürünlerin mevcut fiyatlarını değiştirebilir veya Toplu Değişim araçlarını kullanabilirsiniz. **Yeni fiyatları manuel olarak sıra sıra da girebilirsiniz.**</p>
                     
                     <div class="border p-4 mb-6 rounded-lg bg-gray-50">
                         <h3 class="font-bold mb-3 text-orange-600">Toplu Değişim Araçları</h3>
@@ -663,7 +729,7 @@
                 item.className = 'flex justify-between items-center bg-white p-2 rounded border text-sm';
                 item.innerHTML = `
                     <span class="w-1/2">${p.name}</span>
-                    <span class="w-1/4 text-right">${p.price} ₺</span>
+                    <span class="w-1/4 text-right font-medium">${p.price} ₺</span>
                     <input 
                         type="number" 
                         step="1" 
@@ -780,6 +846,7 @@
                 statusEl.classList.remove('hidden');
                 statusEl.classList.remove('text-red-600');
                 statusEl.classList.add('text-green-600');
+                // Fiyatlar güncellendiği için listeyi yeniden render et
                 renderBulkPriceList(document.getElementById('bulkCategory').value);
             } catch (error) {
                 statusEl.textContent = 'Fiyatları kaydetme başarısız oldu: ' + error.message;
@@ -867,6 +934,10 @@
 
         // --- GENEL EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', () => {
+            
+            // Başlangıçta Ürün Yönetimi modülünü yükle
+            renderProductsModule();
+            
             // Firebase Dinleyicisi (Ürünler)
             productsRef.on('value', (snapshot) => {
                 products = [];
@@ -876,17 +947,20 @@
                     products.push(product);
                 });
                 
-                if (contentContainer.innerHTML === '') {
-                   renderProductsModule(); 
-                } 
-                
-                // Güncelleme mantığı
-                if (document.getElementById('bulkUpdateForm')) {
-                    renderBulkPriceList(document.getElementById('bulkCategory').value);
-                } else if (document.getElementById('productList')) {
-                     renderProductList(document.getElementById('filterCategory').value);
-                } else if (document.getElementById('sortableList') && document.getElementById('sortCategory').value) {
-                    loadSortableList(document.getElementById('sortCategory').value);
+                const activeTab = document.querySelector('.tab-button.active');
+                if (activeTab) {
+                    const activeId = activeTab.id;
+                    
+                    if (activeId === 'showProducts') {
+                        const filterSelect = document.getElementById('filterCategory');
+                        if (filterSelect) renderProductList(filterSelect.value);
+                    } else if (activeId === 'showBulkUpdate') {
+                        const bulkSelect = document.getElementById('bulkCategory');
+                        if (bulkSelect) renderBulkPriceList(bulkSelect.value);
+                    } else if (activeId === 'showSorting') {
+                        const sortSelect = document.getElementById('sortCategory');
+                        if (sortSelect && sortSelect.value) loadSortableList(sortSelect.value);
+                    }
                 }
             });
 
@@ -909,6 +983,24 @@
                  const inputEl = document.getElementById('campaignPriceTextInput');
                  if(inputEl) {
                      inputEl.value = campaignPriceText;
+                 }
+            });
+            
+            // YENİ: Firebase Dinleyicisi (Fiyat Kutucuğu Görseli URL'si)
+            priceBoxUrlRef.on('value', (snapshot) => {
+                 campaignPriceBoxUrl = snapshot.val() || "";
+                 const inputEl = document.getElementById('priceBoxImageURL');
+                 const previewEl = document.getElementById('priceBoxImagePreview');
+                 if(inputEl) {
+                     inputEl.value = campaignPriceBoxUrl;
+                 }
+                 if(previewEl) {
+                     previewEl.src = campaignPriceBoxUrl;
+                     if(campaignPriceBoxUrl) {
+                        previewEl.classList.remove('hidden');
+                     } else {
+                        previewEl.classList.add('hidden');
+                     }
                  }
             });
 
