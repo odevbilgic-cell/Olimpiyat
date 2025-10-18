@@ -107,15 +107,15 @@
         const campaignInfoRef = database.ref('campaign_info'); // YENİ: Kampanya Fiyat Metni
         
         let products = []; 
-        let campaignUrls = []; // Kampanya görsellerini tutar
-        let campaignPriceText = ""; // Kampanya fiyat metnini tutar
+        let campaignUrls = []; 
+        let campaignPriceText = ""; 
         const categoriesTR = ['Menüler', 'Kokoreç', 'Tavuk Kokoreç', 'Tavuk Döner', 'Patso', 'Köfte', 'Ciğer', 'Hamburger', 'Tost', 'Midye', 'Yan Lezzetler', 'İçecekler']; 
         
         // --- HTML Element Tanımlamaları ---
         const contentContainer = document.getElementById('contentContainer');
         const showProductsBtn = document.getElementById('showProducts');
         const showSortingBtn = document.getElementById('showSorting'); 
-        const showCampaignsBtn = document.getElementById('showCampaigns'); // YENİ BUTON
+        const showCampaignsBtn = document.getElementById('showCampaigns'); 
         const showAddProductBtn = document.getElementById('showAddProduct');
         const showBulkUpdateBtn = document.getElementById('showBulkUpdate');
         const showStatsBtn = document.getElementById('showStats');
@@ -127,7 +127,7 @@
         const uploadEditImageBtn = document.getElementById('uploadEditImageBtn');
         const saveEditProductButton = document.getElementById('saveEditProduct');
         
-        // --- MODÜL VE UI YÖNETİMİ (Kısaltıldı, değişmeyenler) ---
+        // --- MODÜL VE UI YÖNETİMİ ---
 
         function setActiveTab(buttonId) {
             tabButtons.forEach(btn => btn.classList.remove('active'));
@@ -184,7 +184,7 @@
             return productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
         }
 
-        // --- MODÜL: ÜRÜN YÖNETİMİ (PRODUCTS) --- (Arayüz kodları kısaltıldı)
+        // --- MODÜL: ÜRÜN YÖNETİMİ (PRODUCTS) ---
         function renderProductsModule() {
             setActiveTab('showProducts');
             loadModule(`
@@ -242,7 +242,147 @@
             document.querySelectorAll('.editBtn').forEach(btn => btn.addEventListener('click', (e) => openEditModal(e.target.dataset.key)));
         }
 
-        // --- YENİ MODÜL: KAMPANYA GÖRSELLERİ YÖNETİMİ (KAMPANYA FİYATI EKLENDİ) ---
+        // --- MODÜL: ÜRÜN SIRALAMA AYARI (SORTING) ---
+        
+        function renderSortingModule() {
+            if (typeof Sortable === 'undefined') {
+                alert("Hata: Ürün sıralama özelliği için gerekli kütüphane (Sortable.js) yüklenemedi. İnternet bağlantınızı kontrol edin.");
+                return;
+            }
+            
+            setActiveTab('showSorting');
+            loadModule(`
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">⬆️ Ürün Sıralama Ayarı</h2>
+                <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
+                    <p class="mb-4 text-gray-600">Ürünleri sürükleyip bırakarak menüdeki sıralamasını değiştirebilirsiniz. Bu ayar tüm dillerde geçerli olacaktır.</p>
+                    
+                    <label class="block mb-2 font-semibold text-sm">Sıralanacak Kategori Seçin:</label>
+                    <select id="sortCategory" class="border p-2 rounded w-full mb-6">
+                        <option value="">-- Kategori Seçiniz --</option>
+                        <option value="Tümü">Tümü (Tüm Ürünler)</option> ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                    </select>
+
+                    <ul id="sortableList" class="flex flex-col gap-2 p-2 border rounded bg-gray-50 min-h-[100px]">
+                        <li class="text-gray-500 text-center py-4">Lütfen yukarıdan bir kategori seçiniz.</li>
+                    </ul>
+                    
+                    <button id="saveSorting" class="mt-6 bg-green-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-green-600 transition w-full hidden">Yeni Sıralamayı Kaydet</button>
+                    <p id="sortingStatus" class="mt-4 text-center text-sm text-green-600 hidden"></p>
+                </div>
+            `);
+            
+            // Event Listeners
+            const sortCategorySelect = document.getElementById('sortCategory');
+            sortCategorySelect.addEventListener('change', (e) => loadSortableList(e.target.value));
+            document.getElementById('saveSorting').addEventListener('click', saveSortingOrder);
+        }
+        
+        // Kategori seçildiğinde sürükle-bırak listesini yükler
+        function loadSortableList(category) {
+            const listEl = document.getElementById('sortableList');
+            const saveBtn = document.getElementById('saveSorting');
+            const statusEl = document.getElementById('sortingStatus');
+            statusEl.classList.add('hidden');
+            saveBtn.classList.add('hidden');
+            listEl.innerHTML = '';
+            
+            if (!category) {
+                listEl.innerHTML = '<li class="text-gray-500 text-center py-4">Lütfen yukarıdan bir kategori seçiniz.</li>';
+                return;
+            }
+            
+            const filteredProducts = category === 'Tümü'
+                ? products
+                : products.filter(p => p.category === category);
+            
+            const filteredAndSorted = sortProductsByOrder(filteredProducts);
+
+
+            if (filteredAndSorted.length === 0) {
+                listEl.innerHTML = `<li class="text-gray-500 text-center py-4">"${category}" kategorisinde ürün bulunmamaktadır.</li>`;
+                return;
+            }
+            
+            filteredAndSorted.forEach((p) => {
+                const item = document.createElement('li');
+                item.className = 'sortable-item flex justify-between items-center bg-white p-3 rounded shadow-sm border border-gray-200';
+                item.dataset.id = p.key; 
+                item.innerHTML = `
+                    <span class="text-gray-400 mr-3">☰</span>
+                    <span class="font-medium text-base flex-1">${p.name}</span>
+                    <span class="text-orange-600 font-semibold">${p.price} ₺</span>
+                `;
+                listEl.appendChild(item);
+            });
+            
+            saveBtn.classList.remove('hidden');
+
+            Sortable.create(listEl, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    statusEl.textContent = 'Sıralama değiştirildi. Kaydet butonuna basmayı unutmayın!';
+                    statusEl.classList.remove('hidden');
+                    statusEl.classList.remove('text-green-600');
+                    statusEl.classList.add('text-red-600');
+                },
+            });
+        }
+        
+        // Yeni sıralama düzenini (order değerlerini) Firebase'e kaydeder
+        async function saveSortingOrder() {
+            const listEl = document.getElementById('sortableList');
+            const items = listEl.children;
+            const updates = {};
+            const statusEl = document.getElementById('sortingStatus');
+            let changesMade = 0;
+            
+            if (items.length === 0) return;
+            
+            for (let i = 0; i < items.length; i++) {
+                const productKey = items[i].dataset.id;
+                const newOrderValue = i; 
+                
+                const currentProduct = products.find(p => p.key === productKey);
+                
+                if (currentProduct && currentProduct.order !== newOrderValue) {
+                    updates[`products/${productKey}/order`] = newOrderValue; 
+                    changesMade++;
+                }
+            }
+            
+            if (changesMade === 0) {
+                 statusEl.textContent = 'Herhangi bir sıralama değişikliği tespit edilmedi.';
+                 statusEl.classList.remove('text-red-600');
+                 statusEl.classList.add('text-green-600');
+                 statusEl.classList.remove('hidden');
+                 return;
+            }
+            
+            if (!confirm(`${changesMade} ürünün sıralaması güncellenecektir. Onaylıyor musunuz?`)) {
+                return;
+            }
+
+            try {
+                await database.ref().update(updates); 
+                
+                statusEl.textContent = `${changesMade} ürün sıralaması başarıyla kaydedildi.`;
+                statusEl.classList.remove('text-red-600');
+                statusEl.classList.add('text-green-600');
+                statusEl.classList.remove('hidden');
+                
+                const currentCategory = document.getElementById('sortCategory').value;
+                loadSortableList(currentCategory); 
+
+            } catch (error) {
+                statusEl.textContent = 'Sıralamayı kaydetme başarısız oldu: ' + error.message;
+                statusEl.classList.add('text-red-600');
+                statusEl.classList.remove('text-green-600');
+                statusEl.classList.remove('hidden');
+            }
+        }
+
+        // --- YENİ MODÜL: KAMPANYA GÖRSELLERİ YÖNETİMİ ---
 
         function renderCampaignModule() {
             setActiveTab('showCampaigns');
@@ -287,23 +427,22 @@
 
             addBtn.addEventListener('click', addCampaignUrl);
             
-            // YENİ: Kampanya Fiyat Metni Kaydetme Olayı
+            // Kampanya Fiyat Metni Kaydetme Olayı
             document.getElementById('saveCampaignPriceTextBtn').addEventListener('click', saveCampaignPriceText);
             
             renderCampaignList();
         }
 
-        // YENİ: Kampanya Fiyat Metnini Firebase'e kaydeder
+        // Kampanya Fiyat Metnini Firebase'e kaydeder
         async function saveCampaignPriceText() {
             const textInput = document.getElementById('campaignPriceTextInput');
             const statusEl = document.getElementById('campaignPriceStatus');
             const newText = textInput.value.trim();
 
             try {
-                // Firebase'e 'price_text' olarak kaydet
                 await campaignInfoRef.child('price_text').set(newText);
                 
-                campaignPriceText = newText; // Local değişkeni güncelle
+                campaignPriceText = newText; 
                 statusEl.textContent = 'Kampanya fiyat metni başarıyla kaydedildi!';
                 statusEl.classList.remove('hidden', 'text-red-600');
                 statusEl.classList.add('text-green-600');
@@ -362,6 +501,7 @@
             }
 
             try {
+                // Burada timestamp eklenerek index.html'de sıralama sağlanır
                 await campaignsRef.push({ url: url, timestamp: Date.now() }); 
                 alert("Kampanya görseli başarıyla listeye eklendi.");
                 
@@ -373,393 +513,6 @@
                 alert("Görsel ekleme başarısız oldu: " + error.message);
             }
         }
-        
-        // --- Diğer Modüllerin (Sıralama, Ekleme, Toplu Fiyat, İstatistikler, Modal) Fonksiyonları ---
-        // ... (Bu kısım, yer kaplamaması için önceki kodunuzdaki haliyle bırakılmıştır.) ...
-        
-        
-        function renderSortingModule() { /* ... */ }
-        function loadSortableList(category) { /* ... */ }
-        function saveSortingOrder() { /* ... */ }
-        function renderAddProductModule() { /* ... */ }
-        function addProduct() { /* ... */ }
-        function renderBulkUpdateModule() { /* ... */ }
-        function renderBulkPriceList(filter) { /* ... */ }
-        function applyBulkAdjustment() { /* ... */ }
-        function saveManualPrices() { /* ... */ }
-        function renderStatsModule() { /* ... */ }
-        function fetchVisitorCounts() { /* ... */ }
-        function resetVisitorCounts() { /* ... */ }
-        function openEditModal(productKey) { /* ... */ }
-        // ...
-        
-        // --- GENEL EVENT LISTENERS ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Firebase Dinleyicisi (Ürünler)
-            productsRef.on('value', (snapshot) => {
-                products = [];
-                snapshot.forEach(childSnapshot => {
-                    const product = childSnapshot.val();
-                    product.key = childSnapshot.key;
-                    products.push(product);
-                });
-                
-                if (contentContainer.innerHTML === '') {
-                   renderProductsModule(); 
-                } 
-                
-                // Diğer açık modülleri güncelleme mantığı...
-            });
-            
-            // YENİ: Firebase Dinleyicisi (Kampanya Görselleri)
-            campaignsRef.on('value', (snapshot) => {
-                campaignUrls = [];
-                snapshot.forEach(childSnapshot => {
-                    const campaign = childSnapshot.val();
-                    campaign.key = childSnapshot.key;
-                    campaignUrls.push(campaign);
-                });
-                
-                // Kampanya Modülü açıksa listeyi yenile
-                if (document.getElementById('campaignList')) {
-                    renderCampaignList();
-                }
-            });
-            
-            // YENİ: Firebase Dinleyicisi (Kampanya Fiyat Metni)
-            campaignInfoRef.child('price_text').on('value', (snapshot) => {
-                 campaignPriceText = snapshot.val() || "";
-                 // Eğer Kampanya Modülü açıksa input değerini güncelle
-                 const inputEl = document.getElementById('campaignPriceTextInput');
-                 if(inputEl) {
-                     inputEl.value = campaignPriceText;
-                 }
-            });
-            
-
-            // Navigasyon Butonları
-            showProductsBtn.addEventListener('click', renderProductsModule);
-            showSortingBtn.addEventListener('click', renderSortingModule); 
-            showCampaignsBtn.addEventListener('click', renderCampaignModule); // YENİ TIKLAMA
-            showAddProductBtn.addEventListener('click', renderAddProductModule);
-            showBulkUpdateBtn.addEventListener('click', renderBulkUpdateModule);
-            showStatsBtn.addEventListener('click', renderStatsModule);
-            
-            // Edit Modal Butonları
-            closeEditProductModal.addEventListener('click', () => editProductModal.classList.add('hidden'));
-            uploadEditImageBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                openCloudinaryWidget(editImageURLInput, editImagePreview);
-            });
-            saveEditProductButton.addEventListener('click', async () => {
-                const productKey = document.getElementById('editProductKey').value;
-                const updates = {
-                    name: document.getElementById('editName').value.trim(),
-                    nameEN: document.getElementById('editNameEN').value.trim(),
-                    desc: document.getElementById('editDesc').value.trim(),
-                    descEN: document.getElementById('editDescEN').value.trim(),
-                    price: parseFloat(document.getElementById('editPrice').value),
-                    category: document.getElementById('editCategory').value,
-                    image: editImageURLInput.value.trim()
-                };
-                
-                if (isNaN(updates.price)) { alert('Lütfen geçerli bir fiyat giriniz.'); return; }
-
-                try {
-                    if (!updates.image) updates.image = ''; 
-
-                    await updateProductInFirebase(productKey, updates); 
-                    editProductModal.classList.add('hidden');
-                    alert(`"${updates.name}" ürünü başarıyla güncellendi.`);
-                } catch (error) {
-                    alert("Güncelleme işlemi başarısız oldu: " + error.message);
-                }
-            });
-        });
-    </script>
-</body>
-</html>
-        const showAddProductBtn = document.getElementById('showAddProduct');
-        const showBulkUpdateBtn = document.getElementById('showBulkUpdate');
-        const showStatsBtn = document.getElementById('showStats');
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const editProductModal = document.getElementById('editProductModal');
-        const closeEditProductModal = document.getElementById('closeEditProductModal');
-        const editImageURLInput = document.getElementById('editImageURL');
-        const editImagePreview = document.getElementById('editImagePreview');
-        const uploadEditImageBtn = document.getElementById('uploadEditImageBtn');
-        const saveEditProductButton = document.getElementById('saveEditProduct');
-        
-        // --- MODÜL VE UI YÖNETİMİ ---
-
-        function setActiveTab(buttonId) {
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            document.getElementById(buttonId).classList.add('active');
-        }
-
-        function loadModule(htmlContent) {
-            contentContainer.innerHTML = htmlContent;
-        }
-
-        // --- CLOUDINARY WIDGET FONKSİYONU ---
-        function openCloudinaryWidget(urlInput, previewImg) {
-            if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
-                alert("Hata: Cloudinary ayarları eksik.");
-                return;
-            }
-
-            const widget = window.cloudinary.createUploadWidget(
-                {
-                    cloudName: CLOUDINARY_CLOUD_NAME,
-                    uploadPreset: CLOUDINARY_UPLOAD_PRESET,
-                    sources: ['local', 'url', 'camera'], 
-                },
-                (error, result) => {
-                    if (!error && result && result.event === "success") {
-                        const url = result.info.secure_url;
-                        urlInput.value = url; 
-                        previewImg.src = url; 
-                        previewImg.classList.remove('hidden'); 
-                        alert("Görsel yüklendi ve URL kaydedildi.");
-                    } else if (error) {
-                        console.error("Cloudinary yükleme hatası:", error);
-                        alert("Görsel yüklenirken bir hata oluştu: " + error.message);
-                    }
-                }
-            );
-            widget.open();
-        }
-
-        // --- FIREBASE CRUD & GÜNCELLEME İŞLEVLERİ ---
-        
-        // Ürün ekleme/güncelleme sırasında lastUpdated alanı otomatik güncellenir
-        async function updateProductInFirebase(key, updates) {
-            updates.lastUpdated = Date.now(); // Fiyat değişim tarihini kaydet
-            await productsRef.child(key).update(updates);
-        }
-
-        async function deleteProductFromFirebase(key) {
-            await productsRef.child(key).remove();
-        }
-
-        // Ürünleri 'order' alanına göre sıralayan yardımcı fonksiyon
-        function sortProductsByOrder(productsArray) {
-            // 'order' alanı olmayan ürünleri listenin en sonuna atar (9999)
-            return productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
-        }
-
-
-        // --- MODÜL: ÜRÜN YÖNETİMİ (PRODUCTS) ---
-        function renderProductsModule() {
-            setActiveTab('showProducts');
-            loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">📦 Ürün Yönetimi</h2>
-                <div class="flex gap-4 mb-4">
-                    <select id="filterCategory" class="border p-2 rounded flex-1">
-                        <option value="Tümü">Tümü</option>
-                        ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                    </select>
-                </div>
-                <ul id="productList" class="flex flex-col gap-3">
-                    <li class="p-4 bg-white rounded shadow text-gray-500">Ürünler yükleniyor...</li>
-                </ul>
-            `);
-            // Event Listener'ları Modül yüklendikten sonra eklenir
-            const filterSelect = document.getElementById('filterCategory');
-            filterSelect.addEventListener('change', () => renderProductList(filterSelect.value));
-            renderProductList(filterSelect.value);
-        }
-
-        function renderProductList(filter='Tümü') {
-            const listEl = document.getElementById('productList');
-            if (!listEl) return;
-            listEl.innerHTML = '';
-            
-            // Sıralama yap: Mevcut ürün listesini order'a göre sırala
-            const sortedProducts = sortProductsByOrder([...products]); // products'ı kopyalayıp sırala
-            
-            const filtered = filter === 'Tümü' ? sortedProducts : sortedProducts.filter(p => p.category === filter);
-
-            if (filtered.length === 0) {
-                listEl.innerHTML = '<li class="p-4 bg-white rounded shadow text-gray-500">Bu kategoride ürün bulunmamaktadır.</li>';
-                return;
-            }
-
-            filtered.forEach((p) => {
-                const item = document.createElement('li');
-                item.className = 'flex justify-between items-center bg-white p-3 rounded border shadow-sm';
-                item.innerHTML = `
-                    <span class="font-medium text-base">${p.name} (${p.category}) - ${p.price} ₺</span>
-                    <div>
-                        <button data-key="${p.key}" class="editBtn bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition mr-2">Düzenle</button>
-                        <button data-key="${p.key}" class="deleteBtn bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition">Sil</button>
-                    </div>
-                `;
-                listEl.appendChild(item);
-            });
-
-            // Delete Event
-            document.querySelectorAll('.deleteBtn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const productKeyToDelete = e.target.dataset.key;
-                    if (confirm("Bu ürünü silmek istediğinizden emin misiniz?")) {
-                        try { await deleteProductFromFirebase(productKeyToDelete); alert("Ürün silindi."); } 
-                        catch (error) { alert("Silme işlemi başarısız oldu: " + error.message); }
-                    }
-                });
-            });
-            // Edit Event
-            document.querySelectorAll('.editBtn').forEach(btn => btn.addEventListener('click', (e) => openEditModal(e.target.dataset.key)));
-        }
-        
-        // --- YENİ MODÜL: ÜRÜN SIRALAMA AYARI (SORTING) ---
-        
-        function renderSortingModule() {
-            // Sortable.js kütüphanesinin yüklenip yüklenmediğini kontrol et
-            if (typeof Sortable === 'undefined') {
-                alert("Hata: Ürün sıralama özelliği için gerekli kütüphane (Sortable.js) yüklenemedi. İnternet bağlantınızı kontrol edin.");
-                return;
-            }
-            
-            setActiveTab('showSorting');
-            loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">⬆️ Ürün Sıralama Ayarı</h2>
-                <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
-                    <p class="mb-4 text-gray-600">Ürünleri sürükleyip bırakarak menüdeki sıralamasını değiştirebilirsiniz. Bu ayar tüm dillerde geçerli olacaktır.</p>
-                    
-                    <label class="block mb-2 font-semibold text-sm">Sıralanacak Kategori Seçin:</label>
-                    <select id="sortCategory" class="border p-2 rounded w-full mb-6">
-                        <option value="">-- Kategori Seçiniz --</option>
-                        <option value="Tümü">Tümü (Tüm Ürünler)</option> ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                    </select>
-
-                    <ul id="sortableList" class="flex flex-col gap-2 p-2 border rounded bg-gray-50 min-h-[100px]">
-                        <li class="text-gray-500 text-center py-4">Lütfen yukarıdan bir kategori seçiniz.</li>
-                    </ul>
-                    
-                    <button id="saveSorting" class="mt-6 bg-green-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-green-600 transition w-full hidden">Yeni Sıralamayı Kaydet</button>
-                    <p id="sortingStatus" class="mt-4 text-center text-sm text-green-600 hidden"></p>
-                </div>
-            `);
-            
-            // Event Listeners
-            const sortCategorySelect = document.getElementById('sortCategory');
-            sortCategorySelect.addEventListener('change', (e) => loadSortableList(e.target.value));
-            document.getElementById('saveSorting').addEventListener('click', saveSortingOrder);
-        }
-        
-        // Kategori seçildiğinde sürükle-bırak listesini yükler
-        function loadSortableList(category) {
-            const listEl = document.getElementById('sortableList');
-            const saveBtn = document.getElementById('saveSorting');
-            const statusEl = document.getElementById('sortingStatus');
-            statusEl.classList.add('hidden');
-            saveBtn.classList.add('hidden');
-            listEl.innerHTML = '';
-            
-            if (!category) {
-                listEl.innerHTML = '<li class="text-gray-500 text-center py-4">Lütfen yukarıdan bir kategori seçiniz.</li>';
-                return;
-            }
-            
-            // Seçili kategoriye göre filtrele ve mevcut 'order' alanına göre sırala
-            const filteredProducts = category === 'Tümü'
-                ? products
-                : products.filter(p => p.category === category);
-            
-            const filteredAndSorted = sortProductsByOrder(filteredProducts);
-
-
-            if (filteredAndSorted.length === 0) {
-                listEl.innerHTML = `<li class="text-gray-500 text-center py-4">"${category}" kategorisinde ürün bulunmamaktadır.</li>`;
-                return;
-            }
-            
-            filteredAndSorted.forEach((p) => {
-                const item = document.createElement('li');
-                item.className = 'sortable-item flex justify-between items-center bg-white p-3 rounded shadow-sm border border-gray-200';
-                // data-id ile Firebase Key'i sakla
-                item.dataset.id = p.key; 
-                item.innerHTML = `
-                    <span class="text-gray-400 mr-3">☰</span>
-                    <span class="font-medium text-base flex-1">${p.name}</span>
-                    <span class="text-orange-600 font-semibold">${p.price} ₺</span>
-                `;
-                listEl.appendChild(item);
-            });
-            
-            saveBtn.classList.remove('hidden');
-
-            // Sortable.js'i bu liste üzerinde etkinleştir
-            Sortable.create(listEl, {
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                onEnd: function (evt) {
-                    statusEl.textContent = 'Sıralama değiştirildi. Kaydet butonuna basmayı unutmayın!';
-                    statusEl.classList.remove('hidden');
-                    statusEl.classList.remove('text-green-600');
-                    statusEl.classList.add('text-red-600');
-                },
-            });
-        }
-        
-        // Yeni sıralama düzenini (order değerlerini) Firebase'e kaydeder
-        async function saveSortingOrder() {
-            const listEl = document.getElementById('sortableList');
-            const items = listEl.children;
-            const updates = {};
-            const statusEl = document.getElementById('sortingStatus');
-            let changesMade = 0;
-            
-            if (items.length === 0) return;
-            
-            for (let i = 0; i < items.length; i++) {
-                const productKey = items[i].dataset.id;
-                const newOrderValue = i; // 0'dan başlayarak index değerini yeni sıra olarak kullan
-                
-                const currentProduct = products.find(p => p.key === productKey);
-                
-                // Sadece sırası değişenleri kaydet
-                if (currentProduct && currentProduct.order !== newOrderValue) {
-                    // Firebase'in root (kök) referansına relative path ile yazıyoruz
-                    updates[`products/${productKey}/order`] = newOrderValue; 
-                    changesMade++;
-                }
-            }
-            
-            if (changesMade === 0) {
-                 statusEl.textContent = 'Herhangi bir sıralama değişikliği tespit edilmedi.';
-                 statusEl.classList.remove('text-red-600');
-                 statusEl.classList.add('text-green-600');
-                 statusEl.classList.remove('hidden');
-                 return;
-            }
-            
-            if (!confirm(`${changesMade} ürünün sıralaması güncellenecektir. Onaylıyor musunuz?`)) {
-                return;
-            }
-
-            try {
-                // Firebase'e toplu güncelleme (multi-path update) gönder
-                await database.ref().update(updates); 
-                
-                statusEl.textContent = `${changesMade} ürün sıralaması başarıyla kaydedildi.`;
-                statusEl.classList.remove('text-red-600');
-                statusEl.classList.add('text-green-600');
-                statusEl.classList.remove('hidden');
-                
-                // Listeyi yeniden yükle (Firebase dinleyicisi de bunu yapacak)
-                const currentCategory = document.getElementById('sortCategory').value;
-                loadSortableList(currentCategory); 
-
-            } catch (error) {
-                statusEl.textContent = 'Sıralamayı kaydetme başarısız oldu: ' + error.message;
-                statusEl.classList.add('text-red-600');
-                statusEl.classList.remove('text-green-600');
-                statusEl.classList.remove('hidden');
-            }
-        }
-
 
         // --- MODÜL: YENİ ÜRÜN EKLEME (ADD PRODUCT) ---
         function renderAddProductModule() {
@@ -814,23 +567,21 @@
                 alert('Lütfen tüm zorunlu alanları (Ad, Fiyat ve Kategori) doldurunuz.'); return; 
             }
             
-            // Yeni ürüne, tüm ürünlerin en sonuna atılmasını sağlamak için büyük bir sıra numarası verilir.
             const maxOrder = products.length > 0 
-                ? Math.max(...products.map(p => p.order === undefined ? 0 : p.order)) // undefined olanları 0 kabul et
+                ? Math.max(...products.map(p => p.order === undefined ? 0 : p.order))
                 : 0;
             
             const newProduct = {
                 name, nameEN: nameEN || name, desc, descEN: descEN || desc,
                 price, image: imageURL, category, 
                 lastUpdated: Date.now(),
-                order: maxOrder + 1 // Yeni ürünü listenin sonuna ekle
+                order: maxOrder + 1 
             };
 
             try {
                 await database.ref('products').push(newProduct); 
                 alert(`"${name}" ürünü başarıyla eklendi.`);
                 
-                // Formu temizle
                 document.querySelectorAll('#contentContainer input, #contentContainer select').forEach(el => el.value = '');
                 document.getElementById('productImageURL').value = ''; 
                 
@@ -889,7 +640,6 @@
             document.getElementById('applyBulkAdjustment').addEventListener('click', applyBulkAdjustment);
             document.getElementById('saveManualPrices').addEventListener('click', saveManualPrices);
             
-            // İlk yüklemede listeyi göster
             renderBulkPriceList(document.getElementById('bulkCategory').value);
         }
         
@@ -899,7 +649,6 @@
             if (!formEl) return;
             formEl.innerHTML = '';
             
-            // Ürünleri 'order' alanına göre sırala
             const sortedProducts = sortProductsByOrder([...products]);
 
             const filtered = filter === 'Tümü' ? sortedProducts : sortedProducts.filter(p => p.category === filter);
@@ -952,7 +701,7 @@
                 if (!currentProduct) return;
 
                 let newPrice;
-                const basePrice = currentProduct.price; // Mevcut Firebase fiyatını kullan
+                const basePrice = currentProduct.price; 
 
                 if (updateType === 'percent') {
                     newPrice = basePrice * (1 + (value / 100));
@@ -961,7 +710,6 @@
                 }
                 newPrice = Math.max(0, parseFloat(newPrice.toFixed(2)));
                 
-                // Yeni fiyatı input alanına yaz
                 input.value = newPrice;
                 updatedCount++;
             });
@@ -996,24 +744,23 @@
                 return;
             }
 
-            inputs.forEach(input => {
+            for (const input of inputs) {
                 const productKey = input.dataset.key;
                 const newPrice = parseFloat(input.value);
                 const currentProduct = products.find(p => p.key === productKey);
 
                 if (isNaN(newPrice) || newPrice < 0) {
                     alert(`${currentProduct.name} ürünü için geçersiz fiyat girdiniz. Lütfen kontrol edin.`);
-                    return; // İlerlemeyi durdur
+                    return; 
                 }
                 
-                // Sadece fiyatı değişenleri güncelle
                 if (currentProduct && currentProduct.price !== newPrice) {
-                    // Toplu güncelleme için path belirleme
                     updates[`products/${productKey}/price`] = newPrice;
-                    updates[`products/${productKey}/lastUpdated`] = currentTime; // Güncel fiyat değişim tarihi
+                    updates[`products/${productKey}/lastUpdated`] = currentTime; 
                     changesMade++;
                 }
-            });
+            }
+
 
             if (changesMade === 0) {
                 statusEl.textContent = 'Herhangi bir fiyat değişikliği tespit edilmedi.';
@@ -1028,13 +775,11 @@
             }
 
             try {
-                // Firebase'e toplu güncelleme (multi-path update) gönder
-                await database.ref().update(updates); // Kök referanstan güncelleme yapıyoruz
+                await database.ref().update(updates); 
                 statusEl.textContent = `${changesMade} ürün fiyatı başarıyla kaydedildi ve ana menü güncellendi.`;
                 statusEl.classList.remove('hidden');
                 statusEl.classList.remove('text-red-600');
                 statusEl.classList.add('text-green-600');
-                // Listeyi yeniden render et (Firebase dinleyicisi de bunu yapmalı, ancak emin olmak için)
                 renderBulkPriceList(document.getElementById('bulkCategory').value);
             } catch (error) {
                 statusEl.textContent = 'Fiyatları kaydetme başarısız oldu: ' + error.message;
@@ -1061,134 +806,4 @@
                 </div>
                 <div class="mt-8">
                     <button id="resetCounter" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Sayaçları Sıfırla (Manuel)</button>
-                    <p class="text-sm text-gray-500 mt-2">NOT: Günlük sayaç Firebase'de gün bazında tutulur. Bu buton tüm sayaç geçmişini siler.</p>
-                </div>
-            `);
-            fetchVisitorCounts();
-            document.getElementById('resetCounter').addEventListener('click', resetVisitorCounts);
-        }
-
-        function fetchVisitorCounts() {
-            const today = new Date().toISOString().slice(0, 10);
-            
-            // Bugünkü sayacı getir
-            visitorsRef.child(today).once('value', snapshot => {
-                document.getElementById('todayCount').textContent = snapshot.val() || 0;
-            });
-
-            // Toplam sayacı getir
-            visitorsRef.once('value', snapshot => {
-                let total = 0;
-                snapshot.forEach(child => {
-                    total += child.val();
-                });
-                document.getElementById('totalCount').textContent = total;
-            });
-        }
-        
-        async function resetVisitorCounts() {
-            if (confirm("Tüm ziyaretçi verilerini sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz.")) {
-                try {
-                    await visitorsRef.remove();
-                    alert("Ziyaretçi sayaçları başarıyla sıfırlandı.");
-                    fetchVisitorCounts(); // UI'ı güncelle
-                } catch (error) {
-                    alert("Sayaç sıfırlama başarısız oldu: " + error.message);
-                }
-            }
-        }
-
-        // --- EDİT MODAL ORTAK KULLANIM FONKSİYONLARI ---
-        function openEditModal(productKey) {
-            const productToEdit = products.find(p => p.key === productKey);
-            
-            if (productToEdit) {
-                document.getElementById('editProductKey').value = productKey; 
-                document.getElementById('editName').value = productToEdit.name;
-                document.getElementById('editNameEN').value = productToEdit.nameEN || '';
-                document.getElementById('editDesc').value = productToEdit.desc || '';
-                document.getElementById('editDescEN').value = productToEdit.descEN || '';
-                document.getElementById('editPrice').value = productToEdit.price;
-                
-                const editCategorySelect = document.getElementById('editCategory');
-                editCategorySelect.innerHTML = categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-                editCategorySelect.value = productToEdit.category;
-                
-                editImageURLInput.value = productToEdit.image;
-                editImagePreview.src = productToEdit.image;
-                
-                editProductModal.classList.remove('hidden');
-            }
-        }
-
-        // --- GENEL EVENT LISTENERS ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Firebase Dinleyicisi
-            productsRef.on('value', (snapshot) => {
-                products = [];
-                snapshot.forEach(childSnapshot => {
-                    const product = childSnapshot.val();
-                    product.key = childSnapshot.key;
-                    // Eğer 'order' alanı yoksa, menüde en sona atılması için bir değer atarız (render sırasında sıralanacak)
-                    // Ancak Firebase'e yazarken varsayılan bir değer atamayız, sadece okurken işleriz.
-                    // Ürün eklenirken zaten order alıyor.
-                    products.push(product);
-                });
-                
-                // Admin paneli açılırken varsayılan modülü yükle
-                if (contentContainer.innerHTML === '') {
-                   renderProductsModule(); 
-                } 
-                
-                // Eğer ilgili modüller açıksa, listeleri yenile
-                if (document.getElementById('bulkUpdateForm')) {
-                    renderBulkPriceList(document.getElementById('bulkCategory').value);
-                } else if (document.getElementById('productList')) {
-                     renderProductList(document.getElementById('filterCategory').value);
-                } else if (document.getElementById('sortableList') && document.getElementById('sortCategory').value) {
-                    // Sıralama modülündeyken, listenin güncel sıralama ile yeniden yüklenmesi için
-                    loadSortableList(document.getElementById('sortCategory').value);
-                }
-            });
-
-            // Navigasyon Butonları
-            showProductsBtn.addEventListener('click', renderProductsModule);
-            showSortingBtn.addEventListener('click', renderSortingModule); // YENİ: Sıralama
-            showAddProductBtn.addEventListener('click', renderAddProductModule);
-            showBulkUpdateBtn.addEventListener('click', renderBulkUpdateModule);
-            showStatsBtn.addEventListener('click', renderStatsModule);
-            
-            // Edit Modal Butonları
-            closeEditProductModal.addEventListener('click', () => editProductModal.classList.add('hidden'));
-            uploadEditImageBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                openCloudinaryWidget(editImageURLInput, editImagePreview);
-            });
-            saveEditProductButton.addEventListener('click', async () => {
-                const productKey = document.getElementById('editProductKey').value;
-                const updates = {
-                    name: document.getElementById('editName').value.trim(),
-                    nameEN: document.getElementById('editNameEN').value.trim(),
-                    desc: document.getElementById('editDesc').value.trim(),
-                    descEN: document.getElementById('editDescEN').value.trim(),
-                    price: parseFloat(document.getElementById('editPrice').value),
-                    category: document.getElementById('editCategory').value,
-                    image: editImageURLInput.value.trim()
-                };
-                
-                if (isNaN(updates.price)) { alert('Lütfen geçerli bir fiyat giriniz.'); return; }
-
-                try {
-                    if (!updates.image) updates.image = ''; 
-
-                    await updateProductInFirebase(productKey, updates); 
-                    editProductModal.classList.add('hidden');
-                    alert(`"${updates.name}" ürünü başarıyla güncellendi.`);
-                } catch (error) {
-                    alert("Güncelleme işlemi başarısız oldu: " + error.message);
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+                    <p class="text-sm text-gray-500 mt-2">NOT: Günlük sayaç Firebase'de gün bazında tut
