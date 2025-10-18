@@ -22,44 +22,48 @@
         height: 4rem; 
     }
     
-    /* --- GÜNCELLENMİŞ KAMPANYA SLIDER STİLLERİ (Oran Koruma ve Tam Sığdırma) --- */
-    /* Slider'ın kapsayıcısı olan .bg-white div'i p-0 ile padding'i sıfırladık. */
-    
+    /* -------------------------------------------------------- */
+    /* --- GÜNCEL KAMPANYA SLIDER STİLLERİ (16:9 ORAN KORUMA) --- */
+    /* Bu teknik, görseli kırpmaz ve her zaman 16:9 oranını korur. */
     .slider-container {
         position: relative;
         overflow: hidden;
         width: 100%;
-        /* YENİ: Sabit yükseklik veya max-height kaldırıldı. İçerik belirleyecek. */
-        height: auto; 
+        height: 0; /* Yüksekliği sıfırlıyoruz */
+        /* KRİTİK AYAR: 16:9 oranı için (9/16)*100 = 56.25% */
+        padding-bottom: 56.25%; 
     }
 
     .slide-wrapper {
         display: flex;
         transition: transform 0.5s ease-in-out;
-        height: auto; 
-        /* ELLE KAYDIRMA İÇİN EKLENDİ */
-        cursor: grab; /* Fare imleci görünümü */
-        user-select: none; /* Metin seçimini engelle */
+        /* Wrapper'ı kapsayıcının tam içine oturtuyoruz */
+        position: absolute; 
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        /* ELLE KAYDIRMA İÇİN */
+        cursor: grab; 
+        user-select: none; 
     }
     
     .slide-wrapper:active {
-        cursor: grabbing; /* Sürükleme sırasında imleç */
+        cursor: grabbing; 
     }
 
     .slide {
         min-width: 100%;
         flex-shrink: 0;
         position: relative; 
-        height: auto; 
+        height: 100%; 
     }
 
     .slide img {
         width: 100%;
-        /* YENİ: Yüksekliği otomatik olarak görselin oranına göre ayarlar */
-        height: auto; 
-        /* EN İYİ ÇÖZÜM: Görseli kırpmadan, kutu içine tamamını sığdırır. */
-        object-fit: contain; 
-        /* Yatay görsel sığdırılırken kenarda kalan kısımlar için siyah arka plan (görselinizin siyah temasına uygun) */
+        height: 100%; 
+        /* Oran korunduğu için cover veya contain fark etmez, ama cover daha yaygındır */
+        object-fit: cover; 
         background-color: black; 
         border-radius: 0.75rem; /* rounded-xl'a karşılık gelir */
     }
@@ -195,7 +199,7 @@
     let currentSlide = 0;
     let sliderInterval;
     
-    // ELLE KAYDIRMA İÇİN YENİ DEĞİŞKENLER
+    // ELLE KAYDIRMA İÇİN DEĞİŞKENLER
     let isDragging = false;
     let startPos = 0;
     let currentTranslate = 0;
@@ -223,11 +227,10 @@
     let categoriesEN = Object.values(categoryTranslations);
 
     
-    // --- SLIDER İŞLEVLERİ (GÜNCELLEMİŞ) ---
+    // --- SLIDER İŞLEVLERİ ---
     
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
-        // Slayt genişliğini alırken null kontrolü
         const slideElement = document.querySelector('.slide');
         if (!slideElement) return;
         
@@ -261,22 +264,19 @@
     function dragStart(e) {
         if (campaignUrls.length <= 1) return;
         isDragging = true;
-        // Dokunmatik veya fare başlangıç konumu
         startPos = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
         transitionStart();
-        prevTranslate = currentTranslate; // Sürükleme başlangıcındaki mevcut konumu kaydet
-        // Otomatik kaydırmayı durdur
+        prevTranslate = currentTranslate;
         if (sliderInterval) clearInterval(sliderInterval);
     }
     
     function drag(e) {
         if (!isDragging) return;
-        e.preventDefault(); // Kaydırma sırasında tarayıcının varsayılan hareketini engelle (özellikle mobilde)
+        e.preventDefault();
         
         const currentPosition = e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
         const diff = currentPosition - startPos;
         
-        // Yeni konumu hesapla (eski konum + sürükleme farkı)
         currentTranslate = prevTranslate + diff;
         setSliderPosition();
     }
@@ -288,33 +288,25 @@
         
         const movedBy = currentTranslate - prevTranslate;
         
-        // 1. Eşiği Geçti mi? (Sağa veya Sola)
         if (movedBy < -DRAG_THRESHOLD && currentSlide < campaignUrls.length - 1) {
-            // Sola sürükle (bir sonraki slayt)
             currentSlide++;
         } else if (movedBy > DRAG_THRESHOLD && currentSlide > 0) {
-            // Sağa sürükle (bir önceki slayt)
             currentSlide--;
         }
         
-        // Son konuma hareket et (kaydırma eşiğini geçse de geçmese de)
         setPositionByIndex();
-        
-        // Otomatik kaydırmayı tekrar başlat
         startSliderInterval(); 
     }
     
     // Ana Slider Fonksiyonları
     function startSliderInterval() {
-        // Zaten bir interval varsa temizle
         if (sliderInterval) clearInterval(sliderInterval);
         
-        // Sadece birden fazla görsel varsa otomatik kaydırmayı başlat
         if (campaignUrls.length > 1) {
             sliderInterval = setInterval(() => {
                 const nextSlide = (currentSlide + 1) % campaignUrls.length;
                 goToSlide(nextSlide);
-            }, 5000); // 5 saniyede bir kaydır
+            }, 5000); 
         }
     }
 
@@ -325,7 +317,7 @@
         const dots = document.querySelectorAll('#campaignSlider .dot');
         
         setPositionByIndex();
-        transitionEnd(); // Animasyonu etkinleştir
+        transitionEnd();
         
         dots.forEach((dot, i) => {
             dot.classList.toggle('active', i === currentSlide);
@@ -335,11 +327,11 @@
     function renderCampaignSlider() {
         if (campaignUrls.length === 0) {
             campaignSliderSection.innerHTML = '';
-            campaignSliderSection.parentElement.classList.add('hidden'); // Kapsayıcı div'i gizle
+            campaignSliderSection.parentElement.classList.add('hidden');
             return;
         }
 
-        campaignSliderSection.parentElement.classList.remove('hidden'); // Kapsayıcı div'i göster
+        campaignSliderSection.parentElement.classList.remove('hidden');
         
         const priceTagHtml = campaignPriceText ? `
             <div class="campaign-price-tag ${campaignPriceText.length > 8 ? 'long-text' : ''}">
@@ -347,7 +339,7 @@
             </div>
         ` : '';
 
-        // Görselin üzerindeki fiyat etiketini sadece ilk görsel için render et
+        // Fiyat etiketi sadece ilk görselde gösterilecek
         const slidesHtml = campaignUrls.map((c, index) => `
             <div class="slide">
                 <img src="${c.url}" alt="Kampanya Görseli" class="rounded-xl">
@@ -372,29 +364,25 @@
 
         // Sürükleme Olaylarını Ekle
         const sliderWrapper = document.querySelector('#campaignSlider .slide-wrapper');
-        
-        // Dokunmatik olaylar (Mobil)
-        sliderWrapper.addEventListener('touchstart', dragStart);
-        sliderWrapper.addEventListener('touchend', dragEnd);
-        sliderWrapper.addEventListener('touchmove', drag);
-        
-        // Fare olayları (Masaüstü)
-        sliderWrapper.addEventListener('mousedown', dragStart);
-        sliderWrapper.addEventListener('mouseup', dragEnd);
-        sliderWrapper.addEventListener('mouseleave', dragEnd); // Fare kaydırıcının dışına çıkarsa bırak
-        sliderWrapper.addEventListener('mousemove', drag);
-        
+        if (sliderWrapper) {
+            sliderWrapper.addEventListener('touchstart', dragStart);
+            sliderWrapper.addEventListener('touchend', dragEnd);
+            sliderWrapper.addEventListener('touchmove', drag);
+            
+            sliderWrapper.addEventListener('mousedown', dragStart);
+            sliderWrapper.addEventListener('mouseup', dragEnd);
+            sliderWrapper.addEventListener('mouseleave', dragEnd);
+            sliderWrapper.addEventListener('mousemove', drag);
+        }
         
         // Dotlara tıklama olayını ekle
         document.querySelectorAll('#campaignSlider .dot').forEach(dot => {
             dot.addEventListener('click', (e) => {
                 goToSlide(parseInt(e.target.dataset.index));
-                // Manuel tıklamadan sonra otomatik kaydırmayı sıfırla
                 startSliderInterval(); 
             });
         });
         
-        // İlk yüklemede doğru slayta git ve otomatik kaydırmayı başlat
         goToSlide(currentSlide);
         startSliderInterval();
     }
@@ -492,15 +480,13 @@
              // Görselleri zaman damgasına göre sırala (en son eklenen en başta)
              campaignUrls.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
              
-             // Slider'ı yeniden render et
-             currentSlide = 0; // Görseller değişince slaytı sıfırla
+             currentSlide = 0; 
              renderCampaignSlider();
         });
         
         // Kampanya Fiyat Metni Dinleyicisi
         campaignInfoRef.child('price_text').on('value', (snapshot) => {
              campaignPriceText = snapshot.val() || "";
-             // Slider'ı yeniden render et
              renderCampaignSlider();
         });
     }
@@ -534,6 +520,7 @@
         const priceUpdateText = formatRelativeDate(p.lastUpdated); 
         const lastUpdateLabel = language === 'TR' ? 'Fiyat güncellendi:' : 'Price updated:';
         
+        // Ürün görseli (h-40 sabit yüksekliği kullanıyor)
         const imageUrl = p.image && p.image.trim() !== '' 
                          ? p.image 
                          : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="10" fill="%239ca3af">Görsel Yüklenmedi</text></svg>';
@@ -642,6 +629,7 @@
         const loginError = document.getElementById('loginError');
         const adminLoginModal = document.getElementById('adminLoginModal');
         
+        // Şifrenin 'admin123' olduğunu varsayıyoruz.
         if(passwordInput.value==='admin123'){ 
             adminLoginModal.classList.add('hidden');
             window.location.href = 'admin.html'; 
