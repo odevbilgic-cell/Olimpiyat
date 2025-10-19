@@ -162,7 +162,7 @@
       
       <a id="goToRatingLink" 
          href="https://search.google.com/local/writereview?placeid=ChIJXXQYlvDIyhQReratRBFh_TY" 
-         class="bg-green-500 text-white px-6 py-3 rounded-xl w-full font-bold text-lg 
+         target="_blank"  class="bg-green-500 text-white px-6 py-3 rounded-xl w-full font-bold text-lg 
                 flex items-center justify-center space-x-2 hover:bg-green-600 transition">
           <span>Hemen 5 Yıldız Ver</span> 
           <span>⭐</span>
@@ -173,9 +173,6 @@
           Hayır, teşekkürler
       </button>
     </div>
-  </div>
-  <div id="feedbackMessage" class="hidden fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl z-[200] transition-opacity duration-300 opacity-0">
-    <span id="feedbackText">Teşekkürler! Yorumunuzu bekliyoruz.</span>
   </div>
   <script>
     // --- Firebase Yapılandırması ---
@@ -203,8 +200,6 @@
     const ratingModal = document.getElementById('ratingModal'); 
     const goToRatingLink = document.getElementById('goToRatingLink'); 
     const closeRatingModal = document.getElementById('closeRatingModal'); 
-    const feedbackMessage = document.getElementById('feedbackMessage'); // YENİ
-    const feedbackText = document.getElementById('feedbackText');       // YENİ
 
     let language = 'TR'; 
     let products = []; 
@@ -344,7 +339,6 @@
     // --- YARDIMCI VE FIREBASE FONKSİYONLARI (Aynı Kaldı) ---
 
     function formatRelativeDate(timestamp) {
-        // ... (fonksiyon içeriği aynı kaldı)
         if (!timestamp) return "";
         const now = Date.now();
         const diffTime = now - timestamp; 
@@ -396,7 +390,6 @@
 
 
     function transformProducts(dataSnapshot) {
-      // ... (fonksiyon içeriği aynı kaldı)
       const productsArray = [];
       dataSnapshot.forEach(childSnapshot => {
         const product = childSnapshot.val();
@@ -411,7 +404,6 @@
     }
 
     function setupFirebaseListener() {
-      // ... (fonksiyon içeriği aynı kaldı)
         productsRef.on('value', (snapshot) => {
             products = snapshot.exists() ? transformProducts(snapshot) : [];
             updateLanguageContent(); 
@@ -440,7 +432,6 @@
     }
 
     function trackVisitor() {
-      // ... (fonksiyon içeriği aynı kaldı)
         const today = new Date().toISOString().slice(0, 10); 
         const counterRef = visitorsRef.child(today);
         
@@ -453,7 +444,6 @@
 
 
     function renderMenu(category='Tümü'){
-      // ... (fonksiyon içeriği aynı kaldı)
       menuContainer.innerHTML='';
       const filtered = category==='Tümü'?products:products.filter(p=>p.category===category);
 
@@ -491,12 +481,11 @@
     }
 
     function createCategoryTabs(){
-      // ... (fonksiyon içeriği aynı kaldı)
         const tabButtonsContainer = document.getElementById('categoryTabs');
         tabButtonsContainer.innerHTML = '';
         const categoriesToIterate = categoriesTR;
 
-        categoriesToiterate.forEach((catTR, index) => {
+        categoriesToIterate.forEach((catTR, index) => {
             let btn = document.createElement('button');
             const catName = language === 'TR' ? catTR : categoriesEN[index];
 
@@ -528,7 +517,6 @@
     }
 
     function updateLanguageContent() {
-      // ... (fonksiyon içeriği aynı kaldı)
         const langTR = document.getElementById('langTR');
         const langEN = document.getElementById('langEN');
         const contactTitle = document.getElementById('contactTitle');
@@ -600,25 +588,12 @@
         });
     }
 
-    // Yorum linkine tıklandığında: Kalıcı olarak yorum yapma ekranına gitti kaydını tut VE geri bildirim göster
+    // Yorum linkine tıklandığında: Kalıcı olarak yorum yapma ekranına gitti kaydını tut
     goToRatingLink.addEventListener('click', () => {
-        // 1. Kalıcı kaydı tut: Bir daha bu cihazda hiç gösterme
+        // Kalıcı kaydı tut: Bir daha bu cihazda hiç gösterme
         localStorage.setItem('olimpiyat_rated', 'true'); 
         ratingModal.classList.add('hidden');
-        
-        // 2. Geri bildirim mesajını göster
-        feedbackText.textContent = "Google yorum sayfasına yönlendiriliyorsunuz. Yorumunuz için şimdiden teşekkürler! 🎉";
-        feedbackMessage.classList.remove('hidden', 'opacity-0');
-        feedbackMessage.classList.add('opacity-100');
-
-        // 5 saniye sonra mesajı kapat
-        setTimeout(() => {
-            feedbackMessage.classList.remove('opacity-100');
-            feedbackMessage.classList.add('opacity-0');
-            setTimeout(() => {
-                feedbackMessage.classList.add('hidden');
-            }, 300); // CSS geçiş süresi kadar bekler
-        }, 5000); 
+        // Not: target="_blank" sayesinde yeni sekmede açılacak, menü açık kalacak.
     });
 
     // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat kaydını tut (Session Storage kullan)
