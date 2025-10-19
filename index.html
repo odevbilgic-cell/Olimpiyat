@@ -122,12 +122,6 @@
         padding: 6px;
     }
     
-    /* Eski Puanlama Butonu Stili (Şu an HTML'de kullanılmıyor ama stili tutalım) */
-    #ratingButton {
-        border: 2px solid #f97316; 
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); 
-    }
-    
   </style>
 </head>
 <body class="text-gray-800">
@@ -575,24 +569,19 @@
         }
     }
     
-    // --- YORUM MODALI MANTIĞI (Günlük Limitli Tekrar) ---
+    // --- YORUM MODALI MANTIĞI (Kalıcı Kapatma) ---
 
+    // Modalı gösterme zaman aralıkları (milisaniye cinsinden)
     const RATING_INTERVALS = [6000, 12000, 18000]; // 6. sn, 12. sn, 18. sn
-    const LAST_RATING_ATTEMPT_KEY = 'olimpiyat_last_rating_attempt';
-
-    function isModalDisabledForToday() {
-        const lastAttemptDate = localStorage.getItem(LAST_RATING_ATTEMPT_KEY);
-        if (!lastAttemptDate) return false;
-
-        const today = new Date().toISOString().slice(0, 10);
-        
-        // Eğer son deneme tarihi bugünün tarihi ise, modalı bugün gösterme
-        return lastAttemptDate === today;
+    
+    function isModalPermanentlyDisabled() {
+        // Yorum linkine tıklanmışsa (olimpiyat_rated: true) bir daha gösterme
+        return localStorage.getItem('olimpiyat_rated') === 'true';
     }
 
     function showRatingModal() {
-        // 1. Eğer bugün zaten göstermişsek, tekrar gösterme (Günlük limit)
-        if (isModalDisabledForToday()) {
+        // 1. Kalıcı olarak kapatılıp kapatılmadığını kontrol et
+        if (isModalPermanentlyDisabled()) {
             return;
         }
 
@@ -603,36 +592,32 @@
     }
     
     function setupIntervals() {
-        // Eğer bugün zaten gösterim denemesi yapılmışsa, interval kurma
-        if (isModalDisabledForToday()) {
+        // Zaten kalıcı olarak kapatılmışsa zamanlayıcıları kurmaya gerek yok
+        if (isModalPermanentlyDisabled()) {
             return;
         }
         
-        // Gösterim denemesi yapıldığına dair bugünün tarihini kaydet (localStorage)
-        const today = new Date().toISOString().slice(0, 10);
-        localStorage.setItem(LAST_RATING_ATTEMPT_KEY, today);
-
-
         // Belirlenen zaman aralıklarında modalı göstermeye çalış
         RATING_INTERVALS.forEach(delay => {
             setTimeout(() => {
-                // Sadece modal zaten açık değilse ve oturumda kapatılmamışsa tekrar göster
-                if (ratingModal.classList.contains('hidden')) {
+                // Sadece modal zaten açık değilse ve kalıcı olarak kapatılmamışsa tekrar göster
+                if (ratingModal.classList.contains('hidden') && !isModalPermanentlyDisabled()) {
                     showRatingModal();
                 }
             }, delay);
         });
     }
 
-    // Yorum linkine tıklandığında: Sadece modalı kapat (Kalıcı kayıt YOK)
+    // Yorum linkine tıklandığında: Kalıcı olarak yorum yapma ekranına gitti kaydını tut
     goToRatingLink.addEventListener('click', () => {
-        // Kullanıcı yoruma niyetlendi, modalı kapatalım. Tekrar gösterme mantığı interval'larda devam edecek.
+        // Kalıcı kaydı tut: Bir daha bu cihazda hiç gösterme
+        localStorage.setItem('olimpiyat_rated', 'true'); 
         ratingModal.classList.add('hidden');
     });
 
-    // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat (Session Storage kullan)
+    // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat kaydını tut (Session Storage kullan)
     closeRatingModal.addEventListener('click', () => {
-        // Session storage kullanıyoruz, böylece sekme kapatıldığında otomatik silinir
+        // Geçici kaydı tut (Oturum bitince silinir)
         sessionStorage.setItem('olimpiyat_rated_session_closed', 'true');
         ratingModal.classList.add('hidden');
     });
