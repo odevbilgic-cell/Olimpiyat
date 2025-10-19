@@ -14,18 +14,23 @@
     .active-tab { background-color: #fb923c; color: white; }
     #categoryTabs::-webkit-scrollbar { display: none; }
     #categoryTabs { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Tarih bilgisini sağ altta ve küçük tutar */
     .price-update-info { font-size: 0.7rem; color: #6b7280; margin-top: 5px; } 
-    #mainHeader { height: 4rem; }
+
+    /* Header'ı sabitlemek ve kategori nav ile çakışmasını önlemek için sabit yükseklik */
+    #mainHeader { 
+        height: 4rem; 
+    }
     
     /* -------------------------------------------------------- */
-    /* --- KAMPANYA SLIDER STİLLERİ --- */
+    /* --- KAMPANYA SLIDER STİLLERİ (YUMUŞAK GEÇİŞ AKTİF) --- */
     
     .slider-container {
         position: relative;
         overflow: hidden;
         width: 100%;
         height: 0; 
-        padding-bottom: 56.25%; 
+        padding-bottom: 56.25%; /* 16:9 oranı sağlar */
     }
 
     .slide-wrapper {
@@ -36,7 +41,11 @@
         width: 100%; 
         height: 100%;
         overflow-x: auto; 
+        
+        /* Kaydırmayı yatay (x ekseni) ekseninde kilitler */
         scroll-snap-type: x mandatory; 
+        
+        /* Kaydırma hareketini yavaş ve yumuşak yapar */
         scroll-behavior: smooth; 
     }
     
@@ -46,6 +55,8 @@
         flex-shrink: 0;
         position: relative; 
         height: 100%; 
+        
+        /* Kaydırmanın bu elementin başlangıcına kilitlenmesini sağlar */
         scroll-snap-align: start; 
     }
 
@@ -80,6 +91,7 @@
         background-color: #fb923c;
     }
     
+    /* YUVARLAK KAMPANYA FİYAT ETİKETİ */
     .campaign-price-tag {
         position: absolute;
         bottom: 15px; 
@@ -102,6 +114,7 @@
         line-height: 1.2;
     }
     
+    /* Uzun metinler için etiketi biraz büyüt */
     .campaign-price-tag.long-text {
         min-width: 70px;
         height: 70px;
@@ -109,6 +122,7 @@
         padding: 6px;
     }
     
+    /* Eski Puanlama Butonu Stili (Şu an HTML'de kullanılmıyor ama stili tutalım) */
     #ratingButton {
         border: 2px solid #f97316; 
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); 
@@ -203,9 +217,9 @@
     const menuContainer = document.getElementById('menuContainer');
     const contactSection = document.getElementById('contactSection');
     const campaignSliderSection = document.getElementById('campaignSlider'); 
-    const ratingModal = document.getElementById('ratingModal'); // Yeni modal
-    const goToRatingLink = document.getElementById('goToRatingLink'); // Yeni link
-    const closeRatingModal = document.getElementById('closeRatingModal'); // Yeni kapatma butonu
+    const ratingModal = document.getElementById('ratingModal'); 
+    const goToRatingLink = document.getElementById('goToRatingLink'); 
+    const closeRatingModal = document.getElementById('closeRatingModal'); 
 
     let language = 'TR'; 
     let products = []; 
@@ -214,7 +228,7 @@
     let currentSlide = 0;
     let sliderInterval;
     
-    // Kategori çevirileri (Aynı kaldı)
+    // Kategori çevirileri
     const categoryTranslations = {
       'Tümü': 'All', 
       'Menüler': 'Menus', 
@@ -235,11 +249,10 @@
     let categoriesEN = Object.values(categoryTranslations);
 
     
-    // --- SLIDER İŞLEVLERİ (Aynı Kaldı) ---
+    // --- SLIDER İŞLEVLERİ ---
     
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
-        
         const sliderContainer = document.querySelector('#campaignSlider');
         const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
         if (!wrapper || !sliderContainer) return;
@@ -343,7 +356,7 @@
     }
 
 
-    // --- ZAMAN VE TARİH YARDIMCI FONKSİYONU (Aynı Kaldı) ---
+    // --- ZAMAN VE TARİH YARDIMCI FONKSİYONU ---
 
     function formatRelativeDate(timestamp) {
         if (!timestamp) return "";
@@ -396,7 +409,7 @@
     }
 
 
-    // --- FIREBASE VERİ İŞLEME VE DİNLEYİCİLER (Aynı Kaldı) ---
+    // --- FIREBASE VERİ İŞLEME VE DİNLEYİCİLER ---
 
     function transformProducts(dataSnapshot) {
       const productsArray = [];
@@ -440,7 +453,7 @@
         });
     }
 
-    // --- ZİYARETÇİ SAYACI İŞLEVİ (Aynı Kaldı) ---
+    // --- ZİYARETÇİ SAYACI İŞLEVİ ---
 
     function trackVisitor() {
         const today = new Date().toISOString().slice(0, 10); 
@@ -454,7 +467,7 @@
     }
 
 
-    // --- UI GÜNCELLEMELERİ (Aynı Kaldı) ---
+    // --- UI GÜNCELLEMELERİ ---
 
     function renderMenu(category='Tümü'){
       menuContainer.innerHTML='';
@@ -562,35 +575,70 @@
         }
     }
     
-    // --- YENİ MODAL MANTIĞI ---
+    // --- YORUM MODALI MANTIĞI (Günlük Limitli Tekrar) ---
+
+    const RATING_INTERVALS = [6000, 12000, 18000]; // 6. sn, 12. sn, 18. sn
+    const LAST_RATING_ATTEMPT_KEY = 'olimpiyat_last_rating_attempt';
+
+    function isModalDisabledForToday() {
+        const lastAttemptDate = localStorage.getItem(LAST_RATING_ATTEMPT_KEY);
+        if (!lastAttemptDate) return false;
+
+        const today = new Date().toISOString().slice(0, 10);
+        
+        // Eğer son deneme tarihi bugünün tarihi ise, modalı bugün gösterme
+        return lastAttemptDate === today;
+    }
 
     function showRatingModal() {
-        // Eğer daha önce yorum linkine tıklanmışsa veya kapatılmışsa gösterme
-        const hasRated = localStorage.getItem('olimpiyat_rated');
-        if (hasRated) {
+        // 1. Eğer bugün zaten göstermişsek, tekrar gösterme (Günlük limit)
+        if (isModalDisabledForToday()) {
+            return;
+        }
+
+        // 2. Eğer kullanıcı bu oturumda "Hayır, teşekkürler" dememişse göster (sessionStorage)
+        if (sessionStorage.getItem('olimpiyat_rated_session_closed') !== 'true') {
+            ratingModal.classList.remove('hidden');
+        }
+    }
+    
+    function setupIntervals() {
+        // Eğer bugün zaten gösterim denemesi yapılmışsa, interval kurma
+        if (isModalDisabledForToday()) {
             return;
         }
         
-        // 6 saniye sonra modalı göster
-        setTimeout(() => {
-            ratingModal.classList.remove('hidden');
-        }, 6000); 
+        // Gösterim denemesi yapıldığına dair bugünün tarihini kaydet (localStorage)
+        const today = new Date().toISOString().slice(0, 10);
+        localStorage.setItem(LAST_RATING_ATTEMPT_KEY, today);
+
+
+        // Belirlenen zaman aralıklarında modalı göstermeye çalış
+        RATING_INTERVALS.forEach(delay => {
+            setTimeout(() => {
+                // Sadece modal zaten açık değilse ve oturumda kapatılmamışsa tekrar göster
+                if (ratingModal.classList.contains('hidden')) {
+                    showRatingModal();
+                }
+            }, delay);
+        });
     }
-    
-    // Yorum linkine tıklandığında, modalı kapat ve 'olimpiyat_rated' kaydını ayarla
+
+    // Yorum linkine tıklandığında: Sadece modalı kapat (Kalıcı kayıt YOK)
     goToRatingLink.addEventListener('click', () => {
-        localStorage.setItem('olimpiyat_rated', 'true');
+        // Kullanıcı yoruma niyetlendi, modalı kapatalım. Tekrar gösterme mantığı interval'larda devam edecek.
         ratingModal.classList.add('hidden');
     });
 
-    // Kapatma butonuna tıklandığında, modalı kapat ve 'olimpiyat_rated' kaydını ayarla (Yorumu reddetti olarak işaretle)
+    // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat (Session Storage kullan)
     closeRatingModal.addEventListener('click', () => {
-        localStorage.setItem('olimpiyat_rated', 'closed'); // Farklı bir değerle kapatıldığını kaydet
+        // Session storage kullanıyoruz, böylece sekme kapatıldığında otomatik silinir
+        sessionStorage.setItem('olimpiyat_rated_session_closed', 'true');
         ratingModal.classList.add('hidden');
     });
 
-
-    // --- EVENT LISTENERS (Aynı Kaldı) ---
+    
+    // --- EVENT LISTENERS ---
 
     document.getElementById('langTR').addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
     document.getElementById('langEN').addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
@@ -616,11 +664,10 @@
       setupFirebaseListener(); 
       trackVisitor(); 
       
-      // Pencere boyutu değiştiğinde slider pozisyonunu yeniden hesapla
       window.addEventListener('resize', setPositionByIndex); 
       
-      // Modal'ı gösterme mantığını çalıştır
-      showRatingModal(); 
+      // Zamanlayıcıları kur
+      setupIntervals();
     });
   </script>
 </body>
