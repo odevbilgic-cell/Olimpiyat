@@ -110,36 +110,74 @@
     }
     
     /* -------------------------------------------------------- */
-    /* --- YENİ: SABİT YORUM BUTONU STİLİ --- */
+    /* --- YENİ: SABİT YORUM BUTONU STİLİ VE ANİMASYON --- */
     
     #floatingRatingButton {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        width: 60px;
-        height: 60px;
+        width: 90px; /* Daha geniş */
+        height: 90px; /* Daha geniş */
         border-radius: 50%;
-        background-color: #4285F4; /* Google Mavi */
+        background-color: #fb923c; /* Turuncu (sitenin rengiyle uyumlu) */
         color: white;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        z-index: 50; /* Diğer her şeyin üstünde olsun */
+        z-index: 50; 
+        cursor: grab; /* Sürükleme işareti */
+        transition: box-shadow 0.2s;
+        border: 4px solid white; /* Beyaz çerçeve */
+        user-select: none; /* Metin seçilmesini engeller */
+    }
+    
+    #floatingRatingButton:active {
+        cursor: grabbing;
+    }
+    
+    /* Kalp Ritmi (Pulse) Animasyonu */
+    @keyframes pulse-beat {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    #ratingText {
+        font-size: 0.9rem;
+        font-weight: bold;
+        text-align: center;
+        line-height: 1.2;
+        padding: 0 5px;
+        /* Animasyonu uygula */
+        animation: pulse-beat 1.5s infinite; 
+    }
+    
+    /* Kapatma Butonu */
+    #closeFloatingButton {
+        position: absolute;
+        top: 0px; 
+        left: 5px; /* Sol üste yakın */
+        width: 20px;
+        height: 20px;
+        background-color: rgba(255, 255, 255, 0.8);
+        color: #333;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.8rem;
+        font-weight: bold;
         cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        border: 4px solid white; /* Beyaz çerçeve ekler */
+        z-index: 51; /* Ana butonun üzerinde olsun */
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
     
-    #floatingRatingButton:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
-    }
-    
-    /* Google 'G' simgesi SVG için stil */
-    #googleGSvg {
-        width: 28px;
-        height: 28px;
+    /* Kaydedilen konum için (JS tarafından eklenecek) */
+    .initial-position {
+        right: 20px;
+        bottom: 20px;
     }
     
   </style>
@@ -208,13 +246,9 @@
       </button>
     </div>
   </div>
-  <button id="floatingRatingButton" title="Bizi Google'da Puanlayın">
-      <svg id="googleGSvg" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg">
-          <path d="M533.5 272.2c0-18.7-1.5-37.1-4.7-55H267.3v104.9h148.8c-6.7 34.3-26.6 63.8-55.9 83.5l-2.4 1.9 82.5 63.8 5.7.8c51-47.3 80.9-115.9 80.9-199.9z" fill="#4285f4"/>
-          <path d="M267.3 544.3c71.2 0 131.2-23.7 174.9-64.4l-88.7-68.6c-24.5 16.5-56.1 26.3-86.2 26.3-66.2 0-122.4-44.8-142.3-104.5l-3.3.6-86.1 66.7-.8 2.6c39.6 78.4 117.8 132.8 207.5 132.8z" fill="#34a853"/>
-          <path d="M125 324.7c-5.7-16.5-9.3-34.1-9.3-52.5s3.6-36 9.3-52.5l-90.4-70v303z" fill="#fbbc05"/>
-          <path d="M267.3 108.8c39 0 68.7 17.5 84.7 32.4L412.3 84C366.6 39.5 325 0 267.3 0 177.6 0 99.4 54.4 59.8 132.8l90.4 70.1c19.9-59.7 76.1-104.5 142.2-104.5z" fill="#ea4335"/>
-      </svg>
+  <button id="floatingRatingButton" class="initial-position" title="Bizi Google'da Puanlayın">
+      <div id="closeFloatingButton">x</div> 
+      <span id="ratingText">Tıkla<br>Puanla</span>
   </button>
   <script>
     // --- Firebase Yapılandırması (Aynı Kaldı) ---
@@ -242,7 +276,8 @@
     const ratingModal = document.getElementById('ratingModal'); 
     const goToRatingLink = document.getElementById('goToRatingLink'); 
     const closeRatingModal = document.getElementById('closeRatingModal'); 
-    const floatingRatingButton = document.getElementById('floatingRatingButton'); // YENİ
+    const floatingRatingButton = document.getElementById('floatingRatingButton'); 
+    const closeFloatingButton = document.getElementById('closeFloatingButton'); // YENİ
 
     let language = 'TR'; 
     let products = []; 
@@ -272,8 +307,12 @@
     let categoriesEN = Object.values(categoryTranslations);
 
     
-    // --- SLIDER İŞLEVLERİ (Aynı Kaldı) ---
+    // --- SLIDER İŞLEVLERİ, FIREBASE, RENDER FONKSİYONLARI (Aynı Kaldı) ---
     
+    // (setPositionByIndex, startSliderInterval, goToSlide, handleScroll, renderCampaignSlider, 
+    // formatRelativeDate, transformProducts, setupFirebaseListener, trackVisitor, 
+    // renderMenu, createCategoryTabs, updateLanguageContent fonksiyonları aynı kalmıştır)
+
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
         const sliderContainer = document.querySelector('#campaignSlider');
@@ -378,8 +417,6 @@
         startSliderInterval();
     }
 
-
-    // --- YARDIMCI VE FIREBASE FONKSİYONLARI (Aynı Kaldı) ---
 
     function formatRelativeDate(timestamp) {
         if (!timestamp) return "";
@@ -592,38 +629,36 @@
         }
     }
     
-    // --- YORUM MODALI MANTIĞI ---
+    // --- YORUM MODALI VE SABİT BUTON MANTIĞI ---
 
     // Modalı gösterme zaman aralıkları (milisaniye cinsinden)
     const RATING_INTERVALS = [6000, 12000, 18000]; // 6. sn, 12. sn, 18. sn
     
+    // Kalıcı olarak yorum modalının veya sabit butonun kapatılıp kapatılmadığını kontrol eder
     function isModalPermanentlyDisabled() {
-        // Yorum linkine tıklanmışsa (olimpiyat_rated: true) bir daha gösterme
         return localStorage.getItem('olimpiyat_rated') === 'true';
+    }
+    
+    function isFloatingButtonClosed() {
+        return localStorage.getItem('olimpiyat_floating_closed') === 'true';
     }
 
     function showRatingModal() {
-        // 1. Kalıcı olarak kapatılıp kapatılmadığını kontrol et
-        if (isModalPermanentlyDisabled()) {
+        // Otomatik açılış sadece kalıcı olarak kapatılmamışsa ve bu oturumda kapatılmamışsa
+        if (isModalPermanentlyDisabled() || sessionStorage.getItem('olimpiyat_rated_session_closed') === 'true') {
             return;
         }
 
-        // 2. Eğer kullanıcı bu oturumda "Hayır, teşekkürler" dememişse göster (sessionStorage)
-        if (sessionStorage.getItem('olimpiyat_rated_session_closed') !== 'true') {
-            ratingModal.classList.remove('hidden');
-        }
+        ratingModal.classList.remove('hidden');
     }
     
     function setupIntervals() {
-        // Zaten kalıcı olarak kapatılmışsa zamanlayıcıları kurmaya gerek yok
         if (isModalPermanentlyDisabled()) {
             return;
         }
         
-        // Belirlenen zaman aralıklarında modalı göstermeye çalış
         RATING_INTERVALS.forEach(delay => {
             setTimeout(() => {
-                // Sadece modal zaten açık değilse ve kalıcı olarak kapatılmamışsa tekrar göster
                 if (ratingModal.classList.contains('hidden') && !isModalPermanentlyDisabled()) {
                     showRatingModal();
                 }
@@ -633,26 +668,148 @@
 
     // Yorum linkine tıklandığında: Kalıcı olarak yorum yapma ekranına gitti kaydını tut
     goToRatingLink.addEventListener('click', () => {
-        // Kalıcı kaydı tut: Bir daha bu cihazda hiç gösterme
         localStorage.setItem('olimpiyat_rated', 'true'); 
         ratingModal.classList.add('hidden');
+        // Hem modal hem de sabit butonu gizleyelim, kullanıcı yoruma gitti.
+        floatingRatingButton.classList.add('hidden');
+        localStorage.setItem('olimpiyat_floating_closed', 'true');
     });
 
     // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat kaydını tut (Session Storage kullan)
     closeRatingModal.addEventListener('click', () => {
-        // Geçici kaydı tut (Oturum bitince silinir)
         sessionStorage.setItem('olimpiyat_rated_session_closed', 'true');
         ratingModal.classList.add('hidden');
     });
     
-    // YENİ: Sabit butona tıklandığında modalı göster
-    floatingRatingButton.addEventListener('click', () => {
-        // Kalıcı olarak kapatılmış olsa bile, kullanıcı butona tıklıyorsa modalı göstermek istiyordur.
-        // Bu yüzden isModalPermanentlyDisabled() kontrolü yapmıyoruz, direkt gösteriyoruz.
-        ratingModal.classList.remove('hidden');
+    // YENİ: Sabit butona TIKLAMA işlevi (modalı açar)
+    floatingRatingButton.addEventListener('click', (event) => {
+        // Eğer tıklama kapatma butonundan gelmediyse modalı aç
+        if (event.target !== closeFloatingButton && !closeFloatingButton.contains(event.target)) {
+            ratingModal.classList.remove('hidden');
+        }
+    });
+    
+    // YENİ: Sabit butondaki kapatma (x) butonuna tıklandığında
+    closeFloatingButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Butonun ana tıklama olayını engelle
+        floatingRatingButton.classList.add('hidden');
+        // Kalıcı olarak kapat kaydını tut
+        localStorage.setItem('olimpiyat_floating_closed', 'true');
     });
 
+    // --- YENİ: SÜRÜKLEME (DRAG) İŞLEVİ ---
+    
+    let isDragging = false;
+    let offsetX, offsetY;
+    let initialX, initialY;
+    
+    function onMouseDown(e) {
+        // Sadece ana butona basıldığında sürüklemeyi başlat, çarpıya basıldığında değil.
+        if (e.target.id === 'closeFloatingButton' || e.target.parentElement.id === 'closeFloatingButton') {
+            return;
+        }
+        
+        isDragging = true;
+        floatingRatingButton.style.transition = 'none'; // Sürüklerken animasyonu kapat
+        
+        // Farenin/dokunuşun başlangıç konumu
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+        
+        // Butonun başlangıç konumu (offset'i hesaplamak için)
+        const rect = floatingRatingButton.getBoundingClientRect();
+        
+        offsetX = clientX - rect.left;
+        offsetY = clientY - rect.top;
+        initialX = clientX;
+        initialY = clientY;
+        
+        floatingRatingButton.style.cursor = 'grabbing';
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        document.addEventListener('touchmove', onMouseMove);
+        document.addEventListener('touchend', onMouseUp);
+    }
+    
+    function onMouseMove(e) {
+        if (!isDragging) return;
+        
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+        
+        // Yeni pozisyon
+        let newX = clientX - offsetX;
+        let newY = clientY - offsetY;
+        
+        // Ekran sınırlarını kontrol et
+        const buttonWidth = floatingRatingButton.offsetWidth;
+        const buttonHeight = floatingRatingButton.offsetHeight;
+        const maxX = window.innerWidth - buttonWidth;
+        const maxY = window.innerHeight - buttonHeight;
+        
+        newX = Math.max(0, Math.min(newX, maxX));
+        newY = Math.max(0, Math.min(newY, maxY));
 
+        floatingRatingButton.style.left = `${newX}px`;
+        floatingRatingButton.style.top = `${newY}px`;
+        floatingRatingButton.style.right = 'auto'; // 'right' CSS özelliğini sıfırla
+        floatingRatingButton.style.bottom = 'auto'; // 'bottom' CSS özelliğini sıfırla
+    }
+    
+    function onMouseUp(e) {
+        if (!isDragging) return;
+        
+        isDragging = false;
+        floatingRatingButton.style.cursor = 'grab';
+        
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('touchmove', onMouseMove);
+        document.removeEventListener('touchend', onMouseUp);
+        
+        // Sürüklemenin tıklama olarak algılanmasını engellemek için küçük bir mesafe kontrolü
+        const finalX = e.clientX || e.changedTouches[0].clientX;
+        const finalY = e.clientY || e.changedTouches[0].clientY;
+        const distance = Math.sqrt(Math.pow(finalX - initialX, 2) + Math.pow(finalY - initialY, 2));
+
+        // Eğer sürükleme yapıldıysa (mesafe > 5px), yeni konumu kaydet
+        if (distance > 5) {
+            const rect = floatingRatingButton.getBoundingClientRect();
+            // Yeni konumu (pencerenin sağ alt köşesine göre) kaydet
+            const savedRight = window.innerWidth - (rect.left + rect.width);
+            const savedBottom = window.innerHeight - (rect.top + rect.height);
+            
+            localStorage.setItem('olimpiyat_floating_pos', JSON.stringify({ right: savedRight, bottom: savedBottom }));
+        }
+        
+        floatingRatingButton.style.transition = 'box-shadow 0.2s'; // Animasyonu geri aç
+    }
+
+    floatingRatingButton.addEventListener('mousedown', onMouseDown);
+    floatingRatingButton.addEventListener('touchstart', onMouseDown);
+
+    // Konumu Yükle
+    function loadFloatingButtonPosition() {
+        const savedPos = localStorage.getItem('olimpiyat_floating_pos');
+        if (savedPos) {
+            const { right, bottom } = JSON.parse(savedPos);
+            floatingRatingButton.style.right = `${right}px`;
+            floatingRatingButton.style.bottom = `${bottom}px`;
+            floatingRatingButton.classList.remove('initial-position'); 
+        } else {
+             // Varsayılan konum
+             floatingRatingButton.style.right = '20px';
+             floatingRatingButton.style.bottom = '20px';
+        }
+        
+        // Buton kapatılmışsa gizle
+        if (isFloatingButtonClosed() || isModalPermanentlyDisabled()) {
+            floatingRatingButton.classList.add('hidden');
+        } else {
+            floatingRatingButton.classList.remove('hidden');
+        }
+    }
+    
     // --- EVENT LISTENERS (Aynı Kaldı) ---
 
     document.getElementById('langTR').addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
@@ -678,10 +835,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       setupFirebaseListener(); 
       trackVisitor(); 
+      loadFloatingButtonPosition(); // Konumu yükle
       
       window.addEventListener('resize', setPositionByIndex); 
       
-      // Zamanlayıcıları kur
       setupIntervals();
     });
   </script>
