@@ -10,60 +10,136 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   
   <style>
-    /* ... Diğer CSS Stilleri (Aynı Kaldı) ... */
     body { background-color: #fff7f0; }
     .active-tab { background-color: #fb923c; color: white; }
     #categoryTabs::-webkit-scrollbar { display: none; }
     #categoryTabs { -ms-overflow-style: none; scrollbar-width: none; }
     .price-update-info { font-size: 0.7rem; color: #6b7280; margin-top: 5px; } 
     #mainHeader { height: 4rem; }
-
-    /* Kampanya slider ve diğer stiller aynı */
-    /* ... */
     
     /* -------------------------------------------------------- */
-    /* --- YENİ: SABİT YORUM BUTONU STİLİ (IMG Etiketi Kullanarak) --- */
+    /* --- KAMPANYA SLIDER STİLLERİ (Aynı Kaldı) --- */
+    
+    .slider-container {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        height: 0; 
+        padding-bottom: 56.25%; 
+    }
+
+    .slide-wrapper {
+        display: flex;
+        position: absolute; 
+        top: 0;
+        left: 0;
+        width: 100%; 
+        height: 100%;
+        overflow-x: auto; 
+        scroll-snap-type: x mandatory; 
+        scroll-behavior: smooth; 
+    }
+    
+    .slide {
+        min-width: 100%;
+        width: 100%; 
+        flex-shrink: 0;
+        position: relative; 
+        height: 100%; 
+        scroll-snap-align: start; 
+    }
+
+    .slide img {
+        width: 100%;
+        height: 100%; 
+        object-fit: cover; 
+        background-color: black; 
+        border-radius: 0.75rem; 
+    }
+    
+    .slider-dots {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        background-color: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .dot.active {
+        background-color: #fb923c;
+    }
+    
+    .campaign-price-tag {
+        position: absolute;
+        bottom: 15px; 
+        right: 15px;
+        background-color: #ef4444; 
+        color: white;
+        padding: 10px;
+        border-radius: 50%;
+        min-width: 60px;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1rem;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        z-index: 5;
+        white-space: normal;
+        line-height: 1.2;
+    }
+    
+    .campaign-price-tag.long-text {
+        min-width: 70px;
+        height: 70px;
+        font-size: 0.85rem;
+        padding: 6px;
+    }
+    
+    /* -------------------------------------------------------- */
+    /* --- YENİ: SABİT YORUM BUTONU STİLİ --- */
     
     #floatingRatingButton {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        width: 70px; 
-        height: 70px; 
-        border: none; 
-        padding: 0; 
-        
-        /* Butonun arka plan rengini şeffaf yap, görselin görünmesini engelleme */
-        background-color: transparent; 
-        
-        border-radius: 50%; /* Dış çerçeveyi yuvarlak yap (Gerekirse) */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        z-index: 50; 
-        cursor: pointer; 
-        overflow: hidden; /* Görselin taşmasını engellemek için */
-        
-        display: flex; /* Görseli buton içinde ortalamak için */
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #4285F4; /* Google Mavi */
+        color: white;
+        display: flex;
         justify-content: center;
         align-items: center;
-
-        /* Hızlı Kalp Ritmi Animasyonu */
-        animation: fast-pulse 0.8s infinite alternate; 
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        z-index: 50; /* Diğer her şeyin üstünde olsun */
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 4px solid white; /* Beyaz çerçeve ekler */
     }
     
-    /* Buton içindeki görseli, butonu tam kaplayacak şekilde ayarla */
-    #floatingRatingButton img {
-        width: 100%;
-        height: 100%;
-        /* object-cover kullanıyoruz, böylece tam sığar, kırpılabilir ama beyaz boşluk kalmaz */
-        object-fit: cover; 
-        border-radius: 50%; /* Görseli yuvarlak hale getir */
+    #floatingRatingButton:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
     }
-
-    /* Kalp Ritmi Animasyonu Keyframes */
-    @keyframes fast-pulse {
-        0% { transform: scale(1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); }
-        50% { transform: scale(1.05); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5); }
-        100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); }
+    
+    /* Google 'G' simgesi SVG için stil */
+    #googleGSvg {
+        width: 28px;
+        height: 28px;
     }
     
   </style>
@@ -132,11 +208,13 @@
       </button>
     </div>
   </div>
-  
   <button id="floatingRatingButton" title="Bizi Google'da Puanlayın">
-      <img src="yuvarlak.png" 
-           alt="Puanla Butonu Görseli" 
-      >
+      <svg id="googleGSvg" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg">
+          <path d="M533.5 272.2c0-18.7-1.5-37.1-4.7-55H267.3v104.9h148.8c-6.7 34.3-26.6 63.8-55.9 83.5l-2.4 1.9 82.5 63.8 5.7.8c51-47.3 80.9-115.9 80.9-199.9z" fill="#4285f4"/>
+          <path d="M267.3 544.3c71.2 0 131.2-23.7 174.9-64.4l-88.7-68.6c-24.5 16.5-56.1 26.3-86.2 26.3-66.2 0-122.4-44.8-142.3-104.5l-3.3.6-86.1 66.7-.8 2.6c39.6 78.4 117.8 132.8 207.5 132.8z" fill="#34a853"/>
+          <path d="M125 324.7c-5.7-16.5-9.3-34.1-9.3-52.5s3.6-36 9.3-52.5l-90.4-70v303z" fill="#fbbc05"/>
+          <path d="M267.3 108.8c39 0 68.7 17.5 84.7 32.4L412.3 84C366.6 39.5 325 0 267.3 0 177.6 0 99.4 54.4 59.8 132.8l90.4 70.1c19.9-59.7 76.1-104.5 142.2-104.5z" fill="#ea4335"/>
+      </svg>
   </button>
   <script>
     // --- Firebase Yapılandırması (Aynı Kaldı) ---
@@ -164,7 +242,7 @@
     const ratingModal = document.getElementById('ratingModal'); 
     const goToRatingLink = document.getElementById('goToRatingLink'); 
     const closeRatingModal = document.getElementById('closeRatingModal'); 
-    const floatingRatingButton = document.getElementById('floatingRatingButton'); 
+    const floatingRatingButton = document.getElementById('floatingRatingButton'); // YENİ
 
     let language = 'TR'; 
     let products = []; 
@@ -194,8 +272,8 @@
     let categoriesEN = Object.values(categoryTranslations);
 
     
-    // --- SLIDER, FIREBASE, RENDER FONKSİYONLARI (Aynı Kaldı) ---
-
+    // --- SLIDER İŞLEVLERİ (Aynı Kaldı) ---
+    
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
         const sliderContainer = document.querySelector('#campaignSlider');
@@ -300,6 +378,8 @@
         startSliderInterval();
     }
 
+
+    // --- YARDIMCI VE FIREBASE FONKSİYONLARI (Aynı Kaldı) ---
 
     function formatRelativeDate(timestamp) {
         if (!timestamp) return "";
@@ -512,28 +592,38 @@
         }
     }
     
-    // --- YORUM MODALI VE SABİT BUTON MANTIĞI ---
+    // --- YORUM MODALI MANTIĞI ---
 
-    const RATING_INTERVALS = [6000, 12000, 18000];
+    // Modalı gösterme zaman aralıkları (milisaniye cinsinden)
+    const RATING_INTERVALS = [6000, 12000, 18000]; // 6. sn, 12. sn, 18. sn
     
     function isModalPermanentlyDisabled() {
+        // Yorum linkine tıklanmışsa (olimpiyat_rated: true) bir daha gösterme
         return localStorage.getItem('olimpiyat_rated') === 'true';
     }
-    
+
     function showRatingModal() {
-        if (isModalPermanentlyDisabled() || sessionStorage.getItem('olimpiyat_rated_session_closed') === 'true') {
+        // 1. Kalıcı olarak kapatılıp kapatılmadığını kontrol et
+        if (isModalPermanentlyDisabled()) {
             return;
         }
-        ratingModal.classList.remove('hidden');
+
+        // 2. Eğer kullanıcı bu oturumda "Hayır, teşekkürler" dememişse göster (sessionStorage)
+        if (sessionStorage.getItem('olimpiyat_rated_session_closed') !== 'true') {
+            ratingModal.classList.remove('hidden');
+        }
     }
     
     function setupIntervals() {
+        // Zaten kalıcı olarak kapatılmışsa zamanlayıcıları kurmaya gerek yok
         if (isModalPermanentlyDisabled()) {
             return;
         }
         
+        // Belirlenen zaman aralıklarında modalı göstermeye çalış
         RATING_INTERVALS.forEach(delay => {
             setTimeout(() => {
+                // Sadece modal zaten açık değilse ve kalıcı olarak kapatılmamışsa tekrar göster
                 if (ratingModal.classList.contains('hidden') && !isModalPermanentlyDisabled()) {
                     showRatingModal();
                 }
@@ -543,32 +633,26 @@
 
     // Yorum linkine tıklandığında: Kalıcı olarak yorum yapma ekranına gitti kaydını tut
     goToRatingLink.addEventListener('click', () => {
+        // Kalıcı kaydı tut: Bir daha bu cihazda hiç gösterme
         localStorage.setItem('olimpiyat_rated', 'true'); 
         ratingModal.classList.add('hidden');
-        floatingRatingButton.style.display = 'none'; // Butonu tamamen gizle
     });
 
-    // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat kaydını tut
+    // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat kaydını tut (Session Storage kullan)
     closeRatingModal.addEventListener('click', () => {
+        // Geçici kaydı tut (Oturum bitince silinir)
         sessionStorage.setItem('olimpiyat_rated_session_closed', 'true');
         ratingModal.classList.add('hidden');
     });
     
-    // Sabit butona TIKLAMA işlevi (modalı açar) 
+    // YENİ: Sabit butona tıklandığında modalı göster
     floatingRatingButton.addEventListener('click', () => {
-        showRatingModal();
+        // Kalıcı olarak kapatılmış olsa bile, kullanıcı butona tıklıyorsa modalı göstermek istiyordur.
+        // Bu yüzden isModalPermanentlyDisabled() kontrolü yapmıyoruz, direkt gösteriyoruz.
+        ratingModal.classList.remove('hidden');
     });
-    
-    // Konumu Yükle (Sadece görünürlüğü kontrol et)
-    function loadFloatingButtonPosition() {
-        // Butonun görünürlük kontrolü
-        if (isModalPermanentlyDisabled()) {
-            floatingRatingButton.style.display = 'none';
-        } else {
-            floatingRatingButton.style.display = 'flex'; // Butonu görünür yap ve hizalamayı sağla
-        }
-    }
-    
+
+
     // --- EVENT LISTENERS (Aynı Kaldı) ---
 
     document.getElementById('langTR').addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
@@ -594,10 +678,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       setupFirebaseListener(); 
       trackVisitor(); 
-      loadFloatingButtonPosition(); 
       
       window.addEventListener('resize', setPositionByIndex); 
       
+      // Zamanlayıcıları kur
       setupIntervals();
     });
   </script>
