@@ -110,23 +110,21 @@
     }
     
     /* -------------------------------------------------------- */
-    /* --- YENİ: SABİT YORUM BUTONU STİLİ (DÜZENLENDİ) --- */
+    /* --- YENİ: SABİT YORUM BUTONU STİLİ (GÜNCELLENDİ) --- */
     
     #floatingRatingButton {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        width: 60px;
-        height: 60px;
+        width: 72px; /* Büyütüldü */
+        height: 72px; /* Büyütüldü */
         border-radius: 50%;
-        /* background-color: #4285F4; /* Eski: Google Mavi */
-        /* YENİ: yuvarlak.png görselini ekle */
         background-image: url('yuvarlak.png'); 
         background-size: cover; 
         background-position: center;
         background-repeat: no-repeat;
         
-        color: transparent; /* İçindeki içeriği gizle (artık SVG yok) */
+        color: transparent;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -134,7 +132,7 @@
         z-index: 50; 
         cursor: pointer;
         transition: transform 0.2s, box-shadow 0.2s;
-        border: 4px solid white; 
+        border: none; /* Beyaz çerçeve kaldırıldı */
     }
     
     #floatingRatingButton:hover {
@@ -142,7 +140,7 @@
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
     }
     
-    /* Google 'G' simgesi SVG için stil (Artık gerekli değil, HTML'den kaldırıldı) */
+    /* Google 'G' simgesi SVG için stil (Kullanılmıyor) */
     #googleGSvg {
         display: none; 
     }
@@ -242,7 +240,7 @@
     const ratingModal = document.getElementById('ratingModal'); 
     const goToRatingLink = document.getElementById('goToRatingLink'); 
     const closeRatingModal = document.getElementById('closeRatingModal'); 
-    const floatingRatingButton = document.getElementById('floatingRatingButton'); // YENİ
+    const floatingRatingButton = document.getElementById('floatingRatingButton'); 
 
     let language = 'TR'; 
     let products = []; 
@@ -645,10 +643,8 @@
         ratingModal.classList.add('hidden');
     });
     
-    // YENİ: Sabit butona tıklandığında modalı göster
+    // Sabit butona tıklandığında modalı göster
     floatingRatingButton.addEventListener('click', () => {
-        // Kalıcı olarak kapatılmış olsa bile, kullanıcı butona tıklıyorsa modalı göstermek istiyordur.
-        // Bu yüzden isModalPermanentlyDisabled() kontrolü yapmıyoruz, direkt gösteriyoruz.
         ratingModal.classList.remove('hidden');
     });
 
