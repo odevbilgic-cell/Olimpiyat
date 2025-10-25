@@ -1,3 +1,6 @@
+Elbette, tüm isteklerinizi (turuncu zemin, kalp ritmi ve metin kaldırma, özel görsel ekleme, sürükleme performansı, sayfa kaydırma engeli ve çarpı butonunun oturum bazlı kapatma özelliği) içeren nihai ve tam index.html kodunuz aşağıdadır.
+Bu kod, yuvarlak.png dosyanızın index.html ile aynı dizinde olduğunu varsayarak düzenlenmiştir.
+Tam ve Nihai index.html Kodu
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -110,48 +113,29 @@
     }
     
     /* -------------------------------------------------------- */
-    /* --- YENİ: SABİT YORUM BUTONU STİLİ VE ANİMASYON --- */
+    /* --- YENİ: SABİT YORUM BUTONU STİLİ --- */
     
     #floatingRatingButton {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        width: 90px;
-        height: 90px;
+        width: 70px; 
+        height: 70px; 
         border-radius: 50%;
-        background-color: #fb923c; /* Turuncu (sitenin rengiyle uyumlu) */
+        background-color: #fb923c; /* Full Turuncu */
         color: white;
         display: flex;
-        flex-direction: column;
         justify-content: center;
         align-items: center;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         z-index: 50; 
-        cursor: grab; /* Sürükleme işareti */
+        cursor: grab; 
         transition: box-shadow 0.2s;
-        /* İstenen: Beyaz şerit/çerçeve YOK */
         user-select: none; 
     }
     
     #floatingRatingButton:active {
         cursor: grabbing;
-    }
-    
-    /* Kalp Ritmi (Pulse) Animasyonu */
-    @keyframes pulse-beat {
-        0% { transform: scale(1); }
-        30% { transform: scale(1.08); } /* Hız artırıldı */
-        60% { transform: scale(1); }
-        100% { transform: scale(1); }
-    }
-    
-    #ratingText {
-        font-size: 0.9rem;
-        font-weight: bold;
-        text-align: center;
-        line-height: 1.2;
-        padding: 0 5px;
-        animation: pulse-beat 1s infinite; /* Hız artırıldı */
     }
     
     /* Kapatma Butonu */
@@ -163,6 +147,7 @@
         height: 20px;
         background-color: rgba(255, 255, 255, 0.8);
         color: #333;
+        border: 1px solid #ddd; 
         border-radius: 50%;
         display: flex;
         justify-content: center;
@@ -172,7 +157,7 @@
         cursor: pointer;
         z-index: 51; 
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-        line-height: 1; /* x'in ortalanması için */
+        line-height: 1; 
     }
     
     .initial-position {
@@ -248,7 +233,12 @@
   </div>
   <button id="floatingRatingButton" class="initial-position" title="Bizi Google'da Puanlayın">
       <div id="closeFloatingButton">x</div> 
-      <span id="ratingText">Tıkla<br>Puanla</span>
+      
+      <img src="yuvarlak.png" 
+           alt="Puanla Butonu Görseli" 
+           class="w-full h-full object-contain p-2" 
+           style="filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));"
+      >
   </button>
   <script>
     // --- Firebase Yapılandırması (Aynı Kaldı) ---
@@ -629,13 +619,12 @@
 
     const RATING_INTERVALS = [6000, 12000, 18000];
     
-    // Kalıcı olarak yorum modalının veya sabit butonun kapatılıp kapatılmadığını kontrol eder
     function isModalPermanentlyDisabled() {
         return localStorage.getItem('olimpiyat_rated') === 'true';
     }
     
-    // YENİ: Sabit butonun SADECE BU OTURUM için gizlenip gizlenmediğini kontrol eder.
     function isFloatingButtonClosedSession() {
+        // Oturum bazlı kapatma için Session Storage kullanılır (Sayfa yenilenince geri gelir)
         return sessionStorage.getItem('olimpiyat_floating_closed_session') === 'true';
     }
 
@@ -665,7 +654,6 @@
         localStorage.setItem('olimpiyat_rated', 'true'); 
         ratingModal.classList.add('hidden');
         floatingRatingButton.classList.add('hidden');
-        // Kullanıcı yoruma gittiği için butonu kalıcı olarak gizle.
         sessionStorage.setItem('olimpiyat_floating_closed_session', 'true');
     });
 
@@ -675,29 +663,30 @@
         ratingModal.classList.add('hidden');
     });
     
-    // Sabit butona TIKLAMA işlevi (modalı açar)
+    // Sabit butona TIKLAMA işlevi (modalı açar) 
     floatingRatingButton.addEventListener('click', (event) => {
-        // Sürükleme yapılmamışsa ve kapatma butonu hedef değilse
-        if (!floatingRatingButton.isMoved && event.target !== closeFloatingButton && !closeFloatingButton.contains(event.target)) {
+        // Eğer tıklama kapatma butonundan gelmediyse VE SÜRÜKLEME YAPILMAMIŞSA
+        if (event.target !== closeFloatingButton && !closeFloatingButton.contains(event.target) && !floatingRatingButton.isMoved) {
             ratingModal.classList.remove('hidden');
         }
+        // Tıklama işlevi bitti, isMoved'ı sıfırla
+        floatingRatingButton.isMoved = false; 
     });
     
     // Sabit butondaki kapatma (x) butonuna tıklandığında
     closeFloatingButton.addEventListener('click', (event) => {
-        event.stopPropagation();
+        event.stopPropagation(); // Butonun ana tıklama olayını engelle
         floatingRatingButton.classList.add('hidden');
-        // YENİ: Sadece bu oturum için kapat kaydını tut. (Sayfa yenilenince geri gelir.)
+        // İstenen özellik: Sayfa yenilendiğinde geri gelmesi için sessionStorage kullan
         sessionStorage.setItem('olimpiyat_floating_closed_session', 'true');
     });
 
-    // --- SÜRÜKLEME (DRAG) İŞLEVİ - KASMAYI GİDERME VE KAYDIRMAYI ENGELLEME ---
+    // --- SÜRÜKLEME (DRAG) İŞLEVİ - KASMA VE KAYDIRMA ENGELİ DÜZELTİLDİ ---
     
     let isDragging = false;
     let offsetX, offsetY;
     let initialX, initialY;
     
-    // YENİ: Tıklama mı yoksa sürükleme mi olduğunu anlamak için
     floatingRatingButton.isMoved = false;
 
     function onMouseDown(e) {
@@ -721,10 +710,10 @@
         
         floatingRatingButton.style.cursor = 'grabbing';
         
-        // YENİ: Sürükleme sırasında sayfa kaydırmayı engelle
+        // Sürükleme sırasında sayfa kaydırmayı engelle
         if (e.type === 'touchstart') {
             document.body.style.overflow = 'hidden';
-            e.preventDefault(); // Mobil cihazlarda varsayılan dokunmatik kaydırmayı engeller
+            e.preventDefault(); 
         }
 
         document.addEventListener('mousemove', onMouseMove, { passive: false });
@@ -744,17 +733,15 @@
         const clientX = e.clientX || e.touches[0].clientX;
         const clientY = e.clientY || e.touches[0].clientY;
         
-        // Tıklama mı sürükleme mi kontrolü
+        // Tıklama mı sürükleme mi kontrolü (Mesafe > 5px ise sürükleme say)
         const distance = Math.sqrt(Math.pow(clientX - initialX, 2) + Math.pow(clientY - initialY, 2));
         if (distance > 5) {
             floatingRatingButton.isMoved = true;
         }
 
-        // Yeni pozisyon
         let newX = clientX - offsetX;
         let newY = clientY - offsetY;
         
-        // Ekran sınırlarını kontrol et
         const buttonWidth = floatingRatingButton.offsetWidth;
         const buttonHeight = floatingRatingButton.offsetHeight;
         const maxX = window.innerWidth - buttonWidth;
@@ -763,8 +750,7 @@
         newX = Math.max(0, Math.min(newX, maxX));
         newY = Math.max(0, Math.min(newY, maxY));
 
-        // YENİ: Top/Left kullanarak performansı artır
-        floatingRatingButton.style.position = 'fixed';
+        // Top/Left kullanarak konum güncelleme (Kasmayı engeller)
         floatingRatingButton.style.left = `${newX}px`;
         floatingRatingButton.style.top = `${newY}px`;
         floatingRatingButton.style.right = 'auto'; 
@@ -795,11 +781,6 @@
         }
         
         floatingRatingButton.style.transition = 'box-shadow 0.2s'; 
-        
-        // Tıklama event'inin tetiklenmesini engelle
-        if (floatingRatingButton.isMoved) {
-            e.stopPropagation(); 
-        }
     }
 
     floatingRatingButton.addEventListener('mousedown', onMouseDown);
@@ -810,6 +791,7 @@
         const savedPos = localStorage.getItem('olimpiyat_floating_pos');
         if (savedPos) {
             const { right, bottom } = JSON.parse(savedPos);
+            // Sürüklenen konumu koru
             floatingRatingButton.style.right = `${right}px`;
             floatingRatingButton.style.bottom = `${bottom}px`;
             floatingRatingButton.classList.remove('initial-position'); 
@@ -818,7 +800,7 @@
              floatingRatingButton.style.bottom = '20px';
         }
         
-        // YENİ: Buton kapatılmışsa SADECE BU OTURUM İÇİN gizle (Sayfa yenilenince geri gelir)
+        // Butonun görünürlük kontrolü
         if (isFloatingButtonClosedSession() || isModalPermanentlyDisabled()) {
             floatingRatingButton.classList.add('hidden');
         } else {
@@ -860,3 +842,4 @@
   </script>
 </body>
 </html>
+
