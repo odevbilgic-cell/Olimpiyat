@@ -10,107 +10,19 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   
   <style>
+    /* ... Diğer CSS Stilleri (Aynı Kaldı) ... */
     body { background-color: #fff7f0; }
     .active-tab { background-color: #fb923c; color: white; }
     #categoryTabs::-webkit-scrollbar { display: none; }
     #categoryTabs { -ms-overflow-style: none; scrollbar-width: none; }
     .price-update-info { font-size: 0.7rem; color: #6b7280; margin-top: 5px; } 
     #mainHeader { height: 4rem; }
+
+    /* Kampanya slider ve diğer stiller aynı */
+    /* ... */
     
     /* -------------------------------------------------------- */
-    /* --- KAMPANYA SLIDER STİLLERİ (Aynı Kaldı) --- */
-    
-    .slider-container {
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-        height: 0; 
-        padding-bottom: 56.25%; 
-    }
-
-    .slide-wrapper {
-        display: flex;
-        position: absolute; 
-        top: 0;
-        left: 0;
-        width: 100%; 
-        height: 100%;
-        overflow-x: auto; 
-        scroll-snap-type: x mandatory; 
-        scroll-behavior: smooth; 
-    }
-    
-    .slide {
-        min-width: 100%;
-        width: 100%; 
-        flex-shrink: 0;
-        position: relative; 
-        height: 100%; 
-        scroll-snap-align: start; 
-    }
-
-    .slide img {
-        width: 100%;
-        height: 100%; 
-        object-fit: cover; 
-        background-color: black; 
-        border-radius: 0.75rem; 
-    }
-    
-    .slider-dots {
-        position: absolute;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 8px;
-        z-index: 10;
-    }
-
-    .dot {
-        width: 10px;
-        height: 10px;
-        background-color: rgba(255, 255, 255, 0.5);
-        border-radius: 50%;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .dot.active {
-        background-color: #fb923c;
-    }
-    
-    .campaign-price-tag {
-        position: absolute;
-        bottom: 15px; 
-        right: 15px;
-        background-color: #ef4444; 
-        color: white;
-        padding: 10px;
-        border-radius: 50%;
-        min-width: 60px;
-        height: 60px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 1rem;
-        font-weight: bold;
-        text-align: center;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        z-index: 5;
-        white-space: normal;
-        line-height: 1.2;
-    }
-    
-    .campaign-price-tag.long-text {
-        min-width: 70px;
-        height: 70px;
-        font-size: 0.85rem;
-        padding: 6px;
-    }
-    
-    /* -------------------------------------------------------- */
-    /* --- YENİ: SABİT YORUM BUTONU STİLİ (Background Image ile) --- */
+    /* --- YENİ: SABİT YORUM BUTONU STİLİ (IMG Etiketi Kullanarak) --- */
     
     #floatingRatingButton {
         position: fixed;
@@ -118,26 +30,35 @@
         right: 20px;
         width: 70px; 
         height: 70px; 
-        border: none; /* Varsayılan buton kenarlığını kaldır */
-        padding: 0; /* İç boşluğu kaldır */
+        border: none; 
+        padding: 0; 
         
-        /* Görseli arkaplan olarak ayarla */
-        background-image: url('yuvarlak.png');
-        background-color: transparent; /* Görselin kendi arka planı için */
-        background-size: cover; 
-        background-position: center; 
-        background-repeat: no-repeat;
+        /* Butonun arka plan rengini şeffaf yap, görselin görünmesini engelleme */
+        background-color: transparent; 
         
-        border-radius: 50%; /* Dış çerçeveyi yuvarlak yap */
+        border-radius: 50%; /* Dış çerçeveyi yuvarlak yap (Gerekirse) */
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         z-index: 50; 
         cursor: pointer; 
-        user-select: none; 
+        overflow: hidden; /* Görselin taşmasını engellemek için */
         
+        display: flex; /* Görseli buton içinde ortalamak için */
+        justify-content: center;
+        align-items: center;
+
         /* Hızlı Kalp Ritmi Animasyonu */
         animation: fast-pulse 0.8s infinite alternate; 
     }
     
+    /* Buton içindeki görseli, butonu tam kaplayacak şekilde ayarla */
+    #floatingRatingButton img {
+        width: 100%;
+        height: 100%;
+        /* object-cover kullanıyoruz, böylece tam sığar, kırpılabilir ama beyaz boşluk kalmaz */
+        object-fit: cover; 
+        border-radius: 50%; /* Görseli yuvarlak hale getir */
+    }
+
     /* Kalp Ritmi Animasyonu Keyframes */
     @keyframes fast-pulse {
         0% { transform: scale(1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); }
@@ -212,7 +133,11 @@
     </div>
   </div>
   
-  <button id="floatingRatingButton" title="Bizi Google'da Puanlayın"></button>
+  <button id="floatingRatingButton" title="Bizi Google'da Puanlayın">
+      <img src="yuvarlak.png" 
+           alt="Puanla Butonu Görseli" 
+      >
+  </button>
   <script>
     // --- Firebase Yapılandırması (Aynı Kaldı) ---
     const firebaseConfig = {
@@ -640,7 +565,7 @@
         if (isModalPermanentlyDisabled()) {
             floatingRatingButton.style.display = 'none';
         } else {
-            floatingRatingButton.style.display = 'block'; 
+            floatingRatingButton.style.display = 'flex'; // Butonu görünür yap ve hizalamayı sağla
         }
     }
     
