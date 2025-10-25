@@ -116,8 +116,8 @@
         position: fixed;
         bottom: 20px;
         right: 20px;
-        width: 90px; /* Daha geniş */
-        height: 90px; /* Daha geniş */
+        width: 90px;
+        height: 90px;
         border-radius: 50%;
         background-color: #fb923c; /* Turuncu (sitenin rengiyle uyumlu) */
         color: white;
@@ -129,8 +129,8 @@
         z-index: 50; 
         cursor: grab; /* Sürükleme işareti */
         transition: box-shadow 0.2s;
-        border: 4px solid white; /* Beyaz çerçeve */
-        user-select: none; /* Metin seçilmesini engeller */
+        /* İstenen: Beyaz şerit/çerçeve YOK */
+        user-select: none; 
     }
     
     #floatingRatingButton:active {
@@ -140,7 +140,8 @@
     /* Kalp Ritmi (Pulse) Animasyonu */
     @keyframes pulse-beat {
         0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
+        30% { transform: scale(1.08); } /* Hız artırıldı */
+        60% { transform: scale(1); }
         100% { transform: scale(1); }
     }
     
@@ -150,15 +151,14 @@
         text-align: center;
         line-height: 1.2;
         padding: 0 5px;
-        /* Animasyonu uygula */
-        animation: pulse-beat 1.5s infinite; 
+        animation: pulse-beat 1s infinite; /* Hız artırıldı */
     }
     
     /* Kapatma Butonu */
     #closeFloatingButton {
         position: absolute;
         top: 0px; 
-        left: 5px; /* Sol üste yakın */
+        left: 5px; 
         width: 20px;
         height: 20px;
         background-color: rgba(255, 255, 255, 0.8);
@@ -170,11 +170,11 @@
         font-size: 0.8rem;
         font-weight: bold;
         cursor: pointer;
-        z-index: 51; /* Ana butonun üzerinde olsun */
+        z-index: 51; 
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        line-height: 1; /* x'in ortalanması için */
     }
     
-    /* Kaydedilen konum için (JS tarafından eklenecek) */
     .initial-position {
         right: 20px;
         bottom: 20px;
@@ -277,7 +277,7 @@
     const goToRatingLink = document.getElementById('goToRatingLink'); 
     const closeRatingModal = document.getElementById('closeRatingModal'); 
     const floatingRatingButton = document.getElementById('floatingRatingButton'); 
-    const closeFloatingButton = document.getElementById('closeFloatingButton'); // YENİ
+    const closeFloatingButton = document.getElementById('closeFloatingButton'); 
 
     let language = 'TR'; 
     let products = []; 
@@ -307,11 +307,7 @@
     let categoriesEN = Object.values(categoryTranslations);
 
     
-    // --- SLIDER İŞLEVLERİ, FIREBASE, RENDER FONKSİYONLARI (Aynı Kaldı) ---
-    
-    // (setPositionByIndex, startSliderInterval, goToSlide, handleScroll, renderCampaignSlider, 
-    // formatRelativeDate, transformProducts, setupFirebaseListener, trackVisitor, 
-    // renderMenu, createCategoryTabs, updateLanguageContent fonksiyonları aynı kalmıştır)
+    // --- SLIDER, FIREBASE, RENDER FONKSİYONLARI (Aynı Kaldı) ---
 
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
@@ -631,24 +627,22 @@
     
     // --- YORUM MODALI VE SABİT BUTON MANTIĞI ---
 
-    // Modalı gösterme zaman aralıkları (milisaniye cinsinden)
-    const RATING_INTERVALS = [6000, 12000, 18000]; // 6. sn, 12. sn, 18. sn
+    const RATING_INTERVALS = [6000, 12000, 18000];
     
     // Kalıcı olarak yorum modalının veya sabit butonun kapatılıp kapatılmadığını kontrol eder
     function isModalPermanentlyDisabled() {
         return localStorage.getItem('olimpiyat_rated') === 'true';
     }
     
-    function isFloatingButtonClosed() {
-        return localStorage.getItem('olimpiyat_floating_closed') === 'true';
+    // YENİ: Sabit butonun SADECE BU OTURUM için gizlenip gizlenmediğini kontrol eder.
+    function isFloatingButtonClosedSession() {
+        return sessionStorage.getItem('olimpiyat_floating_closed_session') === 'true';
     }
 
     function showRatingModal() {
-        // Otomatik açılış sadece kalıcı olarak kapatılmamışsa ve bu oturumda kapatılmamışsa
         if (isModalPermanentlyDisabled() || sessionStorage.getItem('olimpiyat_rated_session_closed') === 'true') {
             return;
         }
-
         ratingModal.classList.remove('hidden');
     }
     
@@ -670,53 +664,54 @@
     goToRatingLink.addEventListener('click', () => {
         localStorage.setItem('olimpiyat_rated', 'true'); 
         ratingModal.classList.add('hidden');
-        // Hem modal hem de sabit butonu gizleyelim, kullanıcı yoruma gitti.
         floatingRatingButton.classList.add('hidden');
-        localStorage.setItem('olimpiyat_floating_closed', 'true');
+        // Kullanıcı yoruma gittiği için butonu kalıcı olarak gizle.
+        sessionStorage.setItem('olimpiyat_floating_closed_session', 'true');
     });
 
-    // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat kaydını tut (Session Storage kullan)
+    // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat kaydını tut
     closeRatingModal.addEventListener('click', () => {
         sessionStorage.setItem('olimpiyat_rated_session_closed', 'true');
         ratingModal.classList.add('hidden');
     });
     
-    // YENİ: Sabit butona TIKLAMA işlevi (modalı açar)
+    // Sabit butona TIKLAMA işlevi (modalı açar)
     floatingRatingButton.addEventListener('click', (event) => {
-        // Eğer tıklama kapatma butonundan gelmediyse modalı aç
-        if (event.target !== closeFloatingButton && !closeFloatingButton.contains(event.target)) {
+        // Sürükleme yapılmamışsa ve kapatma butonu hedef değilse
+        if (!floatingRatingButton.isMoved && event.target !== closeFloatingButton && !closeFloatingButton.contains(event.target)) {
             ratingModal.classList.remove('hidden');
         }
     });
     
-    // YENİ: Sabit butondaki kapatma (x) butonuna tıklandığında
+    // Sabit butondaki kapatma (x) butonuna tıklandığında
     closeFloatingButton.addEventListener('click', (event) => {
-        event.stopPropagation(); // Butonun ana tıklama olayını engelle
+        event.stopPropagation();
         floatingRatingButton.classList.add('hidden');
-        // Kalıcı olarak kapat kaydını tut
-        localStorage.setItem('olimpiyat_floating_closed', 'true');
+        // YENİ: Sadece bu oturum için kapat kaydını tut. (Sayfa yenilenince geri gelir.)
+        sessionStorage.setItem('olimpiyat_floating_closed_session', 'true');
     });
 
-    // --- YENİ: SÜRÜKLEME (DRAG) İŞLEVİ ---
+    // --- SÜRÜKLEME (DRAG) İŞLEVİ - KASMAYI GİDERME VE KAYDIRMAYI ENGELLEME ---
     
     let isDragging = false;
     let offsetX, offsetY;
     let initialX, initialY;
     
+    // YENİ: Tıklama mı yoksa sürükleme mi olduğunu anlamak için
+    floatingRatingButton.isMoved = false;
+
     function onMouseDown(e) {
-        // Sadece ana butona basıldığında sürüklemeyi başlat, çarpıya basıldığında değil.
         if (e.target.id === 'closeFloatingButton' || e.target.parentElement.id === 'closeFloatingButton') {
             return;
         }
         
         isDragging = true;
-        floatingRatingButton.style.transition = 'none'; // Sürüklerken animasyonu kapat
+        floatingRatingButton.isMoved = false;
+        floatingRatingButton.style.transition = 'none'; 
         
-        // Farenin/dokunuşun başlangıç konumu
         const clientX = e.clientX || e.touches[0].clientX;
         const clientY = e.clientY || e.touches[0].clientY;
         
-        // Butonun başlangıç konumu (offset'i hesaplamak için)
         const rect = floatingRatingButton.getBoundingClientRect();
         
         offsetX = clientX - rect.left;
@@ -725,18 +720,36 @@
         initialY = clientY;
         
         floatingRatingButton.style.cursor = 'grabbing';
-        document.addEventListener('mousemove', onMouseMove);
+        
+        // YENİ: Sürükleme sırasında sayfa kaydırmayı engelle
+        if (e.type === 'touchstart') {
+            document.body.style.overflow = 'hidden';
+            e.preventDefault(); // Mobil cihazlarda varsayılan dokunmatik kaydırmayı engeller
+        }
+
+        document.addEventListener('mousemove', onMouseMove, { passive: false });
         document.addEventListener('mouseup', onMouseUp);
-        document.addEventListener('touchmove', onMouseMove);
+        document.addEventListener('touchmove', onMouseMove, { passive: false });
         document.addEventListener('touchend', onMouseUp);
     }
     
     function onMouseMove(e) {
         if (!isDragging) return;
         
+        // Mobil cihazlarda varsayılan kaydırmayı engelle
+        if (e.cancelable) {
+            e.preventDefault();
+        }
+        
         const clientX = e.clientX || e.touches[0].clientX;
         const clientY = e.clientY || e.touches[0].clientY;
         
+        // Tıklama mı sürükleme mi kontrolü
+        const distance = Math.sqrt(Math.pow(clientX - initialX, 2) + Math.pow(clientY - initialY, 2));
+        if (distance > 5) {
+            floatingRatingButton.isMoved = true;
+        }
+
         // Yeni pozisyon
         let newX = clientX - offsetX;
         let newY = clientY - offsetY;
@@ -750,10 +763,12 @@
         newX = Math.max(0, Math.min(newX, maxX));
         newY = Math.max(0, Math.min(newY, maxY));
 
+        // YENİ: Top/Left kullanarak performansı artır
+        floatingRatingButton.style.position = 'fixed';
         floatingRatingButton.style.left = `${newX}px`;
         floatingRatingButton.style.top = `${newY}px`;
-        floatingRatingButton.style.right = 'auto'; // 'right' CSS özelliğini sıfırla
-        floatingRatingButton.style.bottom = 'auto'; // 'bottom' CSS özelliğini sıfırla
+        floatingRatingButton.style.right = 'auto'; 
+        floatingRatingButton.style.bottom = 'auto'; 
     }
     
     function onMouseUp(e) {
@@ -762,18 +777,15 @@
         isDragging = false;
         floatingRatingButton.style.cursor = 'grab';
         
-        document.removeEventListener('mousemove', onMouseMove);
+        // Sürükleme sırasında engellenen kaydırmayı geri aç
+        document.body.style.overflow = 'auto';
+        
+        document.removeEventListener('mousemove', onMouseMove, { passive: false });
         document.removeEventListener('mouseup', onMouseUp);
-        document.removeEventListener('touchmove', onMouseMove);
+        document.removeEventListener('touchmove', onMouseMove, { passive: false });
         document.removeEventListener('touchend', onMouseUp);
         
-        // Sürüklemenin tıklama olarak algılanmasını engellemek için küçük bir mesafe kontrolü
-        const finalX = e.clientX || e.changedTouches[0].clientX;
-        const finalY = e.clientY || e.changedTouches[0].clientY;
-        const distance = Math.sqrt(Math.pow(finalX - initialX, 2) + Math.pow(finalY - initialY, 2));
-
-        // Eğer sürükleme yapıldıysa (mesafe > 5px), yeni konumu kaydet
-        if (distance > 5) {
+        if (floatingRatingButton.isMoved) {
             const rect = floatingRatingButton.getBoundingClientRect();
             // Yeni konumu (pencerenin sağ alt köşesine göre) kaydet
             const savedRight = window.innerWidth - (rect.left + rect.width);
@@ -782,7 +794,12 @@
             localStorage.setItem('olimpiyat_floating_pos', JSON.stringify({ right: savedRight, bottom: savedBottom }));
         }
         
-        floatingRatingButton.style.transition = 'box-shadow 0.2s'; // Animasyonu geri aç
+        floatingRatingButton.style.transition = 'box-shadow 0.2s'; 
+        
+        // Tıklama event'inin tetiklenmesini engelle
+        if (floatingRatingButton.isMoved) {
+            e.stopPropagation(); 
+        }
     }
 
     floatingRatingButton.addEventListener('mousedown', onMouseDown);
@@ -797,13 +814,12 @@
             floatingRatingButton.style.bottom = `${bottom}px`;
             floatingRatingButton.classList.remove('initial-position'); 
         } else {
-             // Varsayılan konum
              floatingRatingButton.style.right = '20px';
              floatingRatingButton.style.bottom = '20px';
         }
         
-        // Buton kapatılmışsa gizle
-        if (isFloatingButtonClosed() || isModalPermanentlyDisabled()) {
+        // YENİ: Buton kapatılmışsa SADECE BU OTURUM İÇİN gizle (Sayfa yenilenince geri gelir)
+        if (isFloatingButtonClosedSession() || isModalPermanentlyDisabled()) {
             floatingRatingButton.classList.add('hidden');
         } else {
             floatingRatingButton.classList.remove('hidden');
@@ -835,7 +851,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       setupFirebaseListener(); 
       trackVisitor(); 
-      loadFloatingButtonPosition(); // Konumu yükle
+      loadFloatingButtonPosition(); 
       
       window.addEventListener('resize', setPositionByIndex); 
       
