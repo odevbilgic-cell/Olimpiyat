@@ -132,12 +132,12 @@
         const visitorsRef = database.ref('visitors');
         const campaignsRef = database.ref('campaigns'); 
         const campaignInfoRef = database.ref('campaign_info'); 
-        const priceBoxUrlRef = database.ref('campaign_info/price_box_url'); // YENİ: Fiyat Kutucuğu Görseli URL'si
+        const priceBoxUrlRef = database.ref('campaign_info/price_box_url'); 
         
         let products = []; 
         let campaignUrls = []; 
         let campaignPriceText = ""; 
-        let campaignPriceBoxUrl = ""; // YENİ: Fiyat Kutucuğu URL'si için değişken
+        let campaignPriceBoxUrl = ""; 
         const categoriesTR = ['Menüler', 'Kokoreç', 'Tavuk Kokoreç', 'Tavuk Döner', 'Patso', 'Köfte', 'Ciğer', 'Hamburger', 'Tost', 'Midye', 'Yan Lezzetler', 'İçecekler']; 
         
         // --- HTML Element Tanımlamaları ---
@@ -449,8 +449,11 @@
                     </div>
 
                     <h3 class="font-bold text-xl mb-3 text-gray-800">Mevcut Kampanya Görselleri (${campaignUrls.length} Adet)</h3>
-                    <ul id="campaignList" class="flex flex-col gap-3 p-2 border rounded bg-gray-50 min-h-[50px]">
+                    <p class="mb-3 text-sm text-red-600 font-semibold">Görselleri sürükle bırak yaparak sıralayabilirsiniz.</p>
+                    <ul id="sortableCampaignList" class="flex flex-col gap-2 p-2 border rounded bg-gray-50 min-h-[50px]">
                         </ul>
+                    <button id="saveCampaignSorting" class="mt-4 bg-green-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-green-600 transition w-full hidden">Yeni Sıralamayı Kaydet</button>
+                    <p id="campaignSortingStatus" class="mt-2 text-center text-sm text-green-600 hidden"></p>
                 </div>
             `);
             
@@ -493,6 +496,9 @@
             // Kampanya Fiyat Metni Kaydetme Olayı
             document.getElementById('saveCampaignPriceTextBtn').addEventListener('click', saveCampaignPriceText);
             
+            // YENİ: Kampanya Sıralama Olay Dinleyicisi
+            document.getElementById('saveCampaignSorting').addEventListener('click', saveCampaignSortingOrder);
+            
             renderCampaignList();
             
              // Input değerlerini Firebase'den gelen veriye göre ayarla
@@ -520,23 +526,35 @@
             setTimeout(() => statusEl.classList.add('hidden'), 3000);
         }
         
-        // Mevcut Kampanya Görsellerini Listeler
+        // Mevcut Kampanya Görsellerini Listeler ve Sıralamayı Ayarlar (GÜNCELLENDİ)
         function renderCampaignList() {
-            const listEl = document.getElementById('campaignList');
+            const listEl = document.getElementById('sortableCampaignList');
+            const saveBtn = document.getElementById('saveCampaignSorting');
+            const statusEl = document.getElementById('campaignSortingStatus');
             if (!listEl) return;
+            
+            // 1. Görselleri order değerine göre sırala (order olmayanları sona at)
+            const sortedCampaigns = [...campaignUrls].sort((a, b) => 
+                (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)
+            );
+            
             listEl.innerHTML = '';
+            saveBtn.classList.add('hidden');
+            statusEl.classList.add('hidden');
 
-            if (campaignUrls.length === 0) {
+            if (sortedCampaigns.length === 0) {
                 listEl.innerHTML = '<li class="text-gray-500 text-center py-4">Henüz kampanya görseli eklenmedi.</li>';
                 return;
             }
             
-            const sortedCampaigns = [...campaignUrls].sort((a, b) => b.timestamp - a.timestamp);
+            saveBtn.classList.remove('hidden');
 
             sortedCampaigns.forEach((c) => {
                 const item = document.createElement('li');
-                item.className = 'flex items-center bg-white p-3 rounded shadow-sm border border-gray-200';
+                item.className = 'sortable-item flex items-center bg-white p-3 rounded shadow-sm border border-gray-200';
+                item.dataset.id = c.key; // Sortable.js için key
                 item.innerHTML = `
+                    <span class="text-gray-400 mr-3">☰</span>
                     <img src="${c.url}" class="campaign-item-img" alt="Kampanya Görseli">
                     <span class="text-sm flex-1 truncate">${c.url}</span>
                     <button data-key="${c.key}" class="deleteCampaignBtn bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition ml-3">Sil</button>
@@ -544,6 +562,18 @@
                 listEl.appendChild(item);
             });
 
+            // 2. Sortable.js'i Listeye Uygula
+            Sortable.create(listEl, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    statusEl.textContent = 'Sıralama değiştirildi. Kaydet butonuna basmayı unutmayın!';
+                    statusEl.classList.remove('hidden', 'text-green-600');
+                    statusEl.classList.add('text-red-600');
+                },
+            });
+
+            // 3. Silme Butonu Event Listener'larını tekrar bağla
             document.querySelectorAll('.deleteCampaignBtn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const keyToDelete = e.target.dataset.key;
@@ -566,9 +596,18 @@
                 alert('Lütfen önce bir görsel yükleyin.');
                 return;
             }
+            
+            // Yeni eklenen kampanyanın order değerini, mevcutların en sonuna ayarla
+            const maxOrder = campaignUrls.length > 0 
+                ? Math.max(...campaignUrls.map(c => c.order === undefined ? 0 : c.order))
+                : 0;
 
             try {
-                await campaignsRef.push({ url: url, timestamp: Date.now() }); 
+                await campaignsRef.push({ 
+                    url: url, 
+                    timestamp: Date.now(),
+                    order: maxOrder + 1 
+                }); 
                 alert("Kampanya görseli başarıyla listeye eklendi.");
                 
                 document.getElementById('newCampaignImageURL').value = '';
@@ -580,6 +619,58 @@
                 alert("Görsel ekleme başarısız oldu: " + error.message);
             }
         }
+        
+        // YENİ FONKSİYON: Kampanyaların Yeni Sıralama Düzenini Kaydeder
+        async function saveCampaignSortingOrder() {
+            const listEl = document.getElementById('sortableCampaignList');
+            const items = listEl.children;
+            const updates = {};
+            const statusEl = document.getElementById('campaignSortingStatus');
+            let changesMade = 0;
+            
+            if (items.length === 0) return;
+            
+            for (let i = 0; i < items.length; i++) {
+                const campaignKey = items[i].dataset.id;
+                const newOrderValue = i; 
+                
+                const currentCampaign = campaignUrls.find(c => c.key === campaignKey);
+                
+                if (currentCampaign && currentCampaign.order !== newOrderValue) {
+                    updates[`campaigns/${campaignKey}/order`] = newOrderValue; 
+                    changesMade++;
+                }
+            }
+            
+            if (changesMade === 0) {
+                 statusEl.textContent = 'Herhangi bir sıralama değişikliği tespit edilmedi.';
+                 statusEl.classList.remove('text-red-600');
+                 statusEl.classList.add('text-green-600');
+                 statusEl.classList.remove('hidden');
+                 return;
+            }
+            
+            if (!confirm(`${changesMade} kampanya görselinin sıralaması güncellenecektir. Onaylıyor musunuz?`)) {
+                return;
+            }
+
+            try {
+                // Tüm güncellemeleri tek seferde Firebase'e gönder
+                await database.ref().update(updates); 
+                
+                statusEl.textContent = `${changesMade} kampanya sıralaması başarıyla kaydedildi.`;
+                statusEl.classList.remove('text-red-600');
+                statusEl.classList.add('text-green-600');
+                statusEl.classList.remove('hidden');
+
+            } catch (error) {
+                statusEl.textContent = 'Sıralamayı kaydetme başarısız oldu: ' + error.message;
+                statusEl.classList.add('text-red-600');
+                statusEl.classList.remove('text-green-600');
+                statusEl.classList.remove('hidden');
+            }
+        }
+
 
         // --- MODÜL: YENİ ÜRÜN EKLEME (ADD PRODUCT) ---
         function renderAddProductModule() {
@@ -972,7 +1063,7 @@
                      campaign.key = childSnapshot.key;
                      campaignUrls.push(campaign);
                  });
-                 if (document.getElementById('campaignList')) {
+                 if (document.getElementById('sortableCampaignList')) { // Kontrol güncellendi
                      renderCampaignList();
                  }
             });
@@ -986,7 +1077,7 @@
                  }
             });
             
-            // YENİ: Firebase Dinleyicisi (Fiyat Kutucuğu Görseli URL'si)
+            // Firebase Dinleyicisi (Fiyat Kutucuğu Görseli URL'si)
             priceBoxUrlRef.on('value', (snapshot) => {
                  campaignPriceBoxUrl = snapshot.val() || "";
                  const inputEl = document.getElementById('priceBoxImageURL');
