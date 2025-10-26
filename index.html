@@ -8,8 +8,7 @@
   
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  
-  <style>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script> <style>
     body { background-color: #fff7f0; }
     .active-tab { background-color: #fb923c; color: white; }
     #categoryTabs::-webkit-scrollbar { display: none; }
@@ -18,7 +17,7 @@
     #mainHeader { height: 4rem; }
     
     /* -------------------------------------------------------- */
-    /* --- KAMPANYA SLIDER STİLLERİ (Aynı Kaldı) --- */
+    /* --- KAMPANYA SLIDER STİLLERİ --- */
     
     .slider-container {
         position: relative;
@@ -110,14 +109,14 @@
     }
     
     /* -------------------------------------------------------- */
-    /* --- YENİ: SABİT YORUM BUTONU STİLİ (GÜNCELLENDİ) --- */
+    /* --- SABİT YORUM BUTONU STİLİ --- */
     
     #floatingRatingButton {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        width: 72px; /* Büyütüldü */
-        height: 72px; /* Büyütüldü */
+        width: 72px; 
+        height: 72px; 
         border-radius: 50%;
         background-image: url('yuvarlak.png'); 
         background-size: cover; 
@@ -132,7 +131,7 @@
         z-index: 50; 
         cursor: pointer;
         transition: transform 0.2s, box-shadow 0.2s;
-        border: none; /* Beyaz çerçeve kaldırıldı */
+        border: none; 
     }
     
     #floatingRatingButton:hover {
@@ -215,7 +214,7 @@
   <button id="floatingRatingButton" title="Bizi Google'da Puanlayın"></button>
   
   <script>
-    // --- Firebase Yapılandırması (Aynı Kaldı) ---
+    // --- Firebase Yapılandırması ---
     const firebaseConfig = {
         apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
         authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
@@ -249,7 +248,7 @@
     let currentSlide = 0;
     let sliderInterval;
     
-    // Kategori çevirileri (Aynı Kaldı)
+    // Kategori çevirileri
     const categoryTranslations = {
       'Tümü': 'All', 
       'Menüler': 'Menus', 
@@ -270,7 +269,7 @@
     let categoriesEN = Object.values(categoryTranslations);
 
     
-    // --- SLIDER İŞLEVLERİ (Aynı Kaldı) ---
+    // --- SLIDER İŞLEVLERİ ---
     
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
@@ -377,7 +376,7 @@
     }
 
 
-    // --- YARDIMCI VE FIREBASE FONKSİYONLARI (Aynı Kaldı) ---
+    // --- YARDIMCI VE FIREBASE FONKSİYONLARI ---
 
     function formatRelativeDate(timestamp) {
         if (!timestamp) return "";
@@ -439,12 +438,14 @@
         productsArray.push(product);
       });
       
+      // Ürün sıralaması: order değerine göre sıralanır
       productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
       
       return productsArray;
     }
 
     function setupFirebaseListener() {
+        // Ürün Dinleyicisi
         productsRef.on('value', (snapshot) => {
             products = snapshot.exists() ? transformProducts(snapshot) : [];
             updateLanguageContent(); 
@@ -453,6 +454,7 @@
             alert("Menüyü yüklerken bir hata oluştu.");
         });
         
+        // Kampanya Görselleri Dinleyicisi (GÜNCELLENEN KISIM: order ile sıralama)
         campaignsRef.on('value', (snapshot) => {
              campaignUrls = [];
              snapshot.forEach(childSnapshot => {
@@ -460,12 +462,17 @@
                  campaign.key = childSnapshot.key;
                  campaignUrls.push(campaign);
              });
-             campaignUrls.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+             
+             // YENİ SIRALAMA MANTIĞI: Admin panelinde kaydedilen 'order' değerine göre sırala (Küçükten Büyüğe)
+             campaignUrls.sort((a, b) => 
+                 (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)
+             );
              
              currentSlide = 0; 
              renderCampaignSlider();
         });
         
+        // Kampanya Bilgileri Dinleyicisi
         campaignInfoRef.child('price_text').on('value', (snapshot) => {
              campaignPriceText = snapshot.val() || "";
              renderCampaignSlider();
@@ -649,7 +656,7 @@
     });
 
 
-    // --- EVENT LISTENERS (Aynı Kaldı) ---
+    // --- EVENT LISTENERS ---
 
     document.getElementById('langTR').addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
     document.getElementById('langEN').addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
@@ -662,6 +669,8 @@
         const loginError = document.getElementById('loginError');
         const adminLoginModal = document.getElementById('adminLoginModal');
         
+        // DİKKAT: Burada Firebase Auth kullanılmıyor, basit şifre kontrolü var.
+        // Firebase Auth'u kullanmak için "admin.html"deki gibi bir yapı kurulmalıdır.
         if(passwordInput.value==='admin123'){ 
             adminLoginModal.classList.add('hidden');
             window.location.href = 'admin.html'; 
@@ -677,7 +686,7 @@
       
       window.addEventListener('resize', setPositionByIndex); 
       
-      // Zamanlayıcıları kur
+      // Yorum zamanlayıcılarını kur
       setupIntervals();
     });
   </script>
