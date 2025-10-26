@@ -12,6 +12,9 @@
 
     <style>
         body { background-color: #f3f4f6; }
+        /* Aktif ana menü butonu */
+        .admin-menu-button.active { background-color: #f97316; } 
+        /* Aktif sol menü butonu */
         .tab-button.active { background-color: #fb923c; color: white; }
         /* Sıralama Modülü İçin Stiller */
         .sortable-item { cursor: grab; }
@@ -54,7 +57,28 @@
 <body>
     <div class="flex h-screen">
         <div class="w-64 bg-orange-600 text-white flex flex-col p-4 shadow-xl">
-            <h1 class="text-3xl font-bold mb-8 border-b border-orange-400 pb-2">Admin Panel</h1>
+            <h1 class="text-3xl font-bold mb-4 border-b border-orange-400 pb-2">Admin Panel</h1>
+            
+            <div class="mb-6 border-b border-orange-400 pb-4">
+                <p class="text-sm font-semibold mb-2">Yönetilecek Menü:</p>
+                <button id="switchToInPlace" data-menu="in_place" 
+                        class="admin-menu-button active w-full text-left p-2 rounded transition mb-2">
+                    🍽️ Yerinde Menü (products)
+                </button>
+                <button id="switchToDelivery" data-menu="delivery" 
+                        class="admin-menu-button w-full text-left p-2 rounded hover:bg-orange-700 transition">
+                    🛵 Paket Servis Menüsü (delivery_products)
+                </button>
+            </div>
+            <div id="copyToDeliveryContainer" class="mb-6 border-b border-orange-400 pb-4 hidden">
+                <button id="copyToDeliveryBtn" 
+                        class="bg-blue-500 text-white px-3 py-2 text-xs rounded-lg hover:bg-blue-600 transition font-bold w-full">
+                    Yerinde Menü Verilerini Kopyala
+                </button>
+                <p class="text-[10px] text-orange-200 mt-1">Sadece Paket Servis modunda görünür.</p>
+            </div>
+
+
             <button id="showProducts" class="tab-button active text-left p-3 rounded hover:bg-orange-500 transition mb-2">
                 📦 Ürün Yönetimi
             </button>
@@ -128,11 +152,23 @@
         // Firebase'i başlat
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const productsRef = database.ref('products');
-        const visitorsRef = database.ref('visitors');
-        const campaignsRef = database.ref('campaigns'); 
-        const campaignInfoRef = database.ref('campaign_info'); 
-        const priceBoxUrlRef = database.ref('campaign_info/price_box_url'); 
+        
+        // GENEL REFERANS YOLLARI (Sabit Kalsın)
+        const inPlaceProductsPath = 'products';
+        const inPlaceCampaignsPath = 'campaigns';
+        const inPlaceCampaignInfoPath = 'campaign_info';
+        const deliveryProductsPath = 'delivery_products';
+        const deliveryCampaignsPath = 'delivery_campaigns';
+        const deliveryCampaignInfoPath = 'delivery_campaign_info';
+        const visitorsPath = 'visitors'; // Ziyaretçiler her iki menü için de aynı yolu kullanabilir.
+        
+        // DINAMIK REFERANSLAR (Seçili menüye göre değişecekler)
+        let currentMenuType = 'in_place'; // Başlangıçta Yerinde Menü
+        let productsRef;
+        let campaignsRef; 
+        let campaignInfoRef;
+        let priceBoxUrlRef; 
+        let visitorsRef = database.ref(visitorsPath); // Ziyaretçi referansı sabit kalabilir.
         
         let products = []; 
         let campaignUrls = []; 
@@ -149,6 +185,7 @@
         const showBulkUpdateBtn = document.getElementById('showBulkUpdate');
         const showStatsBtn = document.getElementById('showStats');
         const tabButtons = document.querySelectorAll('.tab-button');
+        const adminMenuButtons = document.querySelectorAll('.admin-menu-button');
         const editProductModal = document.getElementById('editProductModal');
         const closeEditProductModal = document.getElementById('closeEditProductModal');
         const editImageURLInput = document.getElementById('editImageURL');
@@ -156,6 +193,106 @@
         const uploadEditImageBtn = document.getElementById('uploadEditImageBtn');
         const saveEditProductButton = document.getElementById('saveEditProduct');
         
+        
+        // --- YENİ: DİNAMİK REFERANS YÖNETİMİ ---
+        function setFirebaseRefs(menuType) {
+            currentMenuType = menuType;
+            
+            if (menuType === 'in_place') {
+                productsRef = database.ref(inPlaceProductsPath);
+                campaignsRef = database.ref(inPlaceCampaignsPath);
+                campaignInfoRef = database.ref(inPlaceCampaignInfoPath);
+            } else { // 'delivery'
+                productsRef = database.ref(deliveryProductsPath);
+                campaignsRef = database.ref(deliveryCampaignsPath);
+                campaignInfoRef = database.ref(deliveryCampaignInfoPath);
+            }
+            priceBoxUrlRef = campaignInfoRef.child('price_box_url');
+
+            // Mevcut dinleyicileri kaldırıp yeni referanslara yeniden bağlamak için
+            // Burası kritik bir optimizasyon gerektirir, ancak basitçe yeniden yükleme ile halledelim.
+            // Sayfayı yeniden yüklemek yerine, dinleyicileri kaldıran ve yeni referanslara bağlayan bir fonksiyon yazılabilir.
+            // Şimdilik sadece referansları ayarlayıp, ardından dataListener'ı çağıracağız.
+            console.log(`Firebase referansları ayarlandı: ${menuType}`);
+
+            // UI'ı güncelle
+            updateMenuButtonState(menuType);
+            
+            // Tüm aktif dinleyicileri durdurup yeniden başlat
+            stopAllListeners();
+            setupDataListeners();
+            
+            // Mevcut aktif modülü yeniden render et
+            const activeTab = document.querySelector('.tab-button.active');
+            if (activeTab) {
+                activeTab.click(); // Aktif butonu tetikle (modülü yeniden yüklemek için)
+            } else {
+                renderProductsModule();
+            }
+        }
+        
+        // UI Menü Butonu Durumunu Günceller
+        function updateMenuButtonState(menuType) {
+             adminMenuButtons.forEach(btn => {
+                 btn.classList.remove('active');
+                 if (btn.dataset.menu === menuType) {
+                     btn.classList.add('active');
+                 }
+             });
+             // Kopyalama butonunun görünürlüğünü ayarla
+             const copyContainer = document.getElementById('copyToDeliveryContainer');
+             if (menuType === 'delivery') {
+                copyContainer.classList.remove('hidden');
+             } else {
+                copyContainer.classList.add('hidden');
+             }
+        }
+        
+        // --- YENİ: VERİ KOPYALAMA İŞLEVİ ---
+        async function copyMenuDataToDelivery() {
+            if (currentMenuType !== 'delivery') return; // Sadece paket serviste aktif
+
+            if (!confirm("Tüm Yerinde Menü (products) verileri, Paket Servis Menüsüne (delivery_products) kopyalanacak. Devam etmek istiyor musunuz? Paket Servis menüsündeki mevcut verilerin ÜZERİNE YAZILACAKTIR!")) {
+                return;
+            }
+
+            const sourceProductsRef = database.ref(inPlaceProductsPath);
+            const sourceCampaignsRef = database.ref(inPlaceCampaignsPath);
+            const sourceCampaignInfoRef = database.ref(inPlaceCampaignInfoPath);
+            
+            const targetProductsRef = database.ref(deliveryProductsPath);
+            const targetCampaignsRef = database.ref(deliveryCampaignsPath);
+            const targetCampaignInfoRef = database.ref(deliveryCampaignInfoPath);
+
+
+            try {
+                // 1. Ürünleri Kopyala
+                let snapshot = await sourceProductsRef.once('value');
+                await targetProductsRef.set(snapshot.val() || {});
+                console.log("Ürünler başarıyla kopyalandı.");
+
+                // 2. Kampanyaları Kopyala
+                snapshot = await sourceCampaignsRef.once('value');
+                await targetCampaignsRef.set(snapshot.val() || {});
+                console.log("Kampanyalar başarıyla kopyalandı.");
+                
+                // 3. Kampanya Bilgisini Kopyala (Fiyat Metni, Kutucuk Görseli vb.)
+                snapshot = await sourceCampaignInfoRef.once('value');
+                await targetCampaignInfoRef.set(snapshot.val() || {});
+                console.log("Kampanya bilgisi başarıyla kopyalandı.");
+
+                alert("Veriler başarıyla Yerinde Menü'den Paket Servis Menüsü'ne kopyalandı!");
+                
+                // Kopyalama sonrası referansların tekrar tetiklenmesi için
+                setFirebaseRefs('delivery'); 
+
+            } catch (error) {
+                 alert("Veri kopyalama sırasında bir hata oluştu: " + error.message);
+                 console.error("Veri kopyalama hatası:", error);
+            }
+        }
+
+
         // --- MODÜL VE UI YÖNETİMİ ---
 
         function setActiveTab(buttonId) {
@@ -197,14 +334,17 @@
         
         async function updateProductInFirebase(key, updates) {
             updates.lastUpdated = Date.now(); 
+            // productsRef dinamik olduğu için doğru yola yazacak.
             await productsRef.child(key).update(updates);
         }
 
         async function deleteProductFromFirebase(key) {
+            // productsRef dinamik olduğu için doğru yoldan silecek.
             await productsRef.child(key).remove();
         }
         
         async function deleteCampaignUrl(key) {
+             // campaignsRef dinamik olduğu için doğru yoldan silecek.
              await campaignsRef.child(key).remove();
         }
         
@@ -215,8 +355,9 @@
         // --- MODÜL: ÜRÜN YÖNETİMİ (PRODUCTS) ---
         function renderProductsModule() {
             setActiveTab('showProducts');
+            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">📦 Ürün Yönetimi</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">📦 ${menuTitle} Ürün Yönetimi</h2>
                 <div class="flex gap-4 mb-4">
                     <select id="filterCategory" class="border p-2 rounded flex-1">
                         <option value="Tümü">Tümü</option>
@@ -281,8 +422,9 @@
             }
             
             setActiveTab('showSorting');
+            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">⬆️ Ürün Sıralama Ayarı</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">⬆️ ${menuTitle} Ürün Sıralama Ayarı</h2>
                 <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
                     <p class="mb-4 text-gray-600">Ürünleri sürükleyip bırakarak menüdeki sıralamasını değiştirebilirsiniz. Bu ayar tüm dillerde geçerli olacaktır.</p>
                     
@@ -366,6 +508,7 @@
             const updates = {};
             const statusEl = document.getElementById('sortingStatus');
             let changesMade = 0;
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
             
             if (items.length === 0) return;
             
@@ -376,7 +519,8 @@
                 const currentProduct = products.find(p => p.key === productKey);
                 
                 if (currentProduct && currentProduct.order !== newOrderValue) {
-                    updates[`products/${productKey}/order`] = newOrderValue; 
+                    // Dinamik yolu burada kullanıyoruz
+                    updates[`${pathPrefix}/${productKey}/order`] = newOrderValue; 
                     changesMade++;
                 }
             }
@@ -412,12 +556,13 @@
             }
         }
 
-        // --- YENİ MODÜL: KAMPANYA GÖRSELLERİ YÖNETİMİ ---
+        // --- MODÜL: KAMPANYA GÖRSELLERİ YÖNETİMİ ---
 
         function renderCampaignModule() {
             setActiveTab('showCampaigns');
+            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">🖼️ Kampanya Görselleri Yönetimi</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">🖼️ ${menuTitle} Kampanya Görselleri Yönetimi</h2>
                 <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
                     <p class="mb-4 text-gray-600">Bu görseller ana sayfadaki otomatik dönen banner (slider) alanında kullanılır.</p>
 
@@ -469,7 +614,8 @@
                     const newUrl = priceBoxUrlInput.value.trim();
                     if(newUrl) {
                          try {
-                             await priceBoxUrlRef.set(newUrl);
+                             // priceBoxUrlRef dinamik olduğu için doğru yola yazacak.
+                             await priceBoxUrlRef.set(newUrl); 
                              campaignPriceBoxUrl = newUrl; // Global değişkeni güncelle
                              alert("Kutucuk görseli başarıyla güncellendi.");
                          } catch (error) {
@@ -512,6 +658,7 @@
             const newText = textInput.value.trim();
 
             try {
+                // campaignInfoRef dinamik olduğu için doğru yola yazacak.
                 await campaignInfoRef.child('price_text').set(newText);
                 
                 campaignPriceText = newText; 
@@ -526,7 +673,7 @@
             setTimeout(() => statusEl.classList.add('hidden'), 3000);
         }
         
-        // Mevcut Kampanya Görsellerini Listeler ve Sıralamayı Ayarlar (GÜNCELLENDİ)
+        // Mevcut Kampanya Görsellerini Listeler ve Sıralamayı Ayarlar
         function renderCampaignList() {
             const listEl = document.getElementById('sortableCampaignList');
             const saveBtn = document.getElementById('saveCampaignSorting');
@@ -603,6 +750,7 @@
                 : 0;
 
             try {
+                // campaignsRef dinamik olduğu için doğru yola yazacak.
                 await campaignsRef.push({ 
                     url: url, 
                     timestamp: Date.now(),
@@ -620,14 +768,15 @@
             }
         }
         
-        // YENİ FONKSİYON: Kampanyaların Yeni Sıralama Düzenini Kaydeder
+        // Kampanyaların Yeni Sıralama Düzenini Kaydeder
         async function saveCampaignSortingOrder() {
             const listEl = document.getElementById('sortableCampaignList');
             const items = listEl.children;
             const updates = {};
             const statusEl = document.getElementById('campaignSortingStatus');
             let changesMade = 0;
-            
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
+
             if (items.length === 0) return;
             
             for (let i = 0; i < items.length; i++) {
@@ -637,7 +786,8 @@
                 const currentCampaign = campaignUrls.find(c => c.key === campaignKey);
                 
                 if (currentCampaign && currentCampaign.order !== newOrderValue) {
-                    updates[`campaigns/${campaignKey}/order`] = newOrderValue; 
+                    // Dinamik yolu burada kullanıyoruz
+                    updates[`${pathPrefix}/${campaignKey}/order`] = newOrderValue; 
                     changesMade++;
                 }
             }
@@ -675,8 +825,9 @@
         // --- MODÜL: YENİ ÜRÜN EKLEME (ADD PRODUCT) ---
         function renderAddProductModule() {
             setActiveTab('showAddProduct');
+            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">➕ Yeni Ürün Ekle</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">➕ ${menuTitle} Yeni Ürün Ekle</h2>
                 <div class="flex flex-col gap-4 p-6 border rounded-lg bg-white shadow-md max-w-lg">
                     <input id="productName" placeholder="Ürün Adı (TR)" class="border p-3 rounded" />
                     <input id="productNameEN" placeholder="Product Name (EN) (Opsiyonel)" class="border p-3 rounded" />
@@ -736,7 +887,8 @@
             };
 
             try {
-                await database.ref('products').push(newProduct); 
+                // productsRef dinamik olduğu için doğru yola yazacak.
+                await productsRef.push(newProduct); 
                 alert(`"${name}" ürünü başarıyla eklendi.`);
                 
                 document.querySelectorAll('#contentContainer input, #contentContainer select').forEach(el => el.value = '');
@@ -753,8 +905,9 @@
         // --- MODÜL: TOPLU FİYAT DEĞİŞTİRME (BULK UPDATE) ---
         function renderBulkUpdateModule() {
             setActiveTab('showBulkUpdate');
+            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">💸 Toplu Fiyat Değiştirme</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">💸 ${menuTitle} Toplu Fiyat Değiştirme</h2>
                 <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
                     <p class="mb-4 text-gray-600">Aşağıdaki listede ürünlerin mevcut fiyatlarını değiştirebilir veya Toplu Değişim araçlarını kullanabilirsiniz. **Yeni fiyatları manuel olarak sıra sıra da girebilirsiniz.**</p>
                     
@@ -892,6 +1045,7 @@
             const currentTime = Date.now();
             const statusEl = document.getElementById('bulkStatus');
             let changesMade = 0;
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
 
             if (inputs.length === 0) {
                 statusEl.textContent = 'Kaydedilecek ürün bulunamadı.';
@@ -912,8 +1066,9 @@
                 }
                 
                 if (currentProduct && currentProduct.price !== newPrice) {
-                    updates[`products/${productKey}/price`] = newPrice;
-                    updates[`products/${productKey}/lastUpdated`] = currentTime; 
+                    // Dinamik yolu burada kullanıyoruz
+                    updates[`${pathPrefix}/${productKey}/price`] = newPrice;
+                    updates[`${pathPrefix}/${productKey}/lastUpdated`] = currentTime; 
                     changesMade++;
                 }
             }
@@ -933,7 +1088,7 @@
 
             try {
                 await database.ref().update(updates); 
-                statusEl.textContent = `${changesMade} ürün fiyatı başarıyla kaydedildi ve ana menü güncellendi.`;
+                statusEl.textContent = `${changesMade} ürün fiyatı başarıyla kaydedildi ve menü güncellendi.`;
                 statusEl.classList.remove('hidden');
                 statusEl.classList.remove('text-red-600');
                 statusEl.classList.add('text-green-600');
@@ -950,8 +1105,13 @@
         // --- MODÜL: İSTATİSTİKLER (STATS) ---
         function renderStatsModule() {
             setActiveTab('showStats');
+            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
+            
+            // NOTE: Ziyaretçi takibi tek bir 'visitors' yolunda tutuluyor.
+            // Bu yüzden menüye özel bir ziyaretçi sayacı şimdilik yok.
+            
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">📊 İstatistikler</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">📊 Menü Görüntüleme İstatistikleri</h2>
                 <div class="grid grid-cols-2 gap-6 max-w-xl">
                     <div class="bg-white p-6 rounded-lg shadow">
                         <h3 class="text-xl font-semibold mb-2 text-orange-600">Bugünkü Görüntüleme</h3>
@@ -963,8 +1123,8 @@
                     </div>
                 </div>
                 <div class="mt-8">
-                    <button id="resetCounter" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Sayaçları Sıfırla (Manuel)</button>
-                    <p class="text-sm text-gray-500 mt-2">NOT: Günlük sayaç Firebase'de gün bazında tutulur. Bu buton tüm sayaç geçmişini siler.</p>
+                    <button id="resetCounter" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Sayaçları Sıfırla (Tüm Zamanlar)</button>
+                    <p class="text-sm text-gray-500 mt-2">NOT: Bu sayaçlar, ${currentMenuType === 'in_place' ? 'index.html' : 'delivery.html'} dosyasının kaç kez açıldığını gösterir. Sıfırlama tüm geçmişi siler.</p>
                 </div>
             `);
             fetchVisitorCounts();
@@ -974,6 +1134,8 @@
         function fetchVisitorCounts() {
             const today = new Date().toISOString().slice(0, 10);
             
+            // Ziyaretçi referansı sabit olduğu için burada dinamik bir değişiklik yapmaya gerek yok.
+            // Ancak, gerçek bir ayrım için 'visitors/in_place' ve 'visitors/delivery' gibi yollar kullanılmalıdır.
             visitorsRef.child(today).once('value', snapshot => {
                 document.getElementById('todayCount').textContent = snapshot.val() || 0;
             });
@@ -1021,16 +1183,25 @@
                 editProductModal.classList.remove('hidden');
             }
         }
-
-
-        // --- GENEL EVENT LISTENERS ---
-        document.addEventListener('DOMContentLoaded', () => {
+        
+        // --- FIREBASE DINLEYICILERI YÖNETİMİ ---
+        
+        // Dinleyicileri tutmak için boş bir nesne
+        let activeListeners = {}; 
+        
+        function stopAllListeners() {
+            // Önceki dinleyicileri kapat (off metodu ile)
+            if (activeListeners.products) productsRef.off('value', activeListeners.products);
+            if (activeListeners.campaigns) campaignsRef.off('value', activeListeners.campaigns);
+            if (activeListeners.campaignPriceText) campaignInfoRef.child('price_text').off('value', activeListeners.campaignPriceText);
+            if (activeListeners.priceBoxUrl) priceBoxUrlRef.off('value', activeListeners.priceBoxUrl);
             
-            // Başlangıçta Ürün Yönetimi modülünü yükle
-            renderProductsModule();
-            
-            // Firebase Dinleyicisi (Ürünler)
-            productsRef.on('value', (snapshot) => {
+            activeListeners = {}; // Nesneyi temizle
+        }
+        
+        function setupDataListeners() {
+             // Firebase Dinleyicisi (Ürünler)
+            activeListeners.products = productsRef.on('value', (snapshot) => {
                 products = [];
                 snapshot.forEach(childSnapshot => {
                     const product = childSnapshot.val();
@@ -1056,20 +1227,20 @@
             });
 
             // Firebase Dinleyicisi (Kampanya Görselleri)
-            campaignsRef.on('value', (snapshot) => {
+            activeListeners.campaigns = campaignsRef.on('value', (snapshot) => {
                  campaignUrls = [];
                  snapshot.forEach(childSnapshot => {
                      const campaign = childSnapshot.val();
                      campaign.key = childSnapshot.key;
                      campaignUrls.push(campaign);
                  });
-                 if (document.getElementById('sortableCampaignList')) { // Kontrol güncellendi
+                 if (document.getElementById('sortableCampaignList')) { 
                      renderCampaignList();
                  }
             });
             
             // Firebase Dinleyicisi (Kampanya Fiyat Metni)
-            campaignInfoRef.child('price_text').on('value', (snapshot) => {
+            activeListeners.campaignPriceText = campaignInfoRef.child('price_text').on('value', (snapshot) => {
                  campaignPriceText = snapshot.val() || "";
                  const inputEl = document.getElementById('campaignPriceTextInput');
                  if(inputEl) {
@@ -1078,7 +1249,7 @@
             });
             
             // Firebase Dinleyicisi (Fiyat Kutucuğu Görseli URL'si)
-            priceBoxUrlRef.on('value', (snapshot) => {
+            activeListeners.priceBoxUrl = priceBoxUrlRef.on('value', (snapshot) => {
                  campaignPriceBoxUrl = snapshot.val() || "";
                  const inputEl = document.getElementById('priceBoxImageURL');
                  const previewEl = document.getElementById('priceBoxImagePreview');
@@ -1094,8 +1265,15 @@
                      }
                  }
             });
+        }
 
 
+        // --- GENEL EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Başlangıçta Yerinde Menü referanslarını ayarla ve dinleyicileri başlat.
+            setFirebaseRefs('in_place'); 
+            
             // Navigasyon Butonları
             showProductsBtn.addEventListener('click', renderProductsModule);
             showSortingBtn.addEventListener('click', renderSortingModule); 
@@ -1103,6 +1281,13 @@
             showAddProductBtn.addEventListener('click', renderAddProductModule);
             showBulkUpdateBtn.addEventListener('click', renderBulkUpdateModule);
             showStatsBtn.addEventListener('click', renderStatsModule);
+            
+            // YENİ: Menü Tipi Geçiş Butonları
+            document.getElementById('switchToInPlace').addEventListener('click', () => setFirebaseRefs('in_place'));
+            document.getElementById('switchToDelivery').addEventListener('click', () => setFirebaseRefs('delivery'));
+            
+            // YENİ: Veri Kopyalama Butonu
+            document.getElementById('copyToDeliveryBtn').addEventListener('click', copyMenuDataToDelivery);
             
             // Edit Modal Butonları
             closeEditProductModal.addEventListener('click', () => editProductModal.classList.add('hidden'));
@@ -1127,6 +1312,7 @@
                 try {
                     if (!updates.image) updates.image = ''; 
 
+                    // updateProductInFirebase fonksiyonu dinamik referansı kullanacak
                     await updateProductInFirebase(productKey, updates); 
                     editProductModal.classList.add('hidden');
                     alert(`"${updates.name}" ürünü başarıyla güncellendi.`);
