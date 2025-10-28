@@ -45,8 +45,7 @@
     <div class="flex items-center gap-2">
       <button id="langTR" class="bg-white text-red-600 px-2 py-1 rounded text-sm font-bold">TR</button>
       <button id="langEN" class="bg-white text-red-600 px-2 py-1 rounded text-sm">EN</button>
-      <button id="adminLoginBtn" class="bg-white text-red-600 px-2 py-1 rounded text-lg font-bold ml-2">⚙️</button>
-    </div>
+      </div>
   </header>
 
   <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
@@ -161,10 +160,53 @@
 
     
     // --- SLIDER İŞLEVLERİ ve Diğer Yardımcı Fonksiyonlar (Aynı Kaldı) ---
-    function setPositionByIndex() { /* ... */ }
-    function startSliderInterval() { /* ... */ }
-    function goToSlide(index) { /* ... */ }
-    function handleScroll() { /* ... */ }
+    function setPositionByIndex() {
+        if (campaignUrls.length === 0) return;
+        const sliderContainer = document.querySelector('#campaignSlider');
+        const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
+        if (!wrapper || !sliderContainer) return;
+        
+        const slideWidth = sliderContainer.clientWidth; 
+        wrapper.scrollLeft = currentSlide * slideWidth;
+        
+        const dots = document.querySelectorAll('#campaignSlider .dot');
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+        });
+    }
+    function startSliderInterval() {
+        if (sliderInterval) clearInterval(sliderInterval);
+        
+        if (campaignUrls.length > 1) {
+            sliderInterval = setInterval(() => {
+                const nextSlide = (currentSlide + 1) % campaignUrls.length;
+                goToSlide(nextSlide);
+            }, 5000); 
+        }
+    }
+    function goToSlide(index) {
+        if (campaignUrls.length === 0) return;
+        currentSlide = index;
+        setPositionByIndex();
+    }
+    function handleScroll() {
+        const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
+        const sliderContainer = document.querySelector('#campaignSlider');
+        if (!wrapper || !sliderContainer) return;
+        
+        const scrollLeft = wrapper.scrollLeft;
+        const slideWidth = sliderContainer.clientWidth;
+        const newSlideIndex = Math.round(scrollLeft / slideWidth);
+        
+        if (newSlideIndex !== currentSlide) {
+            currentSlide = newSlideIndex;
+            const dots = document.querySelectorAll('#campaignSlider .dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+            startSliderInterval(); 
+        }
+    }
 
     function renderCampaignSlider() {
         if (campaignUrls.length === 0) {
@@ -219,7 +261,55 @@
         startSliderInterval();
     }
     
-    function formatRelativeDate(timestamp) { /* ... */ }
+    function formatRelativeDate(timestamp) {
+        if (!timestamp) return "";
+        const now = Date.now();
+        const diffTime = now - timestamp; 
+        const diffMinutes = Math.floor(diffTime / 60000);
+        const diffHours = Math.floor(diffMinutes / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        const TR = {
+            min: (m) => `${m} dakika önce`,
+            hour: (h) => `${h} saat önce`,
+            day: (d) => `${d} gün önce`,
+            today: 'Bugün',
+            yesterday: 'Dün',
+            week: '1 hafta önce',
+            date: (d, m, y) => `${d}.${m}.${y}`
+        };
+
+        const EN = {
+            min: (m) => `${m} minutes ago`,
+            hour: (h) => `${h} hours ago`,
+            day: (d) => `${d} days ago`,
+            today: 'Today',
+            yesterday: 'Yesterday',
+            week: '1 week ago',
+            date: (d, m, y) => `${d}/${m}/${y}`
+        };
+
+        const t = language === 'TR' ? TR : EN;
+
+        if (diffMinutes < 60) {
+            if (diffMinutes < 5) return t.today; 
+            return t.min(diffMinutes);
+        } else if (diffHours < 24) {
+            return t.hour(diffHours);
+        } else if (diffDays === 1) {
+             return t.yesterday; 
+        } else if (diffDays <= 7) {
+            return t.day(diffDays); 
+        } else if (diffDays <= 14) {
+            return t.week;
+        } else {
+            const date = new Date(timestamp);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return t.date(day, month, year);
+        }
+    }
     function transformProducts(dataSnapshot) { 
       const productsArray = [];
       dataSnapshot.forEach(childSnapshot => {
@@ -235,7 +325,16 @@
       return productsArray;
     }
     
-    function trackVisitor() { /* ... */ }
+    function trackVisitor() {
+        const today = new Date().toISOString().slice(0, 10); 
+        const counterRef = visitorsRef.child(today);
+        
+        counterRef.once('value', snapshot => {}); 
+        
+        counterRef.transaction(currentCount => {
+            return (currentCount || 0) + 1;
+        });
+    }
     
     function setupFirebaseListener() {
         // Ürün Dinleyicisi (PAKET SERVİS)
@@ -388,9 +487,29 @@
 
     const RATING_INTERVALS = [6000, 12000, 18000]; 
     
-    function isModalPermanentlyDisabled() { /* ... */ }
-    function showRatingModal() { /* ... */ }
-    function setupIntervals() { /* ... */ }
+    function isModalPermanentlyDisabled() {
+        return localStorage.getItem('olimpiyat_rated') === 'true';
+    }
+    function showRatingModal() {
+        if (isModalPermanentlyDisabled()) {
+            return;
+        }
+        if (sessionStorage.getItem('olimpiyat_rated_session_closed') !== 'true') {
+            ratingModal.classList.remove('hidden');
+        }
+    }
+    function setupIntervals() {
+        if (isModalPermanentlyDisabled()) {
+            return;
+        }
+        RATING_INTERVALS.forEach(delay => {
+            setTimeout(() => {
+                if (ratingModal.classList.contains('hidden') && !isModalPermanentlyDisabled()) {
+                    showRatingModal();
+                }
+            }, delay);
+        });
+    }
 
     goToRatingLink.addEventListener('click', () => { localStorage.setItem('olimpiyat_rated', 'true'); ratingModal.classList.add('hidden'); });
     closeRatingModal.addEventListener('click', () => { sessionStorage.setItem('olimpiyat_rated_session_closed', 'true'); ratingModal.classList.add('hidden'); });
@@ -402,7 +521,10 @@
     document.getElementById('langTR').addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
     document.getElementById('langEN').addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
     document.getElementById('imageModal').addEventListener('click',()=>document.getElementById('imageModal').classList.add('hidden'));
-    document.getElementById('adminLoginBtn').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.remove('hidden'));
+    
+    // Admin Giriş butonu HTML'den silindiği için bu satır da kaldırılabilir
+    // document.getElementById('adminLoginBtn').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.remove('hidden'));
+    
     document.getElementById('closeAdminLogin').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.add('hidden'));
 
     document.getElementById('checkPassword').addEventListener('click',()=>{
