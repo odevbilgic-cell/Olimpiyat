@@ -392,7 +392,7 @@
         
         // PAKET SERVİS: Fiyat hesaplama (İçecekler hariç +10 TL)
         let finalPrice = p.price;
-        if (p.category !== 'İçecekler' && !isNaN(parseFloat(p.price))) {
+        if (p.category !== 'İçecekler' && 'Midye' && !isNaN(parseFloat(p.price))) {
              finalPrice = parseFloat(p.price) + 10;
         }
 
