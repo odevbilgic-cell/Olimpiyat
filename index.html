@@ -155,8 +155,7 @@
     <div class="flex items-center gap-2">
       <button id="langTR" class="bg-white text-orange-600 px-2 py-1 rounded text-sm font-bold">TR</button>
       <button id="langEN" class="bg-white text-orange-600 px-2 py-1 rounded text-sm">EN</button>
-      <button id="adminLoginBtn" class="bg-white text-orange-600 px-2 py-1 rounded text-lg font-bold ml-2">⚙️</button>
-    </div>
+      </div>
   </header>
 
   <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
@@ -661,7 +660,10 @@
     document.getElementById('langTR').addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
     document.getElementById('langEN').addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
     document.getElementById('imageModal').addEventListener('click',()=>document.getElementById('imageModal').classList.add('hidden'));
-    document.getElementById('adminLoginBtn').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.remove('hidden'));
+    
+    // Admin Giriş butonu HTML'den silindiği için bu satır da kaldırılabilir
+    // document.getElementById('adminLoginBtn').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.remove('hidden'));
+    
     document.getElementById('closeAdminLogin').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.add('hidden'));
 
     document.getElementById('checkPassword').addEventListener('click',()=>{
