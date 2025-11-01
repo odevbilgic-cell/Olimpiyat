@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yönetici Paneli | Olimpiyat Kokoreç</title>
+    
+    <link rel="icon" type="image/jpeg" href="/logo.jpg"> 
+    <link rel="shortcut icon" href="/logo.jpg">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -1018,9 +1022,9 @@
                 } else { // fixed
                     newPrice = basePrice + value;
                 }
-                newPrice = Math.max(0, parseFloat(newPrice.toFixed(2)));
+                newPrice = Math.max(0, newPrice); // Max 0'dan büyük olmalı
                 
-                input.value = newPrice;
+                input.value = parseFloat(newPrice.toFixed(2)); // İki ondalık basamağa yuvarla
                 updatedCount++;
             });
 
@@ -1046,11 +1050,12 @@
             const statusEl = document.getElementById('bulkStatus');
             let changesMade = 0;
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
+            let invalidPrices = []; // Geçersiz fiyatları tutacak dizi
+
 
             if (inputs.length === 0) {
                 statusEl.textContent = 'Kaydedilecek ürün bulunamadı.';
-                statusEl.classList.remove('hidden');
-                statusEl.classList.remove('text-green-600');
+                statusEl.classList.remove('hidden', 'text-green-600');
                 statusEl.classList.add('text-red-600');
                 return;
             }
@@ -1061,23 +1066,31 @@
                 const currentProduct = products.find(p => p.key === productKey);
 
                 if (isNaN(newPrice) || newPrice < 0) {
-                    alert(`${currentProduct.name} ürünü için geçersiz fiyat girdiniz. Lütfen kontrol edin.`);
-                    return; 
+                    invalidPrices.push(currentProduct.name);
+                    continue; // Geçersiz fiyatı atla, diğerlerini kaydetmeye devam et
                 }
                 
-                if (currentProduct && currentProduct.price !== newPrice) {
+                const currentPriceRounded = parseFloat(currentProduct.price.toFixed(2));
+                const newPriceRounded = parseFloat(newPrice.toFixed(2));
+
+
+                if (currentProduct && currentPriceRounded !== newPriceRounded) {
                     // Dinamik yolu burada kullanıyoruz
-                    updates[`${pathPrefix}/${productKey}/price`] = newPrice;
+                    updates[`${pathPrefix}/${productKey}/price`] = newPriceRounded;
                     updates[`${pathPrefix}/${productKey}/lastUpdated`] = currentTime; 
                     changesMade++;
                 }
+            }
+            
+            // Hata Kontrolü
+            if (invalidPrices.length > 0) {
+                alert(`Aşağıdaki ürünler için geçersiz fiyat girdiniz ve kaydedilemediler: \n- ${invalidPrices.join('\n- ')}\n\nDiğer geçerli fiyatlar kaydedilmeye devam ediliyor.`);
             }
 
 
             if (changesMade === 0) {
                 statusEl.textContent = 'Herhangi bir fiyat değişikliği tespit edilmedi.';
-                statusEl.classList.remove('hidden');
-                statusEl.classList.remove('text-red-600');
+                statusEl.classList.remove('hidden', 'text-red-600');
                 statusEl.classList.add('text-green-600');
                 return;
             }
