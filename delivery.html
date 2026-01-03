@@ -51,7 +51,7 @@
         line-height: 1;
     }
 
-    /* --- ORTAK SABİT BUTON STİLİ --- */
+    /* --- ORTAK SABİT BUTON STİLİ (GÜNCELLENDİ) --- */
     .floating-btn { 
         position: fixed; 
         right: 20px; 
@@ -70,8 +70,11 @@
         font-weight: bold;
         font-size: 12px;
         text-align: center;
-        background-size: cover;
+        
+        /* LOGO AYARLARI */
         background-position: center;
+        background-repeat: no-repeat;
+        background-size: 65%; /* Logoları kutunun %65'i kadar yapar, böylece kenarlardan taşmaz */
     }
     .floating-btn:hover { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); }
 
@@ -80,8 +83,9 @@
     /* 1. En Altta: Yorum Yap */
     #floatingRatingButton { 
         bottom: 20px; 
-        width: 72px; height: 72px; /* En büyük */
+        width: 72px; height: 72px; 
         background-image: url('yuvarlak.png'); 
+        background-size: cover; /* Bu resim tam oturmalı */
         border: none;
         color: transparent;
     }
@@ -89,36 +93,36 @@
     /* 2. Telefon */
     #floatingPhoneButton { 
         bottom: 105px; 
-        width: 72px; height: 72px; /* En büyük */
+        width: 72px; height: 72px; 
         background-color: #ef4444; 
     }
 
     /* 3. Yemeksepeti */
     #btnYemeksepeti {
         bottom: 190px;
-        background-color: #ea004b; /* Yemeksepeti Pembesi */
+        background-color: #ea004b; 
         background-image: url(logo/yemeksepeti.png);
     }
 
     /* 4. Getir Yemek */
     #btnGetir {
         bottom: 260px;
-        background-color: #5d3ebc; /* Getir Moru */
+        background-color: #5d3ebc; 
         background-image: url(logo/getir.png);
     }
 
     /* 5. Migros Yemek */
     #btnMigros {
         bottom: 330px;
-        background-color: #ffffff; /* Migros Turuncusu */
+        background-color: #ffffff; 
         background-image: url(logo/migros.jpg);
-        background-size: auto;
+        /* Migros için özel ayar gerekirse buraya eklenir, ama genel ayar (65%) yetecektir */
     }
 
     /* 6. Trendyol Yemek (En Üstte) */
     #btnTrendyol {
         bottom: 400px;
-        background-color: #ea6c00; /* Trendyol Turuncusu */
+        background-color: #ea6c00; 
         background-image: url(logo/trendyols.png);
     }
 
@@ -217,12 +221,10 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     
-    // PAKET SERVİS REFERANSLARI
     const productsRef = database.ref('delivery_products'); 
     const visitorsRef = database.ref('delivery_visitors'); 
     const campaignsRef = database.ref('delivery_campaigns'); 
 
-    // --- HTML Element Tanımlamaları ---
     const menuContainer = document.getElementById('menuContainer');
     const contactSection = document.getElementById('contactSection');
     const campaignSliderSection = document.getElementById('campaignSlider'); 
@@ -231,7 +233,6 @@
     const closeRatingModal = document.getElementById('closeRatingModal'); 
     const floatingRatingButton = document.getElementById('floatingRatingButton'); 
 
-    // PLATFORM MODAL ELEMENTLERİ
     const commissionModal = document.getElementById('commissionModal');
     const confirmRedirectBtn = document.getElementById('confirmRedirect');
     const cancelRedirectBtn = document.getElementById('cancelRedirect');
@@ -241,7 +242,7 @@
     let campaignUrls = []; 
     let currentSlide = 0;
     let sliderInterval;
-    let targetPlatformUrl = ""; // Yönlendirilecek linki tutar
+    let targetPlatformUrl = ""; 
 
     const categoryTranslations = {
       'Tümü': 'All', 'Menüler': 'Menus', 'Kokoreç': 'Kokoreç', 'Tavuk Kokoreç': 'Chicken Kokoreç', 
@@ -251,8 +252,6 @@
     let categoriesTR = Object.keys(categoryTranslations);
     let categoriesEN = Object.values(categoryTranslations);
 
-    
-    // --- PLATFORM YÖNLENDİRME MANTIĞI ---
     function openPlatformModal(url) {
         targetPlatformUrl = url;
         commissionModal.classList.remove('hidden');
@@ -260,7 +259,7 @@
 
     confirmRedirectBtn.addEventListener('click', () => {
         if(targetPlatformUrl) {
-            window.open(targetPlatformUrl, '_blank'); // Yeni sekmede veya uygulamada açar
+            window.open(targetPlatformUrl, '_blank'); 
         }
         commissionModal.classList.add('hidden');
     });
@@ -269,14 +268,11 @@
         commissionModal.classList.add('hidden');
     });
 
-    // Platform Butonlarına Tıklama Olayları
     document.getElementById('btnYemeksepeti').addEventListener('click', () => openPlatformModal("https://www.yemeksepeti.com/restaurant/hk8c/olimpiyat-kokorec-and-fast-food-hk8c"));
     document.getElementById('btnGetir').addEventListener('click', () => openPlatformModal("https://getir.com/yemek/restoran/olimpiyat-kokorec-yamanevler-mah-umraniye-istanbul/?adTrackingId="));
     document.getElementById('btnMigros').addEventListener('click', () => openPlatformModal("https://www.migros.com.tr/yemek/olimpiyat-kokorec-doner-umraniye-yamanevler-mah-st-252d3"));
     document.getElementById('btnTrendyol').addEventListener('click', () => openPlatformModal("https://tgoyemek.com/restoranlar/212061#bu-restoranin-en-sevilenleri"));
 
-
-    // --- SLIDER İŞLEVLERİ ---
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
         const sliderContainer = document.querySelector('#campaignSlider');
