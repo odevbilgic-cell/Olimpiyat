@@ -35,6 +35,29 @@
     /* --- SABİT YORUM BUTONU STİLİ --- */
     #floatingRatingButton { position: fixed; bottom: 20px; right: 20px; width: 72px; height: 72px; border-radius: 50%; background-image: url('yuvarlak.png'); background-size: cover; background-position: center; background-repeat: no-repeat; color: transparent; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); z-index: 50; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; }
     #floatingRatingButton:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); }
+    
+    /* --- YENİ EKLENEN TELEFON BUTONU STİLİ --- */
+    #floatingPhoneButton { 
+        position: fixed; 
+        bottom: 105px; /* Yorum butonunun (20px + 72px + boşluk) hemen üstü */
+        right: 20px; 
+        width: 72px; 
+        height: 72px; 
+        border-radius: 50%; 
+        background-color: #ef4444; /* Tema Kırmızısı */
+        color: white; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); 
+        z-index: 50; 
+        cursor: pointer; 
+        transition: transform 0.2s, box-shadow 0.2s; 
+        text-decoration: none;
+        border: 2px solid white; /* Görünürlüğü artırmak için beyaz çerçeve */
+    }
+    #floatingPhoneButton:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); background-color: #dc2626; }
+
     #googleGSvg { display: none; }
   </style>
 </head>
@@ -102,6 +125,12 @@
     </div>
   </div>
   
+  <a id="floatingPhoneButton" href="tel:02163357920" title="Hemen Ara Sipariş Ver">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+    </svg>
+  </a>
+
   <button id="floatingRatingButton" title="Bizi Google'da Puanlayın"></button>
   
   <script>
@@ -147,13 +176,13 @@
       'Kokoreç': 'Kokoreç', 
       'Tavuk Kokoreç': 'Chicken Kokoreç', 
       'Tavuk Döner': 'Chicken Döner', 
-      'Patso': 'Patso',                  
+      'Patso': 'Patso',                   
       'Köfte': 'Meatballs', 
       'Ciğer': 'Liver', 
       'Hamburger': 'Hamburger', 
       'Midye': 'Mussel',
       'Yan Lezzetler': 'Side Dishes', 
-      'Tost': 'Toast',                   
+      'Tost': 'Toast',                     
       'İçecekler': 'Drinks', 
       'İletişim': 'Contact'
     };
