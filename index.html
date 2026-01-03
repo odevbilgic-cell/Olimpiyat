@@ -331,18 +331,20 @@
 
         campaignSliderSection.parentElement.classList.remove('hidden');
         
-        const priceTagHtml = campaignPriceText ? `
-            <div class="campaign-price-tag ${campaignPriceText.length > 8 ? 'long-text' : ''}">
-                ${campaignPriceText}
-            </div>
-        ` : '';
-
-        const slidesHtml = campaignUrls.map((c, index) => `
+        // GLOBAL FİYAT ETİKETİNİ KALDIRIYORUZ
+        // YERİNE HER SLIDE İÇİN ÖZEL FİYAT KOYUYORUZ
+        
+        const slidesHtml = campaignUrls.map((c, index) => {
+            // Eğer kampanya için özel bir fiyat girildiyse HTML'ini oluştur, yoksa boş bırak
+            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}</div>` : '';
+            
+            return `
             <div class="slide">
                 <img src="${c.url}" alt="Kampanya Görseli" class="rounded-xl">
-                ${index === 0 ? priceTagHtml : ''} 
+                ${priceHtml} 
             </div>
-        `).join('');
+            `;
+        }).join('');
 
         const dotsHtml = campaignUrls.map((_, i) => `
             <div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>
@@ -374,7 +376,6 @@
         goToSlide(currentSlide);
         startSliderInterval();
     }
-
 
     // --- YARDIMCI VE FIREBASE FONKSİYONLARI ---
 
