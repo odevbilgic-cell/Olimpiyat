@@ -79,27 +79,28 @@
         background-color: #fb923c;
     }
     
-    .campaign-price-tag {
+    .campaign-price-overlay {
         position: absolute;
-        bottom: 15px; 
-        right: 15px;
-        background-color: #ef4444; 
-        color: white;
-        padding: 10px;
-        border-radius: 50%;
-        min-width: 60px;
-        height: 60px;
+        bottom: 7%;  /* Görselin sol altındaki turuncu blob hizası */
+        left: 6%;    
+        width: 35%;  
+        height: 15%; 
         display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 1rem;
-        font-weight: bold;
+        justify-content: center; 
+        align-items: center;     
+        z-index: 10;
+        /* -webkit-text-stroke: 3px black; */
+        
+        /* Metin Stili */
+        color: white;
+        font-family: 'Arial Black', 'Impact', sans-serif; 
+        font-size: clamp(3rem, 8vw, 5rem); 
+        font-weight: 900;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.4); 
+        transform: rotate(-deg); 
         text-align: center;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        z-index: 5;
-        white-space: normal;
-        line-height: 1.2;
-    }
+        line-height: 1;
+        
     
     .campaign-price-tag.long-text {
         min-width: 70px;
