@@ -563,214 +563,193 @@
         // --- MODÜL: KAMPANYA GÖRSELLERİ YÖNETİMİ ---
 
         function renderCampaignModule() {
-            setActiveTab('showCampaigns');
-            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
-            loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">🖼️ ${menuTitle} Kampanya Görselleri Yönetimi</h2>
-                <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
-                    <p class="mb-4 text-gray-600">Bu görseller ana sayfadaki otomatik dönen banner (slider) alanında kullanılır.</p>
-
-                    <div class="border p-4 mb-6 rounded-lg bg-red-50">
-                        <h3 class="font-bold mb-3 text-red-700">📌 Kampanya Fiyat Kutucuğu Görseli</h3>
-                        <p class="text-sm text-gray-600 mb-3">Bu görsel, kampanyaların üzerinde sabit duran şık fiyat etiketidir. (Örn: Sarı-Siyah Daire)</p>
-                        
-                        <img id="priceBoxImagePreview" class="price-box-preview-img ${campaignPriceBoxUrl ? '' : 'hidden'}" src="${campaignPriceBoxUrl}" alt="Fiyat Kutucuğu Önizleme">
-                        
-                        <button id="uploadPriceBoxImageBtn" class="mt-3 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition w-full font-semibold">Kutucuk Görseli Yükle / Değiştir</button>
-                        <input type="hidden" id="priceBoxImageURL" value="${campaignPriceBoxUrl}" />
-                    </div>
-                    
-                    <div class="border p-4 mb-6 rounded-lg bg-yellow-50">
-                        <h3 class="font-bold mb-3 text-red-600">Toplu Kampanya Fiyat Metni</h3>
-                        <p class="text-sm text-gray-600 mb-3">Bu metin, yüklediğiniz **kutucuk görseli içinde** gösterilir. (Örn: "250 ₺", "%20 İndirim")</p>
-                        <input id="campaignPriceTextInput" type="text" placeholder="Örn: 250 ₺" value="${campaignPriceText}" class="border p-2 rounded w-full mb-3" />
-                        <button id="saveCampaignPriceTextBtn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition w-full font-semibold">Fiyat Metnini Kaydet</button>
-                        <p id="campaignPriceStatus" class="mt-2 text-sm text-green-600 hidden"></p>
-                    </div>
-
-                    <div class="border p-4 mb-6 rounded-lg bg-gray-50">
-                        <h3 class="font-bold mb-3 text-orange-600">Yeni Banner Görseli Yükle</h3>
-                        <p class="text-sm text-gray-600 mb-3">Önerilen görsel boyutu: Geniş ve yatay (Örn: 800x300 piksel).</p>
-                        <button id="uploadNewCampaignImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition w-full">Görsel Yükle (Cloudinary)</button>
-                        <img id="newCampaignImagePreview" class="campaign-image-preview hidden" src="" alt="Yeni Kampanya Görseli Önizleme">
-                        <input type="hidden" id="newCampaignImageURL" value="" />
-                        <button id="addCampaignUrlBtn" class="mt-3 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition w-full hidden">Görseli Listeye Ekle</button>
-                    </div>
-
-                    <h3 class="font-bold text-xl mb-3 text-gray-800">Mevcut Kampanya Görselleri (${campaignUrls.length} Adet)</h3>
-                    <p class="mb-3 text-sm text-red-600 font-semibold">Görselleri sürükle bırak yaparak sıralayabilirsiniz.</p>
-                    <ul id="sortableCampaignList" class="flex flex-col gap-2 p-2 border rounded bg-gray-50 min-h-[50px]">
-                        </ul>
-                    <button id="saveCampaignSorting" class="mt-4 bg-green-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-green-600 transition w-full hidden">Yeni Sıralamayı Kaydet</button>
-                    <p id="campaignSortingStatus" class="mt-2 text-center text-sm text-green-600 hidden"></p>
-                </div>
-            `);
+    setActiveTab('showCampaigns');
+    const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
+    loadModule(`
+        <h2 class="text-3xl font-bold text-gray-800 mb-6">🖼️ ${menuTitle} Kampanya Yönetimi</h2>
+        <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
             
-            // Event Listeners (Fiyat Kutucuğu)
-            const priceBoxUrlInput = document.getElementById('priceBoxImageURL');
-            const priceBoxPreview = document.getElementById('priceBoxImagePreview');
-
-            document.getElementById('uploadPriceBoxImageBtn').addEventListener('click', (e) => {
-                e.preventDefault();
-                openCloudinaryWidget(priceBoxUrlInput, priceBoxPreview);
-                // Kutucuk görseli yüklendiğinde Firebase'e kaydet
-                priceBoxUrlInput.addEventListener('change', async () => {
-                    const newUrl = priceBoxUrlInput.value.trim();
-                    if(newUrl) {
-                         try {
-                             // priceBoxUrlRef dinamik olduğu için doğru yola yazacak.
-                             await priceBoxUrlRef.set(newUrl); 
-                             campaignPriceBoxUrl = newUrl; // Global değişkeni güncelle
-                             alert("Kutucuk görseli başarıyla güncellendi.");
-                         } catch (error) {
-                             alert("Kutucuk görselini kaydetme başarısız oldu: " + error.message);
-                         }
-                    }
-                }, { once: true });
-            });
-
-
-            // Event Listeners (Banner Görseli Yükleme ve Silme)
-            const urlInput = document.getElementById('newCampaignImageURL');
-            const previewImg = document.getElementById('newCampaignImagePreview');
-            const addBtn = document.getElementById('addCampaignUrlBtn');
-            
-            document.getElementById('uploadNewCampaignImageBtn').addEventListener('click', (e) => {
-                e.preventDefault();
-                openCloudinaryWidget(urlInput, previewImg); 
-                addBtn.classList.remove('hidden');
-            });
-
-            addBtn.addEventListener('click', addCampaignUrl);
-            
-            // Kampanya Fiyat Metni Kaydetme Olayı
-            document.getElementById('saveCampaignPriceTextBtn').addEventListener('click', saveCampaignPriceText);
-            
-            // YENİ: Kampanya Sıralama Olay Dinleyicisi
-            document.getElementById('saveCampaignSorting').addEventListener('click', saveCampaignSortingOrder);
-            
-            renderCampaignList();
-            
-             // Input değerlerini Firebase'den gelen veriye göre ayarla
-            document.getElementById('campaignPriceTextInput').value = campaignPriceText;
-        }
-        
-        // Kampanya Fiyat Metnini Firebase'e kaydeder
-        async function saveCampaignPriceText() {
-            const textInput = document.getElementById('campaignPriceTextInput');
-            const statusEl = document.getElementById('campaignPriceStatus');
-            const newText = textInput.value.trim();
-
-            try {
-                // campaignInfoRef dinamik olduğu için doğru yola yazacak.
-                await campaignInfoRef.child('price_text').set(newText);
+            <div class="border p-4 mb-6 rounded-lg bg-orange-50 border-orange-200">
+                <h3 class="font-bold mb-3 text-orange-700">Yeni Kampanya Ekle</h3>
                 
-                campaignPriceText = newText; 
-                statusEl.textContent = 'Kampanya fiyat metni başarıyla kaydedildi!';
-                statusEl.classList.remove('hidden', 'text-red-600');
-                statusEl.classList.add('text-green-600');
-            } catch (error) {
-                statusEl.textContent = 'Kaydetme başarısız oldu: ' + error.message;
-                statusEl.classList.remove('hidden', 'text-green-600');
-                statusEl.classList.add('text-red-600');
-            }
-            setTimeout(() => statusEl.classList.add('hidden'), 3000);
-        }
+                <div class="mb-3">
+                    <label class="block text-sm font-semibold mb-1">1. Görsel Seçin</label>
+                    <button id="uploadNewCampaignImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition w-full">Görsel Yükle (Cloudinary)</button>
+                    <img id="newCampaignImagePreview" class="campaign-image-preview hidden" src="" alt="Önizleme">
+                    <input type="hidden" id="newCampaignImageURL" value="" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="block text-sm font-semibold mb-1">2. Fiyat Girin (Kutucuk İçin)</label>
+                    <input id="newCampaignPriceInput" type="text" placeholder="Örn: 250 ₺" class="border p-2 rounded w-full font-bold text-lg" />
+                    <p class="text-xs text-gray-500 mt-1">Bu fiyat sol alttaki turuncu alanda görünecektir.</p>
+                </div>
+
+                <button id="addCampaignUrlBtn" class="mt-2 bg-green-500 text-white px-4 py-3 rounded hover:bg-green-600 transition w-full font-bold hidden">✅ Listeye Kaydet</button>
+            </div>
+
+            <h3 class="font-bold text-xl mb-3 text-gray-800">Yayındaki Kampanyalar (${campaignUrls.length} Adet)</h3>
+            <p class="mb-3 text-sm text-gray-500">Sıralamayı değiştirmek için sürükleyip bırakın, fiyatı değiştirmek için kutucuğa yazıp "Güncelle" deyin.</p>
+            
+            <ul id="sortableCampaignList" class="flex flex-col gap-4 p-2 border rounded bg-gray-50 min-h-[50px]">
+            </ul>
+
+            <button id="saveCampaignSorting" class="mt-4 bg-gray-800 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-gray-900 transition w-full hidden">Sıralamayı Kaydet</button>
+            <p id="campaignSortingStatus" class="mt-2 text-center text-sm text-green-600 hidden"></p>
+        </div>
+    `);
+    
+    // Görsel Yükleme Butonu
+    const urlInput = document.getElementById('newCampaignImageURL');
+    const previewImg = document.getElementById('newCampaignImagePreview');
+    const addBtn = document.getElementById('addCampaignUrlBtn');
+    
+    document.getElementById('uploadNewCampaignImageBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        openCloudinaryWidget(urlInput, previewImg);
+        // Widget kapandığında ve urlInput dolduğunda butonu göster
+        const observer = new MutationObserver(() => {
+            if(urlInput.value) addBtn.classList.remove('hidden');
+        });
+        observer.observe(urlInput, { attributes: true });
+    });
+
+    addBtn.addEventListener('click', addCampaignUrl);
+    
+    // Sıralama Kaydetme Butonu
+    document.getElementById('saveCampaignSorting').addEventListener('click', saveCampaignSortingOrder);
+    
+    renderCampaignList();
+}
         
         // Mevcut Kampanya Görsellerini Listeler ve Sıralamayı Ayarlar
-        function renderCampaignList() {
-            const listEl = document.getElementById('sortableCampaignList');
-            const saveBtn = document.getElementById('saveCampaignSorting');
-            const statusEl = document.getElementById('campaignSortingStatus');
-            if (!listEl) return;
-            
-            // 1. Görselleri order değerine göre sırala (order olmayanları sona at)
-            const sortedCampaigns = [...campaignUrls].sort((a, b) => 
-                (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)
-            );
-            
-            listEl.innerHTML = '';
-            saveBtn.classList.add('hidden');
-            statusEl.classList.add('hidden');
+       function renderCampaignList() {
+    const listEl = document.getElementById('sortableCampaignList');
+    const saveBtn = document.getElementById('saveCampaignSorting');
+    const statusEl = document.getElementById('campaignSortingStatus');
+    if (!listEl) return;
+    
+    const sortedCampaigns = [...campaignUrls].sort((a, b) => 
+        (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)
+    );
+    
+    listEl.innerHTML = '';
+    saveBtn.classList.add('hidden');
+    statusEl.classList.add('hidden');
 
-            if (sortedCampaigns.length === 0) {
-                listEl.innerHTML = '<li class="text-gray-500 text-center py-4">Henüz kampanya görseli eklenmedi.</li>';
-                return;
-            }
-            
-            saveBtn.classList.remove('hidden');
+    if (sortedCampaigns.length === 0) {
+        listEl.innerHTML = '<li class="text-gray-500 text-center py-4">Henüz kampanya görseli eklenmedi.</li>';
+        return;
+    }
+    
+    saveBtn.classList.remove('hidden');
 
-            sortedCampaigns.forEach((c) => {
-                const item = document.createElement('li');
-                item.className = 'sortable-item flex items-center bg-white p-3 rounded shadow-sm border border-gray-200';
-                item.dataset.id = c.key; // Sortable.js için key
-                item.innerHTML = `
-                    <span class="text-gray-400 mr-3">☰</span>
-                    <img src="${c.url}" class="campaign-item-img" alt="Kampanya Görseli">
-                    <span class="text-sm flex-1 truncate">${c.url}</span>
-                    <button data-key="${c.key}" class="deleteCampaignBtn bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition ml-3">Sil</button>
-                `;
-                listEl.appendChild(item);
-            });
-
-            // 2. Sortable.js'i Listeye Uygula
-            Sortable.create(listEl, {
-                animation: 150,
-                ghostClass: 'sortable-ghost',
-                onEnd: function (evt) {
-                    statusEl.textContent = 'Sıralama değiştirildi. Kaydet butonuna basmayı unutmayın!';
-                    statusEl.classList.remove('hidden', 'text-green-600');
-                    statusEl.classList.add('text-red-600');
-                },
-            });
-
-            // 3. Silme Butonu Event Listener'larını tekrar bağla
-            document.querySelectorAll('.deleteCampaignBtn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const keyToDelete = e.target.dataset.key;
-                    if (confirm("Bu kampanya görselini silmek istediğinizden emin misiniz?")) {
-                        try { 
-                            await deleteCampaignUrl(keyToDelete); 
-                            alert("Kampanya görseli silindi."); 
-                        } catch (error) { 
-                            alert("Silme işlemi başarısız oldu: " + error.message); 
-                        }
-                    }
-                });
-            });
-        }
+    sortedCampaigns.forEach((c) => {
+        const item = document.createElement('li');
+        item.className = 'sortable-item bg-white p-3 rounded shadow-sm border border-gray-200';
+        item.dataset.id = c.key; 
         
-        // Yeni görsel URL'sini Firebase'e kaydeder
-        async function addCampaignUrl() {
-            const url = document.getElementById('newCampaignImageURL').value.trim();
-            if (!url) {
-                alert('Lütfen önce bir görsel yükleyin.');
-                return;
-            }
-            
-            // Yeni eklenen kampanyanın order değerini, mevcutların en sonuna ayarla
-            const maxOrder = campaignUrls.length > 0 
-                ? Math.max(...campaignUrls.map(c => c.order === undefined ? 0 : c.order))
-                : 0;
+        // Fiyat değeri yoksa boş string olsun
+        const priceValue = c.price || "";
 
+        item.innerHTML = `
+            <div class="flex items-center gap-3">
+                <span class="text-gray-400 cursor-grab text-xl">☰</span>
+                <img src="${c.url}" class="w-20 h-12 object-cover rounded border">
+                
+                <div class="flex-1">
+                    <label class="text-xs font-bold text-gray-500 block">Fiyat:</label>
+                    <div class="flex gap-2">
+                        <input type="text" class="campaign-price-edit border p-1 rounded w-full text-sm font-bold text-orange-600" value="${priceValue}" placeholder="Fiyat Girin">
+                        <button class="updatePriceBtn bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition">Güncelle</button>
+                    </div>
+                </div>
+
+                <button data-key="${c.key}" class="deleteCampaignBtn bg-red-100 text-red-600 px-3 py-2 rounded hover:bg-red-200 transition">🗑️</button>
+            </div>
+        `;
+        listEl.appendChild(item);
+    });
+
+    // Sortable JS Uygula
+    Sortable.create(listEl, {
+        animation: 150,
+        handle: '.cursor-grab',
+        ghostClass: 'sortable-ghost',
+        onEnd: function (evt) {
+            statusEl.textContent = 'Sıralama değişti. "Sıralamayı Kaydet"e basın.';
+            statusEl.classList.remove('hidden', 'text-green-600');
+            statusEl.classList.add('text-red-600');
+        },
+    });
+
+    // Fiyat Güncelleme Butonları
+    document.querySelectorAll('.updatePriceBtn').forEach((btn, index) => {
+        btn.addEventListener('click', async (e) => {
+            const li = e.target.closest('li');
+            const key = li.dataset.id;
+            const newPrice = li.querySelector('.campaign-price-edit').value;
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
+            
             try {
-                // campaignsRef dinamik olduğu için doğru yola yazacak.
-                await campaignsRef.push({ 
-                    url: url, 
-                    timestamp: Date.now(),
-                    order: maxOrder + 1 
-                }); 
-                alert("Kampanya görseli başarıyla listeye eklendi.");
-                
-                document.getElementById('newCampaignImageURL').value = '';
-                document.getElementById('newCampaignImagePreview').src = '';
-                document.getElementById('newCampaignImagePreview').classList.add('hidden');
-                document.getElementById('addCampaignUrlBtn').classList.add('hidden');
-                
-            } catch (error) {
-                alert("Görsel ekleme başarısız oldu: " + error.message);
+                await database.ref(`${pathPrefix}/${key}/price`).set(newPrice);
+                alert('Fiyat güncellendi!');
+            } catch(err) {
+                alert('Hata: ' + err.message);
             }
-        }
+        });
+    });
+
+    // Silme Butonları
+    document.querySelectorAll('.deleteCampaignBtn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const keyToDelete = e.target.dataset.key;
+            if (confirm("Bu kampanyayı silmek istediğinizden emin misiniz?")) {
+                try { 
+                    await deleteCampaignUrl(keyToDelete); 
+                    // Silindikten sonra renderCampaignList otomatik tetiklenir (on('value') sayesinde)
+                } catch (error) { 
+                    alert("Hata: " + error.message); 
+                }
+            }
+        });
+    });
+}
+
+// YENİ KAMPANYA EKLEME (Fiyatlı)
+async function addCampaignUrl() {
+    const url = document.getElementById('newCampaignImageURL').value.trim();
+    const price = document.getElementById('newCampaignPriceInput').value.trim();
+
+    if (!url) {
+        alert('Lütfen önce bir görsel yükleyin.');
+        return;
+    }
+    
+    const maxOrder = campaignUrls.length > 0 
+        ? Math.max(...campaignUrls.map(c => c.order === undefined ? 0 : c.order))
+        : 0;
+
+    try {
+        await campaignsRef.push({ 
+            url: url, 
+            price: price, // Fiyatı da kaydediyoruz
+            timestamp: Date.now(),
+            order: maxOrder + 1 
+        }); 
+        alert("Kampanya başarıyla eklendi.");
+        
+        // Formu temizle
+        document.getElementById('newCampaignImageURL').value = '';
+        document.getElementById('newCampaignPriceInput').value = '';
+        document.getElementById('newCampaignImagePreview').src = '';
+        document.getElementById('newCampaignImagePreview').classList.add('hidden');
+        document.getElementById('addCampaignUrlBtn').classList.add('hidden');
+        
+    } catch (error) {
+        alert("Hata: " + error.message);
+    }
+}
         
         // Kampanyaların Yeni Sıralama Düzenini Kaydeder
         async function saveCampaignSortingOrder() {
