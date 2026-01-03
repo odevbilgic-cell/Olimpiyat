@@ -51,7 +51,7 @@
         line-height: 1;
     }
 
-    /* --- ORTAK SABİT BUTON STİLİ (GÜNCELLENDİ) --- */
+    /* --- ORTAK SABİT BUTON STİLİ --- */
     .floating-btn { 
         position: fixed; 
         right: 20px; 
@@ -71,21 +71,21 @@
         font-size: 12px;
         text-align: center;
         
-        /* LOGO AYARLARI */
+        /* Genel ayarlar */
         background-position: center;
         background-repeat: no-repeat;
-        background-size: 65%; /* Logoları kutunun %65'i kadar yapar, böylece kenarlardan taşmaz */
     }
     .floating-btn:hover { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); }
 
-    /* --- ÖZEL KONUMLANDIRMALAR VE RENKLER --- */
+    /* --- BUTONLARA ÖZEL BOYUT VE KONUM AYARLARI --- */
+    /* Not: background-size değerlerini logoların durumuna göre değiştirebilirsin */
     
     /* 1. En Altta: Yorum Yap */
     #floatingRatingButton { 
         bottom: 20px; 
         width: 72px; height: 72px; 
         background-image: url('yuvarlak.png'); 
-        background-size: cover; /* Bu resim tam oturmalı */
+        background-size: cover; /* Resmi tam doldur */
         border: none;
         color: transparent;
     }
@@ -102,6 +102,7 @@
         bottom: 190px;
         background-color: #ea004b; 
         background-image: url(logo/yemeksepeti.png);
+        background-size: 75%; /* Logoyu %75 boyutunda yap */
     }
 
     /* 4. Getir Yemek */
@@ -109,6 +110,7 @@
         bottom: 260px;
         background-color: #5d3ebc; 
         background-image: url(logo/getir.png);
+        background-size: 70%; /* Logoyu %70 boyutunda yap */
     }
 
     /* 5. Migros Yemek */
@@ -116,14 +118,15 @@
         bottom: 330px;
         background-color: #ffffff; 
         background-image: url(logo/migros.jpg);
-        /* Migros için özel ayar gerekirse buraya eklenir, ama genel ayar (65%) yetecektir */
+        background-size: 85%; /* Logoyu %85 boyutunda yap */
     }
 
     /* 6. Trendyol Yemek (En Üstte) */
     #btnTrendyol {
         bottom: 400px;
-        background-color: #ffffff; 
+        background-color: #ea6c00; 
         background-image: url(logo/trendyols.png);
+        background-size: 80%; /* Logoyu %80 boyutunda yap */
     }
 
     #googleGSvg { display: none; }
