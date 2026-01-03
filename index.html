@@ -336,7 +336,7 @@
         
         const slidesHtml = campaignUrls.map((c, index) => {
             // Eğer kampanya için özel bir fiyat girildiyse HTML'ini oluştur, yoksa boş bırak
-            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}</div>` : '';
+            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}₺</div>` : '';
             
             return `
             <div class="slide">
