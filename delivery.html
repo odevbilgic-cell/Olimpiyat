@@ -33,24 +33,26 @@
     /* --- GÖRSEL ÜZERİNDEKİ FİYAT YAZISI (YENİ) --- */
     .campaign-price-overlay {
         position: absolute;
-        bottom: 5%;  /* Görselin sol altındaki turuncu blob hizası */
-        left: 5%;    
-        width: 45%;  
-        height: 35%; 
+        bottom: 7%;  /* Görselin sol altındaki turuncu blob hizası */
+        left: 6%;    
+        width: 35%;  
+        height: 15%; 
         display: flex;
         justify-content: center; 
         align-items: center;     
         z-index: 10;
+        /* -webkit-text-stroke: 3px black; */
         
         /* Metin Stili */
         color: white;
         font-family: 'Arial Black', 'Impact', sans-serif; 
-        font-size: clamp(1.5rem, 5vw, 3rem); 
+        font-size: clamp(3rem, 8vw, 5rem); 
         font-weight: 900;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.4); 
-        transform: rotate(-5deg); 
+        transform: rotate(-deg); 
         text-align: center;
         line-height: 1;
+        
     }
 
     /* --- SABİT YORUM BUTONU STİLİ --- */
@@ -272,7 +274,7 @@
         // Her görsel için özel fiyatı kontrol et ve HTML oluştur
         const slidesHtml = campaignUrls.map((c, index) => {
             // Eğer admin panelinden fiyat girilmişse göster
-            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}</div>` : '';
+            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}₺</div>` : '';
             
             return `
             <div class="slide">
