@@ -30,45 +30,34 @@
     .dot { width: 10px; height: 10px; background-color: rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; transition: background-color 0.3s; }
     .dot.active { background-color: #ef4444; } /* Kırmızı */
     
-    /* --- GÖRSEL ÜZERİNDEKİ FİYAT YAZISI (YENİ) --- */
+    /* --- GÖRSEL ÜZERİNDEKİ FİYAT YAZISI --- */
     .campaign-price-overlay {
         position: absolute;
-        bottom: 7%;  /* Görselin sol altındaki turuncu blob hizası */
-        left: 6%;    
+        bottom: 8%;  /* Görselin sol altındaki turuncu blob hizası */
+        left: 5%;    
         width: 35%;  
-        height: 15%; 
+        height: 25%; 
         display: flex;
         justify-content: center; 
         align-items: center;     
         z-index: 10;
-        /* -webkit-text-stroke: 3px black; */
-        
-        /* Metin Stili */
         color: white;
         font-family: 'Arial Black', 'Impact', sans-serif; 
-        font-size: clamp(3rem, 8vw, 5rem); 
+        font-size: clamp(1.5rem, 5vw, 3rem); 
         font-weight: 900;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.4); 
-        transform: rotate(-deg); 
+        transform: rotate(-5deg); 
         text-align: center;
         line-height: 1;
-        
     }
 
-    /* --- SABİT YORUM BUTONU STİLİ --- */
-    #floatingRatingButton { position: fixed; bottom: 20px; right: 20px; width: 72px; height: 72px; border-radius: 50%; background-image: url('yuvarlak.png'); background-size: cover; background-position: center; background-repeat: no-repeat; color: transparent; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); z-index: 50; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; }
-    #floatingRatingButton:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); }
-    
-    /* --- TELEFON BUTONU STİLİ --- */
-    #floatingPhoneButton { 
+    /* --- ORTAK SABİT BUTON STİLİ --- */
+    .floating-btn { 
         position: fixed; 
-        bottom: 105px; /* Yorum butonunun üstünde */
         right: 20px; 
-        width: 72px; 
-        height: 72px; 
+        width: 60px; 
+        height: 60px; 
         border-radius: 50%; 
-        background-color: #ef4444; 
-        color: white; 
         display: flex; 
         justify-content: center; 
         align-items: center; 
@@ -76,10 +65,57 @@
         z-index: 50; 
         cursor: pointer; 
         transition: transform 0.2s, box-shadow 0.2s; 
-        text-decoration: none;
         border: 2px solid white;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        text-align: center;
+        background-size: cover;
+        background-position: center;
     }
-    #floatingPhoneButton:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); background-color: #dc2626; }
+    .floating-btn:hover { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); }
+
+    /* --- ÖZEL KONUMLANDIRMALAR VE RENKLER --- */
+    
+    /* 1. En Altta: Yorum Yap */
+    #floatingRatingButton { 
+        bottom: 20px; 
+        width: 72px; height: 72px; /* En büyük */
+        background-image: url('yuvarlak.png'); 
+        border: none;
+        color: transparent;
+    }
+
+    /* 2. Telefon */
+    #floatingPhoneButton { 
+        bottom: 105px; 
+        width: 72px; height: 72px; /* En büyük */
+        background-color: #ef4444; 
+    }
+
+    /* 3. Yemeksepeti */
+    #btnYemeksepeti {
+        bottom: 190px;
+        background-color: #ea004b; /* Yemeksepeti Pembesi */
+    }
+
+    /* 4. Getir Yemek */
+    #btnGetir {
+        bottom: 260px;
+        background-color: #5d3ebc; /* Getir Moru */
+    }
+
+    /* 5. Migros Yemek */
+    #btnMigros {
+        bottom: 330px;
+        background-color: #ff7e00; /* Migros Turuncusu */
+    }
+
+    /* 6. Trendyol Yemek (En Üstte) */
+    #btnTrendyol {
+        bottom: 400px;
+        background-color: #ea6c00; /* Trendyol Turuncusu */
+    }
 
     #googleGSvg { display: none; }
   </style>
@@ -99,13 +135,10 @@
   <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
 
   <main class="p-4">
-    
     <div class="bg-white rounded-xl shadow mb-4 p-0"> 
         <section id="campaignSlider"></section>
     </div>
-    
     <div id="menuContainer" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-
     <div id="contactSection" class="hidden text-center mt-6 bg-white rounded-xl shadow p-6 max-w-lg mx-auto">
       <h2 id="contactTitle" class="text-2xl font-bold text-red-600 mb-3">İletişim</h2>
       <p id="contactAddress" class="mb-3">📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul</p>
@@ -131,30 +164,38 @@
     <div class="bg-white rounded-xl shadow-lg p-6 w-11/12 max-w-sm relative text-center">
       <h2 class="text-2xl font-bold mb-4 text-red-600">Bizi Puanlayın!</h2>
       <p class="mb-5 text-gray-700">Deneyiminizden memnun kaldıysanız, bir dakikanızı ayırıp Google'da bize 5 yıldız verebilir misiniz? 🌟</p>
-      
-      <a id="goToRatingLink" 
-         href="https://search.google.com/local/writereview?placeid=ChIJXXQYlvDIyhQReratRBFh_TY" 
-         target="_blank"  
-         class="bg-green-500 text-white px-6 py-3 rounded-xl w-full font-bold text-lg 
-                flex items-center justify-center space-x-2 hover:bg-green-600 transition">
-          <span>Hemen 5 Yıldız Ver</span> 
-          <span>⭐</span>
+      <a id="goToRatingLink" href="https://search.google.com/local/writereview?placeid=ChIJXXQYlvDIyhQReratRBFh_TY" target="_blank" class="bg-green-500 text-white px-6 py-3 rounded-xl w-full font-bold text-lg flex items-center justify-center space-x-2 hover:bg-green-600 transition">
+          <span>Hemen 5 Yıldız Ver</span> <span>⭐</span>
       </a>
-      
-      <button id="closeRatingModal" 
-              class="text-gray-500 mt-4 text-sm hover:text-gray-800 transition block w-full">
-          Hayır, teşekkürler
+      <button id="closeRatingModal" class="text-gray-500 mt-4 text-sm hover:text-gray-800 transition block w-full">Hayır, teşekkürler</button>
+    </div>
+  </div>
+
+  <div id="commissionModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[110]">
+    <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-sm relative text-center border-t-8 border-red-500">
+      <h2 class="text-2xl font-bold mb-4 text-red-600">⚠️ DİKKAT!</h2>
+      <p class="mb-6 text-gray-800 font-medium leading-relaxed">
+        UYARI!!! Yemek sipariş platformlarında verilecek siparişlerde komisyon nedeniyle farklı fiyatlandırma olabilir.
+      </p>
+      <button id="confirmRedirect" class="bg-red-600 text-white px-6 py-3 rounded-xl w-full font-bold text-lg hover:bg-red-700 transition shadow-lg">
+          Tamam, Devam Et
       </button>
+      <button id="cancelRedirect" class="text-gray-500 mt-4 text-sm hover:text-gray-800 transition block w-full">İptal</button>
     </div>
   </div>
   
-  <a id="floatingPhoneButton" href="tel:02163357920" title="Hemen Ara Sipariş Ver">
+  <div id="btnTrendyol" class="floating-btn" title="Trendyol Yemek">TY</div>
+  <div id="btnMigros" class="floating-btn" title="Migros Yemek">MY</div>
+  <div id="btnGetir" class="floating-btn" title="Getir Yemek">GY</div>
+  <div id="btnYemeksepeti" class="floating-btn" title="Yemeksepeti">YS</div>
+
+  <a id="floatingPhoneButton" href="tel:02163357920" class="floating-btn" title="Hemen Ara Sipariş Ver">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-8 h-8">
       <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
     </svg>
   </a>
 
-  <button id="floatingRatingButton" title="Bizi Google'da Puanlayın"></button>
+  <button id="floatingRatingButton" class="floating-btn" title="Bizi Google'da Puanlayın"></button>
   
   <script>
     // --- Firebase Yapılandırması ---
@@ -175,7 +216,6 @@
     const productsRef = database.ref('delivery_products'); 
     const visitorsRef = database.ref('delivery_visitors'); 
     const campaignsRef = database.ref('delivery_campaigns'); 
-    // const campaignInfoRef = database.ref('delivery_campaign_info'); // Eski global fiyat sistemi iptal
 
     // --- HTML Element Tanımlamaları ---
     const menuContainer = document.getElementById('menuContainer');
@@ -186,50 +226,64 @@
     const closeRatingModal = document.getElementById('closeRatingModal'); 
     const floatingRatingButton = document.getElementById('floatingRatingButton'); 
 
+    // PLATFORM MODAL ELEMENTLERİ
+    const commissionModal = document.getElementById('commissionModal');
+    const confirmRedirectBtn = document.getElementById('confirmRedirect');
+    const cancelRedirectBtn = document.getElementById('cancelRedirect');
+    
     let language = 'TR'; 
     let products = []; 
     let campaignUrls = []; 
     let currentSlide = 0;
     let sliderInterval;
-    
+    let targetPlatformUrl = ""; // Yönlendirilecek linki tutar
+
     const categoryTranslations = {
-      'Tümü': 'All', 
-      'Menüler': 'Menus', 
-      'Kokoreç': 'Kokoreç', 
-      'Tavuk Kokoreç': 'Chicken Kokoreç', 
-      'Tavuk Döner': 'Chicken Döner', 
-      'Patso': 'Patso',                   
-      'Köfte': 'Meatballs', 
-      'Ciğer': 'Liver', 
-      'Hamburger': 'Hamburger', 
-      'Midye': 'Mussel',
-      'Yan Lezzetler': 'Side Dishes', 
-      'Tost': 'Toast',                     
-      'İçecekler': 'Drinks', 
-      'İletişim': 'Contact'
+      'Tümü': 'All', 'Menüler': 'Menus', 'Kokoreç': 'Kokoreç', 'Tavuk Kokoreç': 'Chicken Kokoreç', 
+      'Tavuk Döner': 'Chicken Döner', 'Patso': 'Patso', 'Köfte': 'Meatballs', 'Ciğer': 'Liver', 
+      'Hamburger': 'Hamburger', 'Midye': 'Mussel', 'Yan Lezzetler': 'Side Dishes', 'Tost': 'Toast', 'İçecekler': 'Drinks', 'İletişim': 'Contact'
     };
     let categoriesTR = Object.keys(categoryTranslations);
     let categoriesEN = Object.values(categoryTranslations);
 
     
+    // --- PLATFORM YÖNLENDİRME MANTIĞI ---
+    function openPlatformModal(url) {
+        targetPlatformUrl = url;
+        commissionModal.classList.remove('hidden');
+    }
+
+    confirmRedirectBtn.addEventListener('click', () => {
+        if(targetPlatformUrl) {
+            window.open(targetPlatformUrl, '_blank'); // Yeni sekmede veya uygulamada açar
+        }
+        commissionModal.classList.add('hidden');
+    });
+
+    cancelRedirectBtn.addEventListener('click', () => {
+        commissionModal.classList.add('hidden');
+    });
+
+    // Platform Butonlarına Tıklama Olayları
+    document.getElementById('btnYemeksepeti').addEventListener('click', () => openPlatformModal("https://www.yemeksepeti.com/restaurant/hk8c/olimpiyat-kokorec-and-fast-food-hk8c"));
+    document.getElementById('btnGetir').addEventListener('click', () => openPlatformModal("https://getir.com/yemek/restoran/olimpiyat-kokorec-yamanevler-mah-umraniye-istanbul/?adTrackingId="));
+    document.getElementById('btnMigros').addEventListener('click', () => openPlatformModal("https://www.migros.com.tr/yemek/olimpiyat-kokorec-doner-umraniye-yamanevler-mah-st-252d3"));
+    document.getElementById('btnTrendyol').addEventListener('click', () => openPlatformModal("https://tgoyemek.com/restoranlar/212061#bu-restoranin-en-sevilenleri"));
+
+
     // --- SLIDER İŞLEVLERİ ---
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
         const sliderContainer = document.querySelector('#campaignSlider');
         const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
         if (!wrapper || !sliderContainer) return;
-        
         const slideWidth = sliderContainer.clientWidth; 
         wrapper.scrollLeft = currentSlide * slideWidth;
-        
         const dots = document.querySelectorAll('#campaignSlider .dot');
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentSlide);
-        });
+        dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
     }
     function startSliderInterval() {
         if (sliderInterval) clearInterval(sliderInterval);
-        
         if (campaignUrls.length > 1) {
             sliderInterval = setInterval(() => {
                 const nextSlide = (currentSlide + 1) % campaignUrls.length;
@@ -246,63 +300,34 @@
         const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
         const sliderContainer = document.querySelector('#campaignSlider');
         if (!wrapper || !sliderContainer) return;
-        
         const scrollLeft = wrapper.scrollLeft;
         const slideWidth = sliderContainer.clientWidth;
         const newSlideIndex = Math.round(scrollLeft / slideWidth);
-        
         if (newSlideIndex !== currentSlide) {
             currentSlide = newSlideIndex;
             const dots = document.querySelectorAll('#campaignSlider .dot');
-            dots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentSlide);
-            });
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
             startSliderInterval(); 
         }
     }
 
-    // --- YENİ SLIDER RENDER FONKSİYONU (Fiyat Kutucuğu Destekli) ---
     function renderCampaignSlider() {
         if (campaignUrls.length === 0) {
             campaignSliderSection.innerHTML = '';
             campaignSliderSection.parentElement.classList.add('hidden');
             return;
         }
-
         campaignSliderSection.parentElement.classList.remove('hidden');
-        
-        // Her görsel için özel fiyatı kontrol et ve HTML oluştur
         const slidesHtml = campaignUrls.map((c, index) => {
-            // Eğer admin panelinden fiyat girilmişse göster
-            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}₺</div>` : '';
-            
-            return `
-            <div class="slide">
-                <img src="${c.url}" alt="Kampanya Görseli" class="rounded-xl">
-                ${priceHtml} 
-            </div>
-            `;
+            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}</div>` : '';
+            return `<div class="slide"><img src="${c.url}" alt="Kampanya Görseli" class="rounded-xl">${priceHtml}</div>`;
         }).join('');
-
-        const dotsHtml = campaignUrls.map((_, i) => `
-            <div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>
-        `).join('');
+        const dotsHtml = campaignUrls.map((_, i) => `<div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>`).join('');
         
-        campaignSliderSection.innerHTML = `
-            <div class="slider-container">
-                <div class="slide-wrapper" style="width: 100%;"> 
-                    ${slidesHtml}
-                </div>
-                <div class="slider-dots">
-                    ${dotsHtml}
-                </div>
-            </div>
-        `;
+        campaignSliderSection.innerHTML = `<div class="slider-container"><div class="slide-wrapper" style="width: 100%;">${slidesHtml}</div><div class="slider-dots">${dotsHtml}</div></div>`;
 
         const sliderWrapper = document.querySelector('#campaignSlider .slide-wrapper');
-        if (sliderWrapper) {
-             sliderWrapper.addEventListener('scroll', handleScroll, { passive: true });
-        }
+        if (sliderWrapper) sliderWrapper.addEventListener('scroll', handleScroll, { passive: true });
         
         document.querySelectorAll('#campaignSlider .dot').forEach(dot => {
             dot.addEventListener('click', (e) => {
@@ -310,7 +335,6 @@
                 startSliderInterval(); 
             });
         });
-        
         goToSlide(currentSlide);
         startSliderInterval();
     }
@@ -322,47 +346,19 @@
         const diffMinutes = Math.floor(diffTime / 60000);
         const diffHours = Math.floor(diffMinutes / 60);
         const diffDays = Math.floor(diffHours / 24);
-
-        const TR = {
-            min: (m) => `${m} dakika önce`,
-            hour: (h) => `${h} saat önce`,
-            day: (d) => `${d} gün önce`,
-            today: 'Bugün',
-            yesterday: 'Dün',
-            week: '1 hafta önce',
-            date: (d, m, y) => `${d}.${m}.${y}`
+        const t = language === 'TR' ? {
+            min: (m) => `${m} dakika önce`, hour: (h) => `${h} saat önce`, day: (d) => `${d} gün önce`, today: 'Bugün', yesterday: 'Dün', week: '1 hafta önce', date: (d, m, y) => `${d}.${m}.${y}`
+        } : {
+            min: (m) => `${m} minutes ago`, hour: (h) => `${h} hours ago`, day: (d) => `${d} days ago`, today: 'Today', yesterday: 'Yesterday', week: '1 week ago', date: (d, m, y) => `${d}/${m}/${y}`
         };
 
-        const EN = {
-            min: (m) => `${m} minutes ago`,
-            hour: (h) => `${h} hours ago`,
-            day: (d) => `${d} days ago`,
-            today: 'Today',
-            yesterday: 'Yesterday',
-            week: '1 week ago',
-            date: (d, m, y) => `${d}/${m}/${y}`
-        };
-
-        const t = language === 'TR' ? TR : EN;
-
-        if (diffMinutes < 60) {
-            if (diffMinutes < 5) return t.today; 
-            return t.min(diffMinutes);
-        } else if (diffHours < 24) {
-            return t.hour(diffHours);
-        } else if (diffDays === 1) {
-             return t.yesterday; 
-        } else if (diffDays <= 7) {
-            return t.day(diffDays); 
-        } else if (diffDays <= 14) {
-            return t.week;
-        } else {
-            const date = new Date(timestamp);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return t.date(day, month, year);
-        }
+        if (diffMinutes < 60) return diffMinutes < 5 ? t.today : t.min(diffMinutes);
+        if (diffHours < 24) return t.hour(diffHours);
+        if (diffDays === 1) return t.yesterday;
+        if (diffDays <= 7) return t.day(diffDays);
+        if (diffDays <= 14) return t.week;
+        const date = new Date(timestamp);
+        return t.date(String(date.getDate()).padStart(2,'0'), String(date.getMonth()+1).padStart(2,'0'), date.getFullYear());
     }
 
     function transformProducts(dataSnapshot) { 
@@ -373,7 +369,6 @@
         product.lastUpdated = product.lastUpdated || Date.now(); 
         productsArray.push(product);
       });
-      // Order'a göre sırala
       productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
       return productsArray;
     }
@@ -386,16 +381,14 @@
     }
     
     function setupFirebaseListener() {
-        // Ürün Dinleyicisi
         productsRef.on('value', (snapshot) => {
             products = snapshot.exists() ? transformProducts(snapshot) : [];
             updateLanguageContent(); 
         }, (error) => {
-            console.error("Firebase ürün veri okuma hatası:", error);
-            alert("Menüyü yüklerken bir hata oluştu.");
+            console.error("Firebase hata:", error);
+            alert("Menü yüklenemedi.");
         });
         
-        // Kampanya Dinleyicisi
         campaignsRef.on('value', (snapshot) => {
              campaignUrls = [];
              snapshot.forEach(childSnapshot => {
@@ -403,12 +396,7 @@
                  campaign.key = childSnapshot.key;
                  campaignUrls.push(campaign);
              });
-             
-             // Sıralama
-             campaignUrls.sort((a, b) => 
-                 (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)
-             );
-             
+             campaignUrls.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
              currentSlide = 0; 
              renderCampaignSlider();
         });
@@ -425,18 +413,11 @@
         const desc = language==='TR'?p.desc:p.descEN||p.desc||'';
         const priceUpdateText = formatRelativeDate(p.lastUpdated); 
         const lastUpdateLabel = language === 'TR' ? 'Fiyat güncellendi:' : 'Price updated:';
-        
-        const imageUrl = p.image && p.image.trim() !== '' 
-                         ? p.image 
-                         : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="10" fill="%239ca3af">Görsel Yüklenmedi</text></svg>';
-        
+        const imageUrl = p.image && p.image.trim() !== '' ? p.image : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="10" fill="%239ca3af">Görsel Yüklenmedi</text></svg>';
         const imageClass = p.image && p.image.trim() !== '' ? 'cursor-pointer' : 'opacity-70';
         
-        // Fiyat hesaplama
         let finalPrice = p.price;
-        if (p.category !== 'İçecekler' && !isNaN(parseFloat(p.price))) {
-             finalPrice = parseFloat(p.price);
-        }
+        if (p.category !== 'İçecekler' && !isNaN(parseFloat(p.price))) { finalPrice = parseFloat(p.price); }
 
         card.innerHTML=`
           <img src='${imageUrl}' alt='${name}' class='w-full h-40 object-cover rounded-lg mb-3 ${imageClass}'>
@@ -447,11 +428,9 @@
             <p class='price-update-info text-right'>${lastUpdateLabel} ${priceUpdateText}</p>
           </div>
         `;
-        
         if (p.image && p.image.trim() !== '') {
             card.querySelector('img').addEventListener('click',()=>{modalImage.src=p.image;imageModal.classList.remove('hidden');});
         }
-        
         menuContainer.appendChild(card);
       });
     }
@@ -464,20 +443,15 @@
         categoriesToIterate.forEach((catTR, index) => {
             let btn = document.createElement('button');
             const catName = language === 'TR' ? catTR : categoriesEN[index];
-
             btn.className='tabBtn px-3 py-1 rounded whitespace-nowrap transition-colors duration-150 hover:bg-red-200';
             btn.dataset.category=catTR;
             btn.textContent=catName;
-
-            if(catTR==='Tümü') {
-                btn.classList.add('active-tab');
-            }
+            if(catTR==='Tümü') btn.classList.add('active-tab');
 
             btn.addEventListener('click',()=>{
                 document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active-tab'));
                 btn.classList.add('active-tab');
                 const categoryKey = btn.dataset.category;
-
                 if(categoryKey==='İletişim'){
                     menuContainer.innerHTML='';
                     campaignSliderSection.parentElement.classList.add('hidden'); 
@@ -499,29 +473,21 @@
         const contactAddress = document.getElementById('contactAddress');
         
         if (language === 'TR') {
-            langTR.style.fontWeight = 'bold';
-            langEN.style.fontWeight = 'normal';
+            langTR.style.fontWeight = 'bold'; langEN.style.fontWeight = 'normal';
             contactTitle.textContent = 'İletişim';
             contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
         } else { 
-            langTR.style.fontWeight = 'normal';
-            langEN.style.fontWeight = 'bold';
+            langTR.style.fontWeight = 'normal'; langEN.style.fontWeight = 'bold';
             contactTitle.textContent = 'Contact';
             contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - Istanbul (Turkey)';
         }
-
         createCategoryTabs();
         const activeTab = document.querySelector('.tabBtn.active-tab');
         const activeCategoryKey = activeTab ? activeTab.dataset.category : 'Tümü';
-        
         if (activeCategoryKey === 'İletişim') {
-            menuContainer.innerHTML = '';
-            campaignSliderSection.parentElement.classList.add('hidden');
-            contactSection.classList.remove('hidden');
+            menuContainer.innerHTML = ''; campaignSliderSection.parentElement.classList.add('hidden'); contactSection.classList.remove('hidden');
         } else {
-            contactSection.classList.add('hidden');
-            renderCampaignSlider();
-            renderMenu(activeCategoryKey);
+            contactSection.classList.add('hidden'); renderCampaignSlider(); renderMenu(activeCategoryKey);
         }
     }
     
