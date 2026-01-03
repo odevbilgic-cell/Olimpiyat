@@ -132,6 +132,33 @@
     }
 
     #googleGSvg { display: none; }
+
+    /* --- KAYAN YAZI ŞERİDİ (TICKER) --- */
+    .ticker-wrap {
+        width: 100%;
+        overflow: hidden;
+        background-color: #1f2937; /* Koyu Gri Zemin */
+        padding-top: 6px;
+        padding-bottom: 6px;
+        white-space: nowrap;
+        position: sticky; /* Menü ile birlikte kalsın istersen */
+        top: 6.5rem; /* Tabların hemen altına denk gelecek şekilde ayarlandı */
+        z-index: 5;
+    }
+
+    .ticker-content {
+        display: inline-block;
+        color: #ffffff; /* Beyaz Yazı */
+        font-size: 0.85rem;
+        font-weight: bold;
+        animation: ticker-move 18s linear infinite; /* Hızı buradan ayarlayabilirsin */
+    }
+
+    /* Soldan Sağa Doğru Kayma Animasyonu */
+    @keyframes ticker-move {
+        0% { transform: translateX(-100%); } /* Soldan başla (ekran dışı) */
+        100% { transform: translateX(100vw); } /* Sağa git (ekran sonu) */
+    }
   </style>
 </head>
 <body class="text-gray-800">
@@ -147,6 +174,12 @@
   </header>
 
   <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
+
+  <div class="ticker-wrap shadow-md">
+      <div class="ticker-content">
+          YEMEK KARTLARI GEÇERLİDİR: | Pluxe Sodexo | Ticket Restaurant | Multinet | Metropol | Setcard | YEMEK KARTLARI GEÇERLİDİR.
+      </div>
+  </div>
 
   <main class="p-4">
     <div class="bg-white rounded-xl shadow mb-4 p-0"> 
