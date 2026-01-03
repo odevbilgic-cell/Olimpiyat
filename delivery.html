@@ -133,31 +133,39 @@
 
     #googleGSvg { display: none; }
 
-    /* --- KAYAN YAZI ŞERİDİ (TICKER) --- */
-    .ticker-wrap {
+    .ticker-container {
         width: 100%;
         overflow: hidden;
         background-color: #1f2937; /* Koyu Gri Zemin */
-        padding-top: 6px;
-        padding-bottom: 6px;
-        white-space: nowrap;
-        position: sticky; /* Menü ile birlikte kalsın istersen */
-        top: 6.5rem; /* Tabların hemen altına denk gelecek şekilde ayarlandı */
+        position: sticky;
+        top: 6.5rem; /* Tabların altında kalacak yükseklik */
         z-index: 5;
+        border-bottom: 1px solid #374151;
     }
 
-    .ticker-content {
-        display: inline-block;
-        color: #ffffff; /* Beyaz Yazı */
+    .ticker-track {
+        display: flex;
+        width: max-content; /* İçerik kadar genişle */
+        /* Animasyon: Soldan Sağa Doğru (Left to Right) */
+        animation: scroll-left-to-right 20s linear infinite; 
+    }
+
+    .ticker-item {
+        color: #ffffff;
         font-size: 0.85rem;
         font-weight: bold;
-        animation: ticker-move 18s linear infinite; /* Hızı buradan ayarlayabilirsin */
+        padding: 6px 9px; /* Yazılar arası boşluk */
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
     }
 
-    /* Soldan Sağa Doğru Kayma Animasyonu */
-    @keyframes ticker-move {
-        0% { transform: translateX(-100%); } /* Soldan başla (ekran dışı) */
-        100% { transform: translateX(100vw); } /* Sağa git (ekran sonu) */
+    /* Animasyonun Matematiği: */
+    /* Şerit %50 geriden başlar, %0'a gelince başa sarar. */
+    /* İki kopya metin olduğu için geçiş hissedilmez. */
+    @keyframes scroll-left-to-right {
+        0% { transform: translateX(-50%); }
+        100% { transform: translateX(0); }
     }
   </style>
 </head>
@@ -175,9 +183,19 @@
 
   <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
 
-  <div class="ticker-wrap shadow-md">
-      <div class="ticker-content">
-          YEMEK KARTLARI GEÇERLİDİR: | Pluxe Sodexo | Ticket Restaurant | Multinet | Metropol | Setcard | YEMEK KARTLARI GEÇERLİDİR.
+  <div class="ticker-container shadow-md">
+      <div class="ticker-track">
+          <div class="ticker-item">
+              YEMEK KARTLARI GEÇERLİDİR 
+          </div>
+          <div class="ticker-item">
+                | Pluxe Sodexo | Ticket Restaurant | Multinet | Metropol | Setcard |              </div>
+           <div class="ticker-item">
+              YEMEK KARTLARI GEÇERLİDİR 
+          </div>
+          <div class="ticker-item">
+              | Pluxe Sodexo | Ticket Restaurant | Multinet | Metropol | Setcard |
+          </div>
       </div>
   </div>
 
