@@ -29,7 +29,27 @@
     .slider-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
     .dot { width: 10px; height: 10px; background-color: rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; transition: background-color 0.3s; }
     .dot.active { background-color: #ef4444; } /* Kırmızı */
-    .campaign-price-tag { position: absolute; bottom: 15px; right: 15px; background-color: #ef4444; color: white; padding: 10px; border-radius: 50%; min-width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; font-size: 1rem; font-weight: bold; text-align: center; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); z-index: 5; white-space: normal; line-height: 1.2; }
+   .campaign-price-overlay {
+        position: absolute;
+        bottom: 8%;  /* Aşağıdan yükseklik (turuncu blob hizası) */
+        left: 5%;    /* Soldan boşluk (turuncu blob hizası) */
+        width: 35%;  /* Blob'un genişliği kadar bir alan */
+        height: 25%; /* Blob'un yüksekliği kadar bir alan */
+        display: flex;
+        justify-content: center; /* Yatay ortala */
+        align-items: center;     /* Dikey ortala */
+        z-index: 10;
+        
+        /* Metin Stili */
+        color: white;
+        font-family: 'Arial Black', 'Impact', sans-serif; /* Kalın font */
+        font-size: clamp(1.5rem, 5vw, 3rem); /* Ekran küçüldükçe yazı da küçülür */
+        font-weight: 900;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.4); /* Okunabilirlik için gölge */
+        transform: rotate(-5deg); /* Hafif sola eğik (tasarıma uyması için) */
+        text-align: center;
+        line-height: 1;
+    }
     .campaign-price-tag.long-text { min-width: 70px; height: 70px; font-size: 0.85rem; padding: 6px; }
     
     /* --- SABİT YORUM BUTONU STİLİ --- */
@@ -239,7 +259,7 @@
         }
     }
 
-    function renderCampaignSlider() {
+   function renderCampaignSlider() {
         if (campaignUrls.length === 0) {
             campaignSliderSection.innerHTML = '';
             campaignSliderSection.parentElement.classList.add('hidden');
@@ -248,18 +268,20 @@
 
         campaignSliderSection.parentElement.classList.remove('hidden');
         
-        const priceTagHtml = campaignPriceText ? `
-            <div class="campaign-price-tag ${campaignPriceText.length > 8 ? 'long-text' : ''}">
-                ${campaignPriceText}
-            </div>
-        ` : '';
-
-        const slidesHtml = campaignUrls.map((c, index) => `
+        // GLOBAL FİYAT ETİKETİNİ KALDIRIYORUZ
+        // YERİNE HER SLIDE İÇİN ÖZEL FİYAT KOYUYORUZ
+        
+        const slidesHtml = campaignUrls.map((c, index) => {
+            // Eğer kampanya için özel bir fiyat girildiyse HTML'ini oluştur, yoksa boş bırak
+            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}</div>` : '';
+            
+            return `
             <div class="slide">
                 <img src="${c.url}" alt="Kampanya Görseli" class="rounded-xl">
-                ${index === 0 ? priceTagHtml : ''} 
+                ${priceHtml} 
             </div>
-        `).join('');
+            `;
+        }).join('');
 
         const dotsHtml = campaignUrls.map((_, i) => `
             <div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>
