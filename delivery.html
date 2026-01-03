@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="olimpiyat kokoreç menüsü" />
-  <meta name="keywords" content="olimpiyat, kokoreç, menüsü, döner, ümraniye, yemek" />
+  <meta name="description" content="olimpiyat kokoreç paket servis menüsü" />
+  <meta name="keywords" content="olimpiyat, kokoreç, paket servis, döner, ümraniye, yemek" />
   <title>Olimpiyat Kokoreç | PAKET SERVİS MENÜSÜ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   
@@ -13,7 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script> 
   
   <style>
-    /* DİKKAT: Ana renk Kırmızı/Red olarak değiştirildi */
+    /* DİKKAT: Ana renk Kırmızı/Red (Paket Servis Teması) */
     body { background-color: #fff7f0; }
     .active-tab { background-color: #ef4444; color: white; } /* Kırmızı */
     #categoryTabs::-webkit-scrollbar { display: none; }
@@ -29,42 +29,43 @@
     .slider-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
     .dot { width: 10px; height: 10px; background-color: rgba(255, 255, 255, 0.5); border-radius: 50%; cursor: pointer; transition: background-color 0.3s; }
     .dot.active { background-color: #ef4444; } /* Kırmızı */
-   .campaign-price-overlay {
+    
+    /* --- GÖRSEL ÜZERİNDEKİ FİYAT YAZISI (YENİ) --- */
+    .campaign-price-overlay {
         position: absolute;
-        bottom: 8%;  /* Aşağıdan yükseklik (turuncu blob hizası) */
-        left: 5%;    /* Soldan boşluk (turuncu blob hizası) */
-        width: 35%;  /* Blob'un genişliği kadar bir alan */
-        height: 25%; /* Blob'un yüksekliği kadar bir alan */
+        bottom: 8%;  /* Görselin sol altındaki turuncu blob hizası */
+        left: 5%;    
+        width: 35%;  
+        height: 25%; 
         display: flex;
-        justify-content: center; /* Yatay ortala */
-        align-items: center;     /* Dikey ortala */
+        justify-content: center; 
+        align-items: center;     
         z-index: 10;
         
         /* Metin Stili */
         color: white;
-        font-family: 'Arial Black', 'Impact', sans-serif; /* Kalın font */
-        font-size: clamp(1.5rem, 5vw, 3rem); /* Ekran küçüldükçe yazı da küçülür */
+        font-family: 'Arial Black', 'Impact', sans-serif; 
+        font-size: clamp(1.5rem, 5vw, 3rem); 
         font-weight: 900;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.4); /* Okunabilirlik için gölge */
-        transform: rotate(-5deg); /* Hafif sola eğik (tasarıma uyması için) */
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.4); 
+        transform: rotate(-5deg); 
         text-align: center;
         line-height: 1;
     }
-    .campaign-price-tag.long-text { min-width: 70px; height: 70px; font-size: 0.85rem; padding: 6px; }
-    
+
     /* --- SABİT YORUM BUTONU STİLİ --- */
     #floatingRatingButton { position: fixed; bottom: 20px; right: 20px; width: 72px; height: 72px; border-radius: 50%; background-image: url('yuvarlak.png'); background-size: cover; background-position: center; background-repeat: no-repeat; color: transparent; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); z-index: 50; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border: none; }
     #floatingRatingButton:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); }
     
-    /* --- YENİ EKLENEN TELEFON BUTONU STİLİ --- */
+    /* --- TELEFON BUTONU STİLİ --- */
     #floatingPhoneButton { 
         position: fixed; 
-        bottom: 105px; /* Yorum butonunun (20px + 72px + boşluk) hemen üstü */
+        bottom: 105px; /* Yorum butonunun üstünde */
         right: 20px; 
         width: 72px; 
         height: 72px; 
         border-radius: 50%; 
-        background-color: #ef4444; /* Tema Kırmızısı */
+        background-color: #ef4444; 
         color: white; 
         display: flex; 
         justify-content: center; 
@@ -74,7 +75,7 @@
         cursor: pointer; 
         transition: transform 0.2s, box-shadow 0.2s; 
         text-decoration: none;
-        border: 2px solid white; /* Görünürlüğü artırmak için beyaz çerçeve */
+        border: 2px solid white;
     }
     #floatingPhoneButton:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5); background-color: #dc2626; }
 
@@ -168,13 +169,13 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     
-    // PAKET SERVİS REFERANSLARI (FARK BURADA)
+    // PAKET SERVİS REFERANSLARI
     const productsRef = database.ref('delivery_products'); 
     const visitorsRef = database.ref('delivery_visitors'); 
     const campaignsRef = database.ref('delivery_campaigns'); 
-    const campaignInfoRef = database.ref('delivery_campaign_info'); 
+    // const campaignInfoRef = database.ref('delivery_campaign_info'); // Eski global fiyat sistemi iptal
 
-    // --- HTML Element Tanımlamaları (Aynı Kaldı) ---
+    // --- HTML Element Tanımlamaları ---
     const menuContainer = document.getElementById('menuContainer');
     const contactSection = document.getElementById('contactSection');
     const campaignSliderSection = document.getElementById('campaignSlider'); 
@@ -186,7 +187,6 @@
     let language = 'TR'; 
     let products = []; 
     let campaignUrls = []; 
-    let campaignPriceText = ""; 
     let currentSlide = 0;
     let sliderInterval;
     
@@ -210,7 +210,7 @@
     let categoriesEN = Object.values(categoryTranslations);
 
     
-    // --- SLIDER İŞLEVLERİ ve Diğer Yardımcı Fonksiyonlar (Aynı Kaldı) ---
+    // --- SLIDER İŞLEVLERİ ---
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
         const sliderContainer = document.querySelector('#campaignSlider');
@@ -259,7 +259,8 @@
         }
     }
 
-   function renderCampaignSlider() {
+    // --- YENİ SLIDER RENDER FONKSİYONU (Fiyat Kutucuğu Destekli) ---
+    function renderCampaignSlider() {
         if (campaignUrls.length === 0) {
             campaignSliderSection.innerHTML = '';
             campaignSliderSection.parentElement.classList.add('hidden');
@@ -268,11 +269,9 @@
 
         campaignSliderSection.parentElement.classList.remove('hidden');
         
-        // GLOBAL FİYAT ETİKETİNİ KALDIRIYORUZ
-        // YERİNE HER SLIDE İÇİN ÖZEL FİYAT KOYUYORUZ
-        
+        // Her görsel için özel fiyatı kontrol et ve HTML oluştur
         const slidesHtml = campaignUrls.map((c, index) => {
-            // Eğer kampanya için özel bir fiyat girildiyse HTML'ini oluştur, yoksa boş bırak
+            // Eğer admin panelinden fiyat girilmişse göster
             const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}</div>` : '';
             
             return `
@@ -363,6 +362,7 @@
             return t.date(day, month, year);
         }
     }
+
     function transformProducts(dataSnapshot) { 
       const productsArray = [];
       dataSnapshot.forEach(childSnapshot => {
@@ -371,26 +371,20 @@
         product.lastUpdated = product.lastUpdated || Date.now(); 
         productsArray.push(product);
       });
-      
-      // Ürün sıralaması: order değerine göre sıralanır
+      // Order'a göre sırala
       productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
-      
       return productsArray;
     }
     
     function trackVisitor() {
         const today = new Date().toISOString().slice(0, 10); 
         const counterRef = visitorsRef.child(today);
-        
         counterRef.once('value', snapshot => {}); 
-        
-        counterRef.transaction(currentCount => {
-            return (currentCount || 0) + 1;
-        });
+        counterRef.transaction(currentCount => { return (currentCount || 0) + 1; });
     }
     
     function setupFirebaseListener() {
-        // Ürün Dinleyicisi (PAKET SERVİS)
+        // Ürün Dinleyicisi
         productsRef.on('value', (snapshot) => {
             products = snapshot.exists() ? transformProducts(snapshot) : [];
             updateLanguageContent(); 
@@ -399,7 +393,7 @@
             alert("Menüyü yüklerken bir hata oluştu.");
         });
         
-        // Kampanya Görselleri Dinleyicisi (PAKET SERVİS)
+        // Kampanya Dinleyicisi
         campaignsRef.on('value', (snapshot) => {
              campaignUrls = [];
              snapshot.forEach(childSnapshot => {
@@ -408,7 +402,7 @@
                  campaignUrls.push(campaign);
              });
              
-             // SIRALAMA MANTIĞI: Admin panelinde kaydedilen 'order' değerine göre sırala
+             // Sıralama
              campaignUrls.sort((a, b) => 
                  (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)
              );
@@ -416,15 +410,8 @@
              currentSlide = 0; 
              renderCampaignSlider();
         });
-        
-        // Kampanya Bilgileri Dinleyicisi (PAKET SERVİS)
-        campaignInfoRef.child('price_text').on('value', (snapshot) => {
-             campaignPriceText = snapshot.val() || "";
-             renderCampaignSlider();
-        });
     }
 
-    // --- KRİTİK FARK: RENDER MENÜ VE FİYAT FARKI ---
     function renderMenu(category='Tümü'){
       menuContainer.innerHTML='';
       const filtered = category==='Tümü'?products.filter(p=>p.category!='İletişim'):products.filter(p=>p.category===category);
@@ -443,7 +430,7 @@
         
         const imageClass = p.image && p.image.trim() !== '' ? 'cursor-pointer' : 'opacity-70';
         
-        // PAKET SERVİS: Fiyat hesaplama (İçecekler hariç +10 TL)
+        // Fiyat hesaplama
         let finalPrice = p.price;
         if (p.category !== 'İçecekler' && !isNaN(parseFloat(p.price))) {
              finalPrice = parseFloat(p.price);
@@ -536,30 +523,18 @@
         }
     }
     
-    // --- YORUM MODALI MANTIĞI (Aynı Kaldı) ---
-
+    // --- YORUM MODALI MANTIĞI ---
     const RATING_INTERVALS = [6000, 12000, 18000]; 
-    
-    function isModalPermanentlyDisabled() {
-        return localStorage.getItem('olimpiyat_rated') === 'true';
-    }
+    function isModalPermanentlyDisabled() { return localStorage.getItem('olimpiyat_rated') === 'true'; }
     function showRatingModal() {
-        if (isModalPermanentlyDisabled()) {
-            return;
-        }
-        if (sessionStorage.getItem('olimpiyat_rated_session_closed') !== 'true') {
-            ratingModal.classList.remove('hidden');
-        }
+        if (isModalPermanentlyDisabled()) return;
+        if (sessionStorage.getItem('olimpiyat_rated_session_closed') !== 'true') ratingModal.classList.remove('hidden');
     }
     function setupIntervals() {
-        if (isModalPermanentlyDisabled()) {
-            return;
-        }
+        if (isModalPermanentlyDisabled()) return;
         RATING_INTERVALS.forEach(delay => {
             setTimeout(() => {
-                if (ratingModal.classList.contains('hidden') && !isModalPermanentlyDisabled()) {
-                    showRatingModal();
-                }
+                if (ratingModal.classList.contains('hidden') && !isModalPermanentlyDisabled()) showRatingModal();
             }, delay);
         });
     }
@@ -568,33 +543,22 @@
     closeRatingModal.addEventListener('click', () => { sessionStorage.setItem('olimpiyat_rated_session_closed', 'true'); ratingModal.classList.add('hidden'); });
     floatingRatingButton.addEventListener('click', () => { ratingModal.classList.remove('hidden'); });
 
-
     // --- EVENT LISTENERS ---
-
     document.getElementById('langTR').addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
     document.getElementById('langEN').addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
     document.getElementById('imageModal').addEventListener('click',()=>document.getElementById('imageModal').classList.add('hidden'));
     
-    // Admin Giriş butonu HTML'den silindiği için bu satır da kaldırılabilir
-    // document.getElementById('adminLoginBtn').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.remove('hidden'));
-    
     document.getElementById('closeAdminLogin').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.add('hidden'));
-
     document.getElementById('checkPassword').addEventListener('click',()=>{
         const passwordInput = document.getElementById('passwordInput');
         const loginError = document.getElementById('loginError');
         const adminLoginModal = document.getElementById('adminLoginModal');
-        
-        // Bu, tek admin paneline yönlendirir
         if(passwordInput.value==='admin123'){ 
             adminLoginModal.classList.add('hidden');
             window.location.href = 'admin.html'; 
-        } else {
-            loginError.classList.remove('hidden');
-        }
+        } else { loginError.classList.remove('hidden'); }
     });
 
-    // --- İlk Yükleme ---
     document.addEventListener('DOMContentLoaded', () => {
       setupFirebaseListener(); 
       trackVisitor(); 
