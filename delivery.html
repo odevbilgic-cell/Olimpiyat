@@ -101,7 +101,7 @@
 
     /* 3. Yemeksepeti */
     #btnYemeksepeti {
-        bottom: 190px;
+        bottom: 400px;
         background-color: #ffffff; 
         background-image: url(logo/yemeksepeti.png);
         background-size: 100%; /* Logoyu %75 boyutunda yap */
@@ -109,7 +109,7 @@
 
     /* 4. Getir Yemek */
     #btnGetir {
-        bottom: 260px;
+        bottom: 330px;
         background-color: #ffffff; 
         background-image: url(logo/getir.png);
         background-size: 100%; /* Logoyu %70 boyutunda yap */
@@ -117,7 +117,7 @@
 
     /* 5. Migros Yemek */
     #btnMigros {
-        bottom: 330px;
+        bottom: 260px;
         background-color: #ffffff; 
         background-image: url(logo/migros.jpg);
         background-size: 100%; /* Logoyu %85 boyutunda yap */
@@ -125,7 +125,7 @@
 
     /* 6. Trendyol Yemek (En Üstte) */
     #btnTrendyol {
-        bottom: 400px;
+        bottom: 190px;
         background-color: #ffffff; 
         background-image: url(logo/trendyols.png);
         background-size: 70%; /* Logoyu %80 boyutunda yap */
@@ -316,11 +316,40 @@
     }
 
     confirmRedirectBtn.addEventListener('click', () => {
-        if(targetPlatformUrl) {
-            window.open(targetPlatformUrl, '_blank'); 
-        }
-        commissionModal.classList.add('hidden');
-    });
+      if(targetPlatformUrl) {
+          
+          // Durum 1: Link Trendyol ise (ÖZEL İŞLEM)
+          if(targetPlatformUrl === "TRENDYOL_OZEL") {
+              
+              // Kullanıcı Mobil Cihazdaysa (Android veya iOS)
+              if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+                  // 1. DİREKT UYGULAMAYI AÇ (Senin ID: 212061)
+                  // Bu kod telefona "Trendyol uygulamasını aç, yemek kısmına git, bu dükkanı göster" der.
+                  window.location.href = "ty://?Page=Meal&ContentId=212061";
+                  
+                  // 2. Eğer uygulama yüklü değilse App Store/Play Store'a yönlendir
+                  setTimeout(() => {
+                      // Uygulama açılmazsa buraya düşer
+                      if (/Android/i.test(navigator.userAgent)) {
+                          window.location.href = "https://play.google.com/store/apps/details?id=trendyol.com";
+                      } else {
+                          window.location.href = "https://apps.apple.com/tr/app/trendyol-online-al%C4%B1%C5%9Fveri%C5%9F/id524362642";
+                      }
+                  }, 1500);
+              } 
+              // Kullanıcı Bilgisayardaysa
+              else {
+                  alert("Trendyol Yemek (Go) sadece mobil uygulama üzerinden hizmet vermektedir. Lütfen telefonunuzdan giriş yapınız.");
+                  window.open("https://www.trendyol.com/uygulamayi-indir", '_blank');
+              }
+          } 
+          // Durum 2: Diğer Platformlar (Yemeksepeti, Getir, Migros)
+          else {
+              window.open(targetPlatformUrl, '_blank'); 
+          }
+      }
+      commissionModal.classList.add('hidden');
+  });
 
     cancelRedirectBtn.addEventListener('click', () => {
         commissionModal.classList.add('hidden');
@@ -329,8 +358,7 @@
     document.getElementById('btnYemeksepeti').addEventListener('click', () => openPlatformModal("https://www.yemeksepeti.com/restaurant/hk8c/olimpiyat-kokorec-and-fast-food-hk8c"));
     document.getElementById('btnGetir').addEventListener('click', () => openPlatformModal("https://getir.com/yemek/restoran/olimpiyat-kokorec-yamanevler-mah-umraniye-istanbul/?adTrackingId="));
     document.getElementById('btnMigros').addEventListener('click', () => openPlatformModal("https://www.migros.com.tr/yemek/olimpiyat-kokorec-doner-umraniye-yamanevler-mah-st-252d3"));
-    document.getElementById('btnTrendyol').addEventListener('click', () => openPlatformModal("https://tgoyemek.com/restoranlar/212061#bu-restoranin-en-sevilenleri"));
-
+   document.getElementById('btnTrendyol').addEventListener('click', () => openPlatformModal("TRENDYOL_OZEL"));
     function setPositionByIndex() {
         if (campaignUrls.length === 0) return;
         const sliderContainer = document.querySelector('#campaignSlider');
