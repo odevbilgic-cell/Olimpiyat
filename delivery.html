@@ -317,27 +317,36 @@
 
     confirmRedirectBtn.addEventListener('click', () => {
       if(targetPlatformUrl) {
-          
-          // Eğer link "tgoyemek.com" içeriyorsa (Trendyol ise) ve kullanıcı MOBİLDEYSE
-          if(targetPlatformUrl.includes('tgoyemek.com') && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-               // window.open yerine window.location.href kullanıyoruz.
-               // Bu komut, telefonun "Bu linki hangi uygulamayla açayım?" diye sormasını veya direkt uygulamayı açmasını sağlar.
-               window.location.href = targetPlatformUrl;
+          // Link Trendyol ise özel bir işlem yapıyoruz
+          if(targetPlatformUrl.includes('trendyol.com/deeplink')) {
+              
+              // Eğer mobildelerse (Android/iPhone)
+              if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
+                  // Bu komut tarayıcıya "Bu linki Trendyol Uygulaması ile aç" emrini verir.
+                  window.location.href = targetPlatformUrl;
+              } 
+              // Bilgisayardalarsa
+              else {
+                  alert("Trendyol Yemek siparişleri sadece telefon uygulamasından verilebilir.");
+                  // İstersen burada yine de genel sayfayı açtırabilirsin:
+                  window.open("https://www.trendyol.com/s/trendyol-yemek", '_blank');
+              }
           } 
+          // Diğer Yemek Kartları (Yemeksepeti, Getir, Migros)
           else {
-               // Bilgisayardaysa veya diğer yemek kartları (Getir, Yemeksepeti) ise yeni sekmede aç.
-               window.open(targetPlatformUrl, '_blank');
+              window.open(targetPlatformUrl, '_blank'); 
           }
       }
       commissionModal.classList.add('hidden');
   });
 
-  // --- BUTON TIKLAMALARI ---
-  
-  // İşte senin verdiğin o özel linki buraya koyduk:
-    document.getElementById('btnTrendyol').addEventListener('click', () => openPlatformModal("https://tgoyemek.com/restoranlar/212061#bu-restoranin-en-sevilenleri"));
-
-   
+    // --- BUTON TIKLAMALARI ---
+    
+    // İŞTE SENİN İSTEDİĞİN LİNKİN ID EKLENMİŞ HALİ:
+    // "Page=Meal" -> Yemek Bölümü
+    // "ContentId=212061" -> Senin Restoranın
+    document.getElementById('btnTrendyol').addEventListener('click', () => openPlatformModal("https://www.trendyol.com/deeplink?Page=Meal&ContentId=212061"));
+    
 
     document.getElementById('btnYemeksepeti').addEventListener('click', () => openPlatformModal("https://www.yemeksepeti.com/restaurant/hk8c/olimpiyat-kokorec-and-fast-food-hk8c"));
     document.getElementById('btnGetir').addEventListener('click', () => openPlatformModal("https://getir.com/yemek/restoran/olimpiyat-kokorec-yamanevler-mah-umraniye-istanbul/?adTrackingId="));
