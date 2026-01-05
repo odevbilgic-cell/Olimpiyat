@@ -318,7 +318,7 @@
     confirmRedirectBtn.addEventListener('click', () => {
       if(targetPlatformUrl) {
           // Link Trendyol ise özel bir işlem yapıyoruz
-          if(targetPlatformUrl.includes('trendyol.com/deeplink')) {
+          if(targetPlatformUrl.includes('trendyol.com')) {
               
               // Eğer mobildelerse (Android/iPhone)
               if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)){
@@ -345,7 +345,7 @@
     // İŞTE SENİN İSTEDİĞİN LİNKİN ID EKLENMİŞ HALİ:
     // "Page=Meal" -> Yemek Bölümü
     // "ContentId=212061" -> Senin Restoranın
-    document.getElementById('btnTrendyol').addEventListener('click', () => openPlatformModal("https://www.trendyol.com/deeplink?Page=Meal&ContentId=212061"));
+    document.getElementById('btnTrendyol').addEventListener('click', () => openPlatformModal("https://www.trendyol.com/s/trendyol-yemek/restoranlar/212061#bu-restoranin-en-sevilenleri"));
     
 
     document.getElementById('btnYemeksepeti').addEventListener('click', () => openPlatformModal("https://www.yemeksepeti.com/restaurant/hk8c/olimpiyat-kokorec-and-fast-food-hk8c"));
