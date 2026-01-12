@@ -41,6 +41,7 @@
         justify-content: center; 
         align-items: center;     
         z-index: 6;
+        letter-spacing: -5px;
         /* -webkit-text-stroke: 3px black; */
         
         /* Metin Stili */
@@ -173,6 +174,15 @@
 
     .uyari{
         font-weight: bolder;
+    }
+
+    .tl{
+        font-size: 25px;
+        position: relative;
+        left: 3px;
+        margin-bottom: -20px;
+        color: rgb(255, 217, 0);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.4); 
     }
   </style>
 </head>
@@ -421,7 +431,7 @@
         }
         campaignSliderSection.parentElement.classList.remove('hidden');
         const slidesHtml = campaignUrls.map((c, index) => {
-            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}₺</div>` : '';
+            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}<p class="tl">₺</p></div>` : '';
             return `<div class="slide"><img src="${c.url}" alt="Kampanya Görseli" class="rounded-xl">${priceHtml}</div>`;
         }).join('');
         const dotsHtml = campaignUrls.map((_, i) => `<div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>`).join('');
