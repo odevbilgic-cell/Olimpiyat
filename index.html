@@ -19,66 +19,30 @@
     /* -------------------------------------------------------- */
     /* --- KAMPANYA SLIDER STİLLERİ --- */
     
-    .slider-container {
-        position: relative;
-        overflow: hidden;
-        width: 100%;
-        height: 0; 
-        padding-bottom: 56.25%; 
-    }
-
-    .slide-wrapper {
-        display: flex;
-        position: absolute; 
-        top: 0;
-        left: 0;
-        width: 100%; 
-        height: 100%;
-        overflow-x: auto; 
-        scroll-snap-type: x mandatory; 
-        scroll-behavior: smooth; 
-    }
-    
-    .slide {
-        min-width: 100%;
-        width: 100%; 
-        flex-shrink: 0;
-        position: relative; 
-        height: 100%; 
-        scroll-snap-align: start; 
-    }
-
-    .slide img {
-        width: 100%;
-        height: 100%; 
-        object-fit: cover; 
-        background-color: black; 
-        border-radius: 0.75rem; 
-    }
-    
+    .slider-container { position: relative; overflow: hidden; width: 100%; height: 0; padding-bottom: 56.25%; }
+    .slide-wrapper { display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; }
+    .slide { min-width: 100%; width: 100%; flex-shrink: 0; position: relative; height: 100%; scroll-snap-align: start; }
+    .slide img { width: 100%; height: 100%; object-fit: cover; background-color: black; border-radius: 0.75rem; }
     .slider-dots {
-        position: absolute;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 8px;
-        z-index: 10;
-    }
-
-    .dot {
-        width: 10px;
-        height: 10px;
-        background-color: rgba(255, 255, 255, 0.5);
-        border-radius: 50%;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .dot.active {
-        background-color: #fb923c;
+         position: absolute; 
+         bottom: 10px; 
+         left: 50%; transform: 
+         translateX(-50%); 
+         display: flex; 
+         gap: 8px; 
+         z-index: 10; }
+    .dot { 
+        width: 5px; 
+        height: 5px; 
+        background-color: rgba(255, 255, 255, 0.5); 
+        border-radius: 50%; cursor: pointer; 
+        transition: background-color 0.3s; 
+        display: none;
     }
     
+        .dot.active { background-color: #ef4444; } /* Kırmızı */
+    
+    /* --- GÖRSEL ÜZERİNDEKİ FİYAT YAZISI --- */
     .campaign-price-overlay {
         position: absolute;
         bottom: 7%;  /* Görselin sol altındaki turuncu blob hizası */
@@ -88,7 +52,8 @@
         display: flex;
         justify-content: center; 
         align-items: center;     
-        z-index: 10;
+        z-index: 6;
+        letter-spacing: -5px;
         /* -webkit-text-stroke: 3px black; */
         
         /* Metin Stili */
@@ -100,14 +65,6 @@
         transform: rotate(-deg); 
         text-align: center;
         line-height: 1;}
-        
-    
-    .campaign-price-tag.long-text {
-        min-width: 70px;
-        height: 70px;
-        font-size: 0.85rem;
-        padding: 6px;
-    }
     
     /* -------------------------------------------------------- */
     /* --- SABİT YORUM BUTONU STİLİ --- */
@@ -143,6 +100,15 @@
     /* Google 'G' simgesi SVG için stil (Kullanılmıyor) */
     #googleGSvg {
         display: none; 
+    }
+
+    .tl{
+        font-size: 25px;
+        position: relative;
+        left: 3px;
+        margin-bottom: -20px;
+        color: rgb(255, 217, 0);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.4); 
     }
     
   </style>
@@ -336,7 +302,7 @@
         
         const slidesHtml = campaignUrls.map((c, index) => {
             // Eğer kampanya için özel bir fiyat girildiyse HTML'ini oluştur, yoksa boş bırak
-            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}₺</div>` : '';
+            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}<p class="tl">₺</p></div>` : '';
             
             return `
             <div class="slide">
