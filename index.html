@@ -133,6 +133,20 @@ box-shadow:0 0 20px rgba(255,0,0,0.5);
     }
     
   </style>
+
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff2a00">
+
+<script>
+  // Service Worker Kaydı
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('PWA Kayıt Başarılı!'))
+        .catch(err => console.log('PWA Kayıt Hatası:', err));
+    });
+  }
+</script>
 </head>
 <body class="text-gray-800">
   
