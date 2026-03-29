@@ -723,7 +723,35 @@ box-shadow:0 0 20px rgba(255,0,0,0.5);
     document.addEventListener('DOMContentLoaded', () => {
       setupFirebaseListener(); 
       trackVisitor(); 
+
+      const messaging = firebase.messaging();
+
+function requestNotificationPermission() {
+  console.log('İzin isteniyor...');
+  Notification.requestPermission().then((permission) => {
+    if (permission === 'granted') {
+      console.log('Bildirim izni verildi.');
       
+      // Token al (Cihazın kimliği)
+      messaging.getToken({ vapidKey: 'BK-6HmGiVvqb5jHEKVFOcoXV7GyjiKIjpIqpe0K_aV4Wafg3k3VAWv19FLiGDuZBwM0X-tjcLg4h5-JnVc6HZKA' }).then((currentToken) => {
+        if (currentToken) {
+          console.log('Token:', currentToken);
+          // Bu token'ı Firebase Database'e kaydetmelisin ki sonra mesaj atabilesin
+          database.ref('fcm_tokens').child(currentToken).set(true);
+        } else {
+          console.log('Token alınamadı.');
+        }
+      }).catch((err) => {
+        console.log('Token alma hatası:', err);
+      });
+    } else {
+      console.log('Bildirim izni reddedildi.');
+    }
+  });
+}
+
+// Sayfa yüklendiğinde veya bir butona tıklandığında çağırabilirsin
+// Örneğin: "Kampanyalardan haberim olsun" butonu
       window.addEventListener('resize', setPositionByIndex); 
       
       // Yorum zamanlayıcılarını kur
