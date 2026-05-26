@@ -1,371 +1,700 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Olimpiyat Kokoreç Menü - Kullanıcı Arayüzü</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script> <style>
-    body { background-color: #fff7f0; }
-    .active-tab { background-color: #fb923c; color: white; }
-    #categoryTabs::-webkit-scrollbar { display: none; }
-    #categoryTabs { -ms-overflow-style: none; scrollbar-width: none; z-index: 11; }
-    .price-update-info { font-size: 0.7rem; color: #6b7280; margin-top: 5px; } 
-    #mainHeader{
-background: linear-gradient(135deg,#ff2a00,#c40000,#7a0000);
-border-bottom:3px solid #ffae00;
-box-shadow:0 0 20px rgba(255,0,0,0.5);
-}
-    
-    /* -------------------------------------------------------- */
-    /* --- KAMPANYA SLIDER STİLLERİ --- */
-    
-    .slider-container { position: relative; overflow: hidden; width: 100%; height: 0; padding-bottom: 56.25%; }
-    .slide-wrapper { display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; }
-    .slide { min-width: 100%; width: 100%; flex-shrink: 0; position: relative; height: 100%; scroll-snap-align: start; }
-    .slide img { width: 100%; height: 100%; object-fit: cover; background-color: black; border-radius: 0.75rem; }
-    .slider-dots {
-         position: absolute; 
-         bottom: 10px; 
-         left: 50%; transform: 
-         translateX(-50%); 
-         display: flex; 
-         gap: 8px; 
-         z-index: 10; }
-    .dot { 
-        width: 5px; 
-        height: 5px; 
-        background-color: rgba(255, 255, 255, 0.5); 
-        border-radius: 50%; cursor: pointer; 
-        transition: background-color 0.3s; 
-        display: none;
-    }
-    
-        .dot.active { background-color: #ef4444; } /* Kırmızı */
-    
-    /* --- GÖRSEL ÜZERİNDEKİ FİYAT YAZISI --- */
-    .campaign-price-overlay {
-        position: absolute;
-        bottom: 7%;  /* Görselin sol altındaki turuncu blob hizası */
-        left: 6%;    
-        width: 35%;  
-        height: 15%; 
-        display: flex;
-        justify-content: center; 
-        align-items: center;     
-        z-index: 6;
-        letter-spacing: -5px;
-        /* -webkit-text-stroke: 3px black; */
-        
-        /* Metin Stili */
-        color: white;
-        font-family: 'Arial Black', 'Impact', sans-serif; 
-        font-size: clamp(3rem, 8vw, 5rem); 
-        font-weight: 900;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.4); 
-        transform: rotate(-deg); 
-        text-align: center;
-        line-height: 1;}
-    
-    /* -------------------------------------------------------- */
-    /* --- SABİT YORUM BUTONU STİLİ --- */
-    
-    #floatingRatingButton {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 72px; 
-        height: 72px; 
-        border-radius: 50%;
-        background-image: url('yuvarlak.png'); 
-        background-size: cover; 
-        background-position: center;
-        background-repeat: no-repeat;
-        
-        color: transparent;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        z-index: 50; 
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        border: none; 
-    }
-    
-    #floatingRatingButton:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
-    }
-    
-    /* Google 'G' simgesi SVG için stil (Kullanılmıyor) */
-    #googleGSvg {
-        display: none; 
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Olimpiyat Kokoreç Menü - Kullanıcı Arayüzü</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-    .tl{
-        font-size: 25px;
-        position: relative;
-        left: 3px;
-        margin-bottom: -20px;
-        color: rgb(255, 217, 0);
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.4); 
-    }
-    .logo{
-        
-        width: 120px;
-    }
-
-    @font-face{
-      font-family:'BenimFont';
-      src: url('fonts/fontum.ttf')
-    }
-    .baslik{
-        font-family: 'BenimFont';
-        -webkit-text-stroke: 0.5px black;
-        color: #ffae00;
-        font-size: 28px;
-        margin: -10px auto -10px;
-        line-height: 0.8;
-    }
-    
-  </style>
-
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ff2a00">
-
-<script>
-  // Service Worker Kaydı
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('PWA Kayıt Başarılı!'))
-        .catch(err => console.log('PWA Kayıt Hatası:', err));
-    });
-  }
-</script>
-</head>
-<body class="text-gray-800">
-  
-  <div id="viewCountListener" style="display:none;"></div> 
-
-  <header id="mainHeader" class="text-white p-3 flex justify-between items-center sticky top-0 z-20 shadow-md">
-    <img class="logo" src="logom.png" alt="logo">
-    <h1 class="baslik" id="bas">&nbsp Lezzet <br> Menüleri</h1>
-    <div class="flex items-center gap-2">
-      <button id="langTR" class="bg-white text-orange-600 px-2 py-1 rounded text-sm font-bold">TR</button>
-      <button id="langEN" class="bg-white text-orange-600 px-2 py-1 rounded text-sm">EN</button>
-      </div>
-  </header>
-
-  <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
-
-  <main class="p-4">
-    
-    <div class="bg-white rounded-xl shadow mb-4 p-0"> 
-        <section id="campaignSlider"></section>
-    </div>
-    
-   <div id="menuContainer" class="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4"></div>
-
-    <div id="contactSection" class="hidden text-center mt-6 bg-white rounded-xl shadow p-6 max-w-lg mx-auto">
-      <h2 id="contactTitle" class="text-2xl font-bold text-orange-600 mb-3">İletişim</h2>
-      <p id="contactAddress" class="mb-3">📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul</p>
-      <p class="mt-2">📞 <a href="tel:02163357920" id="contactPhone" class="text-orange-600 font-semibold text-lg hover:underline">0216 335 79 20</a></p>
-    </div>
-  </main>
-
-  <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50 p-4 transition-opacity">
-    <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl transform transition-all">
-        <div class="relative h-64 sm:h-80">
-            <img id="modalImage" class="w-full h-full object-cover">
-            <button class="absolute top-3 right-3 bg-black bg-opacity-50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-opacity-70 " >✖</button>
-        </div>
-        
-        <div class="p-6">
-            <div class="flex justify-between items-start mb-2">
-                <h2 id="modalTitle" class="text-2xl font-bold text-gray-800 leading-tight"></h2>
-                <span id="modalPrice" class="bg-orange-100 text-orange-600 font-bold px-3 py-1 rounded-lg whitespace-nowrap"></span>
-            </div>
-            <p id="modalDesc" class="text-gray-600 text-base leading-relaxed overflow-y-auto max-h-40"></p>
-        </div>
-    </div>
-</div>
-
-<div id="adminLoginModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-    <div class="bg-white rounded-xl shadow-lg p-6 w-96 relative">
-      <button id="closeAdminLogin" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
-      <h2 class="text-xl font-bold mb-3 text-red-600">Yönetici Girişi (Paket)</h2>
-      <input id="passwordInput" type="password" placeholder="Şifreyi giriniz" class="border w-full p-2 rounded mb-3 focus:ring-red-500 focus:border-red-500" />
-      <button id="checkPassword" class="bg-red-500 text-white px-4 py-2 rounded w-full hover:bg-red-600 transition">Giriş Yap</button>
-      <p id="loginError" class="text-red-600 text-sm mt-2 hidden">Hatalı şifre!</p>
-    </div>
-  </div>
-  
-  <div id="ratingModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[100]">
-    <div class="bg-white rounded-xl shadow-lg p-6 w-11/12 max-w-sm relative text-center">
-      <h2 class="text-2xl font-bold mb-4 text-orange-600">Bizi Puanlayın!</h2>
-      <p class="mb-5 text-gray-700">Deneyiminizden memnun kaldıysanız, bir dakikanızı ayırıp Google'da bize 5 yıldız verebilir misiniz? 🌟</p>
-      
-      <a id="goToRatingLink" 
-         href="https://search.google.com/local/writereview?placeid=ChIJXXQYlvDIyhQReratRBFh_TY" 
-         target="_blank"  
-         class="bg-green-500 text-white px-6 py-3 rounded-xl w-full font-bold text-lg 
-                flex items-center justify-center space-x-2 hover:bg-green-600 transition">
-          <span>Hemen 5 Yıldız Ver</span> 
-          <span>⭐</span>
-      </a>
-      
-      <button id="closeRatingModal" 
-              class="text-gray-500 mt-4 text-sm hover:text-gray-800 transition block w-full">
-          Hayır, teşekkürler
-      </button>
-    </div>
-  </div>
-  
-  <button id="floatingRatingButton" title="Bizi Google'da Puanlayın"></button>
-  
-  <script>
-    // --- Firebase Yapılandırması ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
-        authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
-        projectId: "olimpiyatkokorecmenu",
-        messagingSenderId: "987017604417",
-        appId: "1:987017604417:web:b6c4858712dc66d14745c0",
-        measurementId: "G-HB0J7BFZ9N",
-        databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app" 
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const productsRef = database.ref('products');
-    const visitorsRef = database.ref('visitors'); 
-    const campaignsRef = database.ref('campaigns'); 
-    const campaignInfoRef = database.ref('campaign_info'); 
-
-    // --- HTML Element Tanımlamaları ---
-    const menuContainer = document.getElementById('menuContainer');
-    const contactSection = document.getElementById('contactSection');
-    const campaignSliderSection = document.getElementById('campaignSlider'); 
-    const ratingModal = document.getElementById('ratingModal'); 
-    const goToRatingLink = document.getElementById('goToRatingLink'); 
-    const closeRatingModal = document.getElementById('closeRatingModal'); 
-    const floatingRatingButton = document.getElementById('floatingRatingButton'); 
-
-    let language = 'TR'; 
-    let products = []; 
-    let campaignUrls = []; 
-    let campaignPriceText = ""; 
-    let currentSlide = 0;
-    let sliderInterval;
-    
-    // Kategori çevirileri
-    const categoryTranslations = {
-      'Tümü': 'All', 
-      'Menüler': 'Menus', 
-      'Kokoreç': 'Kokoreç', 
-      'Tavuk Kokoreç': 'Chicken Kokoreç', 
-      'Tavuk Döner': 'Chicken Döner', 
-      'Patso': 'Patso',                  
-      'Köfte': 'Meatballs', 
-      'Ciğer': 'Liver', 
-      'Hamburger': 'Hamburger', 
-      'Midye': 'Mussel',
-      'Yan Lezzetler': 'Side Dishes', 
-      'Tost': 'Toast',                   
-      'İçecekler': 'Drinks', 
-      'İletişim': 'Contact'
-    };
-    let categoriesTR = Object.keys(categoryTranslations);
-    let categoriesEN = Object.values(categoryTranslations);
-
-    
-    // --- SLIDER İŞLEVLERİ ---
-    
-    function setPositionByIndex() {
-        if (campaignUrls.length === 0) return;
-        const sliderContainer = document.querySelector('#campaignSlider');
-        const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
-        if (!wrapper || !sliderContainer) return;
-        
-        const slideWidth = sliderContainer.clientWidth; 
-        wrapper.scrollLeft = currentSlide * slideWidth;
-        
-        const dots = document.querySelectorAll('#campaignSlider .dot');
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentSlide);
-        });
-    }
-    
-    function startSliderInterval() {
-        if (sliderInterval) clearInterval(sliderInterval);
-        
-        if (campaignUrls.length > 1) {
-            sliderInterval = setInterval(() => {
-                const nextSlide = (currentSlide + 1) % campaignUrls.length;
-                goToSlide(nextSlide);
-            }, 5000); 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <style>
+        body {
+            background-color: #fff7f0;
         }
-    }
 
-    function goToSlide(index) {
-        if (campaignUrls.length === 0) return;
-        currentSlide = index;
-        setPositionByIndex();
-    }
-    
-    function handleScroll() {
-        const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
-        const sliderContainer = document.querySelector('#campaignSlider');
-        if (!wrapper || !sliderContainer) return;
+        .active-tab {
+            background-color: #fb923c;
+            color: white;
+        }
+
+        #categoryTabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        #categoryTabs {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            z-index: 11;
+        }
+
+        .price-update-info {
+            font-size: 0.7rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        #mainHeader {
+            background: linear-gradient(135deg, #ff2a00, #c40000, #7a0000);
+            border-bottom: 3px solid #ffae00;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+
+        /* -------------------------------------------------------- */
+        /* --- KAMPANYA SLIDER STİLLERİ --- */
+
+        .slider-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+        }
+
+        .slide-wrapper {
+            display: flex;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+        }
+
+        .slide {
+            min-width: 100%;
+            width: 100%;
+            flex-shrink: 0;
+            position: relative;
+            height: 100%;
+            scroll-snap-align: start;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-color: black;
+            border-radius: 0.75rem;
+        }
+
+        .slider-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform:
+                translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 5px;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: none;
+        }
+
+        .dot.active {
+            background-color: #ef4444;
+        }
+
+        /* Kırmızı */
+
+        /* --- GÖRSEL ÜZERİNDEKİ FİYAT YAZISI --- */
+        .campaign-price-overlay {
+            position: absolute;
+            bottom: 7%;
+            /* Görselin sol altındaki turuncu blob hizası */
+            left: 6%;
+            width: 35%;
+            height: 15%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 6;
+            letter-spacing: -5px;
+            /* -webkit-text-stroke: 3px black; */
+
+            /* Metin Stili */
+            color: white;
+            font-family: 'Arial Black', 'Impact', sans-serif;
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+            transform: rotate(-deg);
+            text-align: center;
+            line-height: 1;
+        }
+
+        /* -------------------------------------------------------- */
+        /* --- SABİT YORUM BUTONU STİLİ --- */
+
+
+
+
+
+        /* Google 'G' simgesi SVG için stil (Kullanılmıyor) */
+        #googleGSvg {
+            display: none;
+        }
+
+        .tl {
+            font-size: 25px;
+            position: relative;
+            left: 3px;
+            margin-bottom: -20px;
+            color: rgb(255, 217, 0);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .logo {
+
+            width: 120px;
+        }
+
+        @font-face {
+            font-family: 'BenimFont';
+            src: url('fonts/fontum.ttf')
+        }
+
+        .baslik {
+            font-family: 'BenimFont';
+            -webkit-text-stroke: 0.5px black;
+            color: #ffae00;
+            font-size: 28px;
+            margin: -10px auto -10px;
+            line-height: 0.8;
+        }
+
+        /* --- ÇARKIFELEK STİLLERİ --- */
+        #wheelCanvas {
+            transition: transform 5s cubic-bezier(0.1, 0.8, 0.2, 1);
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .animate-pop-in {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff2a00">
+
+    <script>
+        // Service Worker Kaydı
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('PWA Kayıt Başarılı!'))
+                    .catch(err => console.log('PWA Kayıt Hatası:', err));
+            });
+        }
+    </script>
+</head>
+
+<body class="text-gray-800">
+
+    <div id="viewCountListener" style="display:none;"></div>
+
+    <header id="mainHeader" class="text-white p-3 flex justify-between items-center sticky top-0 z-20 shadow-md">
+        <img class="logo" src="logom.png" alt="logo">
+        <h1 class="baslik" id="bas">&nbsp Lezzet <br> Menüleri</h1>
+        <div class="flex items-center gap-2">
+            <button id="langTR" class="bg-white text-orange-600 px-2 py-1 rounded text-sm font-bold">TR</button>
+            <button id="langEN" class="bg-white text-orange-600 px-2 py-1 rounded text-sm">EN</button>
+        </div>
+    </header>
+
+    <nav id="categoryTabs"
+        class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
+
+    <main class="p-4">
+
+        <div class="bg-white rounded-xl shadow mb-4 p-0">
+            <section id="campaignSlider"></section>
+        </div>
+
+        <div id="menuContainer" class="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4"></div>
+
+        <div id="contactSection" class="hidden text-center mt-6 bg-white rounded-xl shadow p-6 max-w-lg mx-auto">
+            <h2 id="contactTitle" class="text-2xl font-bold text-orange-600 mb-3">İletişim</h2>
+            <p id="contactAddress" class="mb-3">📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç
+                Ümraniye - İstanbul</p>
+            <p class="mt-2">📞 <a href="tel:02163357920" id="contactPhone"
+                    class="text-orange-600 font-semibold text-lg hover:underline">0216 335 79 20</a></p>
+        </div>
+    </main>
+
+    <div id="imageModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50 p-4 transition-opacity">
+        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl transform transition-all">
+            <div class="relative h-64 sm:h-80">
+                <img id="modalImage" class="w-full h-full object-cover">
+                <button
+                    class="absolute top-3 right-3 bg-black bg-opacity-50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-opacity-70 ">✖</button>
+            </div>
+
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-2">
+                    <h2 id="modalTitle" class="text-2xl font-bold text-gray-800 leading-tight"></h2>
+                    <span id="modalPrice"
+                        class="bg-orange-100 text-orange-600 font-bold px-3 py-1 rounded-lg whitespace-nowrap"></span>
+                </div>
+                <p id="modalDesc" class="text-gray-600 text-base leading-relaxed overflow-y-auto max-h-40"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminLoginModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+        <div class="bg-white rounded-xl shadow-lg p-6 w-96 relative">
+            <button id="closeAdminLogin" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
+            <h2 class="text-xl font-bold mb-3 text-red-600">Yönetici Girişi (Paket)</h2>
+            <input id="passwordInput" type="password" placeholder="Şifreyi giriniz"
+                class="border w-full p-2 rounded mb-3 focus:ring-red-500 focus:border-red-500" />
+            <button id="checkPassword"
+                class="bg-red-500 text-white px-4 py-2 rounded w-full hover:bg-red-600 transition">Giriş Yap</button>
+            <p id="loginError" class="text-red-600 text-sm mt-2 hidden">Hatalı şifre!</p>
+        </div>
+    </div>
+
+   <!-- Olimpiyat Konseptli Gelişmiş Puanlama Modalı -->
+    <div id="ratingModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[100] p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm relative text-center border-b-8 border-orange-500 animate-pop-in">
+            
+            <!-- 1. KISIM: OLİMPİYAT KURUMSAL LOGOSU (Temaya tam uyum) -->
+            <div class="flex flex-col items-center justify-center mb-4 select-none">
+                <div class="relative flex items-center justify-center bg-gradient-to-br from-red-600 to-amber-500 rounded-xl px-5 py-2.5 shadow-md border-b-4 border-amber-600 transform -rotate-1 tracking-wide">
+                    <span class="absolute -top-1.5 -left-1.5 text-yellow-300 text-base animate-pulse">✨</span>
+                    <div class="text-center">
+                        <span class="block text-[9px] font-black uppercase text-yellow-300 tracking-[0.25em] drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Olimpiyat</span>
+                        <h2 class="text-xl font-extrabold text-white uppercase italic leading-none tracking-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.7)] flex items-center gap-1">
+                            <span>LEZZET</span>
+                            <span class="bg-white text-red-600 px-1 py-0.2 rounded text-base font-black not-italic rotate-3 shadow-sm">MENÜSÜ</span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. KISIM: İÇERİK VE İŞTAH AÇICI METİN -->
+            <div class="my-4">
+                <div class="text-4xl mb-3 flex justify-center gap-1 filter drop-shadow-sm">
+                    <span>🥖</span><span>🔥</span><span>⭐</span>
+                </div>
+                <h3 class="text-xl font-black text-gray-800 leading-tight mb-2">Lezzetimizi Beğendiniz mi?</h3>
+                <p class="text-sm text-gray-600 leading-relaxed px-2">
+                    Olimpiyat Kokoreç’teki deneyiminizden memnun kaldıysanız, bize Google’da <span class="font-extrabold text-orange-500">5 Yıldız</span> vererek lezzet ailemizi büyütebilir misiniz? 🌟
+                </p>
+            </div>
+
+            <!-- 3. KISIM: TEMAYA UYGUN BUTONLAR -->
+            <div class="space-y-2 mt-5">
+                <!-- Google 5 Yıldız Ver Butonu (Kurumsal Renklerde ve Parıltılı) -->
+                <a id="goToRatingLink" 
+                   href="https://search.google.com/local/writereview?placeid=ChIJXXQYlvDIyhQReratRBFh_TY" target="_blank"
+                   class="relative overflow-hidden bg-gradient-to-r from-red-600 to-orange-500 text-white px-6 py-3.5 rounded-xl w-full font-black text-base flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-[1.02] active:scale-98 group cursor-pointer">
+                    
+                    <!-- Buton içi parlama efekti -->
+                    <span class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
+                    
+                    <span>HEMEN 5 YILDIZ VER</span>
+                    <span class="text-lg group-hover:animate-bounce">⭐</span>
+                </a>
+
+                <!-- Kapatma Butonu -->
+                <button id="closeRatingModal" 
+                        class="text-gray-400 font-bold mt-2 text-xs hover:text-gray-600 transition block w-full uppercase tracking-wider py-2">
+                    Hayır, teşekkürler
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Sabit Çark Butonu (Puanla Butonunun Üstünde Durur) -->
+    <button id="floatingWheelButton" title="Lezzet Arenası - Oyunları Oyna!"
+        class="fixed bottom-[105px] right-5 w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-red-600 via-orange-500 to-amber-500 text-white flex flex-col justify-center items-center shadow-[0_4px_20px_rgba(239,68,68,0.5)] z-50 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-yellow-400 font-sans tracking-wide overflow-hidden group rotate-3 hover:rotate-0">
+
+        <span
+            class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out-in"></span>
+
+        <span class="absolute top-1 right-1.5 text-[8px] animate-pulse">✨</span>
+
+        <div class="relative flex items-center justify-center h-7 mt-1">
+            <span class="text-2xl filter drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)] group-hover:animate-bounce">🏆</span>
+        </div>
+
+        <div class="text-[9px] font-black uppercase tracking-tighter leading-none mb-1 text-center select-none">
+            <span class="block text-yellow-300 text-[8px] font-extrabold tracking-widest scale-90">ARENA</span>
+            <span
+                class="bg-white text-red-600 px-1 py-0.5 rounded-[3px] font-black inline-block mt-0.5 shadow-sm text-[8px] scale-95">OYUN</span>
+        </div>
+    </button>
+
+    <!-- Gelişmiş Oyun Modalı (Çarkıfelek & Bu mu Şu mu) -->
+<div id="wheelModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-[110] p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md relative text-center max-h-[95vh] overflow-y-auto overflow-x-hidden">
+            <button id="closeWheelModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl font-bold">✖</button>
+
+            <div id="gameSelectionScreen" class="py-4 flex flex-col items-center justify-center">
+                <div class="flex flex-col items-center justify-center my-3 select-none w-full">
+                    <div class="relative flex items-center justify-center bg-gradient-to-br from-red-600 to-amber-500 rounded-2xl px-6 py-3 shadow-lg border-b-4 border-amber-600 transform -rotate-1 tracking-wide">
+                        <span class="absolute -top-2 -left-2 text-yellow-300 text-lg animate-ping">✨</span>
+                        <div class="flex flex-col items-center justify-center text-center">
+                            <img src="file_00000000a4647246a61cf005bd316d6f.png" width="100" class="mx-auto object-contain" style="margin-bottom: -5px; z-index: 10;">
+                            <h2 class="text-2xl font-extrabold text-white uppercase italic leading-none tracking-tight drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)] flex items-center justify-center gap-1.5">
+                                <span>LEZZET</span>
+                                <span class="bg-white text-red-600 px-1.5 py-0.5 rounded-md text-xl font-black not-italic rotate-3 shadow-sm inline-block">ARENASI</span>
+                            </h2>
+                        </div>
+                        <span class="absolute -bottom-1.5 -right-2 bg-yellow-400 text-gray-900 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow border border-white">Oyunlar</span>
+                    </div>
+                    <div class="w-24 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent mt-4 rounded-full"></div>
+                </div>
+
+                <h2 class="text-xl font-black text-orange-600 mb-1 mt-2 text-center w-full">Ne Yiyeceğinizaka Karar Veremediniz mi?</h2>
+                <p class="text-xs text-gray-500 mb-5 text-center w-full">Sizin için seçimi eğlenceli hale getirelim. Bir oyun seçin!</p>
+
+                <div class="space-y-3 w-full">
+                    <button id="selectWheelGame" class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold shadow-md hover:opacity-90 transition transform hover:-translate-y-0.5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🎡</span>
+                            <div class="text-left">
+                                <p class="font-black text-base">Lezzet Çarkıfeleği</p>
+                                <p class="text-xs text-orange-100 font-normal">Şansına güven, çarkı fırlat!</p>
+                            </div>
+                        </div>
+                        <span class="text-xl">➔</span>
+                    </button>
+
+                    <button id="selectMatchupGame" class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl font-bold shadow-md hover:opacity-90 transition transform hover:-translate-y-0.5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🔥</span>
+                            <div class="text-left">
+                                <p class="font-black text-base">Bu mu? Şu mu?</p>
+                                <p class="text-xs text-rose-100 font-normal">Lezzetleri kapıştır, şampiyonu bul!</p>
+                            </div>
+                        </div>
+                        <span class="text-xl">➔</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="wheelGameArea" class="hidden">
+                <div id="wheelHeaderGroup">
+                    <h2 id="wheelTitle" class="text-2xl font-black text-orange-600 mb-1">Ne Yesem?</h2>
+                    <p id="wheelSubtitle" class="text-xs text-gray-500 mb-4">Parmağınla fırlat veya butona basarak lezzet çarkını çevir!</p>
+                </div>
+
+                <div id="wheelWinnerHeaderGroup" class="hidden text-center pb-3 animate-pop-in">
+                    <span class="text-5xl inline-block animate-bounce mb-1">🏆</span>
+                    <h3 id="wheelWinnerHeading" class="text-xl font-black text-green-600 leading-none uppercase tracking-wide">Günün Şanslı Lezzeti!</h3>
+                </div>
+                
+                <div id="wheelInteractiveArea" class="relative w-72 h-[340px] mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                    <div id="wheelContainer" class="relative w-full h-full flex items-center justify-center overflow-hidden">
+                        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[25px] border-t-red-600 drop-shadow-md"></div>
+                        <canvas id="wheelCanvas" width="280" height="280" class="rounded-full shadow-md mt-4"></canvas>
+                        <button id="spinButton" class="absolute w-14 h-14 bg-red-600 text-white rounded-full font-black text-xs shadow-xl border-4 border-white flex items-center justify-center z-10 hover:bg-red-700 uppercase tracking-wider mt-4">ÇEVİR</button>
+                    </div>
+
+                    <div id="wheelBigResultCard" class="hidden absolute inset-0 w-full h-full rounded-2xl overflow-hidden bg-white border-2 border-green-500 shadow-2xl flex flex-col animate-pop-in">
+                        <div class="relative w-full h-3/4 bg-gray-50 border-b border-gray-100">
+                            <img id="wheelResultImage" class="w-full h-full object-contain">
+                            <span id="wheelResultPrice" class="absolute bottom-3 right-3 bg-green-600 text-white font-black text-base px-3 py-1 rounded-lg shadow-md whitespace-nowrap"></span>
+                        </div>
+                        <div class="p-3 text-left bg-gradient-to-b from-green-50 to-white flex-grow flex flex-col justify-center">
+                            <h4 id="wheelResultTitle" class="font-black text-base text-gray-800 leading-tight mb-1"></h4>
+                            <p id="wheelResultDesc" class="text-gray-500 text-xs line-clamp-2 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="reSpinButton" class="hidden mx-auto bg-gray-800 text-white font-bold text-xs px-4 py-2 rounded-full hover:bg-orange-600 transition duration-300">🔄 Başka Bir Şey Seç</button>
+            </div>
+
+            <div id="matchupGameArea" class="hidden">
+                <h2 class="text-2xl font-black text-red-600 mb-1">Bu mu? Şu mu?</h2>
+                <div class="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+                    <div id="matchupProgress" class="bg-red-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <div class="flex flex-col gap-6 my-4 relative">
+                    <div id="optionA" class="bg-white rounded-2xl overflow-hidden shadow-xl cursor-pointer transition transform active:scale-95 flex flex-col border border-gray-100">
+                        <div class="relative h-48 w-full bg-gray-50 flex items-center justify-center">
+                            <img id="imgA" class="w-full h-full object-contain">
+                           
+                        </div>
+                        <div class="p-4 text-left bg-gradient-to-b from-gray-50 to-white border-t border-gray-50">
+                            <h3 id="titleA" class="font-black text-base text-gray-800 leading-tight"></h3>
+                            <p id="descA" class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed"></p>
+                             <span id="priceA" class="absolute bottom-5 right-3 bg-orange-100 text-orange-600 font-black text-sm px-3 py-1 rounded-lg shadow-sm"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-center my-[-24px] z-10">
+                        <span class="bg-red-600 text-white font-black text-xs w-8 h-8 rounded-full flex items-center justify-center border-4 border-white shadow-md animate-pulse">VS</span>
+                    </div>
+
+                    <div id="optionB" class="bg-white rounded-2xl overflow-hidden shadow-xl cursor-pointer transition transform active:scale-95 flex flex-col border border-gray-100">
+                        <div class="relative h-48 w-full bg-gray-50 flex items-center justify-center">
+                            <img id="imgB" class="w-full h-full object-contain">
+                            
+                        </div>
+                        <div class="p-4 text-left bg-gradient-to-b from-gray-50 to-white border-t border-gray-50">
+                            <h3 id="titleB" class="font-black text-base text-gray-800 leading-tight"></h3>
+                            <p id="descB" class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed"></p>
+                            <span id="priceB" class="absolute bottom-5 right-3 bg-orange-100 text-orange-600 font-black text-sm px-3 py-1 rounded-lg shadow-sm"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="matchupWinnerArea" class="hidden py-2">
+                <span class="text-4xl mb-1 block animate-bounce">🏆</span>
+                <h3 class="text-xl font-black text-green-600 mb-3">İşte Tam Canınızın Çektiği Lezzet!</h3>
+
+                <div class="border-2 border-green-500 rounded-2xl overflow-hidden bg-white shadow-lg mb-4">
+                    <div class="w-full h-48 bg-gray-50 flex items-center justify-center">
+                        <img id="winnerMatchImage" class="w-full h-full object-contain">
+                    </div>
+                    <div class="p-4 text-left bg-gradient-to-b from-green-50 to-white relative border-t border-gray-100">
+                        <h4 id="winnerMatchTitle" class="font-black text-lg text-gray-800 mb-1"></h4>
+                        <p id="winnerMatchDesc" class="text-gray-600 text-xs line-clamp-3 mb-2"></p>
+                        <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                            <span class="text-xs text-gray-400 italic">Şampiyon Seçim</span>
+                            <span id="winnerMatchPrice" class="bg-green-600 text-white font-black text-base px-3 py-1 rounded-lg"></span>
+                        </div>
+                    </div>
+                </div>
+                <button id="restartMatchupButton" class="bg-gray-800 text-white font-bold text-xs px-5 py-2.5 rounded-full hover:bg-red-600 transition duration-300">🔄 Yeniden Kapıştır</button>
+            </div>
+
+            <button id="backToSelectionButton" class="hidden mt-4 text-xs text-gray-400 hover:text-gray-600 underline">
+                ⬅ Oyun Seçim Menüsüne Dön
+            </button>
+        </div>
+    </div>
+
+       
+       
+       
         
-        const scrollLeft = wrapper.scrollLeft;
-        const slideWidth = sliderContainer.clientWidth;
-        const newSlideIndex = Math.round(scrollLeft / slideWidth);
-        
-        if (newSlideIndex !== currentSlide) {
-            currentSlide = newSlideIndex;
+
+        <!-- 4. ADIM: "BU MU ŞU MU?" KAZANAN (FİNALE KALAN) ŞAMPİYON EKRANI -->
+        <div id="matchupWinnerArea" class="hidden py-2">
+            <span class="text-4xl mb-1 block animate-bounce">🏆</span>
+            <h3 class="text-xl font-black text-green-600 mb-3">İşte Tam Canınızın Çektiği Lezzet!</h3>
+
+            <div class="border-2 border-green-500 rounded-2xl overflow-hidden bg-white shadow-lg mb-4">
+                <img id="winnerMatchImage" class="w-full h-48 object-cover">
+                <div class="p-4 text-left bg-gradient-to-b from-green-50 to-white relative">
+                    <h4 id="winnerMatchTitle" class="font-black text-lg text-gray-800 mb-1"></h4>
+                    <p id="winnerMatchDesc" class="text-gray-600 text-xs line-clamp-3 mb-2"></p>
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                        <span class="text-xs text-gray-400 italic">Şampiyon Seçim</span>
+                        <span id="winnerMatchPrice"
+                            class="bg-green-600 text-white font-black text-base px-3 py-1 rounded-lg"></span>
+                    </div>
+                </div>
+            </div>
+            <button id="restartMatchupButton"
+                class="bg-gray-800 text-white font-bold text-xs px-5 py-2.5 rounded-full hover:bg-red-600 transition duration-300">
+                🔄 Yeniden Kapıştır
+            </button>
+        </div>
+
+        <!-- Geri Dön Butonu (Oyun alanlarındayken ana seçime dönmek için) -->
+        <button id="backToSelectionButton" class="hidden mt-4 text-xs text-gray-400 hover:text-gray-600 underline">
+            ⬅ Oyun Seçim Menüsüne Dön
+        </button>
+    </div>
+    </div>
+    </div>
+
+    <!-- Sabit Puanla Butonu (Oyun Butonunun Hemen Altında) -->
+    <button id="floatingRatingButton" title="Bizi Google'da Puanlayın"
+        class="fixed bottom-[20px] right-5 w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-red-600 via-orange-500 to-amber-500 text-white flex flex-col justify-center items-center shadow-[0_4px_20px_rgba(245,158,11,0.4)] z-50 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-yellow-400 font-sans tracking-wide overflow-hidden group -rotate-3 hover:rotate-0">
+
+        <!-- Buton İçi Parıltı Efekti -->
+        <span
+            class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out-in"></span>
+
+        <!-- Üst Küçük Yıldız/Kıvılcım -->
+        <span class="absolute top-1 left-1.5 text-[8px] animate-pulse">✨</span>
+
+        <!-- İkon: Büyük Google Yıldızı -->
+        <div class="relative flex items-center justify-center h-7 mt-1">
+            <span
+                class="text-2xl filter drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)] group-hover:animate-spin-[spin_1s_ease-in-out_1]">⭐</span>
+        </div>
+
+        <!-- Mini Puanlama Metni -->
+        <div class="text-[9px] font-black uppercase tracking-tighter leading-none mb-1 text-center select-none">
+            <span class="block text-yellow-300 text-[8px] font-extrabold tracking-widest scale-90">GOOGLE</span>
+            <span
+                class="bg-white text-orange-600 px-1 py-0.5 rounded-[3px] font-black inline-block mt-0.5 shadow-sm text-[8px] scale-95">5
+                YILDIZ</span>
+        </div>
+    </button>
+
+    <script>
+        // --- Firebase Yapılandırması ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
+            authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
+            projectId: "olimpiyatkokorecmenu",
+            messagingSenderId: "987017604417",
+            appId: "1:987017604417:web:b6c4858712dc66d14745c0",
+            measurementId: "G-HB0J7BFZ9N",
+            databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const productsRef = database.ref('products');
+        const visitorsRef = database.ref('visitors');
+        const campaignsRef = database.ref('campaigns');
+        const campaignInfoRef = database.ref('campaign_info');
+
+        // --- HTML Element Tanımlamaları ---
+        const menuContainer = document.getElementById('menuContainer');
+        const contactSection = document.getElementById('contactSection');
+        const campaignSliderSection = document.getElementById('campaignSlider');
+        const ratingModal = document.getElementById('ratingModal');
+        const goToRatingLink = document.getElementById('goToRatingLink');
+        const closeRatingModal = document.getElementById('closeRatingModal');
+        const floatingRatingButton = document.getElementById('floatingRatingButton');
+
+        let language = 'TR';
+        let products = [];
+        let campaignUrls = [];
+        let campaignPriceText = "";
+        let currentSlide = 0;
+        let sliderInterval;
+
+        // Kategori çevirileri
+        const categoryTranslations = {
+            'Tümü': 'All',
+            'Menüler': 'Menus',
+            'Kokoreç': 'Kokoreç',
+            'Tavuk Kokoreç': 'Chicken Kokoreç',
+            'Tavuk Döner': 'Chicken Döner',
+            'Patso': 'Patso',
+            'Köfte': 'Meatballs',
+            'Ciğer': 'Liver',
+            'Hamburger': 'Hamburger',
+            'Midye': 'Mussel',
+            'Yan Lezzetler': 'Side Dishes',
+            'Tost': 'Toast',
+            'İçecekler': 'Drinks',
+            'İletişim': 'Contact'
+        };
+        let categoriesTR = Object.keys(categoryTranslations);
+        let categoriesEN = Object.values(categoryTranslations);
+
+
+        // --- SLIDER İŞLEVLERİ ---
+
+        function setPositionByIndex() {
+            if (campaignUrls.length === 0) return;
+            const sliderContainer = document.querySelector('#campaignSlider');
+            const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
+            if (!wrapper || !sliderContainer) return;
+
+            const slideWidth = sliderContainer.clientWidth;
+            wrapper.scrollLeft = currentSlide * slideWidth;
+
             const dots = document.querySelectorAll('#campaignSlider .dot');
             dots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === currentSlide);
             });
-            startSliderInterval(); 
-        }
-    }
-
-    function renderCampaignSlider() {
-        if (campaignUrls.length === 0) {
-            campaignSliderSection.innerHTML = '';
-            campaignSliderSection.parentElement.classList.add('hidden');
-            return;
         }
 
-        campaignSliderSection.parentElement.classList.remove('hidden');
-        
-        // GLOBAL FİYAT ETİKETİNİ KALDIRIYORUZ
-        // YERİNE HER SLIDE İÇİN ÖZEL FİYAT KOYUYORUZ
-        
-        const slidesHtml = campaignUrls.map((c, index) => {
-            // Eğer kampanya için özel bir fiyat girildiyse HTML'ini oluştur, yoksa boş bırak
-            const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}<p class="tl">₺</p></div>` : '';
-            
-            return `
+        function startSliderInterval() {
+            if (sliderInterval) clearInterval(sliderInterval);
+
+            if (campaignUrls.length > 1) {
+                sliderInterval = setInterval(() => {
+                    const nextSlide = (currentSlide + 1) % campaignUrls.length;
+                    goToSlide(nextSlide);
+                }, 5000);
+            }
+        }
+
+        function goToSlide(index) {
+            if (campaignUrls.length === 0) return;
+            currentSlide = index;
+            setPositionByIndex();
+        }
+
+        function handleScroll() {
+            const wrapper = document.querySelector('#campaignSlider .slide-wrapper');
+            const sliderContainer = document.querySelector('#campaignSlider');
+            if (!wrapper || !sliderContainer) return;
+
+            const scrollLeft = wrapper.scrollLeft;
+            const slideWidth = sliderContainer.clientWidth;
+            const newSlideIndex = Math.round(scrollLeft / slideWidth);
+
+            if (newSlideIndex !== currentSlide) {
+                currentSlide = newSlideIndex;
+                const dots = document.querySelectorAll('#campaignSlider .dot');
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentSlide);
+                });
+                startSliderInterval();
+            }
+        }
+
+        function renderCampaignSlider() {
+            if (campaignUrls.length === 0) {
+                campaignSliderSection.innerHTML = '';
+                campaignSliderSection.parentElement.classList.add('hidden');
+                return;
+            }
+
+            campaignSliderSection.parentElement.classList.remove('hidden');
+
+            // GLOBAL FİYAT ETİKETİNİ KALDIRIYORUZ
+            // YERİNE HER SLIDE İÇİN ÖZEL FİYAT KOYUYORUZ
+
+            const slidesHtml = campaignUrls.map((c, index) => {
+                // Eğer kampanya için özel bir fiyat girildiyse HTML'ini oluştur, yoksa boş bırak
+                const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}<p class="tl">₺</p></div>` : '';
+
+                return `
             <div class="slide">
                 <img src="${c.url}" alt="Kampanya Görseli" class="rounded-xl">
                 ${priceHtml} 
             </div>
             `;
-        }).join('');
+            }).join('');
 
-        const dotsHtml = campaignUrls.map((_, i) => `
+            const dotsHtml = campaignUrls.map((_, i) => `
             <div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>
         `).join('');
-        
-        campaignSliderSection.innerHTML = `
+
+            campaignSliderSection.innerHTML = `
             <div class="slider-container">
                 <div class="slide-wrapper" style="width: 100%;"> 
                     ${slidesHtml}
@@ -376,157 +705,157 @@ box-shadow:0 0 20px rgba(255,0,0,0.5);
             </div>
         `;
 
-        const sliderWrapper = document.querySelector('#campaignSlider .slide-wrapper');
-        if (sliderWrapper) {
-             sliderWrapper.addEventListener('scroll', handleScroll, { passive: true });
-        }
-        
-        document.querySelectorAll('#campaignSlider .dot').forEach(dot => {
-            dot.addEventListener('click', (e) => {
-                goToSlide(parseInt(e.target.dataset.index));
-                startSliderInterval(); 
+            const sliderWrapper = document.querySelector('#campaignSlider .slide-wrapper');
+            if (sliderWrapper) {
+                sliderWrapper.addEventListener('scroll', handleScroll, { passive: true });
+            }
+
+            document.querySelectorAll('#campaignSlider .dot').forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    goToSlide(parseInt(e.target.dataset.index));
+                    startSliderInterval();
+                });
             });
-        });
-        
-        goToSlide(currentSlide);
-        startSliderInterval();
-    }
 
-    // --- YARDIMCI VE FIREBASE FONKSİYONLARI ---
-
-    function formatRelativeDate(timestamp) {
-        if (!timestamp) return "";
-        const now = Date.now();
-        const diffTime = now - timestamp; 
-        const diffMinutes = Math.floor(diffTime / 60000);
-        const diffHours = Math.floor(diffMinutes / 60);
-        const diffDays = Math.floor(diffHours / 24);
-
-        const TR = {
-            min: (m) => `${m} dakika önce`,
-            hour: (h) => `${h} saat önce`,
-            day: (d) => `${d} gün önce`,
-            today: 'Bugün',
-            yesterday: 'Dün',
-            week: '1 hafta önce',
-            date: (d, m, y) => `${d}.${m}.${y}`
-        };
-
-        const EN = {
-            min: (m) => `${m} minutes ago`,
-            hour: (h) => `${h} hours ago`,
-            day: (d) => `${d} days ago`,
-            today: 'Today',
-            yesterday: 'Yesterday',
-            week: '1 week ago',
-            date: (d, m, y) => `${d}/${m}/${y}`
-        };
-
-        const t = language === 'TR' ? TR : EN;
-
-        if (diffMinutes < 60) {
-            if (diffMinutes < 5) return t.today; 
-            return t.min(diffMinutes);
-        } else if (diffHours < 24) {
-            return t.hour(diffHours);
-        } else if (diffDays === 1) {
-             return t.yesterday; 
-        } else if (diffDays <= 7) {
-            return t.day(diffDays); 
-        } else if (diffDays <= 14) {
-            return t.week;
-        } else {
-            const date = new Date(timestamp);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return t.date(day, month, year);
+            goToSlide(currentSlide);
+            startSliderInterval();
         }
-    }
+
+        // --- YARDIMCI VE FIREBASE FONKSİYONLARI ---
+
+        function formatRelativeDate(timestamp) {
+            if (!timestamp) return "";
+            const now = Date.now();
+            const diffTime = now - timestamp;
+            const diffMinutes = Math.floor(diffTime / 60000);
+            const diffHours = Math.floor(diffMinutes / 60);
+            const diffDays = Math.floor(diffHours / 24);
+
+            const TR = {
+                min: (m) => `${m} dakika önce`,
+                hour: (h) => `${h} saat önce`,
+                day: (d) => `${d} gün önce`,
+                today: 'Bugün',
+                yesterday: 'Dün',
+                week: '1 hafta önce',
+                date: (d, m, y) => `${d}.${m}.${y}`
+            };
+
+            const EN = {
+                min: (m) => `${m} minutes ago`,
+                hour: (h) => `${h} hours ago`,
+                day: (d) => `${d} days ago`,
+                today: 'Today',
+                yesterday: 'Yesterday',
+                week: '1 week ago',
+                date: (d, m, y) => `${d}/${m}/${y}`
+            };
+
+            const t = language === 'TR' ? TR : EN;
+
+            if (diffMinutes < 60) {
+                if (diffMinutes < 5) return t.today;
+                return t.min(diffMinutes);
+            } else if (diffHours < 24) {
+                return t.hour(diffHours);
+            } else if (diffDays === 1) {
+                return t.yesterday;
+            } else if (diffDays <= 7) {
+                return t.day(diffDays);
+            } else if (diffDays <= 14) {
+                return t.week;
+            } else {
+                const date = new Date(timestamp);
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return t.date(day, month, year);
+            }
+        }
 
 
-    function transformProducts(dataSnapshot) {
-      const productsArray = [];
-      dataSnapshot.forEach(childSnapshot => {
-        const product = childSnapshot.val();
-        product.key = childSnapshot.key;
-        product.lastUpdated = product.lastUpdated || Date.now(); 
-        productsArray.push(product);
-      });
-      
-      // Ürün sıralaması: order değerine göre sıralanır
-      productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
-      
-      return productsArray;
-    }
+        function transformProducts(dataSnapshot) {
+            const productsArray = [];
+            dataSnapshot.forEach(childSnapshot => {
+                const product = childSnapshot.val();
+                product.key = childSnapshot.key;
+                product.lastUpdated = product.lastUpdated || Date.now();
+                productsArray.push(product);
+            });
 
-    function setupFirebaseListener() {
-        // Ürün Dinleyicisi
-        productsRef.on('value', (snapshot) => {
-            products = snapshot.exists() ? transformProducts(snapshot) : [];
-            updateLanguageContent(); 
-        }, (error) => {
-            console.error("Firebase ürün veri okuma hatası:", error);
-            alert("Menüyü yüklerken bir hata oluştu.");
-        });
-        
-        // Kampanya Görselleri Dinleyicisi (GÜNCELLENEN KISIM: order ile sıralama)
-        campaignsRef.on('value', (snapshot) => {
-             campaignUrls = [];
-             snapshot.forEach(childSnapshot => {
-                 const campaign = childSnapshot.val();
-                 campaign.key = childSnapshot.key;
-                 campaignUrls.push(campaign);
-             });
-             
-             // YENİ SIRALAMA MANTIĞI: Admin panelinde kaydedilen 'order' değerine göre sırala (Küçükten Büyüğe)
-             campaignUrls.sort((a, b) => 
-                 (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)
-             );
-             
-             currentSlide = 0; 
-             renderCampaignSlider();
-        });
-        
-        // Kampanya Bilgileri Dinleyicisi
-        campaignInfoRef.child('price_text').on('value', (snapshot) => {
-             campaignPriceText = snapshot.val() || "";
-             renderCampaignSlider();
-        });
-    }
+            // Ürün sıralaması: order değerine göre sıralanır
+            productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
 
-    function trackVisitor() {
-        const today = new Date().toISOString().slice(0, 10); 
-        const counterRef = visitorsRef.child(today);
-        
-        counterRef.once('value', snapshot => {}); 
-        
-        counterRef.transaction(currentCount => {
-            return (currentCount || 0) + 1;
-        });
-    }
+            return productsArray;
+        }
+
+        function setupFirebaseListener() {
+            // Ürün Dinleyicisi
+            productsRef.on('value', (snapshot) => {
+                products = snapshot.exists() ? transformProducts(snapshot) : [];
+                updateLanguageContent();
+            }, (error) => {
+                console.error("Firebase ürün veri okuma hatası:", error);
+                alert("Menüyü yüklerken bir hata oluştu.");
+            });
+
+            // Kampanya Görselleri Dinleyicisi (GÜNCELLENEN KISIM: order ile sıralama)
+            campaignsRef.on('value', (snapshot) => {
+                campaignUrls = [];
+                snapshot.forEach(childSnapshot => {
+                    const campaign = childSnapshot.val();
+                    campaign.key = childSnapshot.key;
+                    campaignUrls.push(campaign);
+                });
+
+                // YENİ SIRALAMA MANTIĞI: Admin panelinde kaydedilen 'order' değerine göre sırala (Küçükten Büyüğe)
+                campaignUrls.sort((a, b) =>
+                    (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)
+                );
+
+                currentSlide = 0;
+                renderCampaignSlider();
+            });
+
+            // Kampanya Bilgileri Dinleyicisi
+            campaignInfoRef.child('price_text').on('value', (snapshot) => {
+                campaignPriceText = snapshot.val() || "";
+                renderCampaignSlider();
+            });
+        }
+
+        function trackVisitor() {
+            const today = new Date().toISOString().slice(0, 10);
+            const counterRef = visitorsRef.child(today);
+
+            counterRef.once('value', snapshot => { });
+
+            counterRef.transaction(currentCount => {
+                return (currentCount || 0) + 1;
+            });
+        }
 
 
-  function renderMenu(category='Tümü'){
-  menuContainer.innerHTML='';
-  
-  if (products.length === 0) {
-      menuContainer.innerHTML = '<div class="col-span-full text-center p-10 text-gray-400">Menü yükleniyor...</div>';
-  }
+        function renderMenu(category = 'Tümü') {
+            menuContainer.innerHTML = '';
 
-  const filtered = category==='Tümü' ? products.filter(p=>p.category!='İletişim') : products.filter(p=>p.category===category);
+            if (products.length === 0) {
+                menuContainer.innerHTML = '<div class="col-span-full text-center p-10 text-gray-400">Menü yükleniyor...</div>';
+            }
 
-  filtered.forEach(p=>{
-    const card = document.createElement('div');
-    card.className = 'bg-white rounded-lg shadow-sm p-2 flex flex-col h-full hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1 cursor-pointer';
-    
-    const name = language==='TR' ? p.name : p.nameEN || p.name;
-    const desc = language==='TR' ? p.desc : p.descEN || p.desc || '';
-    const priceUpdateText = formatRelativeDate(p.lastUpdated); 
-    const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
-    const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
+            const filtered = category === 'Tümü' ? products.filter(p => p.category != 'İletişim') : products.filter(p => p.category === category);
 
-    card.innerHTML = `
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-lg shadow-sm p-2 flex flex-col h-full hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1 cursor-pointer';
+
+                const name = language === 'TR' ? p.name : p.nameEN || p.name;
+                const desc = language === 'TR' ? p.desc : p.descEN || p.desc || '';
+                const priceUpdateText = formatRelativeDate(p.lastUpdated);
+                const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
+                const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
+
+                card.innerHTML = `
       <div class="relative overflow-hidden rounded-md mb-2">
         <img src='${imageUrl}' 
              alt='${name}' 
@@ -540,223 +869,578 @@ box-shadow:0 0 20px rgba(255,0,0,0.5);
         <span class='text-[8px] sm:text-[9px] text-gray-400 italic'>${priceUpdateText}</span>
       </div>
     `;
-    
-    // Karta tıklandığında modalı aç ve bilgileri doldur
-    card.addEventListener('click', () => {
-        document.getElementById('modalImage').src = imageUrl;
-        document.getElementById('modalTitle').textContent = name;
-        document.getElementById('modalDesc').textContent = desc;
-        document.getElementById('modalPrice').textContent = p.price + " ₺";
-        document.getElementById('imageModal').classList.remove('hidden');
-    });
-    
-    menuContainer.appendChild(card);
-  });
-}
 
-    function createCategoryTabs(){
-        const tabButtonsContainer = document.getElementById('categoryTabs');
-        tabButtonsContainer.innerHTML = '';
-        const categoriesToIterate = categoriesTR;
+                // Karta tıklandığında modalı aç ve bilgileri doldur
+                card.addEventListener('click', () => {
+                    document.getElementById('modalImage').src = imageUrl;
+                    document.getElementById('modalTitle').textContent = name;
+                    document.getElementById('modalDesc').textContent = desc;
+                    document.getElementById('modalPrice').textContent = p.price + " ₺";
+                    document.getElementById('imageModal').classList.remove('hidden');
+                });
 
-        categoriesToIterate.forEach((catTR, index) => {
-            let btn = document.createElement('button');
-            const catName = language === 'TR' ? catTR : categoriesEN[index];
+                menuContainer.appendChild(card);
+            });
+        }
 
-            btn.className='tabBtn px-3 py-1 rounded whitespace-nowrap transition-colors duration-150 hover:bg-orange-200';
-            btn.dataset.category=catTR;
-            btn.textContent=catName;
+        function createCategoryTabs() {
+            const tabButtonsContainer = document.getElementById('categoryTabs');
+            tabButtonsContainer.innerHTML = '';
+            const categoriesToIterate = categoriesTR;
 
-            if(catTR==='Tümü') {
-                btn.classList.add('active-tab');
+            categoriesToIterate.forEach((catTR, index) => {
+                let btn = document.createElement('button');
+                const catName = language === 'TR' ? catTR : categoriesEN[index];
+
+                btn.className = 'tabBtn px-3 py-1 rounded whitespace-nowrap transition-colors duration-150 hover:bg-orange-200';
+                btn.dataset.category = catTR;
+                btn.textContent = catName;
+
+                if (catTR === 'Tümü') {
+                    btn.classList.add('active-tab');
+                }
+
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active-tab'));
+                    btn.classList.add('active-tab');
+                    const categoryKey = btn.dataset.category;
+
+                    if (categoryKey === 'İletişim') {
+                        menuContainer.innerHTML = '';
+                        campaignSliderSection.parentElement.classList.add('hidden');
+                        contactSection.classList.remove('hidden');
+                    } else {
+                        contactSection.classList.add('hidden');
+                        renderCampaignSlider();
+                        renderMenu(categoryKey);
+                    }
+                });
+                tabButtonsContainer.appendChild(btn);
+            });
+        }
+
+        function updateLanguageContent() {
+            const langTR = document.getElementById('langTR');
+            const langEN = document.getElementById('langEN');
+            const contactTitle = document.getElementById('contactTitle');
+            const contactAddress = document.getElementById('contactAddress');
+            const baslik2 = document.getElementById('bas')
+
+            if (language === 'TR') {
+                baslik2.innerHTML = '&nbsp Lezzet <br> Menüleri'
+                langTR.style.fontWeight = 'bold';
+                langEN.style.fontWeight = 'normal';
+                contactTitle.textContent = 'İletişim';
+                contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
+            } else {
+                baslik2.innerHTML = '&nbsp Our <br> Menu'
+                langTR.style.fontWeight = 'normal';
+                langEN.style.fontWeight = 'bold';
+                contactTitle.textContent = 'Contact';
+                contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - Istanbul (Turkey)';
             }
 
-            btn.addEventListener('click',()=>{
-                document.querySelectorAll('.tabBtn').forEach(b=>b.classList.remove('active-tab'));
-                btn.classList.add('active-tab');
-                const categoryKey = btn.dataset.category;
+            createCategoryTabs();
+            const activeTab = document.querySelector('.tabBtn.active-tab');
+            const activeCategoryKey = activeTab ? activeTab.dataset.category : 'Tümü';
 
-                if(categoryKey==='İletişim'){
-                    menuContainer.innerHTML='';
-                    campaignSliderSection.parentElement.classList.add('hidden'); 
-                    contactSection.classList.remove('hidden');
-                } else {
-                    contactSection.classList.add('hidden');
-                    renderCampaignSlider(); 
-                    renderMenu(categoryKey);
-                }
+            if (activeCategoryKey === 'İletişim') {
+                menuContainer.innerHTML = '';
+                campaignSliderSection.parentElement.classList.add('hidden');
+                contactSection.classList.remove('hidden');
+            } else {
+                contactSection.classList.add('hidden');
+                renderCampaignSlider();
+                renderMenu(activeCategoryKey);
+            }
+        }
+
+        // --- YORUM MODALI MANTIĞI ---
+
+        // Modalı gösterme zaman aralıkları (milisaniye cinsinden)
+        const RATING_INTERVALS = [6000, 12000, 18000]; // 6. sn, 12. sn, 18. sn
+
+        function isModalPermanentlyDisabled() {
+            // Yorum linkine tıklanmışsa (olimpiyat_rated: true) bir daha gösterme
+            return localStorage.getItem('olimpiyat_rated') === 'true';
+        }
+
+        function showRatingModal() {
+            // 1. Kalıcı olarak kapatılıp kapatılmadığını kontrol et
+            if (isModalPermanentlyDisabled()) {
+                return;
+            }
+
+            // 2. Eğer kullanıcı bu oturumda "Hayır, teşekkürler" dememişse göster (sessionStorage)
+            if (sessionStorage.getItem('olimpiyat_rated_session_closed') !== 'true') {
+                ratingModal.classList.remove('hidden');
+            }
+        }
+
+        function setupIntervals() {
+            // Zaten kalıcı olarak kapatılmışsa zamanlayıcıları kurmaya gerek yok
+            if (isModalPermanentlyDisabled()) {
+                return;
+            }
+
+            // Belirlenen zaman aralıklarında modalı göstermeye çalış
+            RATING_INTERVALS.forEach(delay => {
+                setTimeout(() => {
+                    // Sadece modal zaten açık değilse ve kalıcı olarak kapatılmamışsa tekrar göster
+                    if (ratingModal.classList.contains('hidden') && !isModalPermanentlyDisabled()) {
+                        showRatingModal();
+                    }
+                }, delay);
             });
-            tabButtonsContainer.appendChild(btn);
+        }
+
+        // Yorum linkine tıklandığında: Kalıcı olarak yorum yapma ekranına gitti kaydını tut
+        goToRatingLink.addEventListener('click', () => {
+            // Kalıcı kaydı tut: Bir daha bu cihazda hiç gösterme
+            localStorage.setItem('olimpiyat_rated', 'true');
+            ratingModal.classList.add('hidden');
         });
-    }
 
-    function updateLanguageContent() {
-        const langTR = document.getElementById('langTR');
-        const langEN = document.getElementById('langEN');
-        const contactTitle = document.getElementById('contactTitle');
-        const contactAddress = document.getElementById('contactAddress');
-        const baslik2 = document.getElementById('bas')
-        
-        if (language === 'TR') {
-            baslik2.innerHTML='&nbsp Lezzet <br> Menüleri'
-            langTR.style.fontWeight = 'bold';
-            langEN.style.fontWeight = 'normal';
-            contactTitle.textContent = 'İletişim';
-            contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
-        } else { 
-            baslik2.innerHTML='&nbsp Our <br> Menu'
-            langTR.style.fontWeight = 'normal';
-            langEN.style.fontWeight = 'bold';
-            contactTitle.textContent = 'Contact';
-            contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - Istanbul (Turkey)';
-        }
+        // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat kaydını tut (Session Storage kullan)
+        closeRatingModal.addEventListener('click', () => {
+            // Geçici kaydı tut (Oturum bitince silinir)
+            sessionStorage.setItem('olimpiyat_rated_session_closed', 'true');
+            ratingModal.classList.add('hidden');
+        });
 
-        createCategoryTabs();
-        const activeTab = document.querySelector('.tabBtn.active-tab');
-        const activeCategoryKey = activeTab ? activeTab.dataset.category : 'Tümü';
-        
-        if (activeCategoryKey === 'İletişim') {
-            menuContainer.innerHTML = '';
-            campaignSliderSection.parentElement.classList.add('hidden');
-            contactSection.classList.remove('hidden');
-        } else {
-            contactSection.classList.add('hidden');
-            renderCampaignSlider();
-            renderMenu(activeCategoryKey);
-        }
-    }
-    
-    // --- YORUM MODALI MANTIĞI ---
-
-    // Modalı gösterme zaman aralıkları (milisaniye cinsinden)
-    const RATING_INTERVALS = [6000, 12000, 18000]; // 6. sn, 12. sn, 18. sn
-    
-    function isModalPermanentlyDisabled() {
-        // Yorum linkine tıklanmışsa (olimpiyat_rated: true) bir daha gösterme
-        return localStorage.getItem('olimpiyat_rated') === 'true';
-    }
-
-    function showRatingModal() {
-        // 1. Kalıcı olarak kapatılıp kapatılmadığını kontrol et
-        if (isModalPermanentlyDisabled()) {
-            return;
-        }
-
-        // 2. Eğer kullanıcı bu oturumda "Hayır, teşekkürler" dememişse göster (sessionStorage)
-        if (sessionStorage.getItem('olimpiyat_rated_session_closed') !== 'true') {
+        // Sabit butona tıklandığında modalı göster
+        floatingRatingButton.addEventListener('click', () => {
             ratingModal.classList.remove('hidden');
-        }
-    }
-    
-    function setupIntervals() {
-        // Zaten kalıcı olarak kapatılmışsa zamanlayıcıları kurmaya gerek yok
-        if (isModalPermanentlyDisabled()) {
-            return;
-        }
-        
-        // Belirlenen zaman aralıklarında modalı göstermeye çalış
-        RATING_INTERVALS.forEach(delay => {
-            setTimeout(() => {
-                // Sadece modal zaten açık değilse ve kalıcı olarak kapatılmamışsa tekrar göster
-                if (ratingModal.classList.contains('hidden') && !isModalPermanentlyDisabled()) {
-                    showRatingModal();
-                }
-            }, delay);
         });
-    }
-
-    // Yorum linkine tıklandığında: Kalıcı olarak yorum yapma ekranına gitti kaydını tut
-    goToRatingLink.addEventListener('click', () => {
-        // Kalıcı kaydı tut: Bir daha bu cihazda hiç gösterme
-        localStorage.setItem('olimpiyat_rated', 'true'); 
-        ratingModal.classList.add('hidden');
-    });
-
-    // Kapatma butonuna tıklandığında: Sadece bu oturum için kapat kaydını tut (Session Storage kullan)
-    closeRatingModal.addEventListener('click', () => {
-        // Geçici kaydı tut (Oturum bitince silinir)
-        sessionStorage.setItem('olimpiyat_rated_session_closed', 'true');
-        ratingModal.classList.add('hidden');
-    });
-    
-    // Sabit butona tıklandığında modalı göster
-    floatingRatingButton.addEventListener('click', () => {
-        ratingModal.classList.remove('hidden');
-    });
 
 
-    // --- EVENT LISTENERS ---
+        // --- EVENT LISTENERS ---
 
-    document.getElementById('langTR').addEventListener('click',()=>{ language='TR'; updateLanguageContent(); });
-    document.getElementById('langEN').addEventListener('click',()=>{ language='EN'; updateLanguageContent(); });
-   document.getElementById('imageModal').addEventListener('click', (e) => {
-    // Sadece arka plana (imageModal ID'li div) veya X butonuna basıldıysa kapat
-    const isBackground = e.target.id === 'imageModal';
-    const isCloseButton = e.target.tagName === 'BUTTON' || e.target.innerText === '✖';
-    
-    if (isBackground || isCloseButton) {
-        document.getElementById('imageModal').classList.add('hidden');
-    }
-});
-    
-    // Admin Giriş butonu HTML'den silindiği için bu satır da kaldırılabilir
-    // document.getElementById('adminLoginBtn').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.remove('hidden'));
-    
-    document.getElementById('closeAdminLogin').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.add('hidden'));
+        document.getElementById('langTR').addEventListener('click', () => { language = 'TR'; updateLanguageContent(); });
+        document.getElementById('langEN').addEventListener('click', () => { language = 'EN'; updateLanguageContent(); });
+        document.getElementById('imageModal').addEventListener('click', (e) => {
+            // Sadece arka plana (imageModal ID'li div) veya X butonuna basıldıysa kapat
+            const isBackground = e.target.id === 'imageModal';
+            const isCloseButton = e.target.tagName === 'BUTTON' || e.target.innerText === '✖';
 
-    document.getElementById('checkPassword').addEventListener('click',()=>{
-        const passwordInput = document.getElementById('passwordInput');
-        const loginError = document.getElementById('loginError');
-        const adminLoginModal = document.getElementById('adminLoginModal');
-        
-        // DİKKAT: Burada Firebase Auth kullanılmıyor, basit şifre kontrolü var.
-        // Firebase Auth'u kullanmak için "admin.html"deki gibi bir yapı kurulmalıdır.
-        if(passwordInput.value==='admin123'){ 
-            adminLoginModal.classList.add('hidden');
-            window.location.href = 'admin.html'; 
-        } else {
-            loginError.classList.remove('hidden');
+            if (isBackground || isCloseButton) {
+                document.getElementById('imageModal').classList.add('hidden');
+            }
+        });
+
+        // Admin Giriş butonu HTML'den silindiği için bu satır da kaldırılabilir
+        // document.getElementById('adminLoginBtn').addEventListener('click',()=>document.getElementById('adminLoginModal').classList.remove('hidden'));
+
+        document.getElementById('closeAdminLogin').addEventListener('click', () => document.getElementById('adminLoginModal').classList.add('hidden'));
+
+        document.getElementById('checkPassword').addEventListener('click', () => {
+            const passwordInput = document.getElementById('passwordInput');
+            const loginError = document.getElementById('loginError');
+            const adminLoginModal = document.getElementById('adminLoginModal');
+
+            // DİKKAT: Burada Firebase Auth kullanılmıyor, basit şifre kontrolü var.
+            // Firebase Auth'u kullanmak için "admin.html"deki gibi bir yapı kurulmalıdır.
+            if (passwordInput.value === 'admin123') {
+                adminLoginModal.classList.add('hidden');
+                window.location.href = 'admin.html';
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        // --- İlk Yükleme ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setupFirebaseListener();
+            trackVisitor();
+
+            const messaging = firebase.messaging();
+
+            function requestNotificationPermission() {
+                console.log('İzin isteniyor...');
+                Notification.requestPermission().then((permission) => {
+                    if (permission === 'granted') {
+                        console.log('Bildirim izni verildi.');
+
+                        // Token al (Cihazın kimliği)
+                        messaging.getToken({ vapidKey: 'BK-6HmGiVvqb5jHEKVFOcoXV7GyjiKIjpIqpe0K_aV4Wafg3k3VAWv19FLiGDuZBwM0X-tjcLg4h5-JnVc6HZKA' }).then((currentToken) => {
+                            if (currentToken) {
+                                console.log('Token:', currentToken);
+                                // Bu token'ı Firebase Database'e kaydetmelisin ki sonra mesaj atabilesin
+                                database.ref('fcm_tokens').child(currentToken).set(true);
+                            } else {
+                                console.log('Token alınamadı.');
+                            }
+                        }).catch((err) => {
+                            console.log('Token alma hatası:', err);
+                        });
+                    } else {
+                        console.log('Bildirim izni reddedildi.');
+                    }
+                });
+            }
+
+            // Sayfa yüklendiğinde veya bir butona tıklandığında çağırabilirsin
+            // Örneğin: "Kampanyalardan haberim olsun" butonu
+            window.addEventListener('resize', setPositionByIndex);
+
+            // Yorum zamanlayıcılarını kur
+            //setupIntervals();
+        });
+
+        // --- MULTI-GAME (ÇARK & MATCHUP) OYUN MOTORU ---
+        const wheelModal = document.getElementById('wheelModal');
+        const floatingWheelButton = document.getElementById('floatingWheelButton');
+        const closeWheelModal = document.getElementById('closeWheelModal');
+
+        // Ekranlar
+        const gameSelectionScreen = document.getElementById('gameSelectionScreen');
+        const wheelGameArea = document.getElementById('wheelGameArea');
+        const matchupGameArea = document.getElementById('matchupGameArea');
+        const matchupWinnerArea = document.getElementById('matchupWinnerArea');
+        const backToSelectionButton = document.getElementById('backToSelectionButton');
+
+        // Oyun Seçim Butonları
+        document.getElementById('selectWheelGame').addEventListener('click', () => switchScreen('wheel'));
+        document.getElementById('selectMatchupGame').addEventListener('click', () => switchScreen('matchup'));
+        backToSelectionButton.addEventListener('click', () => switchScreen('selection'));
+
+        // 1. OYUN: Çarkıfelek Elementleri
+        const spinButton = document.getElementById('spinButton');
+        const reSpinButton = document.getElementById('reSpinButton');
+        const wheelCanvas = document.getElementById('wheelCanvas');
+        const ctx = wheelCanvas.getContext('2d');
+        const wheelContainer = document.getElementById('wheelContainer');
+        const wheelBigResultCard = document.getElementById('wheelBigResultCard');
+
+        let wheelItems = [];
+        let isSpinning = false;
+        let currentAngle = 0;
+        let angularVelocity = 0;
+        const friction = 0.985;
+        let animationFrameId;
+        let isDragging = false;
+        let startAngle = 0;
+        let lastAngles = [];
+
+        // 2. OYUN: "Bu mu Şu mu?" Elementleri ve Değişkenleri
+        let matchupPool = [];      // O anki turda yarışan yiyecekler
+        let nextRoundPool = [];    // Seçilenlerin bir üst tura çıktığı havuz
+        let currentPairIndex = 0;  // Şu an kapışan çiftin sırası
+        let totalInitialItems = 0; // İlerleme çubuğu hesabı için
+
+        // Ekran Değiştirme Sihirbazı
+        function switchScreen(screen) {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+
+            gameSelectionScreen.classList.add('hidden');
+            wheelGameArea.classList.add('hidden');
+            matchupGameArea.classList.add('hidden');
+            matchupWinnerArea.classList.add('hidden');
+            backToSelectionButton.classList.remove('hidden');
+
+            if (screen === 'selection') {
+                gameSelectionScreen.classList.remove('hidden');
+                backToSelectionButton.classList.add('hidden');
+            } else if (screen === 'wheel') {
+                wheelGameArea.classList.remove('hidden');
+                resetWheelUI();
+            } else if (screen === 'matchup') {
+                matchupGameArea.classList.remove('hidden');
+                startMatchupGame();
+            }
         }
-    });
 
-    // --- İlk Yükleme ---
-    document.addEventListener('DOMContentLoaded', () => {
-      setupFirebaseListener(); 
-      trackVisitor(); 
+        // Sabit Oyun Butonuna İlk Tıklama
+        floatingWheelButton.addEventListener('click', () => {
+            wheelItems = products.filter(p => p.category !== 'İçecekler' && p.category !== 'İletişim');
+            if (wheelItems.length < 2) {
+                alert(language === 'TR' ? "Oyunlar için yeterli yiyecek bulunamadı." : "Not enough food found items.");
+                return;
+            }
+            switchScreen('selection');
+            wheelModal.classList.remove('hidden');
+        });
 
-      const messaging = firebase.messaging();
+        closeWheelModal.addEventListener('click', () => {
+            if (!isSpinning) {
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                wheelModal.classList.add('hidden');
+            }
+        });
 
-function requestNotificationPermission() {
-  console.log('İzin isteniyor...');
-  Notification.requestPermission().then((permission) => {
-    if (permission === 'granted') {
-      console.log('Bildirim izni verildi.');
-      
-      // Token al (Cihazın kimliği)
-      messaging.getToken({ vapidKey: 'BK-6HmGiVvqb5jHEKVFOcoXV7GyjiKIjpIqpe0K_aV4Wafg3k3VAWv19FLiGDuZBwM0X-tjcLg4h5-JnVc6HZKA' }).then((currentToken) => {
-        if (currentToken) {
-          console.log('Token:', currentToken);
-          // Bu token'ı Firebase Database'e kaydetmelisin ki sonra mesaj atabilesin
-          database.ref('fcm_tokens').child(currentToken).set(true);
-        } else {
-          console.log('Token alınamadı.');
+        // --- ÇARKIFELEK SİSTEMİ KODLARI ---
+        function resetWheelUI() {
+            wheelBigResultCard.classList.add('hidden');
+            reSpinButton.classList.add('hidden');
+            wheelContainer.classList.remove('hidden');
+            isSpinning = false;
+            angularVelocity = 0;
+            currentAngle = 0;
+            drawWheel();
         }
-      }).catch((err) => {
-        console.log('Token alma hatası:', err);
-      });
-    } else {
-      console.log('Bildirim izni reddedildi.');
-    }
-  });
-}
 
-// Sayfa yüklendiğinde veya bir butona tıklandığında çağırabilirsin
-// Örneğin: "Kampanyalardan haberim olsun" butonu
-      window.addEventListener('resize', setPositionByIndex); 
-      
-      // Yorum zamanlayıcılarını kur
-      //setupIntervals();
-    });
-  </script>
+        reSpinButton.addEventListener('click', resetWheelUI);
+
+        function drawWheel() {
+            const numSegments = wheelItems.length;
+            if (numSegments === 0) return;
+            const anglePerSegment = (2 * Math.PI) / numSegments;
+            const radius = wheelCanvas.width / 2;
+
+            ctx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+            const colors = ['#f97316', '#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.rotate(currentAngle);
+            ctx.translate(-radius, -radius);
+
+            for (let i = 0; i < numSegments; i++) {
+                const startAngle = i * anglePerSegment;
+                const endAngle = startAngle + anglePerSegment;
+
+                ctx.beginPath();
+                ctx.moveTo(radius, radius);
+                ctx.arc(radius, radius, radius - 5, startAngle, endAngle);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.rotate(startAngle + anglePerSegment / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 11px sans-serif";
+
+                const name = language === 'TR' ? wheelItems[i].name : wheelItems[i].nameEN || wheelItems[i].name;
+                const shortName = name.length > 15 ? name.substring(0, 13) + '..' : name;
+
+                ctx.fillText(shortName, radius - 25, 4);
+                ctx.restore();
+            }
+            ctx.restore();
+        }
+
+        function getEventAngle(e) {
+            const rect = wheelCanvas.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return Math.atan2(clientY - centerY, clientX - centerX);
+        }
+
+        wheelCanvas.addEventListener('mousedown', (e) => { if (!isSpinning) { isDragging = true; startAngle = getEventAngle(e) - currentAngle; lastAngles = [{ angle: currentAngle, time: Date.now() }]; } });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            currentAngle = getEventAngle(e) - startAngle;
+            lastAngles.push({ angle: currentAngle, time: Date.now() });
+            if (lastAngles.length > 5) lastAngles.shift();
+            drawWheel();
+        });
+        window.addEventListener('mouseup', () => {
+            if (!isDragging) return; isDragging = false;
+            if (lastAngles.length < 2) return;
+            const first = lastAngles[0]; const last = lastAngles[lastAngles.length - 1];
+            const dt = last.time - first.time; if (dt === 0) return;
+            let dAngle = last.angle - first.angle;
+            if (dAngle > Math.PI) dAngle -= 2 * Math.PI; if (dAngle < -Math.PI) dAngle += 2 * Math.PI;
+            angularVelocity = dAngle / dt * 16.66;
+            if (Math.abs(angularVelocity) > 0.05) {
+                if (angularVelocity > 0.4) angularVelocity = 0.4; if (angularVelocity < -0.4) angularVelocity = -0.4;
+                isSpinning = true; updateWheelFriction();
+            }
+        });
+
+        // Mobil Dokunmatik Çark Bindings
+        wheelCanvas.addEventListener('touchstart', (e) => { if (!isSpinning) { isDragging = true; startAngle = getEventAngle(e) - currentAngle; lastAngles = [{ angle: currentAngle, time: Date.now() }]; } }, { passive: true });
+        wheelCanvas.addEventListener('touchmove', (e) => { if (!isDragging) return; currentAngle = getEventAngle(e) - startAngle; lastAngles.push({ angle: currentAngle, time: Date.now() }); if (lastAngles.length > 5) lastAngles.shift(); drawWheel(); }, { passive: true });
+        wheelCanvas.addEventListener('touchend', () => { if (isDragging) { isDragging = false; const first = lastAngles[0]; const last = lastAngles[lastAngles.length - 1]; const dt = last.time - first.time; if (dt > 0) { let dAngle = last.angle - first.angle; if (dAngle > Math.PI) dAngle -= 2 * Math.PI; if (dAngle < -Math.PI) dAngle += 2 * Math.PI; angularVelocity = dAngle / dt * 16.66; if (Math.abs(angularVelocity) > 0.05) { isSpinning = true; updateWheelFriction(); } } } });
+
+        spinButton.addEventListener('click', () => {
+            if (isSpinning) return; isSpinning = true;
+            angularVelocity = (Math.random() * 0.2 + 0.2) * (Math.random() > 0.5 ? 1 : -1);
+            updateWheelFriction();
+        });
+
+        function updateWheelFriction() {
+            if (!isSpinning) return;
+            currentAngle += angularVelocity; angularVelocity *= friction;
+            drawWheel();
+            if (Math.abs(angularVelocity) < 0.001) { isSpinning = false; calculateWheelWinner(); }
+            else { animationFrameId = requestAnimationFrame(updateWheelFriction); }
+        }
+
+        // Çarkıfelek Kazananını Hesaplayan ve Kupalı Ekrana Basan Gelişmiş Fonksiyon
+        // Çark Düzenini ve Başlıkları İlk Haline Getiren Fonksiyon
+        function resetWheelUI() {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            
+            // Başlıkları ve kartları eski haline çevir
+            document.getElementById('wheelWinnerHeaderGroup').classList.add('hidden');
+            document.getElementById('wheelHeaderGroup').classList.remove('hidden');
+            
+            wheelBigResultCard.classList.add('hidden');
+            reSpinButton.classList.add('hidden');
+            wheelContainer.classList.remove('hidden');
+            
+            isSpinning = false;
+            angularVelocity = 0;
+            currentAngle = 0;
+            
+            drawWheel();
+        }
+
+        // Çark Durduğunda Başlıkları Uçuran ve Resmi Devleştiren Fonksiyon
+        function calculateWheelWinner() {
+            const numSegments = wheelItems.length;
+            const anglePerSegment = (2 * Math.PI) / numSegments;
+
+            let normalizedAngle = currentAngle % (2 * Math.PI);
+            if (normalizedAngle < 0) normalizedAngle += 2 * Math.PI;
+
+            const targetAngle = (Math.PI * 2 - normalizedAngle) + (Math.PI * 1.5);
+            const winningIndex = Math.floor((targetAngle % (Math.PI * 2)) / anglePerSegment);
+            const winnerProduct = wheelItems[winningIndex];
+
+            if (winnerProduct) {
+                const fallbackImg = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
+                
+                // Dil Çevirilerini Yap
+                document.getElementById('wheelWinnerHeading').textContent = language === 'TR' ? "Günün Şanslı Lezzeti!" : "Your Lucky Taste!";
+                reSpinButton.textContent = language === 'TR' ? "🔄 Çarkı Tekrar Çevir" : "🔄 Spin Wheel Again";
+                
+                // Verileri kart içerisine doldur
+                document.getElementById('wheelResultImage').src = winnerProduct.image || fallbackImg;
+                document.getElementById('wheelResultTitle').textContent = language === 'TR' ? winnerProduct.name : winnerProduct.nameEN || winnerProduct.name;
+                document.getElementById('wheelResultDesc').textContent = language === 'TR' ? winnerProduct.desc : winnerProduct.descEN || winnerProduct.desc || '';
+                document.getElementById('wheelResultPrice').textContent = winnerProduct.price + " ₺";
+                
+                // GEÇİŞ ANİMASYONU: Eski başlıkları gizle, Kupalı yeni dev başlığı ve büyük kartı aç
+                setTimeout(() => {
+                    document.getElementById('wheelHeaderGroup').classList.add('hidden');
+                    document.getElementById('wheelWinnerHeaderGroup').classList.remove('hidden');
+                    
+                    wheelContainer.classList.add('hidden');
+                    wheelBigResultCard.classList.remove('hidden');
+                    reSpinButton.classList.remove('hidden');
+                }, 300);
+            }
+        }
+
+
+
+        // --- "BU MU ŞU MU?" OYUN MOTORU KODLARI (KISA VE HIZLI TUR SÜRÜMÜ) ---
+        function startMatchupGame() {
+            // 1. İçecekler ve İletişim hariç tüm yiyecekleri al ve karıştır
+            let allFoods = products
+                .filter(p => p.category !== 'İçecekler' && p.category !== 'İletişim')
+                .sort(() => Math.random() - 0.5);
+
+            // 2. KRİTİK GÜNCELLEME: Kullanıcı sıkılmasın diye havuzu maksimum 8 ürünle sınırla!
+            // Menü durumuna göre 8 ürün seçer, turnuva tam 3 seçimde (Maks 7 kapışmada) biter.
+            matchupPool = allFoods.slice(0, 8);
+
+            // Eğer ürün sayısı tek kalırsa (örn. menüde toplam 5-7 ürün varsa) eşleşme için dengele
+            if (matchupPool.length % 2 !== 0 && matchupPool.length > 1) {
+                matchupPool.push(matchupPool[0]);
+            }
+
+            totalInitialItems = matchupPool.length;
+            nextRoundPool = [];
+            currentPairIndex = 0;
+
+            matchupWinnerArea.classList.add('hidden');
+            matchupGameArea.classList.remove('hidden');
+
+            presentNextPair();
+        }
+
+        // İki yeni yiyecek seçeneğini kartlara yerleştiren fonksiyon
+        function presentNextPair() {
+            // İlerleme yüzdesi hesaplama
+            const progress = ((totalInitialItems - matchupPool.length) / totalInitialItems) * 100;
+            document.getElementById('matchupProgress').style.width = `${progress}%`;
+
+            // Eğer havuzda sadece 1 ürün kaldıysa o nihai şampiyondur!
+            if (matchupPool.length === 1) {
+                showMatchupWinner(matchupPool[0]);
+                return;
+            }
+
+            // Mevcut tur bittiyse (tüm çiftler kapıştıysa), kazananları yeni havuz yap ve bir üst tura geç
+            if (currentPairIndex >= matchupPool.length) {
+                matchupPool = [...nextRoundPool].sort(() => Math.random() - 0.5);
+                if (matchupPool.length % 2 !== 0 && matchupPool.length > 1) matchupPool.push(matchupPool[0]);
+                nextRoundPool = [];
+                currentPairIndex = 0;
+
+                // Havuz teke düştüyse direkt şampiyon ilan et
+                if (matchupPool.length === 1) {
+                    showMatchupWinner(matchupPool[0]);
+                    return;
+                }
+            }
+
+            const productA = matchupPool[currentPairIndex];
+            const productB = matchupPool[currentPairIndex + 1];
+
+            // Eğer veritabanı anlık boşluk oluşturduysa korumaya al
+            if (!productA || !productB) {
+                showMatchupWinner(productA || productB || products[0]);
+                return;
+            }
+
+            const fallback = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
+
+            // Kart A verilerini doldur
+            document.getElementById('imgA').src = productA.image || fallback;
+            document.getElementById('titleA').textContent = language === 'TR' ? productA.name : productA.nameEN || productA.name;
+            document.getElementById('descA').textContent = language === 'TR' ? productA.desc : productA.descEN || productA.desc || '';
+            document.getElementById('priceA').textContent = productA.price + " ₺";
+
+            // Kart B verilerini doldur
+            document.getElementById('imgB').src = productB.image || fallback;
+            document.getElementById('titleB').textContent = language === 'TR' ? productB.name : productB.nameEN || productB.name;
+            document.getElementById('descB').textContent = language === 'TR' ? productB.desc : productB.descEN || productB.desc || '';
+            document.getElementById('priceB').textContent = productB.price + " ₺";
+        }
+
+        // Seçim Olay Dinleyicileri
+        document.getElementById('optionA').addEventListener('click', () => handleSelection(0));
+        document.getElementById('optionB').addEventListener('click', () => handleSelection(1));
+
+        function handleSelection(winnerOffset) {
+            // Seçilen ürünü bir üst tura taşı
+            const chosenWinner = matchupPool[currentPairIndex + winnerOffset];
+            nextRoundPool.push(chosenWinner);
+
+            // Sonraki çifte geç
+            currentPairIndex += 2;
+
+            // Kartların basıldığında tatlı bir blink efekti alması için ufak bir timeout
+            setTimeout(presentNextPair, 150);
+        }
+
+        // Şampiyon Ekranını Gösteren Fonksiyon
+        function showMatchupWinner(winner) {
+            matchupGameArea.classList.add('hidden');
+            matchupWinnerArea.classList.remove('hidden');
+
+            const fallback = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
+            document.getElementById('winnerMatchImage').src = winner.image || fallback;
+            document.getElementById('winnerMatchTitle').textContent = language === 'TR' ? winner.name : winner.nameEN || winner.name;
+            document.getElementById('winnerMatchDesc').textContent = language === 'TR' ? winner.desc : winner.descEN || winner.desc || '';
+            document.getElementById('winnerMatchPrice').textContent = winner.price + " ₺";
+        }
+
+        // Oyunu Yeniden Başlatma Butonu
+        document.getElementById('restartMatchupButton').addEventListener('click', startMatchupGame);
+        document.getElementById('restartMatchupButton').textContent = language === 'TR' ? "🔄 Yeniden Kapıştır" : "🔄 Play Again";
+    </script>
 </body>
+
 </html>
