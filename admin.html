@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yönetici Paneli | Olimpiyat Kokoreç</title>
-    
-    <link rel="icon" type="image/jpeg" href="/logo.jpg"> 
+
+    <link rel="icon" type="image/jpeg" href="/logo.jpg">
     <link rel="shortcut icon" href="/logo.jpg">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -15,37 +16,49 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
     <style>
-        body { background-color: #f3f4f6; }
+        body {
+            background-color: #fff7f0;
+        }
+
         /* Aktif ana menü butonu */
-        .admin-menu-button.active { background-color: #f97316; } 
+        .admin-menu-button.active {
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+
         /* Aktif sol menü butonu */
-        .tab-button.active { background-color: #fb923c; color: white; }
+        .tab-button.active {
+            background: linear-gradient(135deg, #f97316, #f59e0b);
+            color: white;
+            font-weight: 800;
+            box-shadow: 0 4px 10px rgba(249, 115, 22, 0.2);
+        }
+
         /* Sıralama Modülü İçin Stiller */
-        .sortable-item { cursor: grab; }
-        .sortable-item:active { cursor: grabbing; }
+        .sortable-item {
+            cursor: grab;
+        }
+
+        .sortable-item:active {
+            cursor: grabbing;
+        }
+
         .sortable-ghost {
             opacity: 0.4;
-            background: #ffe6cc; 
+            background: #ffe6cc;
             border: 2px dashed #fb923c;
         }
-        /* Kampanya Görseli Önizlemeleri İçin Yeni Stil */
+
+        /* Kampanya Görseli Önizlemeleri */
         .campaign-image-preview {
             width: 100%;
-            height: 120px; 
-            object-fit: cover; 
+            height: 120px;
+            object-fit: cover;
             border-radius: 0.5rem;
             margin-top: 0.75rem;
             border: 1px solid #d1d5db;
         }
-        /* Kampanya Listesindeki Görseller için */
-        .campaign-item-img {
-            width: 80px;
-            height: 45px; 
-            object-fit: cover;
-            border-radius: 0.25rem;
-            border: 1px solid #d1d5db;
-            margin-right: 0.75rem;
-        }
+
         .price-box-preview-img {
             width: 80px;
             height: 80px;
@@ -56,135 +69,195 @@
             background-color: white;
             padding: 5px;
         }
+
+        @keyframes popIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop-in {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+        }
     </style>
 </head>
-<body>
-    <div class="flex h-screen">
-        <div class="w-64 bg-orange-600 text-white flex flex-col p-4 shadow-xl">
-            <h1 class="text-3xl font-bold mb-4 border-b border-orange-400 pb-2">Admin Panel</h1>
+
+<body class="text-gray-800 antialiased font-sans">
+
+    <div id="adminLoginOverlay" class="fixed inset-0 bg-amber-50/90 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md border-b-8 border-orange-500 animate-pop-in">
             
-            <div class="mb-6 border-b border-orange-400 pb-4">
-                <p class="text-sm font-semibold mb-2">Yönetilecek Menü:</p>
-                <button id="switchToInPlace" data-menu="in_place" 
-                        class="admin-menu-button active w-full text-left p-2 rounded transition mb-2">
-                    🍽️ Yerinde Menü (products)
-                </button>
-                <button id="switchToDelivery" data-menu="delivery" 
-                        class="admin-menu-button w-full text-left p-2 rounded hover:bg-orange-700 transition">
-                    🛵 Paket Servis Menüsü (delivery_products)
-                </button>
-            </div>
-            <div id="copyToDeliveryContainer" class="mb-6 border-b border-orange-400 pb-4 hidden">
-                <button id="copyToDeliveryBtn" 
-                        class="bg-blue-500 text-white px-3 py-2 text-xs rounded-lg hover:bg-blue-600 transition font-bold w-full">
-                    Yerinde Menü Verilerini Kopyala
-                </button>
-                <p class="text-[10px] text-orange-200 mt-1">Sadece Paket Servis modunda görünür.</p>
+            <div class="flex flex-col items-center justify-center mb-6 select-none">
+                <div class="relative flex items-center justify-center bg-gradient-to-br from-red-600 to-orange-500 rounded-xl px-6 py-3 shadow-md border-b-4 border-orange-700 tracking-wide">
+                    <div class="text-center">
+                        <span class="block text-[10px] font-black uppercase text-yellow-300 tracking-[0.25em] drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Olimpiyat</span>
+                        <h2 class="text-2xl font-extrabold text-white uppercase italic leading-none tracking-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.7)] flex items-center gap-1">
+                            <span>YÖNETİCİ</span>
+                            <span class="bg-white text-red-600 px-1 py-0.2 rounded text-lg font-black not-italic rotate-3 shadow-sm">PANELİ</span>
+                        </h2>
+                    </div>
+                </div>
             </div>
 
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kullanıcı Adı</label>
+                    <input id="panelUsername" type="text" placeholder="Kullanıcı adını giriniz"
+                        class="border-2 border-gray-100 w-full p-3 rounded-xl focus:outline-none focus:border-orange-500 transition font-medium bg-gray-50 focus:bg-white" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Şifre</label>
+                    <input id="panelPassword" type="password" placeholder="••••••••"
+                        class="border-2 border-gray-100 w-full p-3 rounded-xl focus:outline-none focus:border-orange-500 transition font-medium bg-gray-50 focus:bg-white" />
+                </div>
 
-            <button id="showProducts" class="tab-button active text-left p-3 rounded hover:bg-orange-500 transition mb-2">
-                📦 Ürün Yönetimi
-            </button>
-            <button id="showSorting" class="tab-button text-left p-3 rounded hover:bg-orange-500 transition mb-2">
-                ⬆️ Ürün Sıralama Ayarı
-            </button>
-            <button id="showCampaigns" class="tab-button text-left p-3 rounded hover:bg-orange-500 transition mb-2">
-                🖼️ Kampanya Görselleri
-            </button>
-            <button id="showAddProduct" class="tab-button text-left p-3 rounded hover:bg-orange-500 transition mb-2">
-                ➕ Yeni Ürün Ekle
-            </button>
-            <button id="showBulkUpdate" class="tab-button text-left p-3 rounded hover:bg-orange-500 transition mb-2">
-                💸 Toplu Fiyat Değiştirme
-            </button>
-            <button id="showStats" class="tab-button text-left p-3 rounded hover:bg-orange-500 transition mb-2">
-                📊 İstatistikler
-            </button>
-            <a href="index.html" class="mt-auto p-3 bg-red-500 text-center rounded hover:bg-red-600 transition">
-                Çıkış Yap
+                <p id="panelLoginError" class="text-red-600 text-xs font-bold text-center hidden">❌ Kullanıcı adı veya şifre hatalı!</p>
+
+                <button id="submitPanelLoginBtn"
+                    class="w-full bg-gradient-to-r from-red-600 to-orange-500 text-white px-6 py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 shadow-lg hover:opacity-95 transition transform active:scale-95 cursor-pointer">
+                    <span>SİSTEME GİRİŞ YAP</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col md:flex-row h-screen overflow-hidden">
+        
+        <div class="w-full md:w-64 bg-gradient-to-b from-red-700 via-red-800 to-amber-900 text-white flex flex-col p-4 shadow-xl z-30 relative md:static">
+            <div class="flex items-center justify-between md:block border-b border-red-500/40 pb-2 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🥖</span>
+                    <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight text-yellow-400">Olimpiyat Admin</h1>
+                </div>
+                <a href="index.html" class="md:hidden px-3 py-1.5 bg-red-600 rounded-lg text-xs font-bold shadow-md">Çıkış</a>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 md:block mb-4 md:mb-6 border-b border-red-500/40 pb-4">
+                <button id="switchToInPlace" data-menu="in_place"
+                    class="admin-menu-button active w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40">
+                    🍽️ <span class="truncate">Yerinde Menü</span>
+                </button>
+                <button id="switchToDelivery" data-menu="delivery"
+                    class="admin-menu-button w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40 md:mt-2">
+                    🛵 <span class="truncate">Paket Servis</span>
+                </button>
+            </div>
+
+            <div id="copyToDeliveryContainer" class="mb-4 md:mb-6 border-b border-red-500/40 pb-4 hidden">
+                <button id="copyToDeliveryBtn"
+                    class="bg-blue-600 text-white px-3 py-2.5 text-xs rounded-xl hover:bg-blue-700 transition font-black w-full shadow-md">
+                    Yerinde Menüyü Buraya Kopyala
+                </button>
+            </div>
+
+            <div class="flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none">
+                <button id="showProducts" class="tab-button active text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    📦 Ürünler
+                </button>
+                <button id="showSorting" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    ⬆️ Sıralama
+                </button>
+                <button id="showCampaigns" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    🖼️ Kampanyalar
+                </button>
+                <button id="showAddProduct" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    ➕ Yeni Ürün
+                </button>
+                <button id="showBulkUpdate" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    💸 Toplu Fiyat
+                </button>
+                <button id="showStats" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    📊 İstatistik
+                </button>
+                <button id="showGlobalDateUpdate" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    📅 Ortak Tarih
+                </button>
+            </div>
+
+            <a href="index.html" class="hidden md:block mt-auto p-2.5 bg-red-600 text-center rounded-xl font-bold hover:bg-red-700 shadow-md transition">
+                Güvenli Çıkış Yap
             </a>
         </div>
 
-        <main class="flex-1 p-8 overflow-y-auto">
-            <div id="contentContainer">
+        <main class="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto">
+            <div id="contentContainer" class="max-w-5xl mx-auto">
                 </div>
         </main>
     </div>
 
-    <div id="editProductModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-        <div class="bg-white rounded-xl shadow-lg p-6 w-[500px] relative max-h-[90vh] overflow-y-auto">
-            <button id="closeEditProductModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
-            <h2 class="text-xl font-bold mb-3 text-orange-600">Ürün Düzenle</h2>
-            
+    <div id="editProductModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 w-full max-w-lg relative max-h-[90vh] overflow-y-auto border-t-8 border-orange-500 animate-pop-in">
+            <button id="closeEditProductModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-lg font-bold">✖</button>
+            <h2 class="text-xl font-black mb-4 text-orange-600 flex items-center gap-1">✏️ Ürünü Düzenle</h2>
+
             <input type="hidden" id="editProductKey" />
-            
-            <div class="flex flex-col gap-3">
-                <div class="p-3 border rounded-lg bg-gray-50">
-                    <h3 class="font-semibold mb-2">Görsel Düzenleme</h3>
-                    <img id="editImagePreview" class="w-full h-32 object-cover rounded-lg mb-2 border border-gray-300" src="" alt="Ürün Görseli Önizleme">
-                    <button id="uploadEditImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600 transition w-full">Yeni Görsel Yükle</button>
+
+            <div class="flex flex-col gap-3.5">
+                <div class="p-3 border rounded-xl bg-orange-50/50 border-orange-100 flex flex-col sm:flex-row items-center gap-3">
+                    <img id="editImagePreview" class="w-full sm:w-28 h-24 object-cover rounded-lg border bg-white" src="" alt="Önizleme">
+                    <button id="uploadEditImageBtn" class="bg-orange-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-orange-600 transition w-full sm:w-auto mt-1 sm:mt-0">Yeni Fotoğraf Yükle</button>
                     <input type="hidden" id="editImageURL" value="" />
                 </div>
 
-                <input id="editName" placeholder="Ürün Adı (TR)" class="border p-2 rounded" />
-                <input id="editNameEN" placeholder="Product Name (EN)" class="border p-2 rounded" />
-                <input id="editDesc" placeholder="Açıklama (TR)" class="border p-2 rounded" />
-                <input id="editDescEN" placeholder="Description (EN)" class="border p-2 rounded" />
-                <input id="editPrice" type="number" placeholder="Fiyat (₺)" class="border p-2 rounded" />
-                <select id="editCategory" class="border p-2 rounded"></select>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Ürün Adı (TR)</label><input id="editName" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Product Name (EN)</label><input id="editNameEN" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Açıklama (TR)</label><input id="editDesc" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Description (EN)</label><input id="editDescEN" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Fiyat (₺)</label><input id="editPrice" type="number" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm font-bold" /></div>
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Kategori</label><select id="editCategory" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm font-semibold bg-white"></select></div>
+                </div>
 
-                <button id="saveEditProduct" class="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600 transition">Değişiklikleri Kaydet</button>
+                <button id="saveEditProduct" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-4 py-3 rounded-xl font-bold mt-2 shadow-md hover:opacity-95 transition transform active:scale-95">Değişiklikleri Kaydet</button>
             </div>
         </div>
     </div>
 
 
     <script>
-        // --- Sabitler ve Ayarlar ---
+        // --- Firebase Yapılandırması ---
         const firebaseConfig = {
             apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
             authDomain: "olimpiyatkokorecmenu.firebaseapp.com",
             projectId: "olimpiyatkokorecmenu",
             messagingSenderId: "987017604417",
             appId: "1:987017604417:web:b6c4858712dc66d14745c0",
-            databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app" 
+            databaseURL: "https://olimpiyatkokorecmenu-default-rtdb.europe-west1.firebasedatabase.app"
         };
-        const CLOUDINARY_CLOUD_NAME = 'dtkrwqofx';      
-        const CLOUDINARY_UPLOAD_PRESET = 'olimpiyat_menu'; 
+        const CLOUDINARY_CLOUD_NAME = 'dtkrwqofx';
+        const CLOUDINARY_UPLOAD_PRESET = 'olimpiyat_menu';
 
-        // Firebase'i başlat
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        
-        // GENEL REFERANS YOLLARI (Sabit Kalsın)
+
         const inPlaceProductsPath = 'products';
         const inPlaceCampaignsPath = 'campaigns';
         const inPlaceCampaignInfoPath = 'campaign_info';
         const deliveryProductsPath = 'delivery_products';
         const deliveryCampaignsPath = 'delivery_campaigns';
         const deliveryCampaignInfoPath = 'delivery_campaign_info';
-        const visitorsPath = 'visitors'; // Ziyaretçiler her iki menü için de aynı yolu kullanabilir.
-        
-        // DINAMIK REFERANSLAR (Seçili menüye göre değişecekler)
-        let currentMenuType = 'in_place'; // Başlangıçta Yerinde Menü
+        const visitorsPath = 'visitors';
+
+        let currentMenuType = 'in_place';
         let productsRef;
-        let campaignsRef; 
+        let campaignsRef;
         let campaignInfoRef;
-        let priceBoxUrlRef; 
-        let visitorsRef = database.ref(visitorsPath); // Ziyaretçi referansı sabit kalabilir.
-        
-        let products = []; 
-        let campaignUrls = []; 
-        let campaignPriceText = ""; 
-        let campaignPriceBoxUrl = ""; 
-        const categoriesTR = ['Menüler', 'Kokoreç', 'Tavuk Kokoreç', 'Tavuk Döner', 'Patso', 'Köfte', 'Ciğer', 'Hamburger', 'Tost', 'Midye', 'Yan Lezzetler', 'İçecekler']; 
-        
-        // --- HTML Element Tanımlamaları ---
+        let priceBoxUrlRef;
+        let visitorsRef = database.ref(visitorsPath);
+
+        let products = [];
+        let campaignUrls = [];
+        let campaignPriceText = "";
+        let campaignPriceBoxUrl = "";
+        const categoriesTR = ['Menüler', 'Kokoreç', 'Tavuk Kokoreç', 'Tavuk Döner', 'Patso', 'Köfte', 'Ciğer', 'Hamburger', 'Tost', 'Midye', 'Yan Lezzetler', 'İçecekler'];
+
         const contentContainer = document.getElementById('contentContainer');
         const showProductsBtn = document.getElementById('showProducts');
-        const showSortingBtn = document.getElementById('showSorting'); 
-        const showCampaignsBtn = document.getElementById('showCampaigns'); 
+        const showSortingBtn = document.getElementById('showSorting');
+        const showCampaignsBtn = document.getElementById('showCampaigns');
         const showAddProductBtn = document.getElementById('showAddProduct');
         const showBulkUpdateBtn = document.getElementById('showBulkUpdate');
         const showStatsBtn = document.getElementById('showStats');
@@ -196,112 +269,112 @@
         const editImagePreview = document.getElementById('editImagePreview');
         const uploadEditImageBtn = document.getElementById('uploadEditImageBtn');
         const saveEditProductButton = document.getElementById('saveEditProduct');
-        
-        
-        // --- YENİ: DİNAMİK REFERANS YÖNETİMİ ---
+
         function setFirebaseRefs(menuType) {
             currentMenuType = menuType;
-            
             if (menuType === 'in_place') {
                 productsRef = database.ref(inPlaceProductsPath);
                 campaignsRef = database.ref(inPlaceCampaignsPath);
                 campaignInfoRef = database.ref(inPlaceCampaignInfoPath);
-            } else { // 'delivery'
+            } else {
                 productsRef = database.ref(deliveryProductsPath);
                 campaignsRef = database.ref(deliveryCampaignsPath);
                 campaignInfoRef = database.ref(deliveryCampaignInfoPath);
             }
             priceBoxUrlRef = campaignInfoRef.child('price_box_url');
-
-            // Mevcut dinleyicileri kaldırıp yeni referanslara yeniden bağlamak için
-            // Burası kritik bir optimizasyon gerektirir, ancak basitçe yeniden yükleme ile halledelim.
-            // Sayfayı yeniden yüklemek yerine, dinleyicileri kaldıran ve yeni referanslara bağlayan bir fonksiyon yazılabilir.
-            // Şimdilik sadece referansları ayarlayıp, ardından dataListener'ı çağıracağız.
-            console.log(`Firebase referansları ayarlandı: ${menuType}`);
-
-            // UI'ı güncelle
             updateMenuButtonState(menuType);
-            
-            // Tüm aktif dinleyicileri durdurup yeniden başlat
             stopAllListeners();
             setupDataListeners();
-            
-            // Mevcut aktif modülü yeniden render et
+            refreshActiveModule();
+        }
+
+        function refreshActiveModule() {
             const activeTab = document.querySelector('.tab-button.active');
             if (activeTab) {
-                activeTab.click(); // Aktif butonu tetikle (modülü yeniden yüklemek için)
+                const activeId = activeTab.id;
+                if (activeId === 'showProducts') {
+                    const filterSelect = document.getElementById('filterCategory');
+                    renderProductList(filterSelect ? filterSelect.value : 'Tümü');
+                } else if (activeId === 'showBulkUpdate') {
+                    const bulkSelect = document.getElementById('bulkCategory');
+                    renderBulkPriceList(bulkSelect ? bulkSelect.value : 'Tümü');
+                } else if (activeId === 'showSorting') {
+                    const sortSelect = document.getElementById('sortCategory');
+                    if (sortSelect && sortSelect.value) loadSortableList(sortSelect.value);
+                }
             } else {
                 renderProductsModule();
             }
         }
-        
-        // UI Menü Butonu Durumunu Günceller
-        function updateMenuButtonState(menuType) {
-             adminMenuButtons.forEach(btn => {
-                 btn.classList.remove('active');
-                 if (btn.dataset.menu === menuType) {
-                     btn.classList.add('active');
-                 }
-             });
-             // Kopyalama butonunun görünürlüğünü ayarla
-             const copyContainer = document.getElementById('copyToDeliveryContainer');
-             if (menuType === 'delivery') {
-                copyContainer.classList.remove('hidden');
-             } else {
-                copyContainer.classList.add('hidden');
-             }
-        }
-        
-        // --- YENİ: VERİ KOPYALAMA İŞLEVİ ---
-        async function copyMenuDataToDelivery() {
-            if (currentMenuType !== 'delivery') return; // Sadece paket serviste aktif
 
-            if (!confirm("Tüm Yerinde Menü (products) verileri, Paket Servis Menüsüne (delivery_products) kopyalanacak. Devam etmek istiyor musunuz? Paket Servis menüsündeki mevcut verilerin ÜZERİNE YAZILACAKTIR!")) {
-                return;
-            }
+        function updateMenuButtonState(menuType) {
+            adminMenuButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.menu === menuType) btn.classList.add('active');
+            });
+            const copyContainer = document.getElementById('copyToDeliveryContainer');
+            if (menuType === 'delivery') copyContainer.classList.remove('hidden');
+            else copyContainer.classList.add('hidden');
+        }
+
+        async function copyMenuDataToDelivery() {
+            if (currentMenuType !== 'delivery') return;
+            if (!confirm("Yerinde Menü verileri Paket Servis Menüsüne akıllı olarak aktarılacak:\n\n- Paket serviste zaten var olan ürünlerin MEVCUT FİYATLARI KORUNACAK, diğer bilgileri güncellenecektir.\n- Paket serviste olmayan ürünler fiyatıyla beraber eklenecektir.\n\nDevam etmek istiyor musunuz?")) return;
 
             const sourceProductsRef = database.ref(inPlaceProductsPath);
             const sourceCampaignsRef = database.ref(inPlaceCampaignsPath);
             const sourceCampaignInfoRef = database.ref(inPlaceCampaignInfoPath);
-            
             const targetProductsRef = database.ref(deliveryProductsPath);
             const targetCampaignsRef = database.ref(deliveryCampaignsPath);
             const targetCampaignInfoRef = database.ref(deliveryCampaignInfoPath);
 
-
             try {
-                // 1. Ürünleri Kopyala
-                let snapshot = await sourceProductsRef.once('value');
-                await targetProductsRef.set(snapshot.val() || {});
-                console.log("Ürünler başarıyla kopyalandı.");
+                const targetSnapshot = await targetProductsRef.once('value');
+                const targetProductsData = targetSnapshot.val() || {};
+                const sourceSnapshot = await sourceProductsRef.once('value');
+                const sourceProductsData = sourceSnapshot.val() || {};
 
-                // 2. Kampanyaları Kopyala
-                snapshot = await sourceCampaignsRef.once('value');
+                const targetByName = {};
+                Object.keys(targetProductsData).forEach(key => {
+                    const p = targetProductsData[key];
+                    if (p && p.name) targetByName[p.name.trim().toLowerCase()] = { key: key, price: p.price };
+                });
+
+                const updatedTargetProducts = { ...targetProductsData };
+                Object.keys(sourceProductsData).forEach(sourceKey => {
+                    const sourceProduct = sourceProductsData[sourceKey];
+                    if (!sourceProduct || !sourceProduct.name) return;
+
+                    const sourceNameKey = sourceProduct.name.trim().toLowerCase();
+                    const existingTarget = targetByName[sourceNameKey];
+
+                    if (existingTarget) {
+                        updatedTargetProducts[existingTarget.key] = {
+                            ...sourceProduct,
+                            price: existingTarget.price,
+                            lastUpdated: sourceProduct.lastUpdated || Date.now()
+                        };
+                    } else {
+                        const finalKey = updatedTargetProducts[sourceKey] ? database.ref().child(deliveryProductsPath).push().key : sourceKey;
+                        updatedTargetProducts[finalKey] = { ...sourceProduct, lastUpdated: Date.now() };
+                    }
+                });
+
+                await targetProductsRef.set(updatedTargetProducts);
+                let snapshot = await sourceCampaignsRef.once('value');
                 await targetCampaignsRef.set(snapshot.val() || {});
-                console.log("Kampanyalar başarıyla kopyalandı.");
-                
-                // 3. Kampanya Bilgisini Kopyala (Fiyat Metni, Kutucuk Görseli vb.)
                 snapshot = await sourceCampaignInfoRef.once('value');
                 await targetCampaignInfoRef.set(snapshot.val() || {});
-                console.log("Kampanya bilgisi başarıyla kopyalandı.");
 
-                alert("Veriler başarıyla Yerinde Menü'den Paket Servis Menüsü'ne kopyalandı!");
-                
-                // Kopyalama sonrası referansların tekrar tetiklenmesi için
-                setFirebaseRefs('delivery'); 
-
-            } catch (error) {
-                 alert("Veri kopyalama sırasında bir hata oluştu: " + error.message);
-                 console.error("Veri kopyalama hatası:", error);
-            }
+                alert("Veriler akıllı kopyalama sistemiyle başarıyla aktarıldı!");
+                setFirebaseRefs('delivery');
+            } catch (error) { alert("Hata: " + error.message); }
         }
-
-
-        // --- MODÜL VE UI YÖNETİMİ ---
 
         function setActiveTab(buttonId) {
             tabButtons.forEach(btn => btn.classList.remove('active'));
-            document.getElementById(buttonId).classList.add('active');
+            const targetBtn = document.getElementById(buttonId);
+            if (targetBtn) targetBtn.classList.add('active');
         }
 
         function loadModule(htmlContent) {
@@ -309,97 +382,78 @@
         }
 
         function openCloudinaryWidget(urlInput, previewImg, uploadPreset = CLOUDINARY_UPLOAD_PRESET) {
-            if (!CLOUDINARY_CLOUD_NAME || !uploadPreset) {
-                alert("Hata: Cloudinary ayarları eksik.");
-                return;
-            }
-
+            if (!CLOUDINARY_CLOUD_NAME || !uploadPreset) { alert("Hata: Cloudinary ayarları eksik."); return; }
             const widget = window.cloudinary.createUploadWidget(
-                {
-                    cloudName: CLOUDINARY_CLOUD_NAME,
-                    uploadPreset: uploadPreset, 
-                    sources: ['local', 'url', 'camera'], 
-                },
+                { cloudName: CLOUDINARY_CLOUD_NAME, uploadPreset: uploadPreset, sources: ['local', 'url', 'camera'] },
                 (error, result) => {
                     if (!error && result && result.event === "success") {
                         const url = result.info.secure_url;
-                        urlInput.value = url; 
-                        previewImg.src = url; 
-                        previewImg.classList.remove('hidden'); 
+                        urlInput.value = url;
+                        previewImg.src = url;
+                        previewImg.classList.remove('hidden');
                         alert("Görsel yüklendi ve URL kaydedildi.");
-                    } else if (error) {
-                        console.error("Cloudinary yükleme hatası:", error);
-                        alert("Görsel yüklenirken bir hata oluştu: " + error.message);
-                    }
+                    } else if (error) { alert("Görsel yüklenirken bir hata oluştu: " + error.message); }
                 }
             );
             widget.open();
         }
-        
-        async function updateProductInFirebase(key, updates) {
-            updates.lastUpdated = Date.now(); 
-            // productsRef dinamik olduğu için doğru yola yazacak.
-            await productsRef.child(key).update(updates);
-        }
 
-        async function deleteProductFromFirebase(key) {
-            // productsRef dinamik olduğu için doğru yoldan silecek.
-            await productsRef.child(key).remove();
-        }
-        
-        async function deleteCampaignUrl(key) {
-             // campaignsRef dinamik olduğu için doğru yoldan silecek.
-             await campaignsRef.child(key).remove();
-        }
-        
-        function sortProductsByOrder(productsArray) {
-            return productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
-        }
+        async function updateProductInFirebase(key, updates) { await productsRef.child(key).update(updates); }
+        async function deleteProductFromFirebase(key) { await productsRef.child(key).remove(); }
+        async function deleteCampaignUrl(key) { await campaignsRef.child(key).remove(); }
+        function sortProductsByOrder(productsArray) { return productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)); }
 
-        // --- MODÜL: ÜRÜN YÖNETİMİ (PRODUCTS) ---
+        // --- MODÜLLERİN YÜKLENMESİ ---
         function renderProductsModule() {
             setActiveTab('showProducts');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">📦 ${menuTitle} Ürün Yönetimi</h2>
-                <div class="flex gap-4 mb-4">
-                    <select id="filterCategory" class="border p-2 rounded flex-1">
-                        <option value="Tümü">Tümü</option>
-                        ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                    </select>
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in">
+                    <h2 class="text-2xl font-black text-gray-800 mb-4 flex items-center gap-1">📦 ${menuTitle} Ürün Yönetimi</h2>
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kategoriye Göre Filtrele</label>
+                        <select id="filterCategory" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-semibold bg-gray-50 outline-none focus:border-orange-500">
+                            <option value="Tümü">Tüm Kategoriler</option>
+                            ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                        </select>
+                    </div>
+                    <ul id="productList" class="flex flex-col gap-2.5">
+                        <li class="p-4 text-center text-gray-400 text-sm">Ürünler yükleniyor...</li>
+                    </ul>
                 </div>
-                <ul id="productList" class="flex flex-col gap-3">
-                    <li class="p-4 bg-white rounded shadow text-gray-500">Ürünler yükleniyor...</li>
-                </ul>
             `);
             const filterSelect = document.getElementById('filterCategory');
             filterSelect.addEventListener('change', () => renderProductList(filterSelect.value));
-            if (products.length > 0) {
-                 renderProductList(filterSelect.value);
-            }
+            if (products.length > 0) renderProductList(filterSelect.value);
         }
 
-        function renderProductList(filter='Tümü') {
+        function renderProductList(filter = 'Tümü') {
             const listEl = document.getElementById('productList');
             if (!listEl) return;
             listEl.innerHTML = '';
-            
-            const sortedProducts = sortProductsByOrder([...products]); 
+
+            const sortedProducts = sortProductsByOrder([...products]);
             const filtered = filter === 'Tümü' ? sortedProducts : sortedProducts.filter(p => p.category === filter);
 
             if (filtered.length === 0) {
-                listEl.innerHTML = '<li class="p-4 bg-white rounded shadow text-gray-500">Bu kategoride ürün bulunmamaktadır.</li>';
+                listEl.innerHTML = '<li class="p-4 text-center bg-gray-50 rounded-xl text-gray-400 text-sm border border-dashed">Bu kategoride henüz ürün bulunmamaktadır.</li>';
                 return;
             }
 
             filtered.forEach((p) => {
                 const item = document.createElement('li');
-                item.className = 'flex justify-between items-center bg-white p-3 rounded border shadow-sm';
+                item.className = 'flex flex-col sm:flex-row justify-between sm:items-center bg-gray-50 p-3.5 rounded-xl border border-gray-100 gap-3 hover:bg-gray-100/50 transition';
                 item.innerHTML = `
-                    <span class="font-medium text-base">${p.name} (${p.category}) - ${p.price} ₺</span>
-                    <div>
-                        <button data-key="${p.key}" class="editBtn bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 transition mr-2">Düzenle</button>
-                        <button data-key="${p.key}" class="deleteBtn bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition">Sil</button>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-gray-800 text-sm sm:text-base">${p.name}</span>
+                        <span class="text-xs font-bold text-orange-600 mt-0.5 bg-orange-100 px-2 py-0.5 rounded-md w-fit">${p.category}</span>
+                    </div>
+                    <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-gray-200/60">
+                        <span class="text-sm font-black text-gray-700 bg-white border px-3 py-1.5 rounded-lg shadow-sm">${p.price} ₺</span>
+                        <div class="flex gap-2">
+                            <button data-key="${p.key}" class="editBtn bg-amber-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Düzenle</button>
+                            <button data-key="${p.key}" class="deleteBtn bg-red-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Sil</button>
+                        </div>
                     </div>
                 `;
                 listEl.appendChild(item);
@@ -409,51 +463,43 @@
                 btn.addEventListener('click', async (e) => {
                     const productKeyToDelete = e.target.dataset.key;
                     if (confirm("Bu ürünü silmek istediğinizden emin misiniz?")) {
-                        try { await deleteProductFromFirebase(productKeyToDelete); alert("Ürün silindi."); } 
-                        catch (error) { alert("Silme işlemi başarısız oldu: " + error.message); }
+                        try { await deleteProductFromFirebase(productKeyToDelete); alert("Ürün silindi."); }
+                        catch (error) { alert("Hata: " + error.message); }
                     }
                 });
             });
             document.querySelectorAll('.editBtn').forEach(btn => btn.addEventListener('click', (e) => openEditModal(e.target.dataset.key)));
         }
 
-        // --- MODÜL: ÜRÜN SIRALAMA AYARI (SORTING) ---
-        
         function renderSortingModule() {
-            if (typeof Sortable === 'undefined') {
-                alert("Hata: Ürün sıralama özelliği için gerekli kütüphane (Sortable.js) yüklenemedi. İnternet bağlantınızı kontrol edin.");
-                return;
-            }
-            
+            if (typeof Sortable === 'undefined') { alert("Hata: Sortable.js yüklenemedi."); return; }
             setActiveTab('showSorting');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">⬆️ ${menuTitle} Ürün Sıralama Ayarı</h2>
-                <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
-                    <p class="mb-4 text-gray-600">Ürünleri sürükleyip bırakarak menüdeki sıralamasını değiştirebilirsiniz. Bu ayar tüm dillerde geçerli olacaktır.</p>
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in">
+                    <h2 class="text-2xl font-black text-gray-800 mb-2 flex items-center gap-1">⬆️ ${menuTitle} Sıralama Ayarı</h2>
+                    <p class="mb-4 text-xs sm:text-sm text-gray-500">Ürünleri sürükleyip bırakarak menüdeki dizilimlerini parmağınızla ayarlayabilirsiniz.</p>
                     
-                    <label class="block mb-2 font-semibold text-sm">Sıralanacak Kategori Seçin:</label>
-                    <select id="sortCategory" class="border p-2 rounded w-full mb-6">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sıralanacak Kategori Seçin</label>
+                    <select id="sortCategory" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-semibold bg-gray-50 outline-none focus:border-orange-500 mb-4">
                         <option value="">-- Kategori Seçiniz --</option>
                         <option value="Tümü">Tümü (Tüm Ürünler)</option> ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
                     </select>
 
-                    <ul id="sortableList" class="flex flex-col gap-2 p-2 border rounded bg-gray-50 min-h-[100px]">
-                        <li class="text-gray-500 text-center py-4">Lütfen yukarıdan bir kategori seçiniz.</li>
+                    <ul id="sortableList" class="flex flex-col gap-2 p-2 border border-dashed rounded-xl bg-gray-50/50 min-h-[100px]">
+                        <li class="text-gray-400 text-center text-xs sm:text-sm py-6">Lütfen yukarıdan bir kategori seçiniz.</li>
                     </ul>
                     
-                    <button id="saveSorting" class="mt-6 bg-green-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-green-600 transition w-full hidden">Yeni Sıralamayı Kaydet</button>
-                    <p id="sortingStatus" class="mt-4 text-center text-sm text-green-600 hidden"></p>
+                    <button id="saveSorting" class="mt-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-3 rounded-xl text-sm sm:text-base font-bold shadow-md active:scale-95 transition w-full hidden">Yeni Sıralamayı Kaydet</button>
+                    <p id="sortingStatus" class="mt-3 text-center text-xs font-bold hidden"></p>
                 </div>
             `);
-            
-            // Event Listeners
+
             const sortCategorySelect = document.getElementById('sortCategory');
             sortCategorySelect.addEventListener('change', (e) => loadSortableList(e.target.value));
             document.getElementById('saveSorting').addEventListener('click', saveSortingOrder);
         }
-        
-        // Kategori seçildiğinde sürükle-bırak listesini yükler
+
         function loadSortableList(category) {
             const listEl = document.getElementById('sortableList');
             const saveBtn = document.getElementById('saveSorting');
@@ -461,51 +507,44 @@
             statusEl.classList.add('hidden');
             saveBtn.classList.add('hidden');
             listEl.innerHTML = '';
-            
+
             if (!category || products.length === 0) {
-                listEl.innerHTML = `<li class="text-gray-500 text-center py-4">${products.length === 0 ? 'Ürün verileri yükleniyor...' : 'Lütfen yukarıdan bir kategori seçiniz.'}</li>`;
+                listEl.innerHTML = `<li class="text-gray-400 text-center text-xs sm:text-sm py-6">${products.length === 0 ? 'Veriler yükleniyor...' : 'Lütfen yukarıdan bir kategori seçiniz.'}</li>`;
                 return;
             }
-            
-            const filteredProducts = category === 'Tümü'
-                ? products
-                : products.filter(p => p.category === category);
-            
+
+            const filteredProducts = category === 'Tümü' ? products : products.filter(p => p.category === category);
             const filteredAndSorted = sortProductsByOrder(filteredProducts);
 
-
             if (filteredAndSorted.length === 0) {
-                listEl.innerHTML = `<li class="text-gray-500 text-center py-4">"${category}" kategorisinde ürün bulunmamaktadır.</li>`;
+                listEl.innerHTML = `<li class="text-gray-400 text-center text-xs sm:text-sm py-6">"${category}" kategorisinde ürün bulunmamaktadır.</li>`;
                 return;
             }
-            
+
             filteredAndSorted.forEach((p) => {
                 const item = document.createElement('li');
-                item.className = 'sortable-item flex justify-between items-center bg-white p-3 rounded shadow-sm border border-gray-200';
-                item.dataset.id = p.key; 
+                item.className = 'sortable-item flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border border-gray-100 text-sm sm:text-base font-medium';
+                item.dataset.id = p.key;
                 item.innerHTML = `
-                    <span class="text-gray-400 mr-3">☰</span>
-                    <span class="font-medium text-base flex-1">${p.name}</span>
-                    <span class="text-orange-600 font-semibold">${p.price} ₺</span>
+                    <div class="flex items-center gap-2"><span class="text-gray-400 text-lg">☰</span><span class="text-gray-800">${p.name}</span></div>
+                    <span class="text-orange-600 font-bold">${p.price} ₺</span>
                 `;
                 listEl.appendChild(item);
             });
-            
+
             saveBtn.classList.remove('hidden');
 
             Sortable.create(listEl, {
                 animation: 150,
                 ghostClass: 'sortable-ghost',
-                onEnd: function (evt) {
-                    statusEl.textContent = 'Sıralama değiştirildi. Kaydet butonuna basmayı unutmayın!';
+                onEnd: function () {
+                    statusEl.textContent = 'Sıralama değiştirildi. Kaydetmeyi unutmayın!';
+                    statusEl.className = 'mt-3 text-center text-xs font-bold text-red-600';
                     statusEl.classList.remove('hidden');
-                    statusEl.classList.remove('text-green-600');
-                    statusEl.classList.add('text-red-600');
                 },
             });
         }
-        
-        // Yeni sıralama düzenini (order değerlerini) Firebase'e kaydeder
+
         async function saveSortingOrder() {
             const listEl = document.getElementById('sortableList');
             const items = listEl.children;
@@ -513,246 +552,200 @@
             const statusEl = document.getElementById('sortingStatus');
             let changesMade = 0;
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
-            
+
             if (items.length === 0) return;
-            
+
             for (let i = 0; i < items.length; i++) {
                 const productKey = items[i].dataset.id;
-                const newOrderValue = i; 
-                
+                const newOrderValue = i;
                 const currentProduct = products.find(p => p.key === productKey);
-                
+
                 if (currentProduct && currentProduct.order !== newOrderValue) {
-                    // Dinamik yolu burada kullanıyoruz
-                    updates[`${pathPrefix}/${productKey}/order`] = newOrderValue; 
+                    updates[`${pathPrefix}/${productKey}/order`] = newOrderValue;
                     changesMade++;
                 }
             }
-            
+
             if (changesMade === 0) {
-                 statusEl.textContent = 'Herhangi bir sıralama değişikliği tespit edilmedi.';
-                 statusEl.classList.remove('text-red-600');
-                 statusEl.classList.add('text-green-600');
-                 statusEl.classList.remove('hidden');
-                 return;
-            }
-            
-            if (!confirm(`${changesMade} ürünün sıralaması güncellenecektir. Onaylıyor musunuz?`)) {
+                statusEl.textContent = 'Herhangi bir sıralama değişikliği yapılmadı.';
+                statusEl.className = 'mt-3 text-center text-xs font-bold text-emerald-600';
+                statusEl.classList.remove('hidden');
                 return;
             }
 
-            try {
-                await database.ref().update(updates); 
-                
-                statusEl.textContent = `${changesMade} ürün sıralaması başarıyla kaydedildi.`;
-                statusEl.classList.remove('text-red-600');
-                statusEl.classList.add('text-green-600');
-                statusEl.classList.remove('hidden');
-                
-                const currentCategory = document.getElementById('sortCategory').value;
-                loadSortableList(currentCategory); 
+            if (!confirm(`${changesMade} ürünün sırası güncellenecektir. Onaylıyor musunuz?`)) return;
 
+            try {
+                await database.ref().update(updates);
+                statusEl.textContent = 'Yeni sıralama düzeni başarıyla kaydedildi!';
+                statusEl.className = 'mt-3 text-center text-xs font-bold text-emerald-600';
+                statusEl.classList.remove('hidden');
+                loadSortableList(document.getElementById('sortCategory').value);
             } catch (error) {
-                statusEl.textContent = 'Sıralamayı kaydetme başarısız oldu: ' + error.message;
-                statusEl.classList.add('text-red-600');
-                statusEl.classList.remove('text-green-600');
+                statusEl.textContent = 'Hata: ' + error.message;
+                statusEl.className = 'mt-3 text-center text-xs font-bold text-red-600';
                 statusEl.classList.remove('hidden');
             }
         }
 
-        // --- MODÜL: KAMPANYA GÖRSELLERİ YÖNETİMİ ---
-
         function renderCampaignModule() {
-    setActiveTab('showCampaigns');
-    const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
-    loadModule(`
-        <h2 class="text-3xl font-bold text-gray-800 mb-6">🖼️ ${menuTitle} Kampanya Yönetimi</h2>
-        <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
-            
-            <div class="border p-4 mb-6 rounded-lg bg-orange-50 border-orange-200">
-                <h3 class="font-bold mb-3 text-orange-700">Yeni Kampanya Ekle</h3>
-                
-                <div class="mb-3">
-                    <label class="block text-sm font-semibold mb-1">1. Görsel Seçin</label>
-                    <button id="uploadNewCampaignImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition w-full">Görsel Yükle (Cloudinary)</button>
-                    <img id="newCampaignImagePreview" class="campaign-image-preview hidden" src="" alt="Önizleme">
-                    <input type="hidden" id="newCampaignImageURL" value="" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="block text-sm font-semibold mb-1">2. Fiyat Girin (Kutucuk İçin)</label>
-                    <input id="newCampaignPriceInput" type="text" placeholder="Örn: 250 ₺" class="border p-2 rounded w-full font-bold text-lg" />
-                    <p class="text-xs text-gray-500 mt-1">Bu fiyat sol alttaki turuncu alanda görünecektir.</p>
-                </div>
-
-                <button id="addCampaignUrlBtn" class="mt-2 bg-green-500 text-white px-4 py-3 rounded hover:bg-green-600 transition w-full font-bold hidden">✅ Listeye Kaydet</button>
-            </div>
-
-            <h3 class="font-bold text-xl mb-3 text-gray-800">Yayındaki Kampanyalar (${campaignUrls.length} Adet)</h3>
-            <p class="mb-3 text-sm text-gray-500">Sıralamayı değiştirmek için sürükleyip bırakın, fiyatı değiştirmek için kutucuğa yazıp "Güncelle" deyin.</p>
-            
-            <ul id="sortableCampaignList" class="flex flex-col gap-4 p-2 border rounded bg-gray-50 min-h-[50px]">
-            </ul>
-
-            <button id="saveCampaignSorting" class="mt-4 bg-gray-800 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-gray-900 transition w-full hidden">Sıralamayı Kaydet</button>
-            <p id="campaignSortingStatus" class="mt-2 text-center text-sm text-green-600 hidden"></p>
-        </div>
-    `);
-    
-    // Görsel Yükleme Butonu
-    const urlInput = document.getElementById('newCampaignImageURL');
-    const previewImg = document.getElementById('newCampaignImagePreview');
-    const addBtn = document.getElementById('addCampaignUrlBtn');
-    
-    document.getElementById('uploadNewCampaignImageBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        openCloudinaryWidget(urlInput, previewImg);
-        // Widget kapandığında ve urlInput dolduğunda butonu göster
-        const observer = new MutationObserver(() => {
-            if(urlInput.value) addBtn.classList.remove('hidden');
-        });
-        observer.observe(urlInput, { attributes: true });
-    });
-
-    addBtn.addEventListener('click', addCampaignUrl);
-    
-    // Sıralama Kaydetme Butonu
-    document.getElementById('saveCampaignSorting').addEventListener('click', saveCampaignSortingOrder);
-    
-    renderCampaignList();
-}
-        
-        // Mevcut Kampanya Görsellerini Listeler ve Sıralamayı Ayarlar
-       function renderCampaignList() {
-    const listEl = document.getElementById('sortableCampaignList');
-    const saveBtn = document.getElementById('saveCampaignSorting');
-    const statusEl = document.getElementById('campaignSortingStatus');
-    if (!listEl) return;
-    
-    const sortedCampaigns = [...campaignUrls].sort((a, b) => 
-        (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)
-    );
-    
-    listEl.innerHTML = '';
-    saveBtn.classList.add('hidden');
-    statusEl.classList.add('hidden');
-
-    if (sortedCampaigns.length === 0) {
-        listEl.innerHTML = '<li class="text-gray-500 text-center py-4">Henüz kampanya görseli eklenmedi.</li>';
-        return;
-    }
-    
-    saveBtn.classList.remove('hidden');
-
-    sortedCampaigns.forEach((c) => {
-        const item = document.createElement('li');
-        item.className = 'sortable-item bg-white p-3 rounded shadow-sm border border-gray-200';
-        item.dataset.id = c.key; 
-        
-        // Fiyat değeri yoksa boş string olsun
-        const priceValue = c.price || "";
-
-        item.innerHTML = `
-            <div class="flex items-center gap-3">
-                <span class="text-gray-400 cursor-grab text-xl">☰</span>
-                <img src="${c.url}" class="w-20 h-12 object-cover rounded border">
-                
-                <div class="flex-1">
-                    <label class="text-xs font-bold text-gray-500 block">Fiyat:</label>
-                    <div class="flex gap-2">
-                        <input type="text" class="campaign-price-edit border p-1 rounded w-full text-sm font-bold text-orange-600" value="${priceValue}" placeholder="Fiyat Girin">
-                        <button class="updatePriceBtn bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition">Güncelle</button>
+            setActiveTab('showCampaigns');
+            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
+            loadModule(`
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in">
+                    <h2 class="text-2xl font-black text-gray-800 mb-4 flex items-center gap-1">🖼️ ${menuTitle} Kampanya Yönetimi</h2>
+                    
+                    <div class="border-2 border-orange-100 p-4 mb-6 rounded-xl bg-orange-50/50">
+                        <h3 class="font-bold mb-3 text-orange-700 text-sm uppercase tracking-wider">Yeni Kampanya Kartı Ekle</h3>
+                        <div class="mb-3">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">1. Afiş Görseli Seçin</label>
+                            <button id="uploadNewCampaignImageBtn" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition w-full shadow-sm">Görsel Yükle (Cloudinary)</button>
+                            <img id="newCampaignImagePreview" class="campaign-image-preview hidden" src="" alt="Önizleme">
+                            <input type="hidden" id="newCampaignImageURL" value="" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">2. Fiyat Girin (Blob/Kutucuk İçin)</label>
+                            <input id="newCampaignPriceInput" type="text" placeholder="Örn: 250 ₺" class="border-2 border-gray-100 p-2.5 rounded-xl w-full font-bold text-sm outline-none focus:border-orange-500" />
+                        </div>
+                        <button id="addCampaignUrlBtn" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-4 py-3 rounded-xl font-bold transition w-full shadow-md hidden">✅ Listeye Dahil Et</button>
                     </div>
+
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Aktif Afişler (${campaignUrls.length} Adet)</h3>
+                    <p class="mb-4 text-xs text-gray-500">Sürükleyerek sırasını değiştirebilir, fiyatları kutulardan anlık düzenleyebilirsiniz.</p>
+                    
+                    <ul id="sortableCampaignList" class="flex flex-col gap-3.5 p-2 border border-dashed rounded-xl bg-gray-50/50 min-h-[50px]"></ul>
+
+                    <button id="saveAllCampaignChangesBtn" class="mt-4 bg-gray-800 text-white px-4 py-3 rounded-xl text-sm sm:text-base font-bold hover:bg-gray-900 transition w-full hidden shadow-md">
+                        Tüm Düzenlemeleri ve Sıralamayı Kaydet
+                    </button>
+                    <p id="campaignSortingStatus" class="mt-2 text-center text-xs font-bold text-emerald-600 hidden"></p>
                 </div>
+            `);
 
-                <button data-key="${c.key}" class="deleteCampaignBtn bg-red-100 text-red-600 px-3 py-2 rounded hover:bg-red-200 transition">🗑️</button>
-            </div>
-        `;
-        listEl.appendChild(item);
-    });
+            const urlInput = document.getElementById('newCampaignImageURL');
+            const previewImg = document.getElementById('newCampaignImagePreview');
+            const addBtn = document.getElementById('addCampaignUrlBtn');
 
-    // Sortable JS Uygula
-    Sortable.create(listEl, {
-        animation: 150,
-        handle: '.cursor-grab',
-        ghostClass: 'sortable-ghost',
-        onEnd: function (evt) {
-            statusEl.textContent = 'Sıralama değişti. "Sıralamayı Kaydet"e basın.';
-            statusEl.classList.remove('hidden', 'text-green-600');
-            statusEl.classList.add('text-red-600');
-        },
-    });
+            document.getElementById('uploadNewCampaignImageBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                openCloudinaryWidget(urlInput, previewImg);
+                const observer = new MutationObserver(() => {
+                    if (urlInput.value) addBtn.classList.remove('hidden');
+                });
+                observer.observe(urlInput, { attributes: true });
+            });
 
-    // Fiyat Güncelleme Butonları
-    document.querySelectorAll('.updatePriceBtn').forEach((btn, index) => {
-        btn.addEventListener('click', async (e) => {
-            const li = e.target.closest('li');
-            const key = li.dataset.id;
-            const newPrice = li.querySelector('.campaign-price-edit').value;
-            const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
-            
+            addBtn.addEventListener('click', addCampaignUrl);
+            document.getElementById('saveAllCampaignChangesBtn').addEventListener('click', saveAllCampaignChanges);
+            renderCampaignList();
+        }
+
+        function renderCampaignList() {
+            const listEl = document.getElementById('sortableCampaignList');
+            const saveBtn = document.getElementById('saveAllCampaignChangesBtn');
+            const statusEl = document.getElementById('campaignSortingStatus');
+            if (!listEl) return;
+
+            const sortedCampaigns = [...campaignUrls].sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
+            listEl.innerHTML = '';
+            saveBtn.classList.add('hidden');
+            statusEl.classList.add('hidden');
+
+            if (sortedCampaigns.length === 0) {
+                listEl.innerHTML = '<li class="text-gray-400 text-center text-sm py-4">Henüz yüklenmiş kampanya afişi bulunmuyor.</li>';
+                return;
+            }
+
+            saveBtn.classList.remove('hidden');
+
+            sortedCampaigns.forEach((c) => {
+                const item = document.createElement('li');
+                item.className = 'sortable-item bg-white p-3 rounded-xl shadow-sm border border-gray-100';
+                item.dataset.id = c.key;
+                const priceValue = c.price || "";
+                item.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div class="flex items-center gap-3 flex-1">
+                            <span class="text-gray-400 cursor-grab text-xl p-1 select-none">☰</span>
+                            <div class="flex items-center gap-2">
+                                <img src="${c.url}" id="img-preview-${c.key}" class="w-20 h-12 object-cover rounded-lg border bg-gray-50 flex-shrink-0">
+                                <button data-key="${c.key}" class="changeCampaignImgBtn text-[10px] bg-gray-100 hover:bg-gray-200 border rounded-lg px-2 py-1 font-bold text-gray-600 transition whitespace-nowrap">Resmi Değiştir</button>
+                            </div>
+                            <div class="flex-1 min-w-[100px]">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase block mb-0.5">Afiş Fiyatı (₺)</label>
+                                <input type="text" class="campaign-price-edit border p-1.5 rounded-lg w-full text-xs font-black text-orange-600 outline-none focus:border-orange-500" value="${priceValue}" placeholder="Fiyat Girin">
+                            </div>
+                        </div>
+                        <div class="flex justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-gray-100">
+                            <button data-key="${c.key}" class="deleteCampaignBtn bg-red-50 text-red-600 px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-red-100 transition flex items-center gap-0.5">🗑️ <span class="sm:hidden">Afişi Sil</span></button>
+                        </div>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+
+            Sortable.create(listEl, {
+                animation: 150,
+                handle: '.cursor-grab',
+                ghostClass: 'sortable-ghost',
+                onEnd: function () {
+                    statusEl.textContent = 'Değişiklik yapıldı. Kaydetmek için aşağıdaki siyah butona basın.';
+                    statusEl.className = 'mt-2 text-center text-xs font-bold text-red-600';
+                    statusEl.classList.remove('hidden');
+                },
+            });
+
+            document.querySelectorAll('.changeCampaignImgBtn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const campaignKey = e.target.dataset.key;
+                    const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
+                    const targetImgHtml = document.getElementById(`img-preview-${campaignKey}`);
+                    
+                    const widget = window.cloudinary.createUploadWidget(
+                        { cloudName: CLOUDINARY_CLOUD_NAME, uploadPreset: CLOUDINARY_UPLOAD_PRESET, sources: ['local', 'url', 'camera'] },
+                        async (error, result) => {
+                            if (!error && result && result.event === "success") {
+                                const newSecureUrl = result.info.secure_url;
+                                try {
+                                    await database.ref(`${pathPrefix}/${campaignKey}/url`).set(newSecureUrl);
+                                    if (targetImgHtml) targetImgHtml.src = newSecureUrl;
+                                    alert("Afiş görseli güncellendi!");
+                                } catch (err) { alert("Hata: " + err.message); }
+                            }
+                        }
+                    );
+                    widget.open();
+                });
+            });
+
+            document.querySelectorAll('.deleteCampaignBtn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const keyToDelete = e.currentTarget.dataset.key;
+                    if (confirm("Bu afişi silmek istediğinizden emin misiniz?")) {
+                        try { await deleteCampaignUrl(keyToDelete); } catch (error) { alert("Hata: " + error.message); }
+                    }
+                });
+            });
+        }
+
+        async function addCampaignUrl() {
+            const url = document.getElementById('newCampaignImageURL').value.trim();
+            const price = document.getElementById('newCampaignPriceInput').value.trim();
+            if (!url) { alert('Lütfen önce bir görsel yükleyin.'); return; }
+
+            const maxOrder = campaignUrls.length > 0 ? Math.max(...campaignUrls.map(c => c.order === undefined ? 0 : c.order)) : 0;
             try {
-                await database.ref(`${pathPrefix}/${key}/price`).set(newPrice);
-                alert('Fiyat güncellendi!');
-            } catch(err) {
-                alert('Hata: ' + err.message);
-            }
-        });
-    });
+                await campaignsRef.push({ url: url, price: price, timestamp: Date.now(), order: maxOrder + 1 });
+                alert("Afiş başarıyla eklendi.");
+                document.getElementById('newCampaignImageURL').value = '';
+                document.getElementById('newCampaignPriceInput').value = '';
+                document.getElementById('newCampaignImagePreview').classList.add('hidden');
+                document.getElementById('addCampaignUrlBtn').classList.add('hidden');
+            } catch (error) { alert("Hata: " + error.message); }
+        }
 
-    // Silme Butonları
-    document.querySelectorAll('.deleteCampaignBtn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const keyToDelete = e.target.dataset.key;
-            if (confirm("Bu kampanyayı silmek istediğinizden emin misiniz?")) {
-                try { 
-                    await deleteCampaignUrl(keyToDelete); 
-                    // Silindikten sonra renderCampaignList otomatik tetiklenir (on('value') sayesinde)
-                } catch (error) { 
-                    alert("Hata: " + error.message); 
-                }
-            }
-        });
-    });
-}
-
-// YENİ KAMPANYA EKLEME (Fiyatlı)
-async function addCampaignUrl() {
-    const url = document.getElementById('newCampaignImageURL').value.trim();
-    const price = document.getElementById('newCampaignPriceInput').value.trim();
-
-    if (!url) {
-        alert('Lütfen önce bir görsel yükleyin.');
-        return;
-    }
-    
-    const maxOrder = campaignUrls.length > 0 
-        ? Math.max(...campaignUrls.map(c => c.order === undefined ? 0 : c.order))
-        : 0;
-
-    try {
-        await campaignsRef.push({ 
-            url: url, 
-            price: price, // Fiyatı da kaydediyoruz
-            timestamp: Date.now(),
-            order: maxOrder + 1 
-        }); 
-        alert("Kampanya başarıyla eklendi.");
-        
-        // Formu temizle
-        document.getElementById('newCampaignImageURL').value = '';
-        document.getElementById('newCampaignPriceInput').value = '';
-        document.getElementById('newCampaignImagePreview').src = '';
-        document.getElementById('newCampaignImagePreview').classList.add('hidden');
-        document.getElementById('addCampaignUrlBtn').classList.add('hidden');
-        
-    } catch (error) {
-        alert("Hata: " + error.message);
-    }
-}
-        
-        // Kampanyaların Yeni Sıralama Düzenini Kaydeder
-        async function saveCampaignSortingOrder() {
+        async function saveAllCampaignChanges() {
             const listEl = document.getElementById('sortableCampaignList');
             const items = listEl.children;
             const updates = {};
@@ -761,85 +754,83 @@ async function addCampaignUrl() {
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
 
             if (items.length === 0) return;
-            
+
             for (let i = 0; i < items.length; i++) {
                 const campaignKey = items[i].dataset.id;
-                const newOrderValue = i; 
-                
+                const newOrderValue = i;
+                const newPriceValue = items[i].querySelector('.campaign-price-edit').value.trim();
                 const currentCampaign = campaignUrls.find(c => c.key === campaignKey);
-                
-                if (currentCampaign && currentCampaign.order !== newOrderValue) {
-                    // Dinamik yolu burada kullanıyoruz
-                    updates[`${pathPrefix}/${campaignKey}/order`] = newOrderValue; 
-                    changesMade++;
+
+                if (currentCampaign) {
+                    if (currentCampaign.order !== newOrderValue) {
+                        updates[`${pathPrefix}/${campaignKey}/order`] = newOrderValue;
+                        changesMade++;
+                    }
+                    if ((currentCampaign.price || "") !== newPriceValue) {
+                        updates[`${pathPrefix}/${campaignKey}/price`] = newPriceValue;
+                        changesMade++;
+                    }
                 }
             }
-            
+
             if (changesMade === 0) {
-                 statusEl.textContent = 'Herhangi bir sıralama değişikliği tespit edilmedi.';
-                 statusEl.classList.remove('text-red-600');
-                 statusEl.classList.add('text-green-600');
-                 statusEl.classList.remove('hidden');
-                 return;
-            }
-            
-            if (!confirm(`${changesMade} kampanya görselinin sıralaması güncellenecektir. Onaylıyor musunuz?`)) {
+                statusEl.textContent = 'Herhangi bir değişiklik tespit edilmedi.';
+                statusEl.className = 'mt-2 text-center text-xs font-bold text-emerald-600';
+                statusEl.classList.remove('hidden');
                 return;
             }
 
-            try {
-                // Tüm güncellemeleri tek seferde Firebase'e gönder
-                await database.ref().update(updates); 
-                
-                statusEl.textContent = `${changesMade} kampanya sıralaması başarıyla kaydedildi.`;
-                statusEl.classList.remove('text-red-600');
-                statusEl.classList.add('text-green-600');
-                statusEl.classList.remove('hidden');
+            if (!confirm(`Yaptığınız ${changesMade} değişiklik kaydedilecektir. Onaylıyor musunuz?`)) return;
 
+            try {
+                await database.ref().update(updates);
+                statusEl.textContent = 'Tüm değişiklikler başarıyla veritabanına işlendi!';
+                statusEl.className = 'mt-2 text-center text-xs font-bold text-emerald-600';
+                statusEl.classList.remove('hidden');
             } catch (error) {
-                statusEl.textContent = 'Sıralamayı kaydetme başarısız oldu: ' + error.message;
-                statusEl.classList.add('text-red-600');
-                statusEl.classList.remove('text-green-600');
+                statusEl.textContent = 'Hata: ' + error.message;
+                statusEl.className = 'mt-2 text-center text-xs font-bold text-red-600';
                 statusEl.classList.remove('hidden');
             }
         }
 
-
-        // --- MODÜL: YENİ ÜRÜN EKLEME (ADD PRODUCT) ---
         function renderAddProductModule() {
             setActiveTab('showAddProduct');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">➕ ${menuTitle} Yeni Ürün Ekle</h2>
-                <div class="flex flex-col gap-4 p-6 border rounded-lg bg-white shadow-md max-w-lg">
-                    <input id="productName" placeholder="Ürün Adı (TR)" class="border p-3 rounded" />
-                    <input id="productNameEN" placeholder="Product Name (EN) (Opsiyonel)" class="border p-3 rounded" />
-                    <input id="productDesc" placeholder="Açıklama (TR)" class="border p-3 rounded" />
-                    <input id="productDescEN" placeholder="Description (EN) (Opsiyonel)" class="border p-3 rounded" />
-                    <input id="productPrice" type="number" placeholder="Fiyat (₺)" class="border p-3 rounded" />
-                    <select id="productCategory" class="border p-3 rounded">
-                        <option value="">-- Kategori Seçiniz --</option>
-                        ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                    </select>
-
-                    <div class="p-4 border rounded-lg bg-gray-50">
-                        <h3 class="font-semibold mb-2">Görsel Yükle (Opsiyonel)</h3>
-                        <button id="uploadNewImageBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition w-full">Görsel Yükle</button>
-                        <img id="newImagePreview" class="w-full h-32 object-cover rounded-lg mt-3 border border-gray-300" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e5e7eb'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%236b7280'>Görsel Yok</text></svg>" alt="Yeni Görsel Önizleme">
-                        <input type="hidden" id="productImageURL" value="" />
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in max-w-xl mx-auto">
+                    <h2 class="text-2xl font-black text-gray-800 mb-5 flex items-center gap-1">➕ ${menuTitle} Yeni Ürün Ekle</h2>
+                    <div class="flex flex-col gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Ürün Adı (TR) *</label><input id="productName" placeholder="Kokoreç vb." class="border-2 border-gray-100 p-2.5 rounded-xl text-sm outline-none focus:border-orange-500" /></div>
+                            <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Product Name (EN)</label><input id="productNameEN" placeholder="Optional" class="border-2 border-gray-100 p-2.5 rounded-xl text-sm outline-none focus:border-orange-500" /></div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Açıklama (TR)</label><input id="productDesc" placeholder="Kekik, pul biberli vb." class="border-2 border-gray-100 p-2.5 rounded-xl text-sm outline-none focus:border-orange-500" /></div>
+                            <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Description (EN)</label><input id="productDescEN" placeholder="Optional" class="border-2 border-gray-100 p-2.5 rounded-xl text-sm outline-none focus:border-orange-500" /></div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Fiyat (₺) *</label><input id="productPrice" type="number" placeholder="0" class="border-2 border-gray-100 p-2.5 rounded-xl text-sm font-bold outline-none focus:border-orange-500" /></div>
+                            <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Kategori *</label><select id="productCategory" class="border-2 border-gray-100 p-2.5 rounded-xl text-sm font-semibold bg-white outline-none focus:border-orange-500">
+                                <option value="">-- Seçiniz --</option>
+                                ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                            </select></div>
+                        </div>
+                        <div class="p-4 border border-dashed rounded-xl bg-gray-50/50 mt-1">
+                            <h3 class="font-bold text-xs text-gray-500 uppercase mb-2">Ürün Görseli (Opsiyonel)</h3>
+                            <button id="uploadNewImageBtn" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition w-full shadow-sm">Fotoğraf Seç ve Yükle</button>
+                            <img id="newImagePreview" class="w-full h-32 object-contain rounded-xl mt-3 bg-white border border-gray-100 p-2 hidden" src="" alt="Yeni Görsel">
+                            <input type="hidden" id="productImageURL" value="" />
+                        </div>
+                        <button id="addProduct" class="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-3.5 rounded-xl font-black text-base shadow-md hover:opacity-95 transition transform active:scale-95 mt-2">ÜRÜNÜ SİSTEME KAYDET</button>
                     </div>
-                    
-                    <button id="addProduct" class="bg-orange-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-orange-600 transition">Ürünü Kaydet</button>
                 </div>
             `);
-            // Event Listener'lar
             document.getElementById('uploadNewImageBtn').addEventListener('click', (e) => {
                 e.preventDefault();
                 openCloudinaryWidget(document.getElementById('productImageURL'), document.getElementById('newImagePreview'));
             });
             document.getElementById('addProduct').addEventListener('click', addProduct);
-
-            document.getElementById('newImagePreview').src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e5e7eb'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%236b7280'>Görsel Yok</text></svg>";
         }
 
         async function addProduct() {
@@ -849,470 +840,362 @@ async function addCampaignUrl() {
             const descEN = document.getElementById('productDescEN').value.trim();
             const price = parseFloat(document.getElementById('productPrice').value);
             const category = document.getElementById('productCategory').value;
-            
-            let imageURL = document.getElementById('productImageURL').value.trim(); 
-            
-            if (!imageURL) { imageURL = ''; }
+            let imageURL = document.getElementById('productImageURL').value.trim();
 
-            if (!name || isNaN(price) || !category) { 
-                alert('Lütfen tüm zorunlu alanları (Ad, Fiyat ve Kategori) doldurunuz.'); return; 
-            }
-            
-            const maxOrder = products.length > 0 
-                ? Math.max(...products.map(p => p.order === undefined ? 0 : p.order))
-                : 0;
-            
-            const newProduct = {
-                name, nameEN: nameEN || name, desc, descEN: descEN || desc,
-                price, image: imageURL, category, 
-                lastUpdated: Date.now(),
-                order: maxOrder + 1 
-            };
+            if (!name || isNaN(price) || !category) { alert('Lütfen zorunlu alanları (*) doldurunuz.'); return; }
+
+            const maxOrder = products.length > 0 ? Math.max(...products.map(p => p.order === undefined ? 0 : p.order)) : 0;
+            const newProduct = { name, nameEN: nameEN || name, desc, descEN: descEN || desc, price, image: imageURL, category, lastUpdated: Date.now(), order: maxOrder + 1 };
 
             try {
-                // productsRef dinamik olduğu için doğru yola yazacak.
-                await productsRef.push(newProduct); 
-                alert(`"${name}" ürünü başarıyla eklendi.`);
-                
-                document.querySelectorAll('#contentContainer input, #contentContainer select').forEach(el => el.value = '');
-                document.getElementById('productImageURL').value = ''; 
-                
-                const previewImg = document.getElementById('newImagePreview');
-                previewImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e5e7eb'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%236b7280'>Görsel Yok</text></svg>";
-                
-            } catch (error) {
-                alert("Ekleme işlemi başarısız oldu: " + error.message);
-            }
+                await productsRef.push(newProduct);
+                alert(`"${name}" başarıyla menüye eklendi.`);
+                renderAddProductModule();
+            } catch (error) { alert("Hata: " + error.message); }
         }
 
-        // --- MODÜL: TOPLU FİYAT DEĞİŞTİRME (BULK UPDATE) ---
         function renderBulkUpdateModule() {
             setActiveTab('showBulkUpdate');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">💸 ${menuTitle} Toplu Fiyat Değiştirme</h2>
-                <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
-                    <p class="mb-4 text-gray-600">Aşağıdaki listede ürünlerin mevcut fiyatlarını değiştirebilir veya Toplu Değişim araçlarını kullanabilirsiniz. **Yeni fiyatları manuel olarak sıra sıra da girebilirsiniz.**</p>
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in">
+                    <h2 class="text-2xl font-black text-gray-800 mb-4 flex items-center gap-1">💸 ${menuTitle} Toplu Fiyat Ayarı</h2>
                     
-                    <div class="border p-4 mb-6 rounded-lg bg-gray-50">
-                        <h3 class="font-bold mb-3 text-orange-600">Toplu Değişim Araçları</h3>
-                        <label class="block mb-2 font-semibold text-sm">Uygulanacak Kategori:</label>
-                        <select id="bulkCategory" class="border p-2 rounded w-full mb-3">
-                            <option value="Tümü">Tüm Ürünler</option>
-                            ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                        </select>
-
-                        <label class="block mb-2 font-semibold text-sm">Değişim Tipi:</label>
-                        <div class="flex gap-4 mb-3">
-                            <label class="flex items-center"><input type="radio" name="updateType" value="percent" checked class="mr-2"> Yüzdesel (%)</label>
-                            <label class="flex items-center"><input type="radio" name="updateType" value="fixed" class="mr-2"> Sabit Değer (₺)</label>
+                    <div class="border-2 border-gray-100 p-4 mb-6 rounded-xl bg-gray-50/50">
+                        <h3 class="font-bold mb-3 text-orange-600 text-sm uppercase tracking-wider">Sihirbaz: Otomatik Toplu Zam/İndirim</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Hedef Kategori</label>
+                                <select id="bulkCategory" class="border-2 border-gray-100 p-2 rounded-xl w-full text-xs font-semibold bg-white outline-none">
+                                    <option value="Tümü">Tüm Ürünler</option>
+                                    ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Değişim Türü</label>
+                                <div class="flex gap-4 p-2 border-2 border-gray-100 rounded-xl bg-white text-xs font-bold h-[38px] items-center">
+                                    <label class="flex items-center cursor-pointer"><input type="radio" name="updateType" value="percent" checked class="mr-1 accent-orange-500"> Yüzde (%)</label>
+                                    <label class="flex items-center cursor-pointer"><input type="radio" name="updateType" value="fixed" class="mr-1 accent-orange-500"> Lira (₺)</label>
+                                </div>
+                            </div>
                         </div>
-
-                        <input id="updateValue" type="number" placeholder="Örn: 10 (₺10 artış) veya -5 (%5 indirim)" class="border p-2 rounded w-full mb-4" />
-                        
-                        <button id="applyBulkAdjustment" class="bg-blue-500 text-white px-4 py-2 rounded font-semibold hover:bg-blue-600 transition w-full">Seçili Ürünlere Toplu Ayar Uygula</button>
+                        <div class="mb-4">
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Miktar (Düşürmek için başına eksi (-) koyun)</label>
+                            <input id="updateValue" type="number" placeholder="Örn: 15 veya -10" class="border-2 border-gray-100 p-2 rounded-xl w-full text-xs outline-none font-bold" />
+                        </div>
+                        <button id="applyBulkAdjustment" class="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm hover:bg-blue-700 transition w-full">Değerleri Aşağıdaki Listeye Yansıt</button>
                     </div>
 
-                    <h3 class="font-bold text-xl mb-3 text-gray-800">Ürün Fiyatlarını Manuel Düzenle</h3>
-                    <div class="flex font-bold text-sm bg-gray-100 p-2 rounded mb-2">
-                        <span class="w-1/2">Ürün Adı</span>
-                        <span class="w-1/4 text-right">Mevcut Fiyat</span>
-                        <span class="w-1/4 text-right">Yeni Fiyat (₺)</span>
+                    <h3 class="font-bold text-lg mb-2 text-gray-800">Fiyat Listesi</h3>
+                    <div class="hidden sm:flex font-bold text-[11px] uppercase tracking-wider bg-gray-100 p-2.5 rounded-xl mb-2 text-gray-500">
+                        <span class="w-2/5">Ürün Adı</span>
+                        <span class="w-1/5 text-right pr-4">Eski Fiyat</span>
+                        <span class="w-1/5 text-right">Yeni Fiyat</span>
+                        <span class="w-1/5 text-right">Kampanyalı Fiyat</span>
                     </div>
-                    <form id="bulkUpdateForm" class="flex flex-col gap-2">
-                        <p class="text-gray-500">Ürünler yükleniyor...</p>
-                        </form>
+                    <form id="bulkUpdateForm" class="flex flex-col gap-2 max-h-[40vh] overflow-y-auto pr-1"></form>
                     
-                    <button id="saveManualPrices" class="mt-6 bg-red-500 text-white px-4 py-3 rounded text-lg font-semibold hover:bg-red-600 transition w-full">Girdiğim Yeni Fiyatları Kaydet</button>
-                    <p id="bulkStatus" class="mt-4 text-center text-sm text-green-600 hidden"></p>
+                    <button id="saveManualPrices" class="mt-6 bg-red-500 text-white px-4 py-3.5 rounded-xl font-black text-base shadow-md hover:bg-red-600 transition w-full">YUKARIDAKİ TÜM FİYATLARI VERİTABANINA İŞLE</button>
+                    <p id="bulkStatus" class="mt-3 text-center text-xs font-bold text-emerald-600 hidden"></p>
                 </div>
             `);
 
-            // Event Listener'lar
             document.getElementById('bulkCategory').addEventListener('change', () => renderBulkPriceList(document.getElementById('bulkCategory').value));
             document.getElementById('applyBulkAdjustment').addEventListener('click', applyBulkAdjustment);
             document.getElementById('saveManualPrices').addEventListener('click', saveManualPrices);
-            
             renderBulkPriceList(document.getElementById('bulkCategory').value);
         }
-        
-        // Toplu fiyat listesini düzenlenebilir inputlarla render eder
-        function renderBulkPriceList(filter='Tümü') {
+
+        function renderBulkPriceList(filter = 'Tümü') {
             const formEl = document.getElementById('bulkUpdateForm');
             if (!formEl) return;
             formEl.innerHTML = '';
-            
-            const sortedProducts = sortProductsByOrder([...products]);
 
+            const sortedProducts = sortProductsByOrder([...products]);
             const filtered = filter === 'Tümü' ? sortedProducts : sortedProducts.filter(p => p.category === filter);
 
             if (filtered.length === 0) {
-                formEl.innerHTML = '<p class="p-4 bg-white rounded shadow text-gray-500">Bu kategoride ürün bulunmamaktadır.</p>';
+                formEl.innerHTML = '<p class="p-4 text-center bg-gray-50 rounded-xl text-gray-400 text-xs border border-dashed">Kategoride ürün yok.</p>';
                 return;
             }
 
             filtered.forEach(p => {
                 const item = document.createElement('div');
-                item.className = 'flex justify-between items-center bg-white p-2 rounded border text-sm';
+                item.className = 'flex flex-col sm:flex-row justify-between sm:items-center bg-gray-50 p-2.5 rounded-xl border border-gray-100 text-xs sm:text-sm gap-2';
+                const existingDiscount = (p.discountPrice !== undefined && p.discountPrice !== null) ? p.discountPrice : "";
+
                 item.innerHTML = `
-                    <span class="w-1/2">${p.name}</span>
-                    <span class="w-1/4 text-right font-medium">${p.price} ₺</span>
-                    <input 
-                        type="number" 
-                        step="1" 
-                        placeholder="${p.price}" 
-                        value="${p.price}"
-                        data-key="${p.key}" 
-                        class="bulk-price-input w-1/4 text-right border p-1 rounded focus:border-orange-500"
-                    />
+                    <span class="sm:w-2/5 font-bold text-gray-700 truncate">${p.name}</span>
+                    <div class="grid grid-cols-3 sm:flex sm:w-3/5 items-center gap-2 justify-end">
+                        <span class="text-right text-gray-400 font-semibold pr-2 self-center sm:w-1/3">${p.price} ₺</span>
+                        <div class="sm:w-1/3 flex flex-col"><label class="sm:hidden text-[9px] text-gray-400 font-bold mb-0.5">YENİ ₺</label><input type="number" step="1" placeholder="${p.price}" value="${p.price}" data-key="${p.key}" class="bulk-price-input text-right border p-1 rounded-lg bg-white font-bold outline-none focus:border-orange-500 w-full" /></div>
+                        <div class="sm:w-1/3 flex flex-col"><label class="sm:hidden text-[9px] text-orange-400 font-bold mb-0.5">İNDİRİM ₺</label><input type="number" step="1" placeholder="Yok" value="${existingDiscount}" data-key="${p.key}" class="bulk-discount-input text-right border p-1 rounded-lg bg-orange-100/50 font-black text-orange-700 outline-none focus:border-orange-500 w-full" /></div>
+                    </div>
                 `;
                 formEl.appendChild(item);
             });
         }
 
-        // Toplu yüzdesel/sabit ayarı input alanlarına uygular
         function applyBulkAdjustment() {
             const updateType = document.querySelector('input[name="updateType"]:checked').value;
             const value = parseFloat(document.getElementById('updateValue').value);
             const statusEl = document.getElementById('bulkStatus');
-            statusEl.classList.add('hidden');
+            if (isNaN(value) || value === 0) { alert('Lütfen miktar giriniz.'); return; }
 
-            if (isNaN(value) || value === 0) {
-                statusEl.textContent = 'Lütfen geçerli bir değişim değeri girin.';
-                statusEl.classList.remove('hidden');
-                statusEl.classList.remove('text-green-600');
-                statusEl.classList.add('text-red-600');
-                return;
-            }
-
-            const inputs = document.querySelectorAll('#bulkUpdateForm .bulk-price-input');
-            let updatedCount = 0;
-
-            inputs.forEach(input => {
-                const productKey = input.dataset.key;
-                const currentProduct = products.find(p => p.key === productKey);
+            const priceInputs = document.querySelectorAll('#bulkUpdateForm .bulk-price-input');
+            priceInputs.forEach(input => {
+                const currentProduct = products.find(p => p.key === input.dataset.key);
                 if (!currentProduct) return;
-
-                let newPrice;
-                const basePrice = currentProduct.price; 
-
-                if (updateType === 'percent') {
-                    newPrice = basePrice * (1 + (value / 100));
-                } else { // fixed
-                    newPrice = basePrice + value;
-                }
-                newPrice = Math.max(0, newPrice); // Max 0'dan büyük olmalı
-                
-                input.value = parseFloat(newPrice.toFixed(2)); // İki ondalık basamağa yuvarla
-                updatedCount++;
+                let newPrice = updateType === 'percent' ? currentProduct.price * (1 + (value / 100)) : currentProduct.price + value;
+                input.value = parseFloat(Math.max(0, newPrice).toFixed(2));
             });
-
-            if (updatedCount > 0) {
-                statusEl.textContent = `${updatedCount} ürünün fiyatı güncellendi. Lütfen "Kaydet" butonuna basarak değişiklikleri veritabanına işleyin.`;
-                statusEl.classList.remove('hidden');
-                statusEl.classList.remove('text-red-600');
-                statusEl.classList.add('text-green-600');
-            } else {
-                 statusEl.textContent = 'Güncellenecek ürün bulunamadı.';
-                 statusEl.classList.remove('hidden');
-                 statusEl.classList.remove('text-green-600');
-                 statusEl.classList.add('text-red-600');
-            }
+            statusEl.textContent = 'Fiyatlar geçici olarak listeye uygulandı. Aşağıdaki kırmızı butondan kalıcı kaydedebilirsiniz.';
+            statusEl.className = 'mt-3 text-center text-xs font-bold text-orange-600';
+            statusEl.classList.remove('hidden');
         }
 
-
-        // Manuel girilen fiyatları Firebase'e kaydeder
         async function saveManualPrices() {
-            const inputs = document.querySelectorAll('#bulkUpdateForm .bulk-price-input');
+            const priceInputs = document.querySelectorAll('#bulkUpdateForm .bulk-price-input');
+            const discountInputs = document.querySelectorAll('#bulkUpdateForm .bulk-discount-input');
             const updates = {};
             const currentTime = Date.now();
             const statusEl = document.getElementById('bulkStatus');
             let changesMade = 0;
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
-            let invalidPrices = []; // Geçersiz fiyatları tutacak dizi
 
+            if (priceInputs.length === 0) return;
 
-            if (inputs.length === 0) {
-                statusEl.textContent = 'Kaydedilecek ürün bulunamadı.';
-                statusEl.classList.remove('hidden', 'text-green-600');
-                statusEl.classList.add('text-red-600');
-                return;
-            }
-
-            for (const input of inputs) {
+            priceInputs.forEach((input, index) => {
                 const productKey = input.dataset.key;
                 const newPrice = parseFloat(input.value);
+                const discountInput = discountInputs[index];
+                const discountValueStr = discountInput ? discountInput.value.trim() : "";
+                const newDiscountPrice = discountValueStr !== "" ? parseFloat(discountValueStr) : null;
                 const currentProduct = products.find(p => p.key === productKey);
 
-                if (isNaN(newPrice) || newPrice < 0) {
-                    invalidPrices.push(currentProduct.name);
-                    continue; // Geçersiz fiyatı atla, diğerlerini kaydetmeye devam et
-                }
-                
+                if (!currentProduct || isNaN(newPrice) || newPrice < 0) return;
+
                 const currentPriceRounded = parseFloat(currentProduct.price.toFixed(2));
                 const newPriceRounded = parseFloat(newPrice.toFixed(2));
+                const currentDiscountRounded = currentProduct.discountPrice ? parseFloat(currentProduct.discountPrice.toFixed(2)) : null;
+                const newDiscountRounded = newDiscountPrice !== null ? parseFloat(newDiscountPrice.toFixed(2)) : null;
 
+                let changed = false;
+                if (currentPriceRounded !== newPriceRounded) { updates[`${pathPrefix}/${productKey}/price`] = newPriceRounded; changed = true; }
+                if (currentDiscountRounded !== newDiscountRounded) { updates[`${pathPrefix}/${productKey}/discountPrice`] = newDiscountRounded; changed = true; }
 
-                if (currentProduct && currentPriceRounded !== newPriceRounded) {
-                    // Dinamik yolu burada kullanıyoruz
-                    updates[`${pathPrefix}/${productKey}/price`] = newPriceRounded;
-                    updates[`${pathPrefix}/${productKey}/lastUpdated`] = currentTime; 
-                    changesMade++;
-                }
-            }
-            
-            // Hata Kontrolü
-            if (invalidPrices.length > 0) {
-                alert(`Aşağıdaki ürünler için geçersiz fiyat girdiniz ve kaydedilemediler: \n- ${invalidPrices.join('\n- ')}\n\nDiğer geçerli fiyatlar kaydedilmeye devam ediliyor.`);
-            }
+                if (changed) { updates[`${pathPrefix}/${productKey}/lastUpdated`] = currentTime; changesMade++; }
+            });
 
-
-            if (changesMade === 0) {
-                statusEl.textContent = 'Herhangi bir fiyat değişikliği tespit edilmedi.';
-                statusEl.classList.remove('hidden', 'text-red-600');
-                statusEl.classList.add('text-green-600');
-                return;
-            }
-            
-            if (!confirm(`${changesMade} ürünün fiyatı güncellenecektir. Onaylıyor musunuz?`)) {
-                return;
-            }
+            if (changesMade === 0) { alert('Herhangi bir değişiklik bulunamadı.'); return; }
+            if (!confirm(`${changesMade} ürün güncellenecektir. Onaylıyor musunuz?`)) return;
 
             try {
-                await database.ref().update(updates); 
-                statusEl.textContent = `${changesMade} ürün fiyatı başarıyla kaydedildi ve menü güncellendi.`;
+                await database.ref().update(updates);
+                statusEl.textContent = 'Tüm fiyatlar ve indirim bilgileri başarıyla kaydedildi!';
+                statusEl.className = 'mt-4 text-center text-xs font-bold text-emerald-600';
                 statusEl.classList.remove('hidden');
-                statusEl.classList.remove('text-red-600');
-                statusEl.classList.add('text-green-600');
-                // Fiyatlar güncellendiği için listeyi yeniden render et
                 renderBulkPriceList(document.getElementById('bulkCategory').value);
-            } catch (error) {
-                statusEl.textContent = 'Fiyatları kaydetme başarısız oldu: ' + error.message;
-                statusEl.classList.remove('hidden');
-                statusEl.classList.remove('text-green-600');
-                statusEl.classList.add('text-red-600');
-            }
+            } catch (error) { alert("Hata: " + error.message); }
         }
-        
-        // --- MODÜL: İSTATİSTİKLER (STATS) ---
+
         function renderStatsModule() {
             setActiveTab('showStats');
-            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
-            
-            // NOTE: Ziyaretçi takibi tek bir 'visitors' yolunda tutuluyor.
-            // Bu yüzden menüye özel bir ziyaretçi sayacı şimdilik yok.
-            
             loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">📊 Menü Görüntüleme İstatistikleri</h2>
-                <div class="grid grid-cols-2 gap-6 max-w-xl">
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-xl font-semibold mb-2 text-orange-600">Bugünkü Görüntüleme</h3>
-                        <p id="todayCount" class="text-4xl font-bold text-gray-800">0</p>
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in max-w-xl mx-auto">
+                    <h2 class="text-2xl font-black text-gray-800 mb-4 flex items-center gap-1">📊 Menü Görüntüleme İstatistikleri</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-orange-50/50 p-4 border border-orange-100 rounded-2xl text-center">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase mb-1">Bugün</h3>
+                            <p id="todayCount" class="text-3xl font-black text-orange-600">0</p>
+                        </div>
+                        <div class="bg-orange-50/50 p-4 border border-orange-100 rounded-2xl text-center">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase mb-1">Toplam Görüntüleme</h3>
+                            <p id="totalCount" class="text-3xl font-black text-orange-600">0</p>
+                        </div>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-xl font-semibold mb-2 text-orange-600">Toplam Görüntüleme</h3>
-                        <p id="totalCount" class="text-4xl font-bold text-gray-800">0</p>
-                    </div>
-                </div>
-                <div class="mt-8">
-                    <button id="resetCounter" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Sayaçları Sıfırla (Tüm Zamanlar)</button>
-                    <p class="text-sm text-gray-500 mt-2">NOT: Bu sayaçlar, ${currentMenuType === 'in_place' ? 'index.html' : 'delivery.html'} dosyasının kaç kez açıldığını gösterir. Sıfırlama tüm geçmişi siler.</p>
+                    <button id="resetCounter" class="mt-5 bg-red-50 text-red-600 border border-red-100 px-4 py-2 text-xs font-bold rounded-xl w-full active:scale-95 transition">Sayaçları Sıfırla (Tüm Zamanlar)</button>
                 </div>
             `);
             fetchVisitorCounts();
             document.getElementById('resetCounter').addEventListener('click', resetVisitorCounts);
         }
 
+        function renderGlobalDateModule() {
+            setActiveTab('showGlobalDateUpdate');
+            const todayStr = new Date().toISOString().slice(0, 10);
+            loadModule(`
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in max-w-md mx-auto">
+                    <h2 class="text-2xl font-black text-gray-800 mb-2 flex items-center gap-1">📅 Ortak Tarih Güncellemesi</h2>
+                    <p class="mb-4 text-xs text-gray-500">Seçeceğiniz tarih, hem Yerinde hem de Paket servis menüsündeki tüm ürünlerin fiyat değişim tarihi olarak tek seferde basılır.</p>
+                    <input id="globalDateInput" type="date" value="${todayStr}" class="border-2 border-gray-100 p-3 rounded-xl w-full mb-4 outline-none focus:border-orange-500 font-bold text-sm bg-gray-50" />
+                    <button id="applyGlobalDateBtn" class="bg-orange-600 text-white px-4 py-3.5 rounded-xl font-bold w-full shadow-md active:scale-95 transition">Tarihleri Tüm Ürünlere Eşitle</button>
+                    <p id="globalDateStatus" class="mt-3 text-center text-xs font-bold hidden"></p>
+                </div>
+            `);
+            document.getElementById('applyGlobalDateBtn').addEventListener('click', saveGlobalDateToAllProducts);
+        }
+
+        async function saveGlobalDateToAllProducts() {
+            const dateInput = document.getElementById('globalDateInput').value;
+            const statusEl = document.getElementById('globalDateStatus');
+            if (!dateInput) return;
+
+            const targetTimestamp = new Date(dateInput).getTime();
+            if (!confirm("Tüm ürünlerin fiyat güncelleme tarihleri değiştirilecektir. Emin misiniz?")) return;
+
+            try {
+                statusEl.textContent = 'Güncelleniyor...'; statusEl.className = 'mt-3 text-center text-xs font-bold text-orange-600'; statusEl.classList.remove('hidden');
+                const inPlaceSnapshot = await database.ref(inPlaceProductsPath).once('value');
+                const deliverySnapshot = await database.ref(deliveryProductsPath).once('value');
+                const inPlaceData = inPlaceSnapshot.val() || {};
+                const deliveryData = deliverySnapshot.val() || {};
+
+                const updates = {};
+                let count = 0;
+                Object.keys(inPlaceData).forEach(k => { updates[`${inPlaceProductsPath}/${k}/lastUpdated`] = targetTimestamp; count++; });
+                Object.keys(deliveryData).forEach(k => { updates[`${deliveryProductsPath}/${k}/lastUpdated`] = targetTimestamp; count++; });
+
+                if (count === 0) { statusEl.textContent = 'Ürün bulunamadı.'; return; }
+                await database.ref().update(updates);
+                statusEl.textContent = 'Tüm ürün tarihleri başarıyla güncellendi!';
+                statusEl.className = 'mt-3 text-center text-xs font-bold text-emerald-600';
+                setFirebaseRefs(currentMenuType);
+            } catch (error) { alert("Hata: " + error.message); }
+        }
+
         function fetchVisitorCounts() {
             const today = new Date().toISOString().slice(0, 10);
-            
-            // Ziyaretçi referansı sabit olduğu için burada dinamik bir değişiklik yapmaya gerek yok.
-            // Ancak, gerçek bir ayrım için 'visitors/in_place' ve 'visitors/delivery' gibi yollar kullanılmalıdır.
-            visitorsRef.child(today).once('value', snapshot => {
-                document.getElementById('todayCount').textContent = snapshot.val() || 0;
-            });
-
-            visitorsRef.once('value', snapshot => {
-                let total = 0;
-                snapshot.forEach(child => {
-                    total += child.val();
-                });
-                document.getElementById('totalCount').textContent = total;
-            });
+            visitorsRef.child(today).once('value', s => { const val = document.getElementById('todayCount'); if(val) val.textContent = s.val() || 0; });
+            visitorsRef.once('value', s => { let total = 0; s.forEach(c => { total += c.val(); }); const val = document.getElementById('totalCount'); if(val) val.textContent = total; });
         }
-        
+
         async function resetVisitorCounts() {
-            if (confirm("Tüm ziyaretçi verilerini sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz.")) {
-                try {
-                    await visitorsRef.remove();
-                    alert("Ziyaretçi sayaçları başarıyla sıfırlandı.");
-                    fetchVisitorCounts(); 
-                } catch (error) {
-                    alert("Sayaç sıfırlama başarısız oldu: " + error.message);
-                }
+            if (confirm("Ziyaretçi verileri sıfırlanacaktır?")) {
+                try { await visitorsRef.remove(); fetchVisitorCounts(); } catch (error) { alert(error.message); }
             }
         }
 
-        // --- EDİT MODAL ORTAK KULLANIM FONKSİYONLARI ---
         function openEditModal(productKey) {
             const productToEdit = products.find(p => p.key === productKey);
-            
             if (productToEdit) {
-                document.getElementById('editProductKey').value = productKey; 
+                document.getElementById('editProductKey').value = productKey;
                 document.getElementById('editName').value = productToEdit.name;
                 document.getElementById('editNameEN').value = productToEdit.nameEN || '';
                 document.getElementById('editDesc').value = productToEdit.desc || '';
                 document.getElementById('editDescEN').value = productToEdit.descEN || '';
                 document.getElementById('editPrice').value = productToEdit.price;
-                
-                const editCategorySelect = document.getElementById('editCategory');
-                editCategorySelect.innerHTML = categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-                editCategorySelect.value = productToEdit.category;
-                
+
+                const select = document.getElementById('editCategory');
+                select.innerHTML = categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+                select.value = productToEdit.category;
+
                 editImageURLInput.value = productToEdit.image;
-                editImagePreview.src = productToEdit.image;
-                
+                editImagePreview.src = productToEdit.image || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="gray"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 002-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
                 editProductModal.classList.remove('hidden');
             }
         }
-        
-        // --- FIREBASE DINLEYICILERI YÖNETİMİ ---
-        
-        // Dinleyicileri tutmak için boş bir nesne
-        let activeListeners = {}; 
-        
+
+        let activeListeners = {};
         function stopAllListeners() {
-            // Önceki dinleyicileri kapat (off metodu ile)
-            if (activeListeners.products) productsRef.off('value', activeListeners.products);
-            if (activeListeners.campaigns) campaignsRef.off('value', activeListeners.campaigns);
-            if (activeListeners.campaignPriceText) campaignInfoRef.child('price_text').off('value', activeListeners.campaignPriceText);
-            if (activeListeners.priceBoxUrl) priceBoxUrlRef.off('value', activeListeners.priceBoxUrl);
-            
-            activeListeners = {}; // Nesneyi temizle
+            if (activeListeners.products && productsRef) productsRef.off('value', activeListeners.products);
+            if (activeListeners.campaigns && campaignsRef) campaignsRef.off('value', activeListeners.campaigns);
+            if (activeListeners.campaignPriceText && campaignInfoRef) campaignInfoRef.child('price_text').off('value', activeListeners.campaignPriceText);
+            if (activeListeners.priceBoxUrl && priceBoxUrlRef) priceBoxUrlRef.off('value', activeListeners.priceBoxUrl);
+            activeListeners = {};
         }
-        
+
         function setupDataListeners() {
-             // Firebase Dinleyicisi (Ürünler)
-            activeListeners.products = productsRef.on('value', (snapshot) => {
+            activeListeners.products = productsRef.on('value', (s) => {
                 products = [];
-                snapshot.forEach(childSnapshot => {
-                    const product = childSnapshot.val();
-                    product.key = childSnapshot.key;
-                    products.push(product);
-                });
-                
-                const activeTab = document.querySelector('.tab-button.active');
-                if (activeTab) {
-                    const activeId = activeTab.id;
-                    
-                    if (activeId === 'showProducts') {
-                        const filterSelect = document.getElementById('filterCategory');
-                        if (filterSelect) renderProductList(filterSelect.value);
-                    } else if (activeId === 'showBulkUpdate') {
-                        const bulkSelect = document.getElementById('bulkCategory');
-                        if (bulkSelect) renderBulkPriceList(bulkSelect.value);
-                    } else if (activeId === 'showSorting') {
-                        const sortSelect = document.getElementById('sortCategory');
-                        if (sortSelect && sortSelect.value) loadSortableList(sortSelect.value);
-                    }
-                }
+                s.forEach(c => { const p = c.val(); p.key = c.key; products.push(p); });
+                refreshActiveModule();
             });
 
-            // Firebase Dinleyicisi (Kampanya Görselleri)
-            activeListeners.campaigns = campaignsRef.on('value', (snapshot) => {
-                 campaignUrls = [];
-                 snapshot.forEach(childSnapshot => {
-                     const campaign = childSnapshot.val();
-                     campaign.key = childSnapshot.key;
-                     campaignUrls.push(campaign);
-                 });
-                 if (document.getElementById('sortableCampaignList')) { 
-                     renderCampaignList();
-                 }
+            activeListeners.campaigns = campaignsRef.on('value', (s) => {
+                campaignUrls = [];
+                s.forEach(c => { const camp = c.val(); camp.key = c.key; campaignUrls.push(camp); });
+                if (document.getElementById('sortableCampaignList')) renderCampaignList();
             });
-            
-            // Firebase Dinleyicisi (Kampanya Fiyat Metni)
-            activeListeners.campaignPriceText = campaignInfoRef.child('price_text').on('value', (snapshot) => {
-                 campaignPriceText = snapshot.val() || "";
-                 const inputEl = document.getElementById('campaignPriceTextInput');
-                 if(inputEl) {
-                     inputEl.value = campaignPriceText;
-                 }
-            });
-            
-            // Firebase Dinleyicisi (Fiyat Kutucuğu Görseli URL'si)
-            activeListeners.priceBoxUrl = priceBoxUrlRef.on('value', (snapshot) => {
-                 campaignPriceBoxUrl = snapshot.val() || "";
-                 const inputEl = document.getElementById('priceBoxImageURL');
-                 const previewEl = document.getElementById('priceBoxImagePreview');
-                 if(inputEl) {
-                     inputEl.value = campaignPriceBoxUrl;
-                 }
-                 if(previewEl) {
-                     previewEl.src = campaignPriceBoxUrl;
-                     if(campaignPriceBoxUrl) {
-                        previewEl.classList.remove('hidden');
-                     } else {
-                        previewEl.classList.add('hidden');
-                     }
-                 }
+
+            activeListeners.campaignPriceText = campaignInfoRef.child('price_text').on('value', (s) => {
+                campaignPriceText = s.val() || "";
             });
         }
 
-
-        // --- GENEL EVENT LISTENERS ---
+        // --- DOM HAZIR OLDUĞUNDA TETİKLE ---
         document.addEventListener('DOMContentLoaded', () => {
-            
-            // Başlangıçta Yerinde Menü referanslarını ayarla ve dinleyicileri başlat.
-            setFirebaseRefs('in_place'); 
-            
-            // Navigasyon Butonları
+            const loginOverlay = document.getElementById('adminLoginOverlay');
+            const usernameInput = document.getElementById('panelUsername');
+            const passwordInput = document.getElementById('panelPassword');
+            const loginError = document.getElementById('panelLoginError');
+            const submitLoginBtn = document.getElementById('submitPanelLoginBtn');
+
+            if (sessionStorage.getItem('olimpiyat_admin_logged_in') === 'true') loginOverlay.classList.add('hidden');
+
+            function handleAdminLogin() {
+                if (usernameInput.value.trim() === 'Olimpiyat' && passwordInput.value === 'Olimpiyatkoko34.') {
+                    loginError.classList.add('hidden');
+                    sessionStorage.setItem('olimpiyat_admin_logged_in', 'true');
+                    loginOverlay.classList.add('hidden');
+                } else {
+                    loginError.classList.remove('hidden'); passwordInput.value = ''; passwordInput.focus();
+                }
+            }
+
+            submitLoginBtn.addEventListener('click', handleAdminLogin);
+            [usernameInput, passwordInput].forEach(i => i.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAdminLogin(); }));
+
+            setFirebaseRefs('in_place');
+
             showProductsBtn.addEventListener('click', renderProductsModule);
-            showSortingBtn.addEventListener('click', renderSortingModule); 
-            showCampaignsBtn.addEventListener('click', renderCampaignModule); 
+            showSortingBtn.addEventListener('click', renderSortingModule);
+            showCampaignsBtn.addEventListener('click', renderCampaignModule);
             showAddProductBtn.addEventListener('click', renderAddProductModule);
             showBulkUpdateBtn.addEventListener('click', renderBulkUpdateModule);
             showStatsBtn.addEventListener('click', renderStatsModule);
-            
-            // YENİ: Menü Tipi Geçiş Butonları
+            document.getElementById('showGlobalDateUpdate').addEventListener('click', renderGlobalDateModule);
+
             document.getElementById('switchToInPlace').addEventListener('click', () => setFirebaseRefs('in_place'));
             document.getElementById('switchToDelivery').addEventListener('click', () => setFirebaseRefs('delivery'));
-            
-            // YENİ: Veri Kopyalama Butonu
             document.getElementById('copyToDeliveryBtn').addEventListener('click', copyMenuDataToDelivery);
-            
-            // Edit Modal Butonları
+
             closeEditProductModal.addEventListener('click', () => editProductModal.classList.add('hidden'));
-            uploadEditImageBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                openCloudinaryWidget(editImageURLInput, editImagePreview);
-            });
+            uploadEditImageBtn.addEventListener('click', (e) => { e.preventDefault(); openCloudinaryWidget(editImageURLInput, editImagePreview); });
+
+            // Sol menüdeki çıkış butonu dinleyicisi
+            const logoutBtn = document.querySelector('a[href="index.html"]');
+            if (logoutBtn) logoutBtn.addEventListener('click', () => sessionStorage.removeItem('olimpiyat_admin_logged_in'));
+
             saveEditProductButton.addEventListener('click', async () => {
                 const productKey = document.getElementById('editProductKey').value;
+                const newPrice = parseFloat(document.getElementById('editPrice').value);
+                if (isNaN(newPrice)) return;
+
+                const currentProduct = products.find(p => p.key === productKey);
+                const isPriceChanged = currentProduct && parseFloat(currentProduct.price.toFixed(2)) !== parseFloat(newPrice.toFixed(2));
+
                 const updates = {
                     name: document.getElementById('editName').value.trim(),
                     nameEN: document.getElementById('editNameEN').value.trim(),
                     desc: document.getElementById('editDesc').value.trim(),
                     descEN: document.getElementById('editDescEN').value.trim(),
-                    price: parseFloat(document.getElementById('editPrice').value),
+                    price: newPrice,
                     category: document.getElementById('editCategory').value,
                     image: editImageURLInput.value.trim()
                 };
-                
-                if (isNaN(updates.price)) { alert('Lütfen geçerli bir fiyat giriniz.'); return; }
+
+                if (isPriceChanged) updates.lastUpdated = Date.now();
+                else if (currentProduct) updates.lastUpdated = currentProduct.lastUpdated;
 
                 try {
-                    if (!updates.image) updates.image = ''; 
-
-                    // updateProductInFirebase fonksiyonu dinamik referansı kullanacak
-                    await updateProductInFirebase(productKey, updates); 
+                    await updateProductInFirebase(productKey, updates);
                     editProductModal.classList.add('hidden');
-                    alert(`"${updates.name}" ürünü başarıyla güncellendi.`);
-                } catch (error) {
-                    alert("Güncelleme işlemi başarısız oldu: " + error.message);
-                }
+                    alert("Ürün başarıyla güncellendi.");
+                } catch (error) { alert("Hata: " + error.message); }
             });
         });
     </script>
 </body>
+
 </html>
