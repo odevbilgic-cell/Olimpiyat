@@ -1527,22 +1527,328 @@
         let currentPairIndex = 0;  
         let totalInitialItems = 0; 
 
-        // 3. OYUN: Akıllı Gurme Testi Dinamik Değişkenleri
-        let currentQuestionIndex = 0;
-        let quizAnswers = { aci: 0, etTuru: '', porsiyon: '', soft: 0 };
-        let winnerFood = null;
-        let winnerDrink = null;
+       // --- YENİLENEN: DİNAMİK DALLANAN GURME TESTİ MOTORU ---
+        let currentStage = "START"; // START, SAKATAT, IZGARA, ATISTIRMALIK, FINAL
+        let quizHistory = [];       // Geri dönmek veya takip etmek için soru geçmişi
+        let currentQuestion = null;
+        
+       // --- 7x7 = 49 DALLI SÜRPRİZ GURME TESTİ AĞACI (TAMAMEN GİZEMLİ VE DOLAYLI) ---
+        const dynamicQuizTree = {
+            // ========================================================
+            // --- ADIM 1: ANA KATEGORİ YOL AYRIMI (GİRİŞ KAPISI) ---
+            // ========================================================
+            "START": {
+                q: "Olimpiyat Arenasına hoş geldiniz! Bugün ruhunuz nasıl bir gastronomi macerası arıyor?",
+                a: "Ateşin etrafında saatlerce sabırla pişen, o isli ve derin sokak felsefesi... 🪵", 
+                b: "Kömürün o meşhur kor ateşinde mühürlenen, dumanı üstünde ağır bir esnaf klasiği... 🔥",    
+                c: "Katmanların üst üste bindiği, sosların havada uçuştuğu o hızlı ve çıtır büfe enerjisi... 🍟",     
+                d: "Limon damlayınca kabuğunda parıldayan, o gizemli ve derin deniz altı sırrı... 🌊"   
+            },
 
-        // --- YENİLENEN GİZEMLİ GURME TESTİ SORULARI ---
-        const gourmetQuestions = [
-            { q: "Şu an tam olarak ne kadar açsınız?", a: "Kurt gibi açım, masayı yiyebilirim! 🐺", b: "Normalim, güzel bir şeyler atıştırmak istiyorum", c: "Biraz sabırsızım, hızlıca gelip doyuracak bir şey olsun", d: "Çok aç değilim, sadece keyif yapıyorum" },
-            { q: "Yemekte acı ve baharat dengesi sizin için ne ifade eder?", a: "Damaklar alev alsın, gözümden yaş gelsin! 🔥", b: "Hafif acı tatlı bir esinti, kararında baharat", c: "Acı olmasın ama kekik ve tuz kokusu buram buram gelsin", d: "Dümdüz, yalın ve sıfır baharat" },
-            { q: "Nasıl bir kıvam ve doku canınız çekiyor?", a: "Dışı çıtır çıtır, içi sulu ve yumuşacık bir usta işi", b: "Şöyle ızgaradan yeni inmiş, dumanı üstünde yoğun bir lezzet", c: "Sosu ve yağı ekmeğine sinmiş, lokum gibi yumuşak bir et", d: "Tane tane yiyebileceğim, deniz kokulu minik kaçamaklar" },
-            { q: "Ekmek arası bir lezzette sizin için en vazgeçilmez şey nedir?", a: "Tezgahtan sıcak sıcak kesilip ekmeğin arasına anında girmesi", b: "İçindeki malzemelerin birbiriyle uyumu ve doyuruculuğu", c: "Yanındaki çıtır çıtır patates patlaması", d: "Sosun ekmeği tamamen ıslatıp lezzeti katlaması" },
-            { q: "Öğle yemeği veya gece kaçamağı modunuz hangisi?", a: "Tezgah başında, taburede hızlıca gömmek!", b: "Güzel ve ferah bir masada, sakin sakin tadını çıkarmak", c: "Dükkanda hiç durmadan paket yaptırıp evde keyifle yemek", d: "Sakin bir köşede tek başıma atıştırmak" },
-            { q: "İçeceklerde karakteriniz hangisidir?", a: "Milli ve geleneksel lezzetlerden asla şaşmam, bol köpük ararım", b: "Yemeğin yanında keskin, sert ve iddialı tatları severim", c: "Soğuk, asitli ve ferahlatıcı modern klasikleri tercih ederim", d: "Hafif, meyvemsi veya sadece susuzluğumu yatıştıracak bir tat" },
-            { q: "Son soru: Olimpiyat tezgahından sana çıkacak lezzetin ruhu ne olmalı?", a: "Ümraniye müdavimlerinin vazgeçemediği o efsane sokak ruhu! 🥖", b: "Izgaranın ve kömür ateşinin o dumanlı esnaf fıtratı 🧆", c: "Çıtır patateslerin ve hızlı sosların o dinamik gençlik enerjisi 🍟", d: "Limonu sıkınca parıldayan o derin lezzet sırrı 🦪" }
-        ];
+            // ========================================================
+            // --- 1. ANA DAL: SOKAK FELESEFESİ YOLCULUĞU (12 DÜĞÜM) ---
+            // ========================================================
+            "KOKO_1": {
+                q: "[ANALİZ - Adım 2] Hazırlanacak malzemenin tahta üzerindeki nihai dokusu nasıl olmalı?",
+                a: "Bıçak darbeleriyle iyice inceltilmiş, adeta ağızda eriyen bir kıvama gelmiş",
+                b: "Dokusu korunmuş, karakterini ve o lifli yapısını çiğnerken hissettiren",
+                c: "Taze bahçe mahsulleriyle birlikte tavada sulu sulu harmanlanıp harareti yükseltilmiş",
+                d: "Bütünsel formda bırakılmış, doğrudan ateşin izini üzerinde taşıyan şeritler halinde"
+            },
+            "KOKO_2": {
+                q: "[ANALİZ - Adım 3] Baharat hattındaki cesaret seviyeniz tam olarak nerede duruyor?",
+                a: "Damakları tamamen ayağa kaldıran, o keskin ve yakıcı kırmızı yoğunluk! 🌶️",
+                b: "Doğanın yeşil aromaları ön planda olsun, sıcaklık arkadan tatlı bir esintiyle vursun",
+                c: "Sadece hafif bir tuz dokunuşu; ana malzemenin kendi saf fıtratı gölgelenmesin",
+                d: "Yalın, sakin ve sıfır uyarım; tamamen dingin bir esnaf ekolü"
+            },
+            "KOKO_3": {
+                q: "[ANALİZ - Adım 4] Bu yoğunluğu sarmalayacak olan dış gövdenin hacmi?",
+                a: "Dışı çıtırdayan, içi tamamen boşaltılmış sıcak bir yarım ölçek",
+                b: "Günün tüm yorgunluğunu unutturacak, çift katmanlı devasa bir tam gövde",
+                c: "Nefis bir tadımlık, gün ortasında hafif bir mola verecek çeyrek ölçek",
+                d: "Dış gövdeye gerek yok, doğrudan tabakta kendi saf haliyle yüzleşmek"
+            },
+            "KOKO_4": {
+                q: "[ANALİZ - Adım 5] İçeriğe ustadan ekstra gizli bir dolgu dokunuşu ister miyiz?",
+                a: "Sıcaklıkla birlikte tamamen eriyip sakızlaşan o yoğun süt beyazı doku 🧀",
+                b: "Arasına saklanmış altın sarısı, çıtır çıtır bir karbonhidrat sürprizi",
+                c: "Taze ve sulu kırmızı mahsullerin ferahlatıcı, ıslak desteği",
+                d: "Hiçbir şey ekleme; merkezdeki lezzet tek başına tahtında kalsın"
+            },
+            "KOKO_5": {
+                q: "[ANALİZ - Adım 6] Damaktaki bu yoğun esintiyi dengeleyecek olan sıvı güç hangisi?",
+                a: "Geleneksel yöntemle çalkalanmış, buz gibi ve yoğun beyaz köpüklü bir ferahlık",
+                b: "Fermente edilmiş, keskin ve iştahı sonuna kadar kamçılayan o koyu renkli yudum",
+                c: "Asitli, buzlu ve serinletici o küresel büfe klasiği",
+                d: "Harareti ve yağı anında nötrleyecek duru, serin ve berrak bir kaynak"
+            },
+            "KOKO_6": {
+                q: "[ANALİZ - Adım 7] Son hamle: Bu gurme deneyim şu an tam olarak nerede yaşanıyor?",
+                a: "Tezgahın hemen önünde, yüksek taburede sıcaklık kaybolmadan elden ele anlık!",
+                b: "Ferah bir masada, dostlarla uzun uzadıya süren bir sohbetin eşliğinde",
+                c: "Kilitli kutusunda eve taşınmış; en rahat köşede, tamamen izole bir keyifle",
+                d: "Gece yarısı caddenin kenarında, direksiyon başında hızlı ve gizli bir kaçamakla"
+            },
+            "KOKO_7": {
+                q: "[GİZEM DETAY - 1] Merkezdeki ana malzemenin yapısında daha hafif bir alternatif arar mısınız?",
+                a: "Evet, sosu içine daha çok hapseden, daha yumuşak ve kanatlı bir doku olabilir",
+                b: "Hayır, ben o en eski, en kemikleşmiş ve yoğrulmuş geleneksel sokak tadından şaşmam"
+            },
+            "KOKO_8": {
+                q: "[GİZEM DETAY - 2] Geleneksel mutfağın unlanıp kızartılan diğer yumuşak dokularına bakışınız?",
+                a: "Sıcak sacda tereyağıyla buluşmuş o eski usul lokum kıvamındaki sakatatları da severim",
+                b: "Farklı maceralara gerek yok, bugünkü odağımız o dönen ateş çemberi kalsın"
+            },
+            "KOKO_9": {
+                q: "[DOKU AYARI] Dış gövdenin iç çeperine işleyecek olan o nemlilik ve ıslaklık oranı?",
+                a: "Biraz yoğun ve sulu bırakılsın, lezzetin her damlası dış gövdeye tamamen sinsin",
+                b: "İyice kurutulmuş, fazla neminden tamamen arındırılmış daha katı bir kıvam"
+            },
+            "KOKO_10": {
+                q: "[YANCI AYARI] Deneyimin kenarına ekşilik ve kıtırlık katacak yeşil yancılar?",
+                a: "Evet, o sirkeyle harmanlanmış minik ve sert acı kapsülleri tabakta yerini alsın",
+                b: "Hayır, dış gövdenin içindeki kendi dengesi bana fazlasıyla yeterli"
+            },
+            "KOKO_11": {
+                q: "[RİTMİK AYAR] Tezgahın arkasından gelen o ritmik demir seslerinin modunuza etkisi?",
+                a: "O ritimler buranın melodisidir, iştahımı ve beklentimi sonuna kadar yükseltiyor!",
+                b: "Sessizce ve sakince hazırlansın ustam, bugün biraz kafa dinlemeye ihtiyacım var"
+            },
+            "KOKO_12": {
+                q: "[KİLİT SEÇİM] Bu deneyim yan unsurlarla tam bir set şölenine dönüştürülsün mü?",
+                a: "Evet, yanına çıtırıyla ve içeceğiyle tam bir menü kombinasyonu kurulsun",
+                b: "Hayır, sadece odaklandığım ana parça gelsin, dikkatim dağılmasın"
+            },
+
+            // ========================================================
+            // --- 2. ANA DAL: KOR ATEŞ VE DUMAN YOLCULUĞU (12 DÜĞÜM) ---
+            // ========================================================
+            "ET_1": {
+                q: "[DUMAN - Adım 2] Kor ateşin üzerinde pişecek olan ana malzemenin geometrisi?",
+                a: "Özel harçla yoğrulmuş, içi sulu kalacak şekilde şekillendirilmiş esnaf klasikleri 🧆",
+                b: "İncecik şeritler halinde dilimlenmiş, marine sosunu içine çekmiş çıtır beyaz doku",
+                c: "Kalın, dolgulu ve katmanların arasına çok yakışacak devasa bir gurme reçetesi",
+                d: "Sıcak sacın üzerinde preslenerek sıcaklıkla bütünleşen şarküteri harmanları"
+            },
+            "ET_2": {
+                q: "[DUMAN - Adım 3] Ateşin malzeme üzerindeki mühürleme derecesi nasıl olmalı?",
+                a: "Hafif nemli, öz suyu tamamen içinde hapsedilmiş yumuşacık bir kıvam",
+                b: "Dışı iyice mühürlenmiş, kömürün o dumanlı kokusunu son katmana kadar almış",
+                c: "Uzun süre marine edilip yavaşça pişmiş, adeta lif lif ayrılan lokum dokusu",
+                d: "Ateşte çok kalıp kurutulmamış, nem dengesi korunmuş esnek yapı"
+            },
+            "ET_3": {
+                q: "[DUMAN - Adım 4] Bu yoğun ziyafetin size sunulacağı ana paketleme formatı?",
+                a: "Fırından yeni çıkmış, kokusu üzerinde taze bir esnaf somununun arasında",
+                b: "Yuvarlak, pofuduk ve hafif tatlımsı modern fırın reçetelerinin içinde",
+                c: "Hiçbir sarmalayıcı olmadan, yanında közlenmiş mahsullerle açık porsiyon tabakta",
+                d: "Sıcak ve incecik açılmış bir buğday yaprağının (lavaşın) içine sıkıca sarılmış dürüm modunda"
+            },
+            "ET_4": {
+                q: "[DUMAN - Adım 5] İçerideki taze yeşillik ve yoğun peynir dengesi?",
+                a: "Bol piyazlık soğanlı ve sumaklı; tam bir sokak ve esnaf fıtratı",
+                b: "Soğansız; sadece taze çıtır yapraklar, turşu dilimleri ve dükkanın gizli sosu",
+                c: "Yeşillik olmasın, eritilmiş yoğun sarı veya beyaz bir katman her şeyi kaplasın 🧀",
+                d: "Tamamen sade; hiçbir yancı element o ana et dokusunu gölgelemesin"
+            },
+            "ET_5": {
+                q: "[DUMAN - Adım 6] Boğazınızdan akacak olan o asit veya ferahlık dengesi?",
+                a: "Soğuk, gazlı ve dumanlı tatları anında dengeleyecek o küresel şişe ferahlığı",
+                b: "Yoğun lezzetlerin ardından damaktaki yağı temizleyecek geleneksel yayık kıvamı",
+                c: "Baharat harmanını zirveye taşıyacak o buruk, mayhoş ve iddialı esnaf içeceği",
+                d: "Yemeği hiç ağırlaştırmayacak, sıfır kalori hafif bir sıvı desteği"
+            },
+            "ET_6": {
+                q: "[DUMAN - Adım 7] Son hamle: Bu hazırlanan gurme formül şu an kime gidiyor?",
+                a: "Yoğun bir günün ardından kurt gibi acıkmış, enerjisini geri kazanmak isteyen bir gence 🎓",
+                b: "Mesai arasında dükkandan hızlıca sipariş veren caddenin o hareketli esnaf ruhuna",
+                c: "Akşam eve dönerken eli boş gitmeyip evdekilere ziyafet kurmak isteyen gurme kafasına",
+                d: "Gece yarısı caddede ışıkları yanan tek sığınağa gelmiş o lezzet avcısına"
+            },
+            "ET_7": {
+                q: "[HARÇ AYARI] Malzemenin içindeki harç ve baharat karakteri nasıl yönlenmeli?",
+                a: "Yoğun kimyonlu, esnaf usulü zengin bir harç yapısı baskın olsun",
+                b: "Sadece ana malzemenin kendi saf tadı gelsin, baharatı arkadan hafifçe desteklesin"
+            },
+            "ET_8": {
+                q: "[SOS AYARI] Modern sunumlarda sosun yoğunluk karakteri ne olmalı?",
+                a: "Yoğun isli (barbekü) ve dükkan yapımı kıvamlı beyaz sosların gurme dokunuşu",
+                b: "Sadece klasik kırmızı domates özü ve hafif hardal esintisi"
+            },
+            "ET_9": {
+                q: "[ISLAKLIK] İnce dilimli beyaz et tercihlerinde marine sosunun durumu?",
+                a: "Bol kıvamlı beyaz sos ve dükkanın sıcak domates özlü sosuyla iyice ıslatılmış",
+                b: "Sossuz, tamamen kuru ve ateşten yeni çıkmış çıtır kıvamda"
+            },
+            "ET_10": {
+                q: "[YAN SEPET] Kutu içeriğine veya tabağın kenarına altın sarısı çıtırlar serpilsin mi?",
+                a: "Evet, boş kalan yerler o sıcak çıtır dilimlerle dolsun taşsın",
+                b: "Hayır, fazladan bir şey istemem; tabakta sadece mühürlenmiş etin kendi ağırlığı konuşsun"
+            },
+            "ET_11": {
+                q: "[DOKU HİSSİ] Dış kapsülün (ekmeğin) dişleriniz arasındaki o ilk ısırık reaksiyonu?",
+                a: "Dışı fırından yeni çıkmış gibi sert, çıtır ve gevreklik hissi veren yapı",
+                b: "Dişlerin arasına yumuşacık gömülen, pamuk gibi hafif sandviç yapısı"
+            },
+            "ET_12": {
+                q: "[ERİTME] Malzemenin üzerindeki peynirin karakteri nasıl tasarlanmalı?",
+                a: "Uzayan, beyaz ve sıcak sacda tamamen eriyip sakızlaşan yerli tarz",
+                b: "Yoğun, sarı ve malzemenin sıcaklığıyla üzerinde tabaka oluşturan batı tarzı"
+            },
+
+            // ========================================================
+            // --- 3. ANA DAL: ÇITIR & BÜFE YOLCULUĞU (12 DÜĞÜM) ---
+            // ========================================================
+            "ATIS_1": {
+                q: "[ÇITIR - Adım 2] Hızlı kombinasyonun temel omurgasını ne oluşturmalı?",
+                a: "Dış gövdenin arasına tamamen doldurulmuş yoğun bir altın sarısı çıtır şeridi 🍟",
+                b: "Sıcak pres makinelerinde iyice ezilmiş, dışı tereyağlı yoğun bir süt beyazı dolgusu",
+                c: "Dışı panelenmiş, çıtırdayan beyaz et parçalarının sıcak bir sarmalla buluşması",
+                d: "Yumuşacık yuvarlak hatların arasında eriyen hızlı büfe esintileri"
+            },
+            "ATIS_2": {
+                q: "[ÇITIR - Adım 3] Sosların iç çeperdeki yoğunluğu nasıl tasarlansın?",
+                a: "Bol kırmızı ve beyaz sos ikilisi her yeri tamamen kaplasın ve ıslatsın",
+                b: "Dükkanın özel acılı formülü ve hardal dokunuşuyla sert bir karakter kazansın",
+                c: "Hiçbir yapay sos olmasın; sadece içeride eriyen sıcak peynirin kendi doğal sıvısı aksın",
+                d: "Tamamen sossuz, kupkuru ve sadece gevreklik hissine odaklı kalsın"
+            },
+            "ATIS_3": {
+                q: "[ÇITIR - Adım 4] Ana omurganın arasına ekstra ne fırlatalım ustam?",
+                a: "Sıcak sacda dilimlenmiş sıcak şarküteri halkaları içeriği etlendirsin",
+                b: "Çıtır panelenmiş katmanlarla dolgunluğu iyice çoğaltalım",
+                c: "Közlenmiş biber veya ekşi turşu dilimleri aralara ferah bir denge katsın",
+                d: "Ekstra malzeme istemem, ana sadelik ve çıtırlık korunmalı"
+            },
+            "ATIS_4": {
+                q: "[ÇITIR - Adım 5] Porsiyonun hacmi ve doyuruculuk ölçeğiniz nedir?",
+                a: "Büyük boy tam gövde; malzemeler dışarı fırlasın, sınırları zorlasın!",
+                b: "Standart yarım oran; ne az ne çok, tam matematiksel dengede",
+                c: "Yanında ekstra soslu çıtır tabağıyla birlikte tam bir set şöleni",
+                d: "Çok hafif olsun, sadece anlık açlığı bastıracak mini bir geçiştirmelik"
+            },
+            "ATIS_5": {
+                q: "[ÇITIR - Adım 6] Bu hızlı bombaların yanına ne açıyoruz?",
+                a: "Buz gibi serinletici, gazlı ve kutu tasarımlı bir modern sıvı gücü",
+                b: "Pres lezzetlerin ve çıtırların en kadim dostu olan bol köpüklü beyaz ferahlık",
+                c: "Damaktaki yağı ve tuzu anında temizleyecek keskin ve iddialı geleneksel bir yudum",
+                d: "Hiçbir aroması olmayan, tamamen nötr serin bir su"
+            },
+            "ATIS_6": {
+                q: "[ÇITIR - Adım 7] Son karar: Bu çıtır kombinasyon günün hangi zaman dilimine gidiyor?",
+                a: "Öğle arasında, koşturmaca esnasında hızlıca ayaküstü atıştırmalık 🕒",
+                b: "Akşamüstü iş çıkışı, ana yemek öncesi kurtarıcı hızlı bir hamle olarak",
+                c: "Gece gece aniden gelen o tatlı acıkma krizini evde rahatça çözerken",
+                d: "Güne erken başlayıp sıcak bir pres lezzetiyle sabahı enerjik selamlamak için"
+            },
+            "ATIS_7": {
+                q: "[ŞARKÜTERİ STİLİ] İçeriğe girecek sıcak halkaların pişme stili nasıl olmalı?",
+                a: "Salçalı dükkan sosunda iyice kaynatılmış, yumuşak ve ıslak büfe usulü",
+                b: "Sıcak demirin üzerinde cızbız edilmiş, kuru ve çıtır kıvamda"
+            },
+            "ATIS_8": {
+                q: "[PRESLER] Peynirli pres lezzetinde ekstra bir katman arar mısınız?",
+                a: "Evet, araya baharatlı esnaf sucukları da girsin, tam karışık bir harman olsun",
+                b: "Hayır, sadece sade bol kaşarlı eriyen klasik süt dokusu temiz kalsın"
+            },
+            "ATIS_9": {
+                q: "[TUZ AYARI] Altın sarısı çıtırların yüzeyindeki tuz dengesi?",
+                a: "Bol tuzlu ve dükkanın özel baharat karışımıyla tamamen harmanlanmış",
+                b: "Sıfır tuz veya çok az tuz, malzemenin kendi saf öz tadı ön planda"
+            },
+            "ATIS_10": {
+                q: "[PRES EKMEĞİ] Pres lezzetinde kullanılacak olan ana taşıyıcı gövde?",
+                a: "Büyük çıtır somun ekmeğin içine basılmış, devasa esnaf tarzı",
+                b: "Klasik düz kare tost ekmeğine yapılmış hafif büfe tarzı"
+            },
+            "ATIS_11": {
+                q: "[BEYAZ SOS] Beyaz dip sosun içine gizlenecek olan o küçük gurme esintisi?",
+                a: "Evet, sarımsak aromalı bir dokunuş bu çıtırlara seviye atlatır",
+                b: "Hayır, düz klasik sade yapısı bozulmadan kalsın"
+            },
+            "ATIS_12": {
+                q: "[EK KATMAN] Menünün yanına 5 adet çıtır kaplamalı halka ekleyelim mi?",
+                a: "Evet, o çıtır kaplamalı soğan halkaları kombinasyonu tamamlar",
+                b: "Hayır, fazladan bir şeye gerek yok ana tercihim bana yeter"
+            },
+
+            // ========================================================
+            // --- 4. ANA DAL: DENİZ KOKUSU YOLCULUĞU (12 DÜĞÜM) ---
+            // ========================================================
+            "MIDYE_1": {
+                q: "[DENİZ - Adım 2] Kabuğun içindeki gizli pilavın baharat karakteri?",
+                a: "Karabiberi ve yenibaharı buram buram tüten yoğun esnaf tarzı",
+                b: "Hafif ve aromatik, pirinci tane tane dökülen daha yumuşak bir kıvam",
+                c: "Sıcak tencereden yeni çıkmış, içi sulu ve nemli Ege ekolü",
+                d: "Hafif zeytinyağlı, özel sosla harmanlanmış modern metropol tarzı"
+            },
+            "MIDYE_2": {
+                q: "[DENİZ - Adım 3] Üzerindeki sarı meyve (limon) operasyonunda sınırınız nedir?",
+                a: "Sıkınca her yerinden sular akmalı, sırılsıklam ekşi ve ıslak! 🍋",
+                b: "Sadece 1-2 drop, içindeki kendi baharat dengesini asla bastırmayacak kadar",
+                c: "Hiç istemem, kabuğun içindeki kendi doğal deniz tuzu bana fazlasıyla yeterli",
+                d: "Ekstra kırmızı baharat takviyesi ve bol ekşiyle çift etkili bir reaksiyon"
+            },
+            "MIDYE_3": {
+                q: "[DENİZ - Adım 4] Kabukların tane boyutu ve dolgunluk derecesi?",
+                a: "Dev boy (Duble), içi tamamen hacimle dolmuş tek hamlelik şampiyonlar",
+                b: "Orta boy, harç miktarı ile öz malzemenin tam matematiksel eşitliği",
+                c: "Küçük boy, çerez niyetine ardı ardına hızlıca gömülecek çıtırlar",
+                d: "Karışık boy; tepsiden o an ne çıkarsa tamamen şansıma esnaf usulü"
+            },
+            "MIDYE_4": {
+                q: "[DENİZ - Adım 5] Tek oturuşta tezgah başında devirmeyi planladığınız o limit?",
+                a: "50'lik kovalardan sipariş verip dükkan rekorunu kırmaya geldim! 🐋",
+                b: "20-30 tane, ana siparişin üzerine harika bir cila ve kapanış olsun diye",
+                c: "10 tanecik, tadımlık nefis bir gece yarısı ayaküstü kaçamağı",
+                d: "Sınırsız! Ben dur diyene kadar usta önümde kabukları açmaya devam etsin"
+            },
+            "MIDYE_5": {
+                q: "[DENİZ - Adım 6] Bu kabuk tepsisinin yanına en iyi hangi sıvı güç gider?",
+                a: "Asitli, buz gibi soğuk bir kutu dünya klasiği gazlı içecek",
+                b: "Deniz mahsulünün o tuzlu tadını dengeleyecek buz gibi serin bir şalgam suyu",
+                c: "Ezberleri tamamen bozup yanında köpüklü soğuk bir yayık denemek",
+                d: "Ağzı tamamen nötrleyecek sadece sade bir maden suyu veya duru su"
+            },
+            "MIDYE_6": {
+                q: "[DENİZ - Adım 7] Son mühür: Olimpiyat kabukları şu an kiminle paylaşılıyor?",
+                a: "Tek başıma, büyük bir gizlilikle hepsini tek kalemde ben gömeceğim! 🤫",
+                b: "Üniversiteden arkadaşlarla toplandık, kim daha çok yiyecek iddiasındayız 🎓",
+                c: "Sıkıca paket yaptırıp eve gece sürprizi olarak aileye götürüyorum",
+                d: "Tezgahın başında usta anlık açıyor, ben anında elinden kapıp havada yakalıyorum"
+            },
+            "MIDYE_7": {
+                q: "[ISI AYARI] Siparişiniz tencereden mi gelsin, soğuk tezgah dolabından mı?",
+                a: "Buharı üzerinde, tencereden yeni çıkmış sıcacık bir deneyim",
+                b: "Klasik serin buz yatağında bekletilmiş, ferahlatıcı soğuk dolap kıvamı"
+            },
+            "MIDYE_8": {
+                q: "[AROMA DETAY] İç harcın içinde kuş üzümü esintisi olsun ister misiniz?",
+                a: "Evet, hafif tatlımsı gurme iç pilavı esintilerini severim",
+                b: "Hayır, sadece bol karabiberli düz klasik pirinç harcı kalsın"
+            },
+            "MIDYE_9": {
+                q: "[EK SOS] Kabuğun içine dükkanın özel acı sosundan damlatalım mı?",
+                a: "Evet, o özel sos ekşilikle birleşince lezzeti tamamen katlıyor",
+                b: "Hayır, sos istemem; orijinal deniz fıtratı bozulmasın"
+            },
+            "MIDYE_10": {
+                q: "[YEME TARZI] Kabuğu kullanma tekniğinde hangi ekoldensiniz?",
+                a: "Üst kabuğu koparıp pilavı bir kaşık gibi sıyırarak zarafetle",
+                b: "Doğrudan ağzıma yaklaştırıp tek hamlede hüpürdeterek sokak usulü"
+            },
+            "MIDYE_11": {
+                q: "[TESLİMAT] Siparişiniz size nasıl paketlensin?",
+                a: " kapalı paket olarak",
+                b: " yolda yürürken tek tek lüpleyeceğim"
+            },
+            "MIDYE_12": {
+                q: "[CİLA] Bu devasa ziyafetin üzerine tatlı bir kapanış?",
+                a: "Tatlı harika olur, menüde o an ne varsa hemen yanına ekleyelim",
+                b: "Gerek yok, o nefis deniz tuzu tadı ağzımda bir süre daha kalsın"
+            }
+        };
 
         // Gelişmiş Ekran Değiştirme ve Reset Sihirbazı
         function switchScreen(screen) {
@@ -1866,95 +2172,151 @@
         document.getElementById('restartMatchupButton').addEventListener('click', startMatchupGame);
         document.getElementById('restartMatchupButton').textContent = language === 'TR' ? "🔄 Yeniden Kapıştır" : "🔄 Play Again";
 
-        // --- GURME TESTİ MOTORU VE AKILLI EŞLEŞTİRME ALGORİTMASI ---
+       
+
+        // Testi Sıfırdan Başlatan Fonksiyon
+       // Testi Sıfırdan Başlatan Fonksiyon
         function startSnakeGame() {
             snakeWinnerArea.classList.add('hidden');
             snakeGameArea.classList.remove('hidden');
-            loadQuizQuestion();
+            
+            // HER ŞEYİ SIFIRLA
+            currentStage = "START"; 
+            currentStepCounter = 1;
+            quizHistory = [];
+            quizAnswers = { etTuru: '', baharat: '', ekmek: '', yanLezzet: '', soft: 0 };
+            
+            // Soruyu hemen yükle
+            loadDynamicQuestion();
         }
 
-        function loadQuizQuestion() {
-            if (currentQuestionIndex >= gourmetQuestions.length) {
+        // Akıllı Soru Yükleme Motoru
+        function loadDynamicQuestion() {
+            let qKey = currentStage;
+            
+            // Eğer oyun sonuna gelindiyse direkt hesaplamaya gönder
+            if (qKey === "FINAL") {
                 calculateQuizResult();
                 return;
             }
 
-            const currentQ = gourmetQuestions[currentQuestionIndex];
-            
-            // Sayaç ve İlerleme Çubuğunu Güncelle
-            document.getElementById('snakeScoreLabel').textContent = ""; // Boşalt
-            document.getElementById('quizProgressLabel').textContent = `SORU: ${currentQuestionIndex + 1} / 7`;
-            const percent = ((currentQuestionIndex + 1) / gourmetQuestions.length) * 100;
+            currentQuestion = dynamicQuizTree[qKey];
+            if (!currentQuestion) {
+                calculateQuizResult();
+                return;
+            }
+
+            // Soru sayacını aşamalı gösterelim
+            let currentStep = quizHistory.length + 1;
+            document.getElementById('quizProgressLabel').textContent = `ANALİZ: ADIM ${currentStep}`;
+            // İlerleme çubuğunu tahmini doldur (Gittiği adıma göre %30, %60, %100)
+            let percent = currentStep === 1 ? 20 : (currentStep === 2 ? 60 : 90);
             document.getElementById('quizProgressBar').style.width = `${percent}%`;
 
-            // Soru Metnini Bas
-            document.getElementById('quizQuestionText').textContent = currentQ.q;
+            // Soru ve Şıkları Bas
+            document.getElementById('quizQuestionText').textContent = currentQuestion.q;
 
-            // Şıkları Butonlara Yerleştir
             const optButtons = document.querySelectorAll('.quiz-opt-btn');
             optButtons.forEach(btn => {
                 const opt = btn.dataset.option;
                 const textSpan = btn.querySelector('.opt-text');
                 
-                if (opt === 'A') textSpan.textContent = currentQ.a;
-                if (opt === 'B') textSpan.textContent = currentQ.b;
-                if (opt === 'C') textSpan.textContent = currentQ.c;
-                if (opt === 'D') textSpan.textContent = currentQ.d;
+                if (opt === 'A') textSpan.textContent = currentQuestion.a;
+                if (opt === 'B') textSpan.textContent = currentQuestion.b;
+                if (opt === 'C') textSpan.textContent = currentQuestion.c;
+                if (opt === 'D') textSpan.textContent = currentQuestion.d;
 
-                // Eski dinleyicileri temizlemek için butonu kopyalayıp yeniden bağlama (Kritik bug önleme)
+                // Event Listener temizleme
                 const newBtn = btn.cloneNode(true);
                 btn.parentNode.replaceChild(newBtn, btn);
-                newBtn.addEventListener('click', () => handleQuizAnswer(opt));
+                newBtn.addEventListener('click', () => processBranchingDecision(opt));
             });
         }
 
-        function handleQuizAnswer(selectedOption) {
-            // Müşterinin şıklarına göre damak tadı profili çıkarma
-            if (currentQuestionIndex === 1) { // Baharat sorusu
-                if (selectedOption === 'A') quizAnswers.aci = 2; // Çok acı
-                if (selectedOption === 'B') quizAnswers.aci = 1; // Orta
+        // CEVABA GÖRE SORU DEĞİŞTİREN KRİTİK KARAR MEKANİZMASI
+       function processBranchingDecision(opt) {
+            quizHistory.push(currentStage);
+
+            // 1. Adım: Ana Yol Ayrımı
+            if (currentStepCounter === 1) {
+                if (opt === 'A') { quizAnswers.etTuru = 'Kokoreç'; currentStage = "KOKO_1"; }
+                else if (opt === 'B') { quizAnswers.etTuru = 'Köfte'; currentStage = "ET_1"; }
+                else if (opt === 'C') { quizAnswers.etTuru = 'Patso'; currentStage = "ATIS_1"; }
+                else if (opt === 'D') { quizAnswers.etTuru = 'Midye'; currentStage = "MIDYE_1"; }
+            } 
+            // 2. Adım: Dallanma devamı
+            else if (currentStepCounter === 2) {
+                // Seçilen ana yola göre ikinci basamağa geç
+                if (quizHistory.includes("START")) {
+                    if (quizAnswers.etTuru === 'Kokoreç') currentStage = "KOKO_2";
+                    else if (quizAnswers.etTuru === 'Köfte') currentStage = "ET_2";
+                    else if (quizAnswers.etTuru === 'Patso') currentStage = "ATIS_2";
+                    else currentStage = "MIDYE_2";
+                }
             }
-            if (currentQuestionIndex === 2) { // Et Sorusu
-                if (selectedOption === 'A') quizAnswers.etTuru = 'Kokoreç';
-                if (selectedOption === 'B') quizAnswers.etTuru = 'Köfte';
-                if (selectedOption === 'C') quizAnswers.etTuru = 'Tavuk';
-                if (selectedOption === 'D') quizAnswers.etTuru = 'Midye';
+            // 3-6 Adımları arası: Rastgele veya sırayla ilerle
+            else if (currentStepCounter < 7) {
+                const stages = Object.keys(dynamicQuizTree);
+                // Mevcut dalın bir sonraki aşamasını basitçe bul
+                currentStage = stages[stages.indexOf(currentStage) + 1] || "FINAL";
             }
-            if (currentQuestionIndex === 4) { // Porsiyon sorusu
-                if (selectedOption === 'A' || selectedOption === 'C') quizAnswers.porsiyon = 'büyük';
-            }
-            if (currentQuestionIndex === 5) { // İçecek sorusu
-                if (selectedOption === 'A' || selectedOption === 'B') quizAnswers.soft = 0; // Ayran/Şalgam
-                if (selectedOption === 'C' || selectedOption === 'D') quizAnswers.soft = 1; // Kola/Meyve suyu
+            // 7. Adımda finali kilitle
+            else {
+                currentStage = "FINAL";
             }
 
-            // Sonraki soruya geç
-            currentQuestionIndex++;
-            setTimeout(loadQuizQuestion, 200);
+            currentStepCounter++;
+            loadDynamicQuestion();
         }
 
-        // MENÜDEN GERÇEK ÜRÜNLERİ ÇEKEN AKILLI EŞLEŞTİRME MOTORU
+        function loadDynamicQuestion() {
+            // Eğer 7 soru bittiyse veya sahne FINAL ise
+            if (currentStepCounter > 7 || currentStage === "FINAL") {
+                calculateQuizResult();
+                return;
+            }
+
+            // Düğümü çek
+            currentQuestion = dynamicQuizTree[currentStage];
+            
+            // Eğer düğüm tanımlı değilse güvenli çıkış yap
+            if (!currentQuestion) { calculateQuizResult(); return; }
+
+            // UI Güncellemeleri
+            document.getElementById('quizProgressLabel').textContent = `ANALİZ: ADIM ${currentStepCounter} / 7`;
+            document.getElementById('quizProgressBar').style.width = `${(currentStepCounter / 7) * 100}%`;
+            document.getElementById('quizQuestionText').textContent = currentQuestion.q;
+
+            // Şıkları düğüme göre bas
+            const optButtons = document.querySelectorAll('.quiz-opt-btn');
+            ['A', 'B', 'C', 'D'].forEach((opt, idx) => {
+                const btn = optButtons[idx];
+                const textSpan = btn.querySelector('.opt-text');
+                textSpan.textContent = currentQuestion[opt.toLowerCase()];
+
+                // Event Listener'ı tazele
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                newBtn.addEventListener('click', () => processBranchingDecision(opt));
+            });
+        }
+
+        // MENÜDEN GERÇEK ÜRÜNLERİ ÇEKEN AKILLI EŞLEŞTİRME MOTORU (DEĞİŞMEDİ)
         function calculateQuizResult() {
             snakeGameArea.classList.add('hidden');
             snakeWinnerArea.classList.remove('hidden');
 
+            document.getElementById('quizProgressBar').style.width = "100%";
             const fallbackImg = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
-
-            // 1. Veritabanındaki yiyecekleri filtrele (İçecek ve İletişim hariç)
+            
             let allFoods = products.filter(p => p.category !== 'İçecekler' && p.category !== 'İletişim');
-            // 2. Veritabanındaki içecekleri filtrele
             let allDrinks = products.filter(p => p.category === 'İçecekler');
 
-            // Eğer veritabanı boşsa acil durum koruması
-            if (allFoods.length === 0) allFoods = [ { name: "Yarım Ekmek Kokoreç", price: 150, image: "" } ];
-            if (allDrinks.length === 0) allDrinks = [ { name: "Köpüklü Ayran", price: 30, image: "" } ];
+            if (allFoods.length === 0) allFoods = [ { name: "Yarım Ekmek Kokoreç", price: 150, image: "", category: "Kokoreç" } ];
+            if (allDrinks.length === 0) allDrinks = [ { name: "Köpüklü Ayran", price: 30, image: "", category: "İçecekler" } ];
 
-            // --- ANA YEMEK SEÇİM SİHİRBAZI ---
-            let filteredFoods = [];
-            if (quizAnswers.etTuru !== '') {
-                filteredFoods = allFoods.filter(p => p.category.includes(quizAnswers.etTuru) || p.name.includes(quizAnswers.etTuru));
-            }
-            // Filtre eşleşmediyse porsiyona veya rastgeleye göre ata
+            // Verilen dinamik kararlara göre filtrele
+            let filteredFoods = allFoods.filter(p => p.category.includes(quizAnswers.etTuru) || p.name.includes(quizAnswers.etTuru));
             if (filteredFoods.length === 0) {
                 filteredFoods = quizAnswers.porsiyon === 'büyük' 
                     ? allFoods.filter(p => p.name.toLowerCase().includes('ekmek') || p.name.toLowerCase().includes('menü'))
@@ -1963,27 +2325,21 @@
             if (filteredFoods.length === 0) filteredFoods = allFoods;
             winnerFood = filteredFoods[Math.floor(Math.random() * filteredFoods.length)];
 
-            // --- İÇECEK SEÇİM SİHİRBAZI ---
             let filteredDrinks = [];
             if (quizAnswers.soft === 0) {
-                // Ayran veya Şalgam seç
                 filteredDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('ayran') || d.name.toLowerCase().includes('şalgam'));
             } else {
-                // Asitli veya tatlı içecek seç
                 filteredDrinks = allDrinks.filter(d => !d.name.toLowerCase().includes('ayran') && !d.name.toLowerCase().includes('şalgam'));
             }
             if (filteredDrinks.length === 0) filteredDrinks = allDrinks;
             winnerDrink = filteredDrinks[Math.floor(Math.random() * filteredDrinks.length)];
 
-            // --- FİNAL EKRANI GRAFİK VE YAZILARINI BASMA ---
             const foodName = language === 'TR' ? winnerFood.name : winnerFood.nameEN || winnerFood.name;
             const drinkName = language === 'TR' ? winnerDrink.name : winnerDrink.nameEN || winnerDrink.name;
 
-            // Fiyat kontrolü (İndirimli fiyat varsa onu göster)
             const fPrice = (winnerFood.discountPrice !== undefined && winnerFood.discountPrice !== null && winnerFood.discountPrice !== "") ? winnerFood.discountPrice : winnerFood.price;
             const dPrice = (winnerDrink.discountPrice !== undefined && winnerDrink.discountPrice !== null && winnerDrink.discountPrice !== "") ? winnerDrink.discountPrice : winnerDrink.price;
 
-            // HTML elemanlarını doldur
             document.getElementById('quizWinnerFoodImg').src = winnerFood.image || fallbackImg;
             document.getElementById('quizWinnerFoodTitle').textContent = foodName;
             document.getElementById('quizWinnerFoodPrice').textContent = fPrice + " ₺";
@@ -1992,19 +2348,9 @@
             document.getElementById('quizWinnerDrinkTitle').textContent = drinkName;
             document.getElementById('quizWinnerDrinkPrice').textContent = dPrice + " ₺";
             
-            // Dil Desteği Çevirisi
-            document.getElementById('closeQuizAndShowBtn').textContent = language === 'TR' ? "🍽️ Menüde İncele" : "🍽️ View in Menu";
+            // Geçmişi temizle (Tekrar oynamak için)
+            quizHistory = [];
         }
-
-        // "Menüde İncele" butonuna basıldığında modalı kapatıp o ürünü listeler
-        document.getElementById('closeQuizAndShowBtn').addEventListener('click', () => {
-            wheelModal.classList.add('hidden'); // Modalı kapat
-            if (winnerFood && winnerFood.category) {
-                // O yemeğin kategorisine ait sekmeyi bul ve otomatik tıkla
-                const targetTab = document.querySelector(`.tabBtn[data-category="${winnerFood.category}"]`);
-                if (targetTab) targetTab.click();
-            }
-        });
     </script>
 </body>
 
