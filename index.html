@@ -432,6 +432,20 @@
                         </div>
                         <span class="text-xl">➔</span>
                     </button>
+
+                    <!-- 3. OYUN: OLİMPİYAT AKILLI GURME TESTİ -->
+                    <button id="selectSnakeGame"
+                        class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-red-600 to-amber-500 text-white rounded-xl font-bold shadow-md hover:opacity-90 transition transform hover:-translate-y-0.5">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">🧠</span>
+                            <div class="text-left">
+                                <p class="font-black text-base">Olimpiyat Gurme Testi</p>
+                                <p class="text-xs text-red-100 font-normal">7 soruda damak tadını analiz edelim, sana
+                                    özel menüyü çıkaralım!</p>
+                            </div>
+                        </div>
+                        <span class="text-xl">➔</span>
+                    </button>
                 </div>
             </div>
 
@@ -494,9 +508,9 @@
                         class="bg-white rounded-2xl overflow-hidden shadow-xl cursor-pointer transition transform active:scale-95 flex flex-col border border-gray-100">
                         <div class="relative h-48 w-full bg-gray-50 flex items-center justify-center">
                             <img id="imgA" class="w-full h-full object-contain">
-
                         </div>
-                        <div class="p-4 text-left bg-gradient-to-b from-gray-50 to-white border-t border-gray-50">
+                        <div
+                            class="p-4 text-left bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 relative">
                             <h3 id="titleA" class="font-black text-base text-gray-800 leading-tight"></h3>
                             <p id="descA" class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed"></p>
                             <span id="priceA"
@@ -513,9 +527,9 @@
                         class="bg-white rounded-2xl overflow-hidden shadow-xl cursor-pointer transition transform active:scale-95 flex flex-col border border-gray-100">
                         <div class="relative h-48 w-full bg-gray-50 flex items-center justify-center">
                             <img id="imgB" class="w-full h-full object-contain">
-
                         </div>
-                        <div class="p-4 text-left bg-gradient-to-b from-gray-50 to-white border-t border-gray-50">
+                        <div
+                            class="p-4 text-left bg-gradient-to-b from-gray-50 to-white border-t border-gray-100 relative">
                             <h3 id="titleB" class="font-black text-base text-gray-800 leading-tight"></h3>
                             <p id="descB" class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed"></p>
                             <span id="priceB"
@@ -549,13 +563,268 @@
                     Yeniden Kapıştır</button>
             </div>
 
-            <button id="backToSelectionButton" class="hidden mt-4 text-xs text-gray-400 hover:text-gray-600 underline">
+            <!-- YENİ OYUN ALANI: AKILLI GURME TESTİ -->
+            <div id="snakeGameArea" class="hidden animate-pop-in text-center max-w-sm mx-auto">
+                <!-- İlerleme Çubuğu ve Soru Sayacı -->
+                <div
+                    class="flex justify-between items-center mb-3 bg-gray-900 text-white p-3 rounded-xl border border-orange-500/30">
+                    <span id="quizProgressLabel" class="text-xs font-black text-yellow-400">SORU: 1 / 7</span>
+                    <div class="w-2/3 bg-gray-700 h-2 rounded-full overflow-hidden">
+                        <div id="quizProgressBar"
+                            class="bg-gradient-to-r from-red-500 to-orange-500 h-full transition-all duration-300"
+                            style="width: 14%"></div>
+                    </div>
+                </div>
+
+                <!-- Soru Kartı -->
+                <div class="bg-white rounded-2xl p-5 border-2 border-orange-100 shadow-xl text-left">
+                    <h3 id="quizQuestionText" class="font-black text-base text-gray-800 leading-tight mb-4">Soru metni
+                        yükleniyor...</h3>
+
+                    <!-- 4 Şıklı Seçenek Butonları -->
+                    <div class="space-y-2.5">
+                        <button data-option="A"
+                            class="quiz-opt-btn w-full text-left p-3 rounded-xl border-2 border-gray-100 hover:border-orange-400 hover:bg-orange-50/50 font-semibold text-xs sm:text-sm transition flex items-center gap-2">
+                            <span
+                                class="bg-gray-100 text-gray-600 w-6 h-6 rounded-lg flex items-center justify-center font-black">A</span>
+                            <span class="opt-text flex-1">Secenek A</span>
+                        </button>
+                        <button data-option="B"
+                            class="quiz-opt-btn w-full text-left p-3 rounded-xl border-2 border-gray-100 hover:border-orange-400 hover:bg-orange-50/50 font-semibold text-xs sm:text-sm transition flex items-center gap-2">
+                            <span
+                                class="bg-gray-100 text-gray-600 w-6 h-6 rounded-lg flex items-center justify-center font-black">B</span>
+                            <span class="opt-text flex-1">Secenek B</span>
+                        </button>
+                        <button data-option="C"
+                            class="quiz-opt-btn w-full text-left p-3 rounded-xl border-2 border-gray-100 hover:border-orange-400 hover:bg-orange-50/50 font-semibold text-xs sm:text-sm transition flex items-center gap-2">
+                            <span
+                                class="bg-gray-100 text-gray-600 w-6 h-6 rounded-lg flex items-center justify-center font-black">C</span>
+                            <span class="opt-text flex-1">Secenek C</span>
+                        </button>
+                        <button data-option="D"
+                            class="quiz-opt-btn w-full text-left p-3 rounded-xl border-2 border-gray-100 hover:border-orange-400 hover:bg-orange-50/50 font-semibold text-xs sm:text-sm transition flex items-center gap-2">
+                            <span
+                                class="bg-gray-100 text-gray-600 w-6 h-6 rounded-lg flex items-center justify-center font-black">D</span>
+                            <span class="opt-text flex-1">Secenek D</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GURME TESTİ FİNAL / KAZANAN EKRANI -->
+            <div id="snakeWinnerArea" class="hidden py-2 animate-pop-in text-center max-w-sm mx-auto">
+                <span class="text-5xl mb-2 block animate-bounce">🍳✨</span>
+                <h3 class="text-xl font-black text-green-600 mb-1">İşte Tam Size Göre Bir Menü!</h3>
+                <p id="quizResultSubtitle" class="text-xs text-gray-500 mb-4">Yaptığınız seçimlere göre damak tadınızın
+                    şifresini çözdük:</p>
+
+                <!-- Yan Yana veya Üst Üste Gelecek Çiftli Menü Kartı -->
+                <div class="space-y-3 mb-5">
+                    <!-- 1. ANA YEMEK KARTI -->
+                    <div
+                        class="border-2 border-orange-500 rounded-2xl overflow-hidden bg-white shadow-lg flex items-center p-3 gap-3">
+                        <img id="quizWinnerFoodImg" class="w-20 h-20 object-cover rounded-xl border flex-shrink-0">
+                        <div class="text-left flex-1 min-w-0">
+                            <span
+                                class="text-[9px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Ana
+                                Yemek</span>
+                            <h4 id="quizWinnerFoodTitle" class="font-black text-sm text-gray-800 truncate mt-1"></h4>
+                            <p id="quizWinnerFoodPrice" class="text-orange-600 font-black text-xs mt-0.5"></p>
+                        </div>
+                    </div>
+
+                    <!-- 2. İÇECEK KARTI -->
+                    <div
+                        class="border-2 border-amber-400 rounded-2xl overflow-hidden bg-white shadow-lg flex items-center p-3 gap-3">
+                        <img id="quizWinnerDrinkImg" class="w-20 h-20 object-cover rounded-xl border flex-shrink-0">
+                        <div class="text-left flex-1 min-w-0">
+                            <span
+                                class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">En
+                                İyi Giden İçecek</span>
+                            <h4 id="quizWinnerDrinkTitle" class="font-black text-sm text-gray-800 truncate mt-1"></h4>
+                            <p id="quizWinnerDrinkPrice" class="text-amber-600 font-black text-xs mt-0.5"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button id="restartSnakeButton"
+                        class="flex-1 bg-gradient-to-r from-red-600 to-orange-500 text-white font-black text-xs px-4 py-3 rounded-xl shadow-md transform active:scale-95 transition">🔄
+                        Testi Yeniden Çöz</button>
+                    <button id="closeQuizAndShowBtn"
+                        class="flex-1 bg-gray-800 text-white font-black text-xs px-4 py-3 rounded-xl shadow-md transform active:scale-95 transition">🍽️
+                        Menüde İncele</button>
+                </div>
+            </div>
+
+            <button id="backToSelectionButton"
+                class="hidden mt-4 text-xs text-gray-400 hover:text-gray-600 underline mx-auto block">
                 ⬅ Oyun Seçim Menüsüne Dön
             </button>
         </div>
     </div>
 
+    <div id="wheelGameArea" class="hidden">
+        <div id="wheelHeaderGroup">
+            <h2 id="wheelTitle" class="text-2xl font-black text-orange-600 mb-1">Ne Yesem?</h2>
+            <p id="wheelSubtitle" class="text-xs text-gray-500 mb-4">Parmağınla fırlat veya butona basarak
+                lezzet çarkını çevir!</p>
+        </div>
 
+        <div id="wheelWinnerHeaderGroup" class="hidden text-center pb-3 animate-pop-in">
+            <span class="text-5xl inline-block animate-bounce mb-1">🏆</span>
+            <h3 id="wheelWinnerHeading" class="text-xl font-black text-green-600 leading-none uppercase tracking-wide">
+                Günün Şanslı
+                Lezzeti!</h3>
+        </div>
+
+        <div id="wheelInteractiveArea"
+            class="relative w-72 h-[340px] mx-auto mb-4 flex items-center justify-center overflow-hidden">
+            <div id="wheelContainer" class="relative w-full h-full flex items-center justify-center overflow-hidden">
+                <div
+                    class="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[25px] border-t-red-600 drop-shadow-md">
+                </div>
+                <canvas id="wheelCanvas" width="280" height="280" class="rounded-full shadow-md mt-4"></canvas>
+                <button id="spinButton"
+                    class="absolute w-14 h-14 bg-red-600 text-white rounded-full font-black text-xs shadow-xl border-4 border-white flex items-center justify-center z-10 hover:bg-red-700 uppercase tracking-wider mt-4">ÇEVİR</button>
+            </div>
+
+            <div id="wheelBigResultCard"
+                class="hidden absolute inset-0 w-full h-full rounded-2xl overflow-hidden bg-white border-2 border-green-500 shadow-2xl flex flex-col animate-pop-in">
+                <div class="relative w-full h-3/4 bg-gray-50 border-b border-gray-100">
+                    <img id="wheelResultImage" class="w-full h-full object-contain">
+                    <span id="wheelResultPrice"
+                        class="absolute bottom-3 right-3 bg-green-600 text-white font-black text-base px-3 py-1 rounded-lg shadow-md whitespace-nowrap"></span>
+                </div>
+                <div
+                    class="p-3 text-left bg-gradient-to-b from-green-50 to-white flex-grow flex flex-col justify-center">
+                    <h4 id="wheelResultTitle" class="font-black text-base text-gray-800 leading-tight mb-1">
+                    </h4>
+                    <p id="wheelResultDesc" class="text-gray-500 text-xs line-clamp-2 leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+
+        <button id="reSpinButton"
+            class="hidden mx-auto bg-gray-800 text-white font-bold text-xs px-4 py-2 rounded-full hover:bg-orange-600 transition duration-300">🔄
+            Başka Bir Şey Seç</button>
+    </div>
+
+    <div id="matchupGameArea" class="hidden">
+        <h2 class="text-2xl font-black text-red-600 mb-1">Bu mu? Şu mu?</h2>
+        <div class="w-full bg-gray-200 rounded-full h-1.5 mb-4">
+            <div id="matchupProgress" class="bg-red-600 h-1.5 rounded-full transition-all duration-300"
+                style="width: 0%"></div>
+        </div>
+
+        <div class="flex flex-col gap-6 my-4 relative">
+            <div id="optionA"
+                class="bg-white rounded-2xl overflow-hidden shadow-xl cursor-pointer transition transform active:scale-95 flex flex-col border border-gray-100">
+                <div class="relative h-48 w-full bg-gray-50 flex items-center justify-center">
+                    <img id="imgA" class="w-full h-full object-contain">
+
+                </div>
+                <div class="p-4 text-left bg-gradient-to-b from-gray-50 to-white border-t border-gray-50">
+                    <h3 id="titleA" class="font-black text-base text-gray-800 leading-tight"></h3>
+                    <p id="descA" class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed"></p>
+                    <span id="priceA"
+                        class="absolute bottom-5 right-3 bg-orange-100 text-orange-600 font-black text-sm px-3 py-1 rounded-lg shadow-sm"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center my-[-24px] z-10">
+                <span
+                    class="bg-red-600 text-white font-black text-xs w-8 h-8 rounded-full flex items-center justify-center border-4 border-white shadow-md animate-pulse">VS</span>
+            </div>
+
+            <div id="optionB"
+                class="bg-white rounded-2xl overflow-hidden shadow-xl cursor-pointer transition transform active:scale-95 flex flex-col border border-gray-100">
+                <div class="relative h-48 w-full bg-gray-50 flex items-center justify-center">
+                    <img id="imgB" class="w-full h-full object-contain">
+
+                </div>
+                <div class="p-4 text-left bg-gradient-to-b from-gray-50 to-white border-t border-gray-50">
+                    <h3 id="titleB" class="font-black text-base text-gray-800 leading-tight"></h3>
+                    <p id="descB" class="text-gray-500 text-xs mt-1 line-clamp-2 leading-relaxed"></p>
+                    <span id="priceB"
+                        class="absolute bottom-5 right-3 bg-orange-100 text-orange-600 font-black text-sm px-3 py-1 rounded-lg shadow-sm"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="matchupWinnerArea" class="hidden py-2">
+        <span class="text-4xl mb-1 block animate-bounce">🏆</span>
+        <h3 class="text-xl font-black text-green-600 mb-3">İşte Tam Canınızın Çektiği Lezzet!</h3>
+
+        <div class="border-2 border-green-500 rounded-2xl overflow-hidden bg-white shadow-lg mb-4">
+            <div class="w-full h-48 bg-gray-50 flex items-center justify-center">
+                <img id="winnerMatchImage" class="w-full h-full object-contain">
+            </div>
+            <div class="p-4 text-left bg-gradient-to-b from-green-50 to-white relative border-t border-gray-100">
+                <h4 id="winnerMatchTitle" class="font-black text-lg text-gray-800 mb-1"></h4>
+                <p id="winnerMatchDesc" class="text-gray-600 text-xs line-clamp-3 mb-2"></p>
+                <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                    <span class="text-xs text-gray-400 italic">Şampiyon Seçim</span>
+                    <span id="winnerMatchPrice"
+                        class="bg-green-600 text-white font-black text-base px-3 py-1 rounded-lg"></span>
+                </div>
+            </div>
+        </div>
+        <button id="restartMatchupButton"
+            class="bg-gray-800 text-white font-bold text-xs px-5 py-2.5 rounded-full hover:bg-red-600 transition duration-300">🔄
+            Yeniden Kapıştır</button>
+    </div>
+
+    <button id="backToSelectionButton" class="hidden mt-4 text-xs text-gray-400 hover:text-gray-600 underline">
+        ⬅ Oyun Seçim Menüsüne Dön
+    </button>
+
+
+    </div>
+    </div>
+
+
+    <!-- YENİ OYUN ALANI: LEZZET AVCISI (SNAKE) -->
+    <div id="snakeGameArea" class="hidden animate-pop-in text-center">
+        <div
+            class="flex justify-between items-center mb-3 bg-gray-900 text-white p-3 rounded-xl border border-orange-500/30">
+            <span id="snakeScoreLabel" class="text-sm font-black text-yellow-400">SKOR: 0</span>
+            <span id="snakeHighLabel" class="text-xs font-bold text-gray-400">EN YÜKSEK: 0</span>
+        </div>
+
+        <!-- Oyun Ekranı -->
+        <div
+            class="relative inline-block bg-gray-950 rounded-2xl p-1.5 border-4 border-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.4)]">
+            <canvas id="snakeCanvas" width="300" height="300" class="rounded-xl bg-gray-900"></canvas>
+        </div>
+
+        <!-- MOBİL DOKUNMATİK JOYSTICK PANELİ (Sadece telefonlarda el uyuşmasın diye tam ergonomik) -->
+        <div class="grid grid-cols-3 gap-2 max-w-[160px] mx-auto mt-4 md:hidden">
+            <div></div>
+            <button id="btnSnakeUp"
+                class="bg-orange-500 text-white font-black p-3 rounded-xl active:bg-red-600 shadow border border-white/20">▲</button>
+            <div></div>
+            <button id="btnSnakeLeft"
+                class="bg-orange-50 text-orange-600 font-black p-3 rounded-xl active:bg-orange-200 shadow border border-orange-200">◀</button>
+            <div class="flex items-center justify-center text-xl">🎮</div>
+            <button id="btnSnakeRight"
+                class="bg-orange-50 text-orange-600 font-black p-3 rounded-xl active:bg-orange-200 shadow border border-orange-200">▶</button>
+            <div></div>
+            <button id="btnSnakeDown"
+                class="bg-orange-500 text-white font-black p-3 rounded-xl active:bg-red-600 shadow border border-white/20">▼</button>
+        </div>
+    </div>
+
+    <!-- LEZZET AVCISI GAME OVER PANELS -->
+    <div id="snakeWinnerArea" class="hidden py-4 animate-pop-in text-center">
+        <span class="text-5xl mb-2 block animate-bounce">🛵🔥</span>
+        <h3 class="text-xl font-black text-red-600 mb-1">Oyun Bitti Ustam!</h3>
+        <p id="snakeResultText" class="text-sm text-gray-600 mb-4 px-4 leading-relaxed"></p>
+        <button id="restartSnakeButton"
+            class="bg-gradient-to-r from-red-600 to-orange-500 text-white font-black text-xs px-6 py-3 rounded-full hover:shadow-lg transition duration-300 transform active:scale-95">🔄
+            Tezgahı Yeniden Kur</button>
+    </div>f
 
 
 
@@ -1213,24 +1482,28 @@
             //setupIntervals();
         });
 
-        // --- MULTI-GAME (ÇARK & MATCHUP) OYUN MOTORU ---
+        // --- MULTI-GAME (ÇARK, MATCHUP & GURME TESTİ) OYUN MOTORU ---
         const wheelModal = document.getElementById('wheelModal');
         const floatingWheelButton = document.getElementById('floatingWheelButton');
         const closeWheelModal = document.getElementById('closeWheelModal');
 
-        // Ekranlar
+        // Ekran Kapsayıcı Elementleri
         const gameSelectionScreen = document.getElementById('gameSelectionScreen');
         const wheelGameArea = document.getElementById('wheelGameArea');
         const matchupGameArea = document.getElementById('matchupGameArea');
         const matchupWinnerArea = document.getElementById('matchupWinnerArea');
+        const snakeGameArea = document.getElementById('snakeGameArea');
+        const snakeWinnerArea = document.getElementById('snakeWinnerArea');
         const backToSelectionButton = document.getElementById('backToSelectionButton');
 
-        // Oyun Seçim Butonları
+        // Oyun Seçim Buton Dinleyicileri
         document.getElementById('selectWheelGame').addEventListener('click', () => switchScreen('wheel'));
         document.getElementById('selectMatchupGame').addEventListener('click', () => switchScreen('matchup'));
+        document.getElementById('selectSnakeGame').addEventListener('click', () => switchScreen('snake'));
         backToSelectionButton.addEventListener('click', () => switchScreen('selection'));
+        document.getElementById('restartSnakeButton').addEventListener('click', startSnakeGame);
 
-        // 1. OYUN: Çarkıfelek Elementleri
+        // 1. OYUN: Çarkıfelek Elementleri ve Değişkenleri
         const spinButton = document.getElementById('spinButton');
         const reSpinButton = document.getElementById('reSpinButton');
         const wheelCanvas = document.getElementById('wheelCanvas');
@@ -1248,13 +1521,30 @@
         let startAngle = 0;
         let lastAngles = [];
 
-        // 2. OYUN: "Bu mu Şu mu?" Elementleri ve Değişkenleri
-        let matchupPool = [];      // O anki turda yarışan yiyecekler
-        let nextRoundPool = [];    // Seçilenlerin bir üst tura çıktığı havuz
-        let currentPairIndex = 0;  // Şu an kapışan çiftin sırası
-        let totalInitialItems = 0; // İlerleme çubuğu hesabı için
+        // 2. OYUN: "Bu mu Şu mu?" Turnuva Değişkenleri
+        let matchupPool = [];      
+        let nextRoundPool = [];    
+        let currentPairIndex = 0;  
+        let totalInitialItems = 0; 
 
-        // Ekran Değiştirme Sihirbazı
+        // 3. OYUN: Akıllı Gurme Testi Dinamik Değişkenleri
+        let currentQuestionIndex = 0;
+        let quizAnswers = { aci: 0, etTuru: '', porsiyon: '', soft: 0 };
+        let winnerFood = null;
+        let winnerDrink = null;
+
+        // --- YENİLENEN GİZEMLİ GURME TESTİ SORULARI ---
+        const gourmetQuestions = [
+            { q: "Şu an tam olarak ne kadar açsınız?", a: "Kurt gibi açım, masayı yiyebilirim! 🐺", b: "Normalim, güzel bir şeyler atıştırmak istiyorum", c: "Biraz sabırsızım, hızlıca gelip doyuracak bir şey olsun", d: "Çok aç değilim, sadece keyif yapıyorum" },
+            { q: "Yemekte acı ve baharat dengesi sizin için ne ifade eder?", a: "Damaklar alev alsın, gözümden yaş gelsin! 🔥", b: "Hafif acı tatlı bir esinti, kararında baharat", c: "Acı olmasın ama kekik ve tuz kokusu buram buram gelsin", d: "Dümdüz, yalın ve sıfır baharat" },
+            { q: "Nasıl bir kıvam ve doku canınız çekiyor?", a: "Dışı çıtır çıtır, içi sulu ve yumuşacık bir usta işi", b: "Şöyle ızgaradan yeni inmiş, dumanı üstünde yoğun bir lezzet", c: "Sosu ve yağı ekmeğine sinmiş, lokum gibi yumuşak bir et", d: "Tane tane yiyebileceğim, deniz kokulu minik kaçamaklar" },
+            { q: "Ekmek arası bir lezzette sizin için en vazgeçilmez şey nedir?", a: "Tezgahtan sıcak sıcak kesilip ekmeğin arasına anında girmesi", b: "İçindeki malzemelerin birbiriyle uyumu ve doyuruculuğu", c: "Yanındaki çıtır çıtır patates patlaması", d: "Sosun ekmeği tamamen ıslatıp lezzeti katlaması" },
+            { q: "Öğle yemeği veya gece kaçamağı modunuz hangisi?", a: "Tezgah başında, taburede hızlıca gömmek!", b: "Güzel ve ferah bir masada, sakin sakin tadını çıkarmak", c: "Dükkanda hiç durmadan paket yaptırıp evde keyifle yemek", d: "Sakin bir köşede tek başıma atıştırmak" },
+            { q: "İçeceklerde karakteriniz hangisidir?", a: "Milli ve geleneksel lezzetlerden asla şaşmam, bol köpük ararım", b: "Yemeğin yanında keskin, sert ve iddialı tatları severim", c: "Soğuk, asitli ve ferahlatıcı modern klasikleri tercih ederim", d: "Hafif, meyvemsi veya sadece susuzluğumu yatıştıracak bir tat" },
+            { q: "Son soru: Olimpiyat tezgahından sana çıkacak lezzetin ruhu ne olmalı?", a: "Ümraniye müdavimlerinin vazgeçemediği o efsane sokak ruhu! 🥖", b: "Izgaranın ve kömür ateşinin o dumanlı esnaf fıtratı 🧆", c: "Çıtır patateslerin ve hızlı sosların o dinamik gençlik enerjisi 🍟", d: "Limonu sıkınca parıldayan o derin lezzet sırrı 🦪" }
+        ];
+
+        // Gelişmiş Ekran Değiştirme ve Reset Sihirbazı
         function switchScreen(screen) {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
@@ -1262,6 +1552,8 @@
             wheelGameArea.classList.add('hidden');
             matchupGameArea.classList.add('hidden');
             matchupWinnerArea.classList.add('hidden');
+            snakeGameArea.classList.add('hidden');
+            snakeWinnerArea.classList.add('hidden');
             backToSelectionButton.classList.remove('hidden');
 
             if (screen === 'selection') {
@@ -1273,6 +1565,13 @@
             } else if (screen === 'matchup') {
                 matchupGameArea.classList.remove('hidden');
                 startMatchupGame();
+            } else if (screen === 'snake') {
+                // Testi ve sayaçları tamamen sıfırlayıp başlatıyoruz
+                currentQuestionIndex = 0;
+                quizAnswers = { aci: 0, etTuru: '', porsiyon: '', soft: 0 };
+                winnerFood = null;
+                winnerDrink = null;
+                startSnakeGame(); 
             }
         }
 
@@ -1566,6 +1865,146 @@
         // Oyunu Yeniden Başlatma Butonu
         document.getElementById('restartMatchupButton').addEventListener('click', startMatchupGame);
         document.getElementById('restartMatchupButton').textContent = language === 'TR' ? "🔄 Yeniden Kapıştır" : "🔄 Play Again";
+
+        // --- GURME TESTİ MOTORU VE AKILLI EŞLEŞTİRME ALGORİTMASI ---
+        function startSnakeGame() {
+            snakeWinnerArea.classList.add('hidden');
+            snakeGameArea.classList.remove('hidden');
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            if (currentQuestionIndex >= gourmetQuestions.length) {
+                calculateQuizResult();
+                return;
+            }
+
+            const currentQ = gourmetQuestions[currentQuestionIndex];
+            
+            // Sayaç ve İlerleme Çubuğunu Güncelle
+            document.getElementById('snakeScoreLabel').textContent = ""; // Boşalt
+            document.getElementById('quizProgressLabel').textContent = `SORU: ${currentQuestionIndex + 1} / 7`;
+            const percent = ((currentQuestionIndex + 1) / gourmetQuestions.length) * 100;
+            document.getElementById('quizProgressBar').style.width = `${percent}%`;
+
+            // Soru Metnini Bas
+            document.getElementById('quizQuestionText').textContent = currentQ.q;
+
+            // Şıkları Butonlara Yerleştir
+            const optButtons = document.querySelectorAll('.quiz-opt-btn');
+            optButtons.forEach(btn => {
+                const opt = btn.dataset.option;
+                const textSpan = btn.querySelector('.opt-text');
+                
+                if (opt === 'A') textSpan.textContent = currentQ.a;
+                if (opt === 'B') textSpan.textContent = currentQ.b;
+                if (opt === 'C') textSpan.textContent = currentQ.c;
+                if (opt === 'D') textSpan.textContent = currentQ.d;
+
+                // Eski dinleyicileri temizlemek için butonu kopyalayıp yeniden bağlama (Kritik bug önleme)
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                newBtn.addEventListener('click', () => handleQuizAnswer(opt));
+            });
+        }
+
+        function handleQuizAnswer(selectedOption) {
+            // Müşterinin şıklarına göre damak tadı profili çıkarma
+            if (currentQuestionIndex === 1) { // Baharat sorusu
+                if (selectedOption === 'A') quizAnswers.aci = 2; // Çok acı
+                if (selectedOption === 'B') quizAnswers.aci = 1; // Orta
+            }
+            if (currentQuestionIndex === 2) { // Et Sorusu
+                if (selectedOption === 'A') quizAnswers.etTuru = 'Kokoreç';
+                if (selectedOption === 'B') quizAnswers.etTuru = 'Köfte';
+                if (selectedOption === 'C') quizAnswers.etTuru = 'Tavuk';
+                if (selectedOption === 'D') quizAnswers.etTuru = 'Midye';
+            }
+            if (currentQuestionIndex === 4) { // Porsiyon sorusu
+                if (selectedOption === 'A' || selectedOption === 'C') quizAnswers.porsiyon = 'büyük';
+            }
+            if (currentQuestionIndex === 5) { // İçecek sorusu
+                if (selectedOption === 'A' || selectedOption === 'B') quizAnswers.soft = 0; // Ayran/Şalgam
+                if (selectedOption === 'C' || selectedOption === 'D') quizAnswers.soft = 1; // Kola/Meyve suyu
+            }
+
+            // Sonraki soruya geç
+            currentQuestionIndex++;
+            setTimeout(loadQuizQuestion, 200);
+        }
+
+        // MENÜDEN GERÇEK ÜRÜNLERİ ÇEKEN AKILLI EŞLEŞTİRME MOTORU
+        function calculateQuizResult() {
+            snakeGameArea.classList.add('hidden');
+            snakeWinnerArea.classList.remove('hidden');
+
+            const fallbackImg = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
+
+            // 1. Veritabanındaki yiyecekleri filtrele (İçecek ve İletişim hariç)
+            let allFoods = products.filter(p => p.category !== 'İçecekler' && p.category !== 'İletişim');
+            // 2. Veritabanındaki içecekleri filtrele
+            let allDrinks = products.filter(p => p.category === 'İçecekler');
+
+            // Eğer veritabanı boşsa acil durum koruması
+            if (allFoods.length === 0) allFoods = [ { name: "Yarım Ekmek Kokoreç", price: 150, image: "" } ];
+            if (allDrinks.length === 0) allDrinks = [ { name: "Köpüklü Ayran", price: 30, image: "" } ];
+
+            // --- ANA YEMEK SEÇİM SİHİRBAZI ---
+            let filteredFoods = [];
+            if (quizAnswers.etTuru !== '') {
+                filteredFoods = allFoods.filter(p => p.category.includes(quizAnswers.etTuru) || p.name.includes(quizAnswers.etTuru));
+            }
+            // Filtre eşleşmediyse porsiyona veya rastgeleye göre ata
+            if (filteredFoods.length === 0) {
+                filteredFoods = quizAnswers.porsiyon === 'büyük' 
+                    ? allFoods.filter(p => p.name.toLowerCase().includes('ekmek') || p.name.toLowerCase().includes('menü'))
+                    : allFoods;
+            }
+            if (filteredFoods.length === 0) filteredFoods = allFoods;
+            winnerFood = filteredFoods[Math.floor(Math.random() * filteredFoods.length)];
+
+            // --- İÇECEK SEÇİM SİHİRBAZI ---
+            let filteredDrinks = [];
+            if (quizAnswers.soft === 0) {
+                // Ayran veya Şalgam seç
+                filteredDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('ayran') || d.name.toLowerCase().includes('şalgam'));
+            } else {
+                // Asitli veya tatlı içecek seç
+                filteredDrinks = allDrinks.filter(d => !d.name.toLowerCase().includes('ayran') && !d.name.toLowerCase().includes('şalgam'));
+            }
+            if (filteredDrinks.length === 0) filteredDrinks = allDrinks;
+            winnerDrink = filteredDrinks[Math.floor(Math.random() * filteredDrinks.length)];
+
+            // --- FİNAL EKRANI GRAFİK VE YAZILARINI BASMA ---
+            const foodName = language === 'TR' ? winnerFood.name : winnerFood.nameEN || winnerFood.name;
+            const drinkName = language === 'TR' ? winnerDrink.name : winnerDrink.nameEN || winnerDrink.name;
+
+            // Fiyat kontrolü (İndirimli fiyat varsa onu göster)
+            const fPrice = (winnerFood.discountPrice !== undefined && winnerFood.discountPrice !== null && winnerFood.discountPrice !== "") ? winnerFood.discountPrice : winnerFood.price;
+            const dPrice = (winnerDrink.discountPrice !== undefined && winnerDrink.discountPrice !== null && winnerDrink.discountPrice !== "") ? winnerDrink.discountPrice : winnerDrink.price;
+
+            // HTML elemanlarını doldur
+            document.getElementById('quizWinnerFoodImg').src = winnerFood.image || fallbackImg;
+            document.getElementById('quizWinnerFoodTitle').textContent = foodName;
+            document.getElementById('quizWinnerFoodPrice').textContent = fPrice + " ₺";
+
+            document.getElementById('quizWinnerDrinkImg').src = winnerDrink.image || fallbackImg;
+            document.getElementById('quizWinnerDrinkTitle').textContent = drinkName;
+            document.getElementById('quizWinnerDrinkPrice').textContent = dPrice + " ₺";
+            
+            // Dil Desteği Çevirisi
+            document.getElementById('closeQuizAndShowBtn').textContent = language === 'TR' ? "🍽️ Menüde İncele" : "🍽️ View in Menu";
+        }
+
+        // "Menüde İncele" butonuna basıldığında modalı kapatıp o ürünü listeler
+        document.getElementById('closeQuizAndShowBtn').addEventListener('click', () => {
+            wheelModal.classList.add('hidden'); // Modalı kapat
+            if (winnerFood && winnerFood.category) {
+                // O yemeğin kategorisine ait sekmeyi bul ve otomatik tıkla
+                const targetTab = document.querySelector(`.tabBtn[data-category="${winnerFood.category}"]`);
+                if (targetTab) targetTab.click();
+            }
+        });
     </script>
 </body>
 
