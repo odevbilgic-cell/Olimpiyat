@@ -592,10 +592,19 @@
             setActiveTab('showCampaigns');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in">
-                    <h2 class="text-2xl font-black text-gray-800 mb-4 flex items-center gap-1">🖼️ ${menuTitle} Kampanya Yönetimi</h2>
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">🖼️ ${menuTitle} Kampanya Yönetimi</h2>
+                <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
                     
-                    <div class="border-2 border-orange-100 p-4 mb-6 rounded-xl bg-orange-50/50">
+                    <div class="border-2 border-amber-100 p-4 mb-6 rounded-xl bg-amber-50/50">
+                        <h3 class="font-bold mb-2 text-orange-600 text-sm uppercase tracking-wider">Kampanya Toplu Fiyat Ayarı</h3>
+                        <p class="text-xs text-gray-500 mb-3">Gireceğiniz miktar mevcut tüm afiş fiyatlarının üzerine eklenecektir. İndirim için başına eksi (-) koyun.</p>
+                        <div class="flex gap-2">
+                            <input id="bulkCampaignAdjustmentValue" type="number" placeholder="Örn: 10 veya -20" class="border-2 border-gray-100 p-2 rounded-xl flex-1 text-sm outline-none font-bold focus:border-orange-500" />
+                            <button id="applyBulkCampaignAdjustmentBtn" class="bg-orange-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-orange-600 transition shadow-sm active:scale-95">Tüm Afişlere Uygula</button>
+                        </div>
+                    </div>
+
+                    <div class="border p-4 mb-6 rounded-lg bg-orange-50/50 border-orange-200">
                         <h3 class="font-bold mb-3 text-orange-700 text-sm uppercase tracking-wider">Yeni Kampanya Kartı Ekle</h3>
                         <div class="mb-3">
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">1. Afiş Görseli Seçin</label>
@@ -637,7 +646,89 @@
 
             addBtn.addEventListener('click', addCampaignUrl);
             document.getElementById('saveAllCampaignChangesBtn').addEventListener('click', saveAllCampaignChanges);
+            
+            // Yeni Eklenen Toplu Ayar Buton Dinleyicisi
+            document.getElementById('applyBulkCampaignAdjustmentBtn').addEventListener('click', applyBulkCampaignAdjustment);
+            
             renderCampaignList();
+        }
+
+        // Kampanya listesindeki tüm input alanlarına toplu zam/indirim yansıtır
+        function applyBulkCampaignAdjustment() {
+            const value = parseFloat(document.getElementById('bulkCampaignAdjustmentValue').value);
+            const statusEl = document.getElementById('campaignSortingStatus');
+            if (isNaN(value) || value === 0) { alert('Lütfen geçerli bir miktar giriniz.'); return; }
+
+            const priceInputs = document.querySelectorAll('#sortableCampaignList .campaign-price-edit');
+            let count = 0;
+
+            priceInputs.forEach(input => {
+                // Mevcut input değerindeki sayısal kısmı ayıkla (örn: "250 TL" -> 250)
+                let currentPrice = parseFloat(input.value.replace(/[^0-9.-]/g, '')) || 0;
+                let newPrice = Math.max(0, currentPrice + value);
+                
+                // Yeni fiyatı formatıyla inputa yaz
+                input.value = newPrice;
+                count++;
+            });
+
+            statusEl.textContent = `Fiyatlar geçici olarak ${count} afiş için listeye yansıtıldı. Kalıcı olması için alttaki siyah butona basın.`;
+            statusEl.className = 'mt-2 text-center text-xs font-bold text-orange-600';
+            statusEl.classList.remove('hidden');
+        }
+
+        // TOPLU KAYDETME: Hem Sıralamayı Hem de Sihirbazla Değişen Tüm Fiyatları Tek Seferde Veritabanına İşler
+        async function saveAllCampaignChanges() {
+            const listEl = document.getElementById('sortableCampaignList');
+            const items = listEl.children;
+            const updates = {};
+            const statusEl = document.getElementById('campaignSortingStatus');
+            let changesMade = 0;
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
+
+            if (items.length === 0) return;
+
+            for (let i = 0; i < items.length; i++) {
+                const campaignKey = items[i].dataset.id;
+                const newOrderValue = i;
+                // Kullanıcının veya sihirbazın girdiği yeni değeri al ve temizle
+                const newPriceValue = items[i].querySelector('.campaign-price-edit').value.trim();
+                
+                const currentCampaign = campaignUrls.find(c => c.key === campaignKey);
+
+                if (currentCampaign) {
+                    // Sıralama değiştiyse ekle
+                    if (currentCampaign.order !== newOrderValue) {
+                        updates[`${pathPrefix}/${campaignKey}/order`] = newOrderValue;
+                        changesMade++;
+                    }
+                    // Fiyat girdisi değiştiyse ekle
+                    if ((currentCampaign.price || "") !== newPriceValue) {
+                        updates[`${pathPrefix}/${campaignKey}/price`] = newPriceValue;
+                        changesMade++;
+                    }
+                }
+            }
+
+            if (changesMade === 0) {
+                statusEl.textContent = 'Herhangi bir fiyat veya sıralama değişikliği tespit edilmedi.';
+                statusEl.className = 'mt-2 text-center text-xs font-bold text-green-600';
+                statusEl.classList.remove('hidden');
+                return;
+            }
+
+            if (!confirm(`Yaptığınız ${changesMade} değişiklik veritabanına işlenecektir. Onaylıyor musunuz?`)) return;
+
+            try {
+                await database.ref().update(updates);
+                statusEl.textContent = 'Tüm kampanya sıralamaları ve fiyatları başarıyla güncellendi!';
+                statusEl.className = 'mt-2 text-center text-xs font-bold text-green-600';
+                statusEl.classList.remove('hidden');
+            } catch (error) {
+                statusEl.textContent = 'Güncelleme başarısız oldu: ' + error.message;
+                statusEl.className = 'mt-2 text-center text-xs font-bold text-red-600';
+                statusEl.classList.remove('hidden');
+            }
         }
 
         function renderCampaignList() {
