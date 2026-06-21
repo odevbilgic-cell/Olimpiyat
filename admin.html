@@ -9,12 +9,13 @@
     <link rel="icon" type="image/jpeg" href="/logo.jpg">
     <link rel="shortcut icon" href="/logo.jpg">
 
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             background-color: #fff7f0;
@@ -71,28 +72,55 @@
         }
 
         @keyframes popIn {
-            0% { transform: scale(0.95); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+            0% {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         .animate-pop-in {
             animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+        }
+
+        /* Grafik geçiş animasyonları */
+        .chart-view {
+            transition: all 0.35s ease-in-out;
+            opacity: 0;
+            transform: translateY(10px);
+            display: none;
+        }
+
+        .chart-view.active-chart {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
 
 <body class="text-gray-800 antialiased font-sans">
 
-    <div id="adminLoginOverlay" class="fixed inset-0 bg-amber-50/90 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md border-b-8 border-orange-500 animate-pop-in">
-            
+    <div id="adminLoginOverlay"
+        class="fixed inset-0 bg-amber-50/90 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+        <div
+            class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md border-b-8 border-orange-500 animate-pop-in">
+
             <div class="flex flex-col items-center justify-center mb-6 select-none">
-                <div class="relative flex items-center justify-center bg-gradient-to-br from-red-600 to-orange-500 rounded-xl px-6 py-3 shadow-md border-b-4 border-orange-700 tracking-wide">
+                <div
+                    class="relative flex items-center justify-center bg-gradient-to-br from-red-600 to-orange-500 rounded-xl px-6 py-3 shadow-md border-b-4 border-orange-700 tracking-wide">
                     <div class="text-center">
-                        <span class="block text-[10px] font-black uppercase text-yellow-300 tracking-[0.25em] drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Olimpiyat</span>
-                        <h2 class="text-2xl font-extrabold text-white uppercase italic leading-none tracking-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.7)] flex items-center gap-1">
+                        <span
+                            class="block text-[10px] font-black uppercase text-yellow-300 tracking-[0.25em] drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Olimpiyat</span>
+                        <h2
+                            class="text-2xl font-extrabold text-white uppercase italic leading-none tracking-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.7)] flex items-center gap-1">
                             <span>YÖNETİCİ</span>
-                            <span class="bg-white text-red-600 px-1 py-0.2 rounded text-lg font-black not-italic rotate-3 shadow-sm">PANELİ</span>
+                            <span
+                                class="bg-white text-red-600 px-1 py-0.2 rounded text-lg font-black not-italic rotate-3 shadow-sm">PANELİ</span>
                         </h2>
                     </div>
                 </div>
@@ -110,7 +138,8 @@
                         class="border-2 border-gray-100 w-full p-3 rounded-xl focus:outline-none focus:border-orange-500 transition font-medium bg-gray-50 focus:bg-white" />
                 </div>
 
-                <p id="panelLoginError" class="text-red-600 text-xs font-bold text-center hidden">❌ Kullanıcı adı veya şifre hatalı!</p>
+                <p id="panelLoginError" class="text-red-600 text-xs font-bold text-center hidden">❌ Kullanıcı adı veya
+                    şifre hatalı!</p>
 
                 <button id="submitPanelLoginBtn"
                     class="w-full bg-gradient-to-r from-red-600 to-orange-500 text-white px-6 py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 shadow-lg hover:opacity-95 transition transform active:scale-95 cursor-pointer">
@@ -121,14 +150,17 @@
     </div>
 
     <div class="flex flex-col md:flex-row h-screen overflow-hidden">
-        
-        <div class="w-full md:w-64 bg-gradient-to-b from-red-700 via-red-800 to-amber-900 text-white flex flex-col p-4 shadow-xl z-30 relative md:static">
+
+        <div
+            class="w-full md:w-64 bg-gradient-to-b from-red-700 via-red-800 to-amber-900 text-white flex flex-col p-4 shadow-xl z-30 relative md:static">
             <div class="flex items-center justify-between md:block border-b border-red-500/40 pb-2 mb-4">
                 <div class="flex items-center gap-2">
                     <span class="text-xl">🥖</span>
-                    <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight text-yellow-400">Olimpiyat Admin</h1>
+                    <h1 class="text-xl md:text-2xl font-black uppercase tracking-tight text-yellow-400">Olimpiyat Admin
+                    </h1>
                 </div>
-                <a href="index.html" class="md:hidden px-3 py-1.5 bg-red-600 rounded-lg text-xs font-bold shadow-md">Çıkış</a>
+                <a href="index.html"
+                    class="md:hidden px-3 py-1.5 bg-red-600 rounded-lg text-xs font-bold shadow-md">Çıkış</a>
             </div>
 
             <div class="grid grid-cols-2 gap-2 md:block mb-4 md:mb-6 border-b border-red-500/40 pb-4">
@@ -149,69 +181,101 @@
                 </button>
             </div>
 
-            <div class="flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none">
-                <button id="showProducts" class="tab-button active text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+            <div
+                class="flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none">
+                <button id="showProducts"
+                    class="tab-button active text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     📦 Ürünler
                 </button>
-                <button id="showSorting" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                <button id="showSorting"
+                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     ⬆️ Sıralama
                 </button>
-                <button id="showCampaigns" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                <button id="showCampaigns"
+                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     🖼️ Kampanyalar
                 </button>
-                <button id="showAddProduct" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                <button id="showAddProduct"
+                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     ➕ Yeni Ürün
                 </button>
-                <button id="showBulkUpdate" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                <button id="showBulkUpdate"
+                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     💸 Toplu Fiyat
                 </button>
-                <button id="showStats" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                <button id="showStats"
+                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     📊 İstatistik
                 </button>
-                <button id="showGlobalDateUpdate" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                <button id="showGlobalDateUpdate"
+                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     📅 Ortak Tarih
                 </button>
             </div>
 
-            <a href="index.html" class="hidden md:block mt-auto p-2.5 bg-red-600 text-center rounded-xl font-bold hover:bg-red-700 shadow-md transition">
+            <a href="index.html"
+                class="hidden md:block mt-auto p-2.5 bg-red-600 text-center rounded-xl font-bold hover:bg-red-700 shadow-md transition">
                 Güvenli Çıkış Yap
             </a>
         </div>
 
         <main class="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto">
             <div id="contentContainer" class="max-w-5xl mx-auto">
-                </div>
+            </div>
         </main>
     </div>
 
-    <div id="editProductModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 w-full max-w-lg relative max-h-[90vh] overflow-y-auto border-t-8 border-orange-500 animate-pop-in">
-            <button id="closeEditProductModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-lg font-bold">✖</button>
+    <div id="editProductModal"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+        <div
+            class="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 w-full max-w-lg relative max-h-[90vh] overflow-y-auto border-t-8 border-orange-500 animate-pop-in">
+            <button id="closeEditProductModal"
+                class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-lg font-bold">✖</button>
             <h2 class="text-xl font-black mb-4 text-orange-600 flex items-center gap-1">✏️ Ürünü Düzenle</h2>
 
             <input type="hidden" id="editProductKey" />
 
             <div class="flex flex-col gap-3.5">
-                <div class="p-3 border rounded-xl bg-orange-50/50 border-orange-100 flex flex-col sm:flex-row items-center gap-3">
-                    <img id="editImagePreview" class="w-full sm:w-28 h-24 object-cover rounded-lg border bg-white" src="" alt="Önizleme">
-                    <button id="uploadEditImageBtn" class="bg-orange-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-orange-600 transition w-full sm:w-auto mt-1 sm:mt-0">Yeni Fotoğraf Yükle</button>
+                <div
+                    class="p-3 border rounded-xl bg-orange-50/50 border-orange-100 flex flex-col sm:flex-row items-center gap-3">
+                    <img id="editImagePreview" class="w-full sm:w-28 h-24 object-cover rounded-lg border bg-white"
+                        src="" alt="Önizleme">
+                    <button id="uploadEditImageBtn"
+                        class="bg-orange-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-orange-600 transition w-full sm:w-auto mt-1 sm:mt-0">Yeni
+                        Fotoğraf Yükle</button>
                     <input type="hidden" id="editImageURL" value="" />
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Ürün Adı (TR)</label><input id="editName" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
-                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Product Name (EN)</label><input id="editNameEN" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Ürün Adı
+                            (TR)</label><input id="editName"
+                            class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Product Name
+                            (EN)</label><input id="editNameEN"
+                            class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Açıklama (TR)</label><input id="editDesc" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
-                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Description (EN)</label><input id="editDescEN" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Açıklama
+                            (TR)</label><input id="editDesc"
+                            class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Description
+                            (EN)</label><input id="editDescEN"
+                            class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm" /></div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Fiyat (₺)</label><input id="editPrice" type="number" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm font-bold" /></div>
-                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Kategori</label><select id="editCategory" class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm font-semibold bg-white"></select></div>
+                    <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 mb-1">Fiyat
+                            (₺)</label><input id="editPrice" type="number"
+                            class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm font-bold" />
+                    </div>
+                    <div class="flex flex-col"><label
+                            class="text-xs font-bold text-gray-500 mb-1">Kategori</label><select id="editCategory"
+                            class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm font-semibold bg-white"></select>
+                    </div>
                 </div>
 
-                <button id="saveEditProduct" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-4 py-3 rounded-xl font-bold mt-2 shadow-md hover:opacity-95 transition transform active:scale-95">Değişiklikleri Kaydet</button>
+                <button id="saveEditProduct"
+                    class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-4 py-3 rounded-xl font-bold mt-2 shadow-md hover:opacity-95 transition transform active:scale-95">Değişiklikleri
+                    Kaydet</button>
             </div>
         </div>
     </div>
@@ -646,10 +710,10 @@
 
             addBtn.addEventListener('click', addCampaignUrl);
             document.getElementById('saveAllCampaignChangesBtn').addEventListener('click', saveAllCampaignChanges);
-            
+
             // Yeni Eklenen Toplu Ayar Buton Dinleyicisi
             document.getElementById('applyBulkCampaignAdjustmentBtn').addEventListener('click', applyBulkCampaignAdjustment);
-            
+
             renderCampaignList();
         }
 
@@ -666,7 +730,7 @@
                 // Mevcut input değerindeki sayısal kısmı ayıkla (örn: "250 TL" -> 250)
                 let currentPrice = parseFloat(input.value.replace(/[^0-9.-]/g, '')) || 0;
                 let newPrice = Math.max(0, currentPrice + value);
-                
+
                 // Yeni fiyatı formatıyla inputa yaz
                 input.value = newPrice;
                 count++;
@@ -693,7 +757,7 @@
                 const newOrderValue = i;
                 // Kullanıcının veya sihirbazın girdiği yeni değeri al ve temizle
                 const newPriceValue = items[i].querySelector('.campaign-price-edit').value.trim();
-                
+
                 const currentCampaign = campaignUrls.find(c => c.key === campaignKey);
 
                 if (currentCampaign) {
@@ -792,7 +856,7 @@
                     const campaignKey = e.target.dataset.key;
                     const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
                     const targetImgHtml = document.getElementById(`img-preview-${campaignKey}`);
-                    
+
                     const widget = window.cloudinary.createUploadWidget(
                         { cloudName: CLOUDINARY_CLOUD_NAME, uploadPreset: CLOUDINARY_UPLOAD_PRESET, sources: ['local', 'url', 'camera'] },
                         async (error, result) => {
@@ -1090,27 +1154,282 @@
             } catch (error) { alert("Hata: " + error.message); }
         }
 
+        // --- GELİŞMİŞ İSTATİSTİK VE ANALİZ MODÜLÜ ---
+        let statsMenuType = 'in_place'; // Varsayılan istatistik modu: Yerinde Menü
+        let activeChartTab = 'hourly';  // Varsayılan aktif grafik tabı
+        let currentChartInstance = null;
+
+        // Grafiklerin örnek/simüle verileri (Firebase verilerinize göre burayı eşleyebilirsiniz)
+        const mockStatsData = {
+            in_place: {
+                hourly: { labels: ['09:00', '12:00', '15:00', '18:00', '21:00', '00:00'], data: [15, 65, 30, 85, 120, 45] },
+                category: { labels: ['Kokoreç', 'Döner', 'Köfte', 'Midye', 'İçecekler'], data: [40, 25, 15, 10, 10] },
+                weekly: { labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'], data: [120, 140, 135, 160, 210, 340, 310] },
+                products: { labels: ['Yarım Ekmek Kokoreç', 'Porsiyon Köfte', 'Tavuk Döner Dürüm', 'Şalgam Suyu'], data: [180, 95, 130, 85] }
+            },
+            delivery: {
+                hourly: { labels: ['09:00', '12:00', '15:00', '18:00', '21:00', '00:00'], data: [5, 45, 25, 95, 140, 90] },
+                category: { labels: ['Kokoreç', 'Döner', 'Hamburger', 'Patso', 'İçecekler'], data: [30, 35, 15, 12, 8] },
+                weekly: { labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'], data: [95, 110, 115, 130, 185, 290, 260] },
+                products: { labels: ['Yarım Ekmek Kokoreç', 'Tavuk Döner Dürüm', 'Gora Hamburger', 'Dublex Patso'], data: [140, 165, 110, 95] }
+            }
+        };
+
         function renderStatsModule() {
             setActiveTab('showStats');
+
+            const menuLabel = statsMenuType === 'in_place' ? '🍽️ Yerinde Menü' : '🛵 Paket Servis';
+
             loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in max-w-xl mx-auto">
-                    <h2 class="text-2xl font-black text-gray-800 mb-4 flex items-center gap-1">📊 Menü Görüntüleme İstatistikleri</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-orange-50/50 p-4 border border-orange-100 rounded-2xl text-center">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase mb-1">Bugün</h3>
-                            <p id="todayCount" class="text-3xl font-black text-orange-600">0</p>
-                        </div>
-                        <div class="bg-orange-50/50 p-4 border border-orange-100 rounded-2xl text-center">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase mb-1">Toplam Görüntüleme</h3>
-                            <p id="totalCount" class="text-3xl font-black text-orange-600">0</p>
-                        </div>
-                    </div>
-                    <button id="resetCounter" class="mt-5 bg-red-50 text-red-600 border border-red-100 px-4 py-2 text-xs font-bold rounded-xl w-full active:scale-95 transition">Sayaçları Sıfırla (Tüm Zamanlar)</button>
+        <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in max-w-3xl mx-auto">
+            
+            <div class="flex justify-center mb-6">
+                <button id="toggleStatsMenuBtn" class="bg-gradient-to-r from-red-700 to-orange-600 text-white font-black px-6 py-3 rounded-xl shadow-md transform active:scale-95 transition flex items-center gap-2 hover:opacity-95">
+                    <span class="bg-yellow-400 text-gray-900 px-2 py-0.5 rounded text-xs font-black select-none">${menuLabel}</span>
+                    <span>İSTATİSTİKLERİNİ DEĞİŞTİR</span>
+                </button>
+            </div>
+
+            <div class="border-b border-gray-100 pb-4 mb-4 text-center">
+                <h2 class="text-2xl font-black text-gray-800 flex items-center justify-center gap-1.5">
+                    📊 Veri Analizi ve Ziyaretçi Davranışları
+                </h2>
+                <p class="text-xs text-gray-500 mt-1">Şu an incelediğiniz veri kümesi: <span class="font-bold text-orange-600 bg-amber-100 px-1.5 py-0.5 rounded">${statsMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis'}</span></p>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+                <button data-chart="hourly" class="chart-tab-btn p-2.5 rounded-xl border font-bold text-xs transition active:scale-95 text-center ${activeChartTab === 'hourly' ? 'bg-amber-400 border-amber-400 text-gray-900 font-black shadow-sm' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}">
+                    🕒 Saatlik Yoğunluk
+                </button>
+                <button data-chart="category" class="chart-tab-btn p-2.5 rounded-xl border font-bold text-xs transition active:scale-95 text-center ${activeChartTab === 'category' ? 'bg-amber-400 border-amber-400 text-gray-900 font-black shadow-sm' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}">
+                    🍔 Kategori İlgi (%)
+                </button>
+                <button data-chart="weekly" class="chart-tab-btn p-2.5 rounded-xl border font-bold text-xs transition active:scale-95 text-center ${activeChartTab === 'weekly' ? 'bg-amber-400 border-amber-400 text-gray-900 font-black shadow-sm' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}">
+                    📅 Haftalık Trafik
+                </button>
+                <button data-chart="products" class="chart-tab-btn p-2.5 rounded-xl border font-bold text-xs transition active:scale-95 text-center ${activeChartTab === 'products' ? 'bg-amber-400 border-amber-400 text-gray-900 font-black shadow-sm' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}">
+                    ⭐ Popüler Ürünler
+                </button>
+            </div>
+
+            <div class="relative bg-gray-50 rounded-2xl p-4 border border-gray-100 min-h-[320px] flex items-center justify-center">
+                <div id="hourlyChartView" class="chart-view w-full ${activeChartTab === 'hourly' ? 'active-chart' : ''}">
+                    <canvas id="hourlyChart"></canvas>
                 </div>
-            `);
-            fetchVisitorCounts();
-            document.getElementById('resetCounter').addEventListener('click', resetVisitorCounts);
+                <div id="categoryChartView" class="chart-view w-full ${activeChartTab === 'category' ? 'active-chart' : ''}">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div id="weeklyChartView" class="chart-view w-full ${activeChartTab === 'weekly' ? 'active-chart' : ''}">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+                <div id="productsChartView" class="chart-view w-full ${activeChartTab === 'products' ? 'active-chart' : ''}">
+                    <canvas id="productsChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+    `);
+
+            // Olay Dinleyicilerini Bağla
+            document.getElementById('toggleStatsMenuBtn').addEventListener('click', () => {
+                statsMenuType = statsMenuType === 'in_place' ? 'delivery' : 'in_place';
+                renderStatsModule(); // Modülü yeni veri kümesiyle yeniden çiz
+            });
+
+            document.querySelectorAll('.chart-tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const targetChart = e.target.dataset.chart;
+                    switchChartTab(targetChart);
+                });
+            });
+
+            // Aktif Grafik Sekmesini Yükle ve Çiz
+            initActiveChart();
         }
+
+        function switchChartTab(tabName) {
+            activeChartTab = tabName;
+
+            // Butonların aktiflik durumunu güncelle
+            document.querySelectorAll('.chart-tab-btn').forEach(btn => {
+                if (btn.dataset.chart === tabName) {
+                    btn.className = "chart-tab-btn p-2.5 rounded-xl border font-black text-xs transition active:scale-95 text-center bg-amber-400 border-amber-400 text-gray-900 shadow-sm";
+                } else {
+                    btn.className = "chart-tab-btn p-2.5 rounded-xl border font-bold text-xs transition active:scale-95 text-center bg-gray-50 text-gray-600 hover:bg-gray-100";
+                }
+            });
+
+            // Grafik görünümlerini animasyonlu olarak gizle/göster
+            document.querySelectorAll('.chart-view').forEach(view => {
+                view.classList.remove('active-chart');
+            });
+
+            const targetView = document.getElementById(`${tabName}ChartView`);
+            if (targetView) {
+                targetView.classList.add('active-chart');
+            }
+
+            // Seçilen grafiği yeniden başlat
+            initActiveChart();
+        }
+
+        function initActiveChart() {
+    // Mevcut aktif bir grafik nesnesi varsa hafızadan temizle
+    if (currentChartInstance) {
+        currentChartInstance.destroy();
+        currentChartInstance = null;
+    }
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    // 1. GRAFİK: SAATLİK VE DAKİKALIK YOĞUNLUK
+    if (activeChartTab === 'hourly') {
+        database.ref('visitors_hourly/' + statsMenuType + '/' + todayStr).once('value', (snapshot) => {
+            const hourlyData = snapshot.val() || {};
+            
+            // Verileri işleyip dakikasına göre düzene sokalım
+            let timeMap = {};
+            for (let key in hourlyData) {
+                // Eski veriler sadece saat ise (Örn: "14"), "14:00" yap. Yeniler zaten "14:26" gelecek.
+                let timeLabel = key.includes(':') ? key : String(key).padStart(2, '0') + ':00';
+                timeMap[timeLabel] = (timeMap[timeLabel] || 0) + hourlyData[key];
+            }
+
+            // Saatleri kronolojik sıraya diz (Sabahtan akşama doğru)
+            const labels = Object.keys(timeMap).sort();
+            const dataValues = labels.map(time => timeMap[time]);
+
+            // Eğer henüz hiç giriş yoksa grafik boş kalmasın diye
+            if(labels.length === 0) {
+                labels.push("Henüz Giriş Yok");
+                dataValues.push(0);
+            }
+
+            const ctx = document.getElementById('hourlyChart').getContext('2d');
+            currentChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: { 
+                    labels: labels, 
+                    datasets: [{ 
+                        label: 'Siteye Giren Kullanıcı', 
+                        data: dataValues, 
+                        borderColor: '#ea580c', 
+                        backgroundColor: 'rgba(254, 240, 138, 0.3)', // Şık hardal arka plan dolgusu
+                        borderWidth: 3, 
+                        pointBackgroundColor: '#b91c1c',
+                        pointHoverRadius: 7, // Fareyle üstüne gelince nokta büyüsün
+                        tension: 0.2, // Çizgiler noktaları net göstersin diye daha düz
+                        fill: true 
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: {
+                        // FARE İLE ÜSTÜNE GELİNCE ÇIKAN ÖZEL KUTUCUK (TOOLTIP)
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.85)',
+                            titleColor: '#fbcc25', // Başlık hardal sarısı
+                            titleFont: { size: 14, family: 'sans-serif', weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            callbacks: {
+                                title: function(context) {
+                                    return 'Tam Saat: ' + context[0].label; // Örn: Tam Saat: 14:26
+                                },
+                                label: function(context) {
+                                    return context.raw + ' Kişi Giriş Yaptı'; // Örn: 2 Kişi Giriş Yaptı
+                                }
+                            }
+                        }
+                    },
+                    scales: { 
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                        x: { ticks: { maxTicksLimit: 12 } } // Çok dakika olursa yazılar üst üste binmesin
+                    } 
+                }
+            });
+        });
+    }
+    // 2. GRAFİK: KATEGORİ İLGİSİ (Gerçek Tıklamalar)
+    else if (activeChartTab === 'category') {
+        database.ref('stats/category_clicks/' + statsMenuType).once('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            let labels = Object.keys(data);
+            let values = Object.values(data);
+            
+            // Eğer henüz hiç tıklama yoksa grafik boş kalmasın diye uyarı basalım
+            if(labels.length === 0) { labels = ["Henüz Veri Yok"]; values = [1]; }
+
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            currentChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: values, backgroundColor: ['#b91c1c', '#f97316', '#f59e0b', '#84cc16', '#06b6d4', '#3b82f6', '#8b5cf6'] }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        });
+    } 
+    // 3. GRAFİK: HAFTALIK TRAFİK (Son 7 Günün Toplamı)
+    else if (activeChartTab === 'weekly') {
+        database.ref('visitors_hourly/' + statsMenuType).once('value', (snapshot) => {
+            const allData = snapshot.val() || {};
+            let labels = [];
+            let values = [];
+            
+            // Son 7 günün tarihlerini geriye doğru bul
+            for(let i=6; i>=0; i--) {
+                let d = new Date();
+                d.setDate(d.getDate() - i);
+                let dStr = d.toISOString().slice(0, 10);
+                let dayName = d.toLocaleDateString('tr-TR', {weekday: 'short'});
+                labels.push(dayName);
+                
+                // O güne ait tüm saatlerin toplamını al
+                let dayTotal = 0;
+                if(allData[dStr]) {
+                    Object.values(allData[dStr]).forEach(val => dayTotal += val);
+                }
+                values.push(dayTotal);
+            }
+
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            currentChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: 'Günlük Toplam Ziyaretçi', data: values, backgroundColor: '#b91c1c', borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        });
+    } 
+    // 4. GRAFİK: EN POPÜLER ÜRÜNLER (Gerçek İncelemeler)
+    else if (activeChartTab === 'products') {
+        database.ref('stats/product_clicks/' + statsMenuType).once('value', (snapshot) => {
+            const clicks = snapshot.val() || {};
+            let list = [];
+            
+            // Firebase'deki ID'leri ürünlerin gerçek isimleriyle eşleştir
+            for(let key in clicks) {
+                let p = products.find(prod => prod.key === key); 
+                if(p) list.push({ name: p.name, count: clicks[key] });
+            }
+            
+            // En çok tıklanandan en aza doğru sırala
+            list.sort((a, b) => b.count - a.count);
+            list = list.slice(0, 5); // Sadece zirvedeki en iyi 5 ürünü al
+            
+            let labels = list.map(item => item.name);
+            let values = list.map(item => item.count);
+            
+            if(labels.length === 0) { labels = ["Henüz Ürün İncelenmedi"]; values = [0]; }
+
+            const ctx = document.getElementById('productsChart').getContext('2d');
+            currentChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: 'Ürün İnceleme Sayısı', data: values, backgroundColor: '#f59e0b', borderRadius: 4 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+        });
+    }
+}
 
         function renderGlobalDateModule() {
             setActiveTab('showGlobalDateUpdate');
@@ -1157,8 +1476,8 @@
 
         function fetchVisitorCounts() {
             const today = new Date().toISOString().slice(0, 10);
-            visitorsRef.child(today).once('value', s => { const val = document.getElementById('todayCount'); if(val) val.textContent = s.val() || 0; });
-            visitorsRef.once('value', s => { let total = 0; s.forEach(c => { total += c.val(); }); const val = document.getElementById('totalCount'); if(val) val.textContent = total; });
+            visitorsRef.child(today).once('value', s => { const val = document.getElementById('todayCount'); if (val) val.textContent = s.val() || 0; });
+            visitorsRef.once('value', s => { let total = 0; s.forEach(c => { total += c.val(); }); const val = document.getElementById('totalCount'); if (val) val.textContent = total; });
         }
 
         async function resetVisitorCounts() {
@@ -1237,6 +1556,7 @@
             submitLoginBtn.addEventListener('click', handleAdminLogin);
             [usernameInput, passwordInput].forEach(i => i.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAdminLogin(); }));
 
+            renderProductsModule();
             setFirebaseRefs('in_place');
 
             showProductsBtn.addEventListener('click', renderProductsModule);
