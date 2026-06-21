@@ -193,6 +193,27 @@
         .animate-pop-in {
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+
+        /* --- KOMBO UPGRADE VE UÇUŞ ANİMASYONLARI --- */
+        .combo-banner-zone {
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        /* Uçan içeceği kusursuz bir dairesel rozet (coin) yapar */
+        .flying-drink-clone {
+            position: fixed;
+            z-index: 100;
+            transition: all 0.85s cubic-bezier(0.25, 1, 0.5, 1);
+            pointer-events: none;
+            object-fit: cover;
+            border-radius: 9999px !important;
+            /* Tam yuvarlak kırpma */
+            border: 2px solid #ffffff !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+            background-color: #ffffff !important;
+        }
     </style>
 
     <link rel="manifest" href="manifest.json">
@@ -258,22 +279,49 @@
     </main>
 
     <div id="imageModal"
-        class="hidden fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50 p-4 transition-opacity">
-        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl transform transition-all">
-            <div class="relative h-64 sm:h-80">
-                <img id="modalImage" class="w-full h-full object-cover">
+        class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-all duration-300">
+        <div
+            class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl transform transition-all border-b-8 border-red-600 animate-pop-in max-h-[92vh] flex flex-col relative">
+
+            <div
+                class="relative h-56 sm:h-64 flex-shrink-0 bg-gray-900 flex items-center justify-center overflow-hidden p-4">
+                <div class="flex w-full h-full items-center justify-center gap-1 transition-all duration-500"
+                    id="modalImageContainer">
+                    <img id="modalImage"
+                        class="w-full h-full object-cover opacity-95 transition-all duration-500 rounded-xl">
+
+                        <img id="modalComboDrinkImage" class="hidden w-0 h-24 sm:h-28 object-cover transition-all duration-500 rounded-full border-4 border-white bg-white shadow-xl filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+                </div>
                 <button
-                    class="absolute top-3 right-3 bg-black bg-opacity-50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-opacity-70 ">✖</button>
+                    class="absolute top-4 right-4 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/80 transition font-black text-sm shadow-md z-30">✖</button>
+                <div class="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white to-transparent z-10"></div>
             </div>
 
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-2">
-                    <h2 id="modalTitle" class="text-2xl font-bold text-gray-800 leading-tight"></h2>
+            <div class="p-5 overflow-y-auto flex-grow space-y-4 scrollbar-none pb-14">
+                <div class="flex justify-between items-start gap-4">
+                    <h2 id="modalTitle" class="text-2xl font-black text-gray-900 leading-tight"></h2>
                     <span id="modalPrice"
-                        class="bg-orange-100 text-orange-600 font-bold px-3 py-1 rounded-lg whitespace-nowrap"></span>
+                        class="bg-red-50 text-red-600 font-black text-base px-3 py-1.5 rounded-xl whitespace-nowrap border border-red-100 shadow-sm z-20"></span>
                 </div>
-                <p id="modalDesc" class="text-gray-600 text-base leading-relaxed overflow-y-auto max-h-40"></p>
+
+                <p id="modalDesc"
+                    class="text-gray-500 text-xs sm:text-sm leading-relaxed border-b border-gray-100 pb-3"></p>
+
+                <div id="modalCrossSellSection" class="pt-2">
+                    <h4
+                        class="text-[11px] font-black uppercase tracking-wider text-gray-400 mb-2 flex items-center gap-1">
+                        🥤 Birlikte Harika Gider
+                    </h4>
+                    <div id="modalSuggestionsContainer" class="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+                    </div>
+                </div>
             </div>
+
+            <div id="comboUpgradeBanner"
+                class="combo-banner-zone absolute bottom-0 left-0 w-full bg-[#fbcc25] text-gray-950 py-3.5 text-center font-black text-sm uppercase tracking-wider shadow-[0_-4px_20px_rgba(0,0,0,0.15)] z-20 select-none">
+                🚀 Menüye Dönüştürüldü! 🎁
+            </div>
+
         </div>
     </div>
 
@@ -1156,15 +1204,28 @@
             });
         }
 
+        // YENİLENEN: Dakikasına kadar ziyaretçi girişini kaydeden motor
         function trackVisitor() {
-            const today = new Date().toISOString().slice(0, 10);
-            const counterRef = visitorsRef.child(today);
+            const todayStr = new Date().toISOString().slice(0, 10);
 
-            counterRef.once('value', snapshot => { });
-
+            // 1. Eski Günlük Toplam Sayaç
+            const counterRef = visitorsRef.child(todayStr);
             counterRef.transaction(currentCount => {
                 return (currentCount || 0) + 1;
             });
+
+            // 2. YENİ: Dakika Bazında Gerçek Ziyaretçi Sayacı
+            const now = new Date();
+            const currentHour = String(now.getHours()).padStart(2, '0');
+            const currentMinute = String(now.getMinutes()).padStart(2, '0');
+            const exactTime = currentHour + ':' + currentMinute; // Örn: "14:26"
+
+            // Kullanıcı yerinde menüye mi girdi, paket servise mi?
+            const activeMenu = window.location.href.includes('delivery') ? 'delivery' : 'in_place';
+
+            // Firebase'de tam olarak "14:26" hücresini +1 artırır
+            database.ref('visitors_hourly/' + activeMenu + '/' + todayStr + '/' + exactTime)
+                .set(firebase.database.ServerValue.increment(1));
         }
 
         // --- YENİ: VİTRİN VE İNDİRİMLİ ÜRÜN İŞLEME SİSTEMİ ---
@@ -1263,14 +1324,168 @@
             </div>
         `;
 
-                // Karta tıklandığında modalı aç ve bilgileri doldur
+                // Karta tıklandığında açılacak akıllı ve kesin kısıtlamalı eşlikçi motoru
                 card.addEventListener('click', () => {
                     document.getElementById('modalImage').src = imageUrl;
                     document.getElementById('modalTitle').textContent = name;
                     document.getElementById('modalDesc').textContent = desc;
-                    document.getElementById('modalPrice').textContent = p.price + " ₺";
+                    document.getElementById('modalPrice').textContent = (p.discountPrice || p.price) + " ₺";
+
+                    const crossSection = document.getElementById('modalCrossSellSection');
+                    const sugContainer = document.getElementById('modalSuggestionsContainer');
+                    sugContainer.innerHTML = '';
+
+                    // KURAL 1: Eğer tıklanan ürün zaten bir içecek ise, eşlikçi alanını tamamen gizle
+                    if (p.category === 'İçecekler') {
+                        crossSection.classList.add('hidden');
+                    } else {
+                        crossSection.classList.remove('hidden');
+
+                        // KURAL 2: Tüm içecekleri filtrele (Büyük litrelik boyları kesinlikle eliyoruz)
+                        const allDrinks = products.filter(prod =>
+                            prod.category === 'İçecekler' &&
+                            !prod.name.toLowerCase().includes('1 lt') &&
+                            !prod.name.toLowerCase().includes('litre') &&
+                            !prod.name.toLowerCase().includes('litrelik')
+                        );
+
+                        let recommendedDrinks = [];
+
+                        // KURAL 3: Ürün çorba ise SADECE SU öner, başka hiçbir şey getirme
+                        if (p.category === 'Çorba' || p.name.toLowerCase().includes('çorba')) {
+                            recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('su') && !d.name.toLowerCase().includes('soda') && !d.name.toLowerCase().includes('meyve'));
+                        }
+                        // KURAL 4: Kokoreç, Ciğer, Köfte veya Menüler için ŞALGAM ve SADECE AÇIK AYRAN (Kapalı kesinlikle elenir)
+                        else if (['Kokoreç', 'Tavuk Kokoreç', 'Köfte', 'Ciğer', 'Menüler'].includes(p.category)) {
+                            recommendedDrinks = allDrinks.filter(d =>
+                                (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) ||
+                                d.name.toLowerCase().includes('şalgam')
+                            );
+                        }
+                        // KURAL 5: Hamburger, Patso, Tavuk Döner için Kola, Fanta, Sprite veya Ice Tea önceliği
+                        else if (['Hamburger', 'Patso', 'Tavuk Döner'].includes(p.category) || p.name.toLowerCase().includes('burger') || p.name.toLowerCase().includes('patso')) {
+                            recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('kutu') || d.name.toLowerCase().includes('açık ayran') || d.name.toLowerCase().includes('gazoz') || d.name.toLowerCase().includes('şişe'));
+                        }
+                        // KURAL 6: Tost için öncelikli Çay, SADECE AÇIK AYRAN veya Kola
+                        else if (p.category === 'Tost') {
+                            recommendedDrinks = allDrinks.filter(d =>
+                                d.name.toLowerCase().includes('çay') ||
+                                (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) ||
+                                d.name.toLowerCase().includes('kutu')
+                            );
+                        }
+
+                        // KURAL 7: Eğer yukarıdaki özel filtrelerden sonuç çıkmazsa, genel listeden de kapalı ayranları tamamen filtreleyerek seç
+                        if (recommendedDrinks.length === 0) {
+                            recommendedDrinks = allDrinks.filter(d => !d.name.toLowerCase().includes('ayran') || d.name.toLowerCase().includes('açık'));
+                        }
+
+                        // KURAL 8: Karıştır ve maksimum 2, minimum 1 içecek olacak şekilde sınırla
+                        recommendedDrinks = recommendedDrinks.sort(() => Math.random() - 0.5).slice(0, 2);
+
+                        if (recommendedDrinks.length === 0) {
+                            crossSection.classList.add('hidden');
+                        } else {
+                            // İçecek kartlarını basan ve animasyonu tetikleyen ana motor
+                            // İçecek kartlarını basan ve animasyonu tetikleyen ana motor
+                            // İçecek kartlarını basan ve dairesel uçuşu yöneten ana motor
+                            recommendedDrinks.forEach(d => {
+                                const dName = language === 'TR' ? d.name : d.nameEN || d.name;
+                                const dPrice = d.discountPrice || d.price;
+                                const dImg = d.image || 'https://via.placeholder.com/100?text=Olimpiyat';
+
+                                const miniCard = document.createElement('div');
+                                miniCard.className = "flex items-center gap-2 bg-white border border-gray-100 rounded-xl p-1.5 min-w-[150px] max-w-[150px] flex-shrink-0 relative cursor-pointer transition-all duration-200 hover:bg-orange-50 shadow-sm";
+                                miniCard.innerHTML = `
+                                <img src="${dImg}" class="w-10 h-10 object-cover rounded-full border border-gray-100 bg-white flex-shrink-0 select-none pointer-events-none">
+                                <div class="text-left min-w-0 flex-1 pointer-events-none">
+                                    <h5 class="font-bold text-[10px] text-gray-800 truncate leading-tight">${dName}</h5>
+                                    <p class="text-red-600 font-black text-[11px] mt-0.5">${dPrice} ₺</p>
+                                </div>
+                                <span class="combo-status text-gray-400 text-sm pr-1 font-black select-none">+</span>
+                            `;
+
+                                // İçecek Rozetine Tıklanınca Çalışacak Uçuş Algoritması:
+                                miniCard.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    if (miniCard.classList.contains('combo-applied')) return;
+                                    miniCard.classList.add('combo-applied');
+
+                                    const drinkImgEl = miniCard.querySelector('img');
+                                    const startRect = drinkImgEl.getBoundingClientRect();
+
+                                    const targetImgEl = document.getElementById('modalComboDrinkImage');
+                                    targetImgEl.src = dImg;
+                                    targetImgEl.classList.remove('hidden');
+
+                                    // Ana yemek hafif küçülür, yanına tam yuvarlak içecek rozeti yerleşir
+                                    document.getElementById('modalImage').className = "w-0.7 h-full object-cover opacity-95 transition-all duration-500 rounded-2xl shadow-md";
+                                    targetImgEl.className = "w-24 h-24 sm:w-28 sm:h-28 -ml-8 object-cover transition-all duration-500 rounded-full border-4 border-white bg-white shadow-xl filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]";
+
+                                    // Uçan dairesel klon (Flyer) oluşturuluyor
+                                    const flyer = document.createElement('img');
+                                    flyer.src = dImg;
+                                    flyer.className = 'flying-drink-clone';
+                                    flyer.style.top = startRect.top + 'px';
+                                    flyer.style.left = startRect.left + 'px';
+                                    flyer.style.width = startRect.width + 'px';
+                                    flyer.style.height = startRect.height + 'px';
+                                    document.body.appendChild(flyer);
+
+                                    // Hedef yuvaya doğru süzülme hareketi
+                                    setTimeout(() => {
+                                        const endRect = targetImgEl.getBoundingClientRect();
+                                        flyer.style.top = endRect.top + 'px';
+                                        flyer.style.left = endRect.left + 'px';
+                                        flyer.style.width = endRect.width + 'px';
+                                        flyer.style.height = endRect.height + 'px';
+                                        flyer.style.transform = 'scale(1.05) rotate(360deg)'; // Hafif dönerek büyüme hissi
+                                        flyer.style.opacity = '1';
+                                    }, 30);
+
+                                    // Süzülme bittiği an (880ms) şovu tamamla
+                                    setTimeout(() => {
+                                        flyer.remove(); // Klonu ekrandan temizle
+
+                                        // Fiyatı anlık olarak topla ve güncelle
+                                        const mainPrice = parseFloat(p.discountPrice || p.price);
+                                        const drinkPrice = parseFloat(dPrice);
+                                        document.getElementById('modalPrice').textContent = (mainPrice + drinkPrice) + " ₺";
+
+                                        // YENİ EKLENEN SATIR: Ürün başlığını "Ana Yemek + İçecek" şeklinde günceller
+                                        document.getElementById('modalTitle').textContent = name + " + " + dName;
+
+                                        // Hardal sarısı şeridi fırlat
+                                        const banner = document.getElementById('comboUpgradeBanner');
+                                        if (banner) {
+                                            banner.style.transform = 'translateY(0)';
+                                            banner.style.opacity = '1';
+                                        }
+
+                                        // Buton ikonunu onayla
+                                        miniCard.querySelector('.combo-status').textContent = '✓';
+                                        miniCard.querySelector('.combo-status').className = 'combo-status text-green-600 font-black text-xs pr-1';
+                                        miniCard.className = "flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl p-1.5 min-w-[150px] max-w-[150px] flex-shrink-0 relative shadow-inner";
+                                    }, 880);
+                                });
+
+                                sugContainer.appendChild(miniCard);
+                            });
+
+
+
+                        }
+                    }
+
+                    // Tıklama istatistik kaydı alanı (Mevcut altyapınız)
+                    const activeMenu = window.location.href.includes('delivery') ? 'delivery' : 'in_place';
+                    if (firebase.database) {
+                        firebase.database().ref('stats/product_clicks/' + activeMenu + '/' + p.key).set(firebase.database.ServerValue.increment(1));
+                    }
+
                     document.getElementById('imageModal').classList.remove('hidden');
                 });
+
 
                 menuContainer.appendChild(card);
             });
@@ -1298,6 +1513,9 @@
                     btn.classList.add('active-tab');
                     const categoryKey = btn.dataset.category;
 
+                    // YENİ EKLENEN SATIR: Yerinde menü kategori tıklamasını 'in_place' altına kaydeder
+                    database.ref('stats/category_clicks/in_place/' + categoryKey).set(firebase.database.ServerValue.increment(1));
+
                     if (categoryKey === 'İletişim') {
                         menuContainer.innerHTML = '';
                         campaignSliderSection.parentElement.classList.add('hidden');
@@ -1305,7 +1523,7 @@
                     } else {
                         contactSection.classList.add('hidden');
                         renderCampaignSlider();
-                        renderDiscountSection(); // İndirim vitrinini güncelle/tetikle
+                        renderDiscountSection();
                         renderMenu(categoryKey);
                     }
                 });
@@ -1420,6 +1638,19 @@
 
             if (isBackground || isCloseButton) {
                 document.getElementById('imageModal').classList.add('hidden');
+
+                // YENİ EKLENEN: POP-UP KAPANINCA KOMBO ANİMASYONLARINI SIFIRLA
+                const comboDrinkImg = document.getElementById('modalComboDrinkImage');
+                if (comboDrinkImg) comboDrinkImg.classList.add('hidden');
+
+                const mainImg = document.getElementById('modalImage');
+                if (mainImg) mainImg.className = "w-full h-full object-cover opacity-95 transition-all duration-500 rounded-xl";
+
+                const banner = document.getElementById('comboUpgradeBanner');
+                if (banner) {
+                    banner.style.transform = 'translateY(100%)';
+                    banner.style.opacity = '0';
+                }
             }
         });
 
@@ -1522,26 +1753,26 @@
         let lastAngles = [];
 
         // 2. OYUN: "Bu mu Şu mu?" Turnuva Değişkenleri
-        let matchupPool = [];      
-        let nextRoundPool = [];    
-        let currentPairIndex = 0;  
-        let totalInitialItems = 0; 
+        let matchupPool = [];
+        let nextRoundPool = [];
+        let currentPairIndex = 0;
+        let totalInitialItems = 0;
 
-       // --- YENİLENEN: DİNAMİK DALLANAN GURME TESTİ MOTORU ---
+        // --- YENİLENEN: DİNAMİK DALLANAN GURME TESTİ MOTORU ---
         let currentStage = "START"; // START, SAKATAT, IZGARA, ATISTIRMALIK, FINAL
         let quizHistory = [];       // Geri dönmek veya takip etmek için soru geçmişi
         let currentQuestion = null;
-        
-       // --- 7x7 = 49 DALLI SÜRPRİZ GURME TESTİ AĞACI (TAMAMEN GİZEMLİ VE DOLAYLI) ---
+
+        // --- 7x7 = 49 DALLI SÜRPRİZ GURME TESTİ AĞACI (TAMAMEN GİZEMLİ VE DOLAYLI) ---
         // --- 49 DALLI GURME TESTİ AĞACI (MENÜYE TAM UYARLANMIŞ) ---
         const dynamicQuizTree = {
             // ADIM 1: ANA YOL AYRIMI
             "START": {
                 q: "Olimpiyat Arenasına hoş geldiniz! Bugün ruhunuz nasıl bir gastronomi macerası arıyor?",
-                a: "Ateşin üzerinde uzun süre pişen, o isli ve derin sakatat ruhu... 🥖", 
-                b: "Kömürün kor ateşinde mühürlenen, dumanı üstünde o ağır esnaf klasiği... 🧆",    
-                c: "Sosların ve çıtırlığın tavan yaptığı, hızlı ve doyurucu büfe enerjisi... 🍟",     
-                d: "Denizden gelen o gizemli, hafif ve taze sır... 🦪"   
+                a: "Ateşin üzerinde uzun süre pişen, o isli ve derin sakatat ruhu... 🥖",
+                b: "Kömürün kor ateşinde mühürlenen, dumanı üstünde o ağır esnaf klasiği... 🧆",
+                c: "Sosların ve çıtırlığın tavan yaptığı, hızlı ve doyurucu büfe enerjisi... 🍟",
+                d: "Denizden gelen o gizemli, hafif ve taze sır... 🦪"
             },
 
             // --- 1. ANA DAL: SOKAK FELESEFESİ (KOKOREÇ / CİĞER) ---
@@ -1628,7 +1859,7 @@
                 quizAnswers = { aci: 0, etTuru: '', porsiyon: '', soft: 0 };
                 winnerFood = null;
                 winnerDrink = null;
-                startSnakeGame(); 
+                startSnakeGame();
             }
         }
 
@@ -1923,20 +2154,20 @@
         document.getElementById('restartMatchupButton').addEventListener('click', startMatchupGame);
         document.getElementById('restartMatchupButton').textContent = language === 'TR' ? "🔄 Yeniden Kapıştır" : "🔄 Play Again";
 
-       
+
 
         // Testi Sıfırdan Başlatan Fonksiyon
-       // Testi Sıfırdan Başlatan Fonksiyon
+        // Testi Sıfırdan Başlatan Fonksiyon
         function startSnakeGame() {
             snakeWinnerArea.classList.add('hidden');
             snakeGameArea.classList.remove('hidden');
-            
+
             // HER ŞEYİ SIFIRLA
-            currentStage = "START"; 
+            currentStage = "START";
             currentStepCounter = 1;
             quizHistory = [];
             quizAnswers = { etTuru: '', baharat: '', ekmek: '', yanLezzet: '', soft: 0 };
-            
+
             // Soruyu hemen yükle
             loadDynamicQuestion();
         }
@@ -1944,7 +2175,7 @@
         // Akıllı Soru Yükleme Motoru
         function loadDynamicQuestion() {
             let qKey = currentStage;
-            
+
             // Eğer oyun sonuna gelindiyse direkt hesaplamaya gönder
             if (qKey === "FINAL") {
                 calculateQuizResult();
@@ -1971,7 +2202,7 @@
             optButtons.forEach(btn => {
                 const opt = btn.dataset.option;
                 const textSpan = btn.querySelector('.opt-text');
-                
+
                 if (opt === 'A') textSpan.textContent = currentQuestion.a;
                 if (opt === 'B') textSpan.textContent = currentQuestion.b;
                 if (opt === 'C') textSpan.textContent = currentQuestion.c;
@@ -1985,7 +2216,7 @@
         }
 
         // CEVABA GÖRE SORU DEĞİŞTİREN KRİTİK KARAR MEKANİZMASI
-       function processBranchingDecision(opt) {
+        function processBranchingDecision(opt) {
             quizHistory.push(currentStage);
 
             // 1. Adım: Ana Yol Ayrımı
@@ -1994,7 +2225,7 @@
                 else if (opt === 'B') { quizAnswers.etTuru = 'Köfte'; currentStage = "ET_1"; }
                 else if (opt === 'C') { quizAnswers.etTuru = 'Patso'; currentStage = "ATIS_1"; }
                 else if (opt === 'D') { quizAnswers.etTuru = 'Midye'; currentStage = "MIDYE_1"; }
-            } 
+            }
             // 2. Adım: Dallanma devamı
             else if (currentStepCounter === 2) {
                 // Seçilen ana yola göre ikinci basamağa geç
@@ -2029,7 +2260,7 @@
 
             // Düğümü çek
             currentQuestion = dynamicQuizTree[currentStage];
-            
+
             // Eğer düğüm tanımlı değilse güvenli çıkış yap
             if (!currentQuestion) { calculateQuizResult(); return; }
 
@@ -2059,17 +2290,17 @@
 
             document.getElementById('quizProgressBar').style.width = "100%";
             const fallbackImg = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
-            
+
             let allFoods = products.filter(p => p.category !== 'İçecekler' && p.category !== 'İletişim');
             let allDrinks = products.filter(p => p.category === 'İçecekler');
 
-            if (allFoods.length === 0) allFoods = [ { name: "Yarım Ekmek Kokoreç", price: 150, image: "", category: "Kokoreç" } ];
-            if (allDrinks.length === 0) allDrinks = [ { name: "Köpüklü Ayran", price: 30, image: "", category: "İçecekler" } ];
+            if (allFoods.length === 0) allFoods = [{ name: "Yarım Ekmek Kokoreç", price: 150, image: "", category: "Kokoreç" }];
+            if (allDrinks.length === 0) allDrinks = [{ name: "Köpüklü Ayran", price: 30, image: "", category: "İçecekler" }];
 
             // Verilen dinamik kararlara göre filtrele
             let filteredFoods = allFoods.filter(p => p.category.includes(quizAnswers.etTuru) || p.name.includes(quizAnswers.etTuru));
             if (filteredFoods.length === 0) {
-                filteredFoods = quizAnswers.porsiyon === 'büyük' 
+                filteredFoods = quizAnswers.porsiyon === 'büyük'
                     ? allFoods.filter(p => p.name.toLowerCase().includes('ekmek') || p.name.toLowerCase().includes('menü'))
                     : allFoods;
             }
@@ -2098,7 +2329,7 @@
             document.getElementById('quizWinnerDrinkImg').src = winnerDrink.image || fallbackImg;
             document.getElementById('quizWinnerDrinkTitle').textContent = drinkName;
             document.getElementById('quizWinnerDrinkPrice').textContent = dPrice + " ₺";
-            
+
             // Geçmişi temizle (Tekrar oynamak için)
             quizHistory = [];
         }
