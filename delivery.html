@@ -365,18 +365,34 @@
         </div>
     </main>
 
-    <div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50 p-4 transition-opacity">
-        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl transform transition-all">
-            <div class="relative h-64 sm:h-80">
-                <img id="modalImage" class="w-full h-full object-cover">
-                <button class="absolute top-3 right-3 bg-black bg-opacity-50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-opacity-70 ">✖</button>
+    <div id="imageModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-all duration-300">
+        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl transform transition-all border-b-8 border-red-600 animate-pop-in max-h-[92vh] flex flex-col">
+            
+            <div class="relative h-56 sm:h-64 flex-shrink-0 bg-red-600">
+                <img id="modalImage" class="w-full h-full object-cover opacity-95">
+                <button class="absolute top-4 right-4 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/80 transition font-black text-sm shadow-md z-10">✖</button>
+                <div class="absolute bottom-0 left-0 w-full h-0 bg-gradient-to-t from-white to-transparent"></div>
             </div>
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-2">
-                    <h2 id="modalTitle" class="text-2xl font-bold text-gray-800 leading-tight"></h2>
-                    <span id="modalPrice" class="bg-orange-100 text-orange-600 font-bold px-3 py-1 rounded-lg whitespace-nowrap"></span>
+
+            <div class="p-5 overflow-y-auto flex-grow space-y-4 scrollbar-none">
+                
+                <div class="flex justify-between items-start gap-4">
+                    <h2 id="modalTitle" class="text-2xl font-black text-gray-900 leading-tight"></h2>
+                    <span id="modalPrice" class="bg-red-50 text-red-600 font-black text-base px-3 py-1.5 rounded-xl whitespace-nowrap border border-red-100 shadow-sm"></span>
                 </div>
-                <p id="modalDesc" class="text-gray-600 text-base leading-relaxed overflow-y-auto max-h-40"></p>
+
+                <p id="modalDesc" class="text-gray-500 text-xs sm:text-sm leading-relaxed border-b border-gray-100 pb-3"></p>
+
+                
+
+                <div id="modalCrossSellSection" class="pt-2 border-t border-gray-100">
+                    <h4 class="text-[11px] font-black uppercase tracking-wider text-gray-400 mb-2 flex items-center gap-1">
+                        🥤 Birlikte Harika Gider
+                    </h4>
+                    <div id="modalSuggestionsContainer" class="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+                        </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -830,11 +846,28 @@
             return productsArray;
         }
 
+        // YENİLENEN: Dakikasına kadar ziyaretçi girişini kaydeden motor
         function trackVisitor() {
-            const today = new Date().toISOString().slice(0, 10);
-            const counterRef = visitorsRef.child(today);
-            counterRef.once('value', snapshot => { });
-            counterRef.transaction(currentCount => { return (currentCount || 0) + 1; });
+            const todayStr = new Date().toISOString().slice(0, 10);
+            
+            // 1. Eski Günlük Toplam Sayaç
+            const counterRef = visitorsRef.child(todayStr);
+            counterRef.transaction(currentCount => {
+                return (currentCount || 0) + 1;
+            });
+
+            // 2. YENİ: Dakika Bazında Gerçek Ziyaretçi Sayacı
+            const now = new Date();
+            const currentHour = String(now.getHours()).padStart(2, '0');
+            const currentMinute = String(now.getMinutes()).padStart(2, '0');
+            const exactTime = currentHour + ':' + currentMinute; // Örn: "14:26"
+            
+            // Kullanıcı yerinde menüye mi girdi, paket servise mi?
+            const activeMenu = window.location.href.includes('delivery') ? 'delivery' : 'in_place';
+            
+            // Firebase'de tam olarak "14:26" hücresini +1 artırır
+            database.ref('visitors_hourly/' + activeMenu + '/' + todayStr + '/' + exactTime)
+                .set(firebase.database.ServerValue.increment(1));
         }
 
         function setupFirebaseListener() {
@@ -893,12 +926,94 @@
       </div>
     `;
 
-                // Karta tıklandığında modalı aç ve bilgileri doldur
+                // Karta tıklandığında açılacak akıllı ve kesin kısıtlamalı eşlikçi motoru
                 card.addEventListener('click', () => {
                     document.getElementById('modalImage').src = imageUrl;
                     document.getElementById('modalTitle').textContent = name;
                     document.getElementById('modalDesc').textContent = desc;
-                    document.getElementById('modalPrice').textContent = p.price + " ₺";
+                    document.getElementById('modalPrice').textContent = (p.discountPrice || p.price) + " ₺";
+
+                    const crossSection = document.getElementById('modalCrossSellSection');
+                    const sugContainer = document.getElementById('modalSuggestionsContainer');
+                    sugContainer.innerHTML = '';
+
+                    // KURAL 1: Eğer tıklanan ürün zaten bir içecek ise, eşlikçi alanını tamamen gizle
+                    if (p.category === 'İçecekler') {
+                        crossSection.classList.add('hidden');
+                    } else {
+                        crossSection.classList.remove('hidden');
+
+                        // KURAL 2: Tüm içecekleri filtrele (Büyük litrelik boyları kesinlikle eliyoruz)
+                        const allDrinks = products.filter(prod => 
+                            prod.category === 'İçecekler' && 
+                            !prod.name.toLowerCase().includes('1 lt') && 
+                            !prod.name.toLowerCase().includes('litre') && 
+                            !prod.name.toLowerCase().includes('litrelik')
+                        );
+
+                        let recommendedDrinks = [];
+
+                        // KURAL 3: Ürün çorba ise SADECE SU öner, başka hiçbir şey getirme
+                        if (p.category === 'Çorba' || p.name.toLowerCase().includes('çorba')) {
+                            recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('su') && !d.name.toLowerCase().includes('soda') && !d.name.toLowerCase().includes('meyve'));
+                        } 
+                        // KURAL 4: Kokoreç, Ciğer, Köfte veya Menüler için ŞALGAM ve SADECE AÇIK AYRAN (Kapalı kesinlikle elenir)
+                        else if (['Kokoreç', 'Tavuk Kokoreç', 'Köfte', 'Ciğer', 'Menüler'].includes(p.category)) {
+                            recommendedDrinks = allDrinks.filter(d => 
+                                (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) || 
+                                d.name.toLowerCase().includes('şalgam')
+                            );
+                        } 
+                        // KURAL 5: Hamburger, Patso, Tavuk Döner için Kola, Fanta, Sprite veya Ice Tea önceliği
+                        else if (['Hamburger', 'Patso', 'Tavuk Döner'].includes(p.category) || p.name.toLowerCase().includes('burger') || p.name.toLowerCase().includes('patso')) {
+                            recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('kola') || d.name.toLowerCase().includes('fanta') || d.name.toLowerCase().includes('sprite') || d.name.toLowerCase().includes('tea') || d.name.toLowerCase().includes('gazoz'));
+                        } 
+                        // KURAL 6: Tost için öncelikli Çay, SADECE AÇIK AYRAN veya Kola
+                        else if (p.category === 'Tost') {
+                            recommendedDrinks = allDrinks.filter(d => 
+                                d.name.toLowerCase().includes('çay') || 
+                                (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) || 
+                                d.name.toLowerCase().includes('kola')
+                            );
+                        }
+
+                        // KURAL 7: Eğer yukarıdaki özel filtrelerden sonuç çıkmazsa, genel listeden de kapalı ayranları tamamen filtreleyerek seç
+                        if (recommendedDrinks.length === 0) {
+                            recommendedDrinks = allDrinks.filter(d => !d.name.toLowerCase().includes('ayran') || d.name.toLowerCase().includes('açık'));
+                        }
+
+                        // KURAL 8: Karıştır ve maksimum 2, minimum 1 içecek olacak şekilde sınırla
+                        recommendedDrinks = recommendedDrinks.sort(() => Math.random() - 0.5).slice(0, 2);
+
+                        if (recommendedDrinks.length === 0) {
+                            crossSection.classList.add('hidden');
+                        } else {
+                            recommendedDrinks.forEach(d => {
+                                const dName = language === 'TR' ? d.name : d.nameEN || d.name;
+                                const dPrice = d.discountPrice || d.price;
+                                const dImg = d.image || 'https://via.placeholder.com/100?text=Olimpiyat';
+
+                                const miniCard = document.createElement('div');
+                                miniCard.className = "flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-xl p-1.5 min-w-[150px] max-w-[150px] flex-shrink-0 relative";
+                                miniCard.innerHTML = `
+                                    <img src="${dImg}" class="w-10 h-10 object-cover rounded-lg border bg-white flex-shrink-0">
+                                    <div class="text-left min-w-0 flex-1">
+                                        <h5 class="font-bold text-[10px] text-gray-800 truncate leading-tight">${dName}</h5>
+                                        <p class="text-red-600 font-black text-[11px] mt-0.5">${dPrice} ₺</p>
+                                    </div>
+                                    <span class="text-gray-300 text-xs pr-1 font-bold select-none">+</span>
+                                `;
+                                sugContainer.appendChild(miniCard);
+                            });
+                        }
+                    }
+
+                    // Tıklama istatistik kaydı alanı (Mevcut altyapınız)
+                    const activeMenu = window.location.href.includes('delivery') ? 'delivery' : 'in_place';
+                    if (firebase.database) {
+                        firebase.database().ref('stats/product_clicks/' + activeMenu + '/' + p.key).set(firebase.database.ServerValue.increment(1));
+                    }
+
                     document.getElementById('imageModal').classList.remove('hidden');
                 });
 
@@ -923,6 +1038,10 @@
                     document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active-tab'));
                     btn.classList.add('active-tab');
                     const categoryKey = btn.dataset.category;
+                    
+                    // YENİ EKLENEN KISIM: Kategori tıklamasını doğrudan 'delivery' havuzuna yaz
+                    database.ref('stats/category_clicks/delivery/' + categoryKey).set(firebase.database.ServerValue.increment(1));
+
                     if (categoryKey === 'İletişim') {
                         menuContainer.innerHTML = '';
                         campaignSliderSection.parentElement.classList.add('hidden');
