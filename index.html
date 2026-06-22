@@ -266,14 +266,21 @@
             <section id="campaignSlider"></section>
         </div>
 
-        <div class="mx-4 my-8 relative">
+       <!-- 🧠 SİPARİŞ BEKLERKEN VAKİT GEÇİRME WIDGET'I (BİLGİ + DÜNYA MUTFAĞI) -->
+    <div class="mx-4 my-8 relative">
         <div class="absolute -top-3 left-6 bg-[#fbcc25] text-gray-950 font-black text-[10px] px-3 py-1 rounded-full uppercase tracking-widest shadow-md z-10 border border-yellow-400">
             Sipariş Beklerken ⏳
         </div>
-        <div class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center relative overflow-hidden shadow-sm">
-            <div class="absolute -right-4 -bottom-4 text-7xl opacity-35 grayscale"><img src="1000129368.png" alt="" width="90" style="transform: translateY(-4px) rotate(25deg);"></div>
-            <h4 class="text-orange-600 font-black text-[14px] mb-2">Biliyor muydunuz?</h4>
-           <p id="triviaText" class="text-gray-700 text-sm font-semibold italic leading-relaxed min-h-[60px]">
+        <div class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center relative overflow-hidden shadow-sm flex flex-col items-center">
+            <div class="absolute -right-4 -bottom-4 text-7xl opacity-5 grayscale pointer-events-none">🍔</div>
+            
+            <!-- Dinamik Başlık (Bilgi veya Dünya Mutfağı yazacak) -->
+            <h4 id="triviaTitle" class="text-orange-600 font-black text-lg mb-2 transition-colors duration-300">Biliyor muydunuz? 🧠</h4>
+            
+            <!-- Dünya Mutfağı Resmi (Sadece yemek çıktığında görünür olacak) -->
+            <img id="mealImage" class="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full shadow-md border-4 border-gray-100 mb-3 hidden transition-opacity duration-500 opacity-0" src="" alt="Dünya Mutfağı">
+            
+            <p id="triviaText" class="text-gray-700 text-sm font-semibold italic leading-relaxed min-h-[60px] w-full">
                 ...
             </p>
         </div>
@@ -2645,25 +2652,25 @@
             "Olimpiyat Kokoreç ailesi olarak, bu ekranı okurken yüzünüzde oluşan gülümsemenin yemeğinize ekstra lezzet katacağına inanıyoruz!"
         ];
 
-        // --- 🧠 SİPARİŞ BEKLERKEN TRIVIA MOTORU (DAKTİLO EFEKTİ) ---
+
+       // --- 🌍 DÜNYA MUTFAĞI & BİLGİ HARMANI DAKTİLO MOTORU ---
         
         let currentTriviaIndex = 0;
         
         // JS Bekletici Fonksiyonu (Daktilo vuruş aralıkları için)
         const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+        // Daktilo Animasyon Motoru
         async function typeWriterEffect(text, elementId) {
             const el = document.getElementById(elementId);
-            el.innerHTML = '&ldquo;'; // Açılış tırnağını koy
+            el.innerHTML = '&ldquo;'; 
             
-            // Yanıp sönen imleç (cursor) oluştur
             const cursor = document.createElement('span');
             cursor.innerHTML = '|';
-            cursor.style.color = '#ea580c'; // Turuncu Olimpiyat rengi imleç
+            cursor.style.color = '#ea580c'; 
             cursor.style.fontWeight = '900';
             cursor.style.animation = 'blink 1s step-end infinite';
             
-            // Eğer sayfada blink animasyonu yoksa otomatik ekle
             if (!document.getElementById('cursor-style')) {
                 const style = document.createElement('style');
                 style.id = 'cursor-style';
@@ -2673,50 +2680,327 @@
 
             el.appendChild(cursor);
 
-            // Harfleri döngüyle tek tek yazdır
+            // Harfleri daktilo gibi bas
             for (let i = 0; i < text.length; i++) {
                 const charNode = document.createTextNode(text.charAt(i));
-                el.insertBefore(charNode, cursor); // Harfi imleçten hemen önceye koy
-                await sleep(35); // YAZMA HIZI: 35 milisaniye (Düşürürsen hızlanır, artırırsan yavaşlar)
+                el.insertBefore(charNode, cursor); 
+                await sleep(35); // Yazı hızı
             }
             
             const endQuote = document.createTextNode('”');
-            el.insertBefore(endQuote, cursor); // Kapanış tırnağını koy
+            el.insertBefore(endQuote, cursor);
         }
 
-        async function startTriviaLoop() {
-            const triviaEl = document.getElementById('triviaText');
-            
-            // Sonsuz daktilo döngüsü
-            while (true) {
-                // Kutuyu görünür yap
-                triviaEl.style.opacity = '1';
-                triviaEl.style.transition = 'none'; 
+        // Dünya Mutfağı API'sinden Rastgele Yemek Çekme Fonksiyonu
+        // Dünya Mutfağı API'sinden Rastgele Yemek Çekme Fonksiyonu
+        async function fetchWorldMeal() {
+            try {
+                // Ücretsiz TheMealDB API
+                const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
+                const data = await res.json();
+                const meal = data.meals[0];
                 
-                // Daktiloyu çalıştır
-                await typeWriterEffect(foodFacts[currentTriviaIndex], 'triviaText');
+                // Bölge ismi 'Unknown' gelirse diye önlem
+                const area = meal.strArea !== "Unknown" ? meal.strArea : "Dünya";
+                const name = meal.strMeal;
+                const img = meal.strMealThumb;
                 
-                // Yazı bittikten sonra müşterinin okuması için tam 7 saniye bekle
-                await sleep(10000);
+                // MÜŞTERİYE GÖSTERİLECEK DİNAMİK MEYDAN OKUMA CÜMLELERİ
+                // MÜŞTERİYE GÖSTERİLECEK DİNAMİK MEYDAN OKUMA CÜMLELERİ (DEV HAVUZ - 200 ADET)
+const challengeMessages = [
+    // --- KOKOREÇ TEMALI (1-30) ---
+    `${area} mutfağında bugün haritada bile zor bulacağınız '${name}' yemeğini yiyorlarmış... Boşverin ustam, hiçbir sos közde ağır ağır pişen kokorecin dumanıyla yarışamaz!`,
+    `${area} taraflarında '${name}' diye bir şeyler atıştırıyorlarmış... Bıraksınlar bu işleri, yaprak gibi açılmış ateşte terleyen tavuk dönerimizin yerini tutar mı hiç? Siparişiniz yolda!`,
+    `Şu gördüğünüz '${name}', ${area} mutfağının incisiymiş... Görünüşe aldanmayın, bol baharatlı ve limonlu bir midye dolmanın verdiği mutluluğun yanından bile geçemez!`,
+    `${area} mutfağının en fiyakalı yemeği '${name}' diyorlar... Valla bizim sıcacık ekmek arası ciğerimizin samimiyeti bunlara bin basar. Ustalarımız siparişinizi hazırlıyor!`,
+    `Millet ${area} lokantalarında '${name}' yiyerek gurmelik taslıyor... Halbuki bilmezler ki en büyük gurmelik, Olimpiyat'ta yenilen o dumanı tüten sokak lezzetleridir!`,
+    `Yabancılar ${area} taraflarında '${name}' ile doymaya çalışadursun... Bizim bol kekikli, acılı kokorecimizin ilk ısırığındaki hazzı asla bilemeyecekler. Beklediğinize değecek!`,
+    `Dünya mutfağından '${name}'... ${area} halkı seviyor olabilir ama bizim pamuk gibi ekmeğe basılmış ıslak hamburgerimizin verdiği o gece yarısı mutluluğunu veremez!`,
+    `Bugün ${area} lüks restoranlarında '${name}' pişiyormuş. Onlar tabakları cımbızla süslerken, bizim usta satırla kokoreç kıyıyor! Asıl şov masanıza gelmek üzere.`,
+    `${area} insanı '${name}' yerken muhtemelen bizim buz gibi açık ayranımızın ve acılı kokorecimizin uyumundan habersizler. Onlar adına üzgünüz!`,
+    `Şu '${name}' dedikleri ${area} porsiyonlarını mikroskopla ararsın. Olimpiyat'ta çeyrek ekmek bile adamı ayağa kaldırır!`,
+    `Diyorlar ki ${area} sokaklarında '${name}' meşhurmuş. Bizim buraların meşhuru belli; ateşte nar gibi kızarmış, baharatı tam kıvamında bir yarım kokoreç!`,
+    `Eminiz ki ${area} aşçıları '${name}' için çok uğraşmıştır ama bizim kuzu alevinde yavaş yavaş dönen kokorecin karizması bir başka be ustam!`,
+    `${area} şefleri '${name}' tarifini sır gibi saklıyormuş. Bizim sırrımız saklı değil; bol malzeme, gerçek ateş ve usta eli!`,
+    `Uzaklarda '${name}' yeniyor, ${area} halkı tok yattığını sanıyor. Halbuki gece yarısı yenilen o çıtır kokorecin verdiği tokluk bambaşkadır.`,
+    `Şimdi ${area}'da olup '${name}' yemek vardı demek isterdik ama yalan olur. Biz buradayız, kokorecin tam merkezinde!`,
+    `Biliyor musunuz, ${area} restoranlarında '${name}' yerken sessiz konuşulurmuş. Bizim burada lezzetten sessiz kalınır!`,
+    `${area} mutfağında '${name}' yaparken çok afili isimler kullanıyorlar. Biz kısaca 'Ustam çek oradan bir yarım' diyoruz, iş bitiyor.`,
+    `Bu '${name}' denen yemeği ${area} kralları yermiş zamanında. Bizim Olimpiyat'ta ise her müşterimiz kraldır!`,
+    `Şu an ${area} sınırları içinde '${name}' yiyen biri, sizin birazdan yiyeceğiniz bol kimyonlu kokoreci görse elindekini usulca masaya bırakırdı.`,
+    `Adamlar ${area} mutfağında '${name}' diye bir icat yapmışlar. Güzeldir elbet ama bizim çıtır ekmeğe damlayan kokoreç yağı dünya mirası sayılmalı!`,
+    `Gerçek lezzet ${area} taraflarında '${name}' ile aranmaz. Gerçek lezzet buram buram köz kokan tezgahımızın hemen arkasındadır.`,
+    `Eğer ${area} halkı bir kez bizim baharatlı kokoreci tatsaydı, inanın '${name}' yemeğini menülerinden tamamen kaldırırlardı.`,
+    `Onlar ${area} sokaklarında '${name}' ile hava atsınlar. Sizin siparişiniz mangaldan yeni indi, birazdan masanızda!`,
+    `Şu '${name}' ${area} diyetlerine çok uygunmuş. Biz diyet yapmıyoruz ustam, biz lezzetin hakkını veriyoruz!`,
+    `Bu '${name}' yemeği ${area} tarafında romantik akşamların menüsüymüş. Bizim için en büyük romantizm ekmek arası kokorece sıkılan bir kaç damla limondur.`,
+    `${area} şefleri '${name}' yaparken gramaj hesaplar. Bizim usta eli boldur, ekmeğin içini lezzetle doldurur!`,
+    `Dünya haritasında ${area}'yı bulmak zordur ama lezzetin haritasında Olimpiyat Kokoreç tam merkezdedir! '${name}' de neymiş?`,
+    `Şu '${name}' yemeğini ${area} şefleri haftalarca marine ediyormuş. Bizim ateşimiz ve baharatımız o işi saniyeler içinde hallediyor!`,
+    `Bizim kokorecin o ilk ısırığındaki 'çıt' sesi, ${area} mutfağının tüm '${name}' tariflerine bedeldir!`,
+    `Siparişiniz hazırlanırken şu '${name}' yemeğine bir bakın. Sonra ${area} halkı için ufak bir saygı duruşunda bulunup Olimpiyat lezzetine odaklanın!`,
+
+    // --- TAVUK DÖNER TEMALI (31-60) ---
+    `Bugün ${area} menüsünde '${name}' varmış. Bizim dükkanda ise yaprak gibi açılmış, özel sosuyla demlenmiş efsane tavuk döner var!`,
+    `${area} sınırlarında '${name}' çok tüketiliyormuş. İddia ediyoruz, bizim dürüm tavuk dönerin içine giren turşu bile daha lezzetlidir!`,
+    `Onlar '${name}' yiyerek ${area} kültürünü yaşatıyor. Biz de bol malzemeli, kaşarı erimiş dönerimizle sokak kültürünü zirveye taşıyoruz!`,
+    `Bir porsiyon '${name}' için ${area} restoranlarında aylar öncesinden sıra alınıyormuş. Olimpiyat'ta lezzet bekletmez, anında masanızda!`,
+    `Şu '${name}' ${area} taraflarında çok hafif bir lezzetmiş. Bizim pilavüstü döner de hafiftir, sadece birazcık akılları baştan alır!`,
+    `${area} aşçıları '${name}' pişerken başından ayrılmazmış. Bizim döner ateş karşısında usul usul dönerken zaten kendi şovunu yapıyor.`,
+    `Biliyor muydunuz? ${area} halkı '${name}' yerken su içermiş. Bizim tavuk dönerin yanında buz gibi köpüklü ayran olmadan o iş olmaz!`,
+    `Diyorlar ki '${name}' yiyen ${area} insanı çok mutlu oluyormuş. Tombik pide arası dönerimizi ısırıp da yüzü asık olan tek bir müşteri görmedik daha!`,
+    `Bu '${name}' denen ${area} yemeğini bıçakla kesmek zormuş. Bizim usta döneri öyle bir keser ki, yaprak gibi dökülür!`,
+    `${area} sokaklarında '${name}' kokusu yayılırmış. Buradaki kızarmış tavuk döner ve baharat kokusu bütün mahalleyi ayağa kaldırır!`,
+    `Şimdi ${area} uçağına binip '${name}' yemeye gitmeye gerek yok. Dünyanın en iyi tavuk döneri zaten burnunuzun dibinde hazırlanıyor.`,
+    `Onlar ${area} şeflerinin elinden '${name}' yesin. Siz birazdan özel sosla ıslatılmış, sıcacık dürüm dönerin keyfine varacaksınız.`,
+    `Bu '${name}' yemeği ${area} elitlerinin favorisiymiş. Olimpiyat'ın tavuk döneri ise 7'den 70'e herkesin tartışmasız şampiyonudur!`,
+    `Şu '${name}' yemeğine ${area} mutfağında çok sos konmazmış. Bizim dürümün içindeki sos, dönerin ruhudur be ustam!`,
+    `Dışarıda hava nasıl olursa olsun, ${area} insanı '${name}' yermiş. Bizde ise her havanın ilacı sıcak bir tombik dönerdir!`,
+    `Eminim ${area} diyetisyenleri '${name}' yemeğini çok öneriyordur. Bizim tavuk dönerimiz ise ruhun en büyük ilacıdır!`,
+    `Bir porsiyon '${name}' ile doyduğunu iddia eden ${area} insanı, Olimpiyat'ın bol malzemeli yarım ekmek dönerini görse şok geçirirdi.`,
+    `Adamlar ${area} topraklarında '${name}' ile övünüyor. Biz ise her gün bu ateşte terleyen tavuk dönerimizle efsaneler yazıyoruz!`,
+    `Şu '${name}' denen ${area} yemeği tabağa konduğunda soğurmuş. Bizim döner dürüm, son lokmasına kadar o ateşi içinde saklar!`,
+    `Bazen ${area} şefleri '${name}' için günlerce hazırlık yaparmış. Bizim marinasyon sırrımızla dönerimiz her saniye efsaneye dönüşüyor.`,
+    `Eğer ${area} şefleri tavuk dönerimizi tatsaydı, emin olun '${name}' tariflerini çöpe atıp dükkana gelir bizden bayilik isterlerdi!`,
+    `Şimdi ${area}'da '${name}' yiyenler düşünsün. Siz birazdan patatesi, turşusu, sosu tam kararında bir efsane yiyeceksiniz.`,
+    `Bu '${name}' yemeği ${area} tarafında çatalla yenirmiş. Bizim döneri iki elle sıkıca kavrayıp o ilk ısırığı almak işin raconudur!`,
+    `Dünya ${area} mutfağının '${name}' yemeğini konuşuyor olabilir ama bizim mahalle sadece usta'nın döner bıçağının sesini dinler.`,
+    `Birazdan masanıza gelecek olan tavuk döner, ${area} mutfağının '${name}' yemeğini lezzetiyle teknik nakavt yapacak. Hazır mısınız?`,
+    `Onların ${area}'da yediği '${name}' karın doyurur. Bizim dürüm dönerimiz ise hem karnı hem kalbi doyurur!`,
+    `Şu '${name}' yemeği ${area} taraflarında çok renkli sunulurmuş. Bizim dönerin o altın sarısı rengi dünyadaki bütün tabaklardan daha iştah açıcıdır.`,
+    `Ne '${name}', ne de başka bir ${area} yemeği... Buz gibi ayranla eşleşmiş bir tavuk dönerin dünyada bir rakibi daha icat edilmedi.`,
+    `Bu '${name}' yemeğinin tarifinde ${area} sırları varmış. Bizim sırrımız falan yok; bol malzeme, temiz işçilik, efsane lezzet!`,
+    `Siparişiniz hazırlanırken ${area} mutfağının '${name}' yemeğine bir bakın... Ve şükredin ki Olimpiyat Kokoreç'tesiniz!`,
+
+    // --- MİDYE DOLMA TEMALI (61-85) ---
+    `${area} kıyılarında '${name}' diye deniz ürünü yiyorlarmış. Onlar deniz ürünü görmemiş! Üstüne taze limon sıkılmış midye dolmamız onlara ders verir.`,
+    `Şu '${name}', ${area} lüks restoranlarında servis edilirmiş. Bizim midyeler sokakların lüksüdür, kabuğunu kaşık yapıp yemesi ayrı bir olaydır!`,
+    `Adamlar ${area}'da '${name}' yapıp üstüne sos döküyormuş. Bir midye dolmanın içindeki o efsane pirinç ve kuş üzümü dengesi hiçbir sosa ihtiyaç duymaz.`,
+    `Biliyor musunuz, ${area} insanı '${name}' ile doyuyormuş. Bizde midye dolma ile doymak yoktur, "10 tane daha ver usta" diyene kadar yenir!`,
+    `Bu '${name}' denen ${area} yemeği masada saatlerce bekleyebilirmiş. Bizim midyeler tezgaha düştüğü an tükenir, bekleme yapmaz!`,
+    `Millet ${area} sahillerinde '${name}' yiyerek tatil yapıyor. Olimpiyat'ta arka arkaya atılan 20 midye dolma zaten başlı başına bir tatildir!`,
+    `Diyorlar ki '${name}' ${area} taraflarında denizden taze çıkıyormuş. Bizim midyeler denizin kalbinden gelir, baharatıyla efsaneleşir.`,
+    `Şu '${name}' yemeğinde ${area} şefleri çok limon kullanmazmış. Biz midyeye o limonu öyle bir sıkarız ki, lezzet patlaması yaşanır!`,
+    `Eğer ${area} halkı Olimpiyat'ın sıcak midyesini tatsaydı, inanın bana '${name}' porsiyonlarını anında iade ederlerdi.`,
+    `Onların '${name}' yemeği tabağı kirletir. Bizim midyede bulaşık çıkmaz, kendi kabuğu kendi tabağıdır, pratikliğin zirvesidir!`,
+    `Bu '${name}' ${area} sokaklarında meşhurmuş. Bizim midye tezgahımızın başındaki o samimi sohbeti dünyanın hiçbir sokağında bulamazsınız.`,
+    `Şimdi ${area}'da '${name}' yemek mi, yoksa bol acılı, baharatlı, taze limonlu midye dolmalarımızı gömmek mi? Cevap çok basit!`,
+    `Bir porsiyon '${name}' yemek ${area} kültüründe bir saat sürermiş. Bizim midye şovunda saniyeler içinde kabuklardan dağ oluşur!`,
+    `O meşhur ${area} mutfağının '${name}' yemeği karın doyurur. Midye dolma ise bir tutkudur, karın toksa bile yenir!`,
+    `Şu '${name}' yemeği için ${area} restoranlarına gitmeye gerek yok. En taze deniz kokusu ve en iyi baharat dengesi şu an sizin için hazırlanıyor.`,
+    `Adamlar ${area} topraklarında '${name}' ile hava atıyorlar. Bizim midye dolmamızın içindeki tarçın ve çam fıstığı uyumu onlara gastronomi dersi verir.`,
+    `Midyeyi açarsın, limonu sıkarsın, ağzına atarsın... Bu üçlü komboyu ${area} mutfağının '${name}' tariflerinden daha çok seviyoruz!`,
+    `Bu '${name}' yemeğini ${area} şefleri havyarla süslermiş. Bizim midyenin süse ihtiyacı yoktur, sade ve kusursuz bir lezzettir.`,
+    `Onlar ${area} mekanlarında '${name}' yiye dursun. Siz şu an Türkiye'nin en taze ve en iyi baharatlı midyesini bekliyorsunuz.`,
+    `Şu '${name}' denen ${area} yemeğine bir bakın. Sonra derin bir nefes alın ve Olimpiyat'ın midye tezgahından gelecek o taze iyot kokusunu bekleyin.`,
+    `Eğer ${area} aşçıları bizim midyenin iç harcını görselerdi, muhtemelen '${name}' yapmayı bırakıp pirinç ıslamaya başlarlardı!`,
+    `Bazen ${area} insanı '${name}' yerken 'acaba daha ne yiyebilirim' diye düşünürmüş. Bizde midye bittiğinde tek bir soru sorulur: 'Kaç tane oldu usta?'`,
+    `Bu '${name}' yemeği ${area} diyet listelerinde varmış. Midye dolmanın kalorisi sayılmaz ustam, o ruhun besinidir!`,
+    `Midyeci ustasının el hızını, ${area} şeflerinin '${name}' hazırlama hızıyla kıyaslamayın bile; ustamız ışık hızında açar!`,
+    `Şimdi arkanıza yaslanın, ${area} mutfağının '${name}' menüsünü unutup Olimpiyat midyesinin o efsanevi lezzet yolculuğuna hazırlanın.`,
+
+    // --- ISLAK HAMBURGER & HAMBURGER TEMALI (86-110) ---
+    `Amerika'da falan hamburgeri kuru kuru yerlermiş, ${area} taraflarında da '${name}' modaymış. Oysa buharla demlenmiş salçalı ıslak hamburgerin şifası başkadır!`,
+    `Şu gördüğünüz '${name}' ${area} sokaklarında çok satarmış. Bizim pamuk gibi ıslak hamburgerimiz gece yarısı açlıklarının tek şampiyonudur!`,
+    `Onlar ${area} kafelerinde '${name}' ile çay içiyor olabilir. Biz buz gibi yayık ayran ve ıslak hamburger ikilisiyle tabuları yıkıyoruz!`,
+    `Bu '${name}' denen ${area} yemeğini bıçakla kibarca keserlermiş. Islak hamburger elle yenir, parmaklarda kalan o özel sos yalanır ustam!`,
+    `Adamlar ${area} mutfağında '${name}' yaparken sosu yanına koyuyor. Bizim ıslak hamburger ekmeği sosla yıkanır, buharla demlenir!`,
+    `Dünya ${area} mutfağının '${name}' yemeğini tartışsın dursun. Biz bir oturuşta kaç tane ıslak hamburger yenebileceğini tartışıyoruz!`,
+    `Şu '${name}' ${area} taraflarında lüks sayılıyormuş. Bizim hamburgerimizin o karamelize soğanlı ve bol peynirli hali lüksün vücut bulmuş halidir.`,
+    `Eğer ${area} şefleri bizim ıslak hamburger kutusundaki o sarımsaklı buharı koklasaydı, '${name}' menülerini komple değiştirirlerdi.`,
+    `Bir tane '${name}' ile ${area} insanı hemen doyarmış. Islak hamburger öyle mi? İki tane yetmez, üçüncü her zaman göz kırpar!`,
+    `Diyorlar ki '${name}' yemeği ${area} bölgesinin en iyisiymiş. Hamburger köftemizin o ev yapımı dokusunu tatmadan konuşmasınlar deriz.`,
+    `Şimdi ${area} uçağına binip '${name}' yemeye gerek yok. Orijinal sokak kültürünün en iyi hamburgeri şu an ızgaradan çıkmak üzere.`,
+    `Bu '${name}' denen ${area} yemeğine çok baharat katarlarmış. Islak hamburgerin sırrı ise tamamen o hafif sarımsaklı, tatlı-tuzlu domates sosundadır.`,
+    `Biliyor musunuz, ${area} gençleri '${name}' yiyerek büyürmüş. Bizim gençler ıslak hamburger tezgahının önünde gece sohbetleriyle büyür!`,
+    `Şu '${name}' tabağına ${area} mutfağında yeşillik koyarlarmış. Islak hamburger sadeliğin gücüdür; ekmek, köfte ve efsane sos! Başka hiçbir şeye ihtiyaç duymaz.`,
+    `Onlar ${area} mekanlarında '${name}' diye şekil yapsınlar. Bizim o altın sarısı hamburger ekmeğimizin yumuşaklığı her türlü şekli bozar!`,
+    `Eğer ${area} diyetisyenleri ıslak hamburgerin insana verdiği mutluluğu bilseydi, '${name}' yerine reçetelerine bunu yazarlardı.`,
+    `Şu '${name}' yemeğinin ${area} tarafında bir tarihi varmış. Islak hamburgerin tarihi ise gecenin en güzel saatlerinde sokak lambaları altında yazılır!`,
+    `Bu '${name}' yemeğini ${area} aşçıları hazırlarken eldiven takarmış. Islak hamburger sıcak sıcak, o kağıdından tutularak büyük bir tutkuyla yenir.`,
+    `Bir ısırık '${name}' alıp '${area} lezzeti' diyorlar. Bizim cheeseburgerin eriyen peynirini görseler kelimelerini geri alırlar!`,
+    `Onlar ${area} topraklarında '${name}' ile doymaya çalışsın. Siz birazdan Olimpiyat'ın o meşhur buharlı burger efsanesiyle tanışacaksınız.`,
+    `Şimdi ${area}'da '${name}' yiyenler düşünsün. Sizin siparişiniz o meşhur kutunun içinde demleniyor, sıcak sıcak geliyor!`,
+    `Bu '${name}' yemeği ${area} kültüründe zengin işiymiş. Islak hamburger herkesin yemeğidir, sokağın tartışmasız ve en samimi kralıdır.`,
+    `Millet ${area} lokantalarında '${name}' siparişini 40 dakika beklermiş. Bizim usta hamburgeri şipşak çeker, açlık krizini anında çözer!`,
+    `Şu '${name}' dedikleri ${area} tabağı göze hitap edermiş. Bizim burgerler ise direkt mideye ve kalbe hitap eder!`,
+    `Siparişiniz yolda! ${area} mutfağının '${name}' yemeği birazdan masanıza gelecek olan o efsane burgerin yanında sönük bir yıldız gibi kalacak.`,
+
+    // --- CİĞER TEMALI (111-135) ---
+    `Bugün ${area} taraflarında '${name}' diye bir şeyler geveliyorlarmış... Bırakın onları, sumaklı soğanla harmanlanmış yaprak ciğerimizin samimiyeti dünyalara bedel!`,
+    `${area} şefleri '${name}' tarifine sos uydurmaya çalışsın. Bizim ciğerimizin kendi yağı ve pul biberi dünyadaki bütün soslara kafa tutar!`,
+    `Şu gördüğünüz '${name}', ${area} ziyafet sofralarının incisiymiş. Yarım ekmek arası pamuk gibi ciğerin verdiği o muazzam ziyafeti henüz tatmamışlar demek ki.`,
+    `Adamlar ${area} mutfağında '${name}' yaparken etin özünü kaybediyormuş. Olimpiyat'ta ciğer ustalıkla mühürlenir, içi sulu ve lokum gibi kalır!`,
+    `Millet ${area} mekanlarında '${name}' yiyerek demir vitamini alıyoruz sanıyor. Gerçek enerji ve güç, mangaldan taze inmiş porsiyon ciğerdedir!`,
+    `Biliyor musunuz, ${area} insanı '${name}' yerken yanına limon istemezmiş. Ciğere şöyle bolca limon sıkıp yemenin verdiği ferahlığı bir bilseler...`,
+    `Bu '${name}' denen ${area} yemeğini çatalla yerlermiş. Ciğer dediğin sıcak somun ekmeğin içine çekilir, maydanozla sarılıp koca bir ısırıkla yenir!`,
+    `Diyorlar ki '${name}' yiyen ${area} gurmeleri çok seçiciymiş. Bizim ciğer tezgahına gelseler o gurmelik falan kalmaz, saniyeler içinde ekmek biter!`,
+    `Şu '${name}' ${area} taraflarında çok hafif bulunuyormuş. Bizim Arnavut ciğerinin küp küp lokmalık o hafif ve eşsiz dokusunu görseler akılları durur.`,
+    `Eğer ${area} şefleri bizim ustanın ciğer doğrama hızını görselerdi, '${name}' tabaklarını mutfakta bırakıp çıraklığa başlarlardı.`,
+    `Onlar ${area} topraklarında '${name}' ile övünedursun. Bizim bol baharatlı, nar gibi kızarmış ciğer şişlerimiz sokak lezzetlerinin şahıdır!`,
+    `Bir porsiyon '${name}' ile ${area} insanı saatlerce idare edermiş. Ciğerin o efsane tadı damakta kaldıkça 'ustam yarım daha çek' dememek imkansızdır.`,
+    `Şu '${name}' yemeğinde ${area} aşçıları garnitür kullanmazmış. Sumaklı, kırmızı toz biberli, soğanlı yatağı olmayan bir ciğer düşünülemez!`,
+    `Dünya mutfağından '${name}'... ${area} halkı bayılıyor olabilir ama ciğerin ateşte cızırdayan o ilk sesini duyduklarında fikirleri kesin değişir.`,
+    `Bu '${name}' yemeği ${area} elitlerinin favorisiymiş. Ciğer ise hem esnafın, hem patronun, hem de ağzının tadını bilen herkesin ortak aşkıdır!`,
+    `Şimdi ${area} uçağına binip '${name}' aramayın. Yeryüzündeki en iyi marinasyona sahip, taptaze ciğer birazdan masanızı şenlendirecek.`,
+    `Bazen ${area} restoranlarında '${name}' masaya soğuk gelirmiş. Olimpiyat'ta ciğer ateşten ekmeğe saniyeler içinde uçar, dumanı üstünde tüter!`,
+    `Onlar ${area} şeflerinin elinden '${name}' yesin. Siz birazdan baharatın ve etin en mükemmel uyumunu yakalamış ciğerin keyfine varacaksınız.`,
+    `Şu '${name}' yemeği ${area} diyetlerine giriyormuş. Ciğer de diyete uygundur ustam, bolca protein ve saf mutluluk içerir!`,
+    `Eğer ${area} halkı bir kere bizim ciğerin tadına baksaydı, inanın '${name}' kelimesini sözlüklerinden tamamen silerlerdi.`,
+    `Bu '${name}' denen ${area} yemeğine çok para ödüyorlarmış. Gerçek zenginlik, sıcacık ekmeğin içindeki bol porsiyonlu Olimpiyat ciğeridir.`,
+    `Birazdan masanıza gelecek olan ciğer, ${area} mutfağının en güvendiği '${name}' yemeğini bile lezzetiyle unutturacak kapasitede.`,
+    `Şu '${name}' yemeği ${area} taraflarında haftada bir yenirmiş. Bizim ciğer o kadar hafiftir ki, sabah öğle akşam yesen yine de bıkmazsın!`,
+    `Ne '${name}', ne de başka bir ${area} spesiyali... Buz gibi ayran ve acı biber turşusu eşliğinde yenen ciğerin dünyada rakibi yoktur.`,
+    `Siparişiniz hazırlanırken ${area} mutfağının '${name}' şovunu izleyin, sonra gerçek şovun mangalda nasıl yapıldığını görmek için tabağınıza bakın!`,
+
+    // --- KÖFTE TEMALI (136-160) ---
+    `${area} mutfağında bugün '${name}' diye bir köfte çeşidi deniyorlarmış... Valla bizim kuzu ve dana döşünden çekilmiş anne usulü köftemizin yanından bile geçemez!`,
+    `Bugün ${area} taraflarında '${name}' tabağına dünya para veriyorlarmış. Bizim içi sulu sulu, dışı ızgara izli porsiyon köftemizin bereketi onlara ders olur!`,
+    `Şu gördüğünüz '${name}', ${area} şeflerinin imza yemeğiymiş. Bizim usta köfteyi öyle bir yoğurur ki, baharatı ve etin kendi suyuyla efsane bir imza atar!`,
+    `Adamlar ${area} lokantalarında '${name}' köftesini soslara boğuyormuş. Gerçek köfteye sos konmaz, eti kaliteliyse sadece biraz kimyonla kendi şovunu yapar!`,
+    `Millet ${area} mekanlarında '${name}' yiyerek köfte yediğini sanıyor. Sokak kültürünün o meşhur tükürük köftesi lezzetini bilmedikleri ne kadar belli!`,
+    `Biliyor musunuz, ${area} insanı '${name}' yerken ekmek yemezmiş. Oysa köftenin mangal suyuna banılmış yarım somun ekmeğin lezzeti bir başkadır be ustam!`,
+    `Bu '${name}' denen ${area} yemeğini çok sıkı yoğururlarmış. Olimpiyat'ta köfte harcı incitilmeden, sadece etin dokusunu koruyacak şekilde kararında yoğrulur.`,
+    `Diyorlar ki '${name}' yiyen ${area} gurmeleri çok mutluymuş. Bizim közlenmiş biber ve domatesle servis edilen köftemizi yeseler sevinçten ağlarlardı.`,
+    `Şu '${name}' ${area} taraflarında tavada yapılıyormuş. Köfte dediğin ızgaranın o döküm demirinde pişip is kokusunu içine çekecek!`,
+    `Eğer ${area} aşçıları bizim köfte reçetemizi bilseydi, '${name}' üretmeyi bırakıp Olimpiyat Kokoreç'e köfte sarmaya gelirlerdi.`,
+    `Onlar ${area} topraklarında '${name}' ile şekil yapsın. Üç çeyrek ekmek arası bol soğanlı ve piyazlı köftemiz sokakların tartışmasız en şekil lezzetidir!`,
+    `Bir porsiyon '${name}' ile ${area} insanı hemen kalkarmış masadan. Bizim köftelerin o iştah açıcı kokusu masadan kalkmayı imkansız kılar.`,
+    `Şu '${name}' yemeğinde ${area} şefleri baharat kullanmazmış. Köftenin ruhu karabiber, kimyon ve ustanın gizli el ayarında gizlidir!`,
+    `Dünya mutfağından '${name}'... ${area} halkı çok seviyor olabilir ama köfte ızgaraya atıldığındaki o cızırtıyı duymadan lezzetten bahsetmesinler.`,
+    `Bu '${name}' yemeği ${area} elit mekanlarında satılırmış. Bizim ekmek arası köftemiz statü tanımaz, herkesin ortak ve en samimi lezzetidir!`,
+    `Şimdi ${area} sokaklarında '${name}' aramayın. Yeryüzündeki en iyi dinlendirilmiş, mangal ateşinde pişmiş köfte şu an tabağınıza doğru yola çıktı.`,
+    `Bazen ${area} restoranlarında '${name}' fazla pişip kururmuş. Olimpiyat'ta köfte tam kıvamında, içi hafif ıslak ve pembe kalarak servis edilir.`,
+    `Onlar ${area} şeflerinin fırınından '${name}' yesin. Siz birazdan kömür ateşinde mühürlenmiş o muazzam sokak köftesinin keyfine varacaksınız.`,
+    `Şu '${name}' yemeği ${area} diyet listelerindeymiş. Köfte de yüksek protein kaynağıdır, üstelik diyet bozduracak kadar da efsanedir!`,
+    `Eğer ${area} halkı bir kere bizim piyazlı köftemizin tadına baksaydı, emin olun '${name}' kelimesini duyduklarında yollarını değiştirirlerdi.`,
+    `Bu '${name}' denen ${area} yemeğine soslu ekmek banılmazmış. Bizim köftenin altındaki yağlı pideyi veya ıslak ekmeği yemek asıl ustalıktır!`,
+    `Birazdan masanıza gelecek olan porsiyon köfte, ${area} mutfağının en iddialı '${name}' yemeğini bile unutturacak kadar şahsiyetli bir lezzettir.`,
+    `Şu '${name}' yemeği ${area} taraflarında çok hafif bulunuyormuş. Bizim köfte o kadar özeldir ki, midede değil sadece akılda ağırlık yapar!`,
+    `Ne '${name}', ne de başka bir ${area} spesiyali... Yanında buz gibi cam şişe kola ile yenen ekmek arası köftenin dünyada bir rakibi yoktur.`,
+    `Siparişiniz hazırlanırken ${area} mutfağının '${name}' yemeğini aklınızdan çıkarın, çünkü mangaldan gelen bu köfte kokusu zaten başka bir şey düşünmenize izin vermeyecek!`,
+
+    // --- PATSO, SUCUK EKMEK VE TOST TEMALI (161-185) ---
+    `${area} lokantalarında kahvaltı diye '${name}' yiyorlarmış... Sanayi kültürünün şahı, yarım ekmek bol salçalı kaşarlı tostumuzun o uzayan peynirini görmemişler!`,
+    `Bugün ${area} taraflarında '${name}' atıştırıp öğünü geçiştiriyorlarmış. Bizim bol sosisli ve ketçap mayonezli patsomuzu görseler geçiştirmek değil ziyafet çekerlerdi!`,
+    `Şu gördüğünüz '${name}', ${area} şeflerinin fast food'uymuş. Bizim mangalda cızırdayan efsanevi sucuk ekmeğimiz varken fast food falan hikaye kalır!`,
+    `Adamlar ${area} mutfağında '${name}' yaparken patatesleri fırınlıyormuş. Patso dediğin, patatesin kızgın yağda altın sarısı çıtırlaştığı o destansı ekmek arası sanatıdır!`,
+    `Millet ${area} kafelerinde '${name}' yiyerek enerji alıyoruz sanıyor. Gerçek enerji, içine ekstra tavuk sote veya sosis atılmış duble patsodadır!`,
+    `Biliyor musunuz, ${area} insanı '${name}' yerken yanında çay içmezmiş. Bizim çıtır çıtır karışık tostumuzun yanında ince belli sıcak bir çay olmazsa gün aydınlanmaz!`,
+    `Bu '${name}' denen ${area} yemeğinde et azmış. Olimpiyat'ın sucuk ekmeğinde dilimler öyle boldur ki, ekmek sucuktan kapanmaz!`,
+    `Diyorlar ki '${name}' yiyen ${area} gençleri çok enerjikmiş. Bizim gecenin köründe gömülen sosisli patsomuz gençliğin tam olarak enerji kaynağıdır!`,
+    `Şu '${name}' ${area} taraflarında çok popülermiş. Bizim patso ise sadece bir yiyecek değil, öğrenciliğin, gençliğin ve sokak kültürünün manifestosudur!`,
+    `Eğer ${area} şefleri bizim sucuk ekmek yaparken ekmeğe bastırdığımız o mangal yağını görselerdi, '${name}' tabaklarını utançla saklarlardı.`,
+    `Onlar ${area} sokaklarında '${name}' ile kahvaltı yapsın. Yarım ekmek kaşarlı sucuklu tostumuz sabahların ve gecelerin tartışmasız yıldızıdır!`,
+    `Bir porsiyon '${name}' ile ${area} insanı hemen doyarmış. Bizim patsonun içindeki o çıtır patatesler yendikçe yedirir, doyma hissini iptal eder.`,
+    `Şu '${name}' yemeğinde ${area} şefleri hafif baharat kullanırmış. Sucuğun içindeki o özel çemen, sarımsak ve baharat dengesi dünyalara bedeldir be ustam!`,
+    `Dünya mutfağından '${name}'... ${area} halkı çok övüyor olabilir ama sucuk mangala düştüğünde yayılan o iştah açıcı kokuya hiçbir yemek rakip olamaz.`,
+    `Bu '${name}' yemeği ${area} elit mekanlarında 5 dakikada yenirmiş. Bizim tostumuz pres makinesinden çıtır çıtır çıkar, keyifle ve yavaşça tadına varılarak yenir!`,
+    `Şimdi ${area} kafelerinde '${name}' aramayın. Yeryüzünün en çıtır patatesleriyle doldurulmuş, sosu bol patsonuz ustamızın ellerinden çıkmak üzere.`,
+    `Bazen ${area} restoranlarında '${name}' masaya soğuk gelirmiş. Olimpiyat'ta tost ekmeği makineden çıktığı an dumanı tüte tüte önünüze gelir.`,
+    `Onlar ${area} şeflerinin elinden '${name}' yesin. Siz birazdan kaliteli sucuğun mangal ateşiyle birleştiği o efsane sokak klasiğini midenize indireceksiniz.`,
+    `Şu '${name}' yemeği ${area} diyet listelerindeymiş. Patsonun kalorisi sorulmaz ustam, o mutluluk endeksinin tavan yaptığı yerdir!`,
+    `Eğer ${area} halkı bir kere bizim bol malzemeli Amerikanlı patsomuzu tatsaydı, emin olun '${name}' kelimesini unutup menüye 'Patso' eklerlerdi.`,
+    `Bu '${name}' denen ${area} yemeğine peynir yakışmazmış. Bizim kaşarlı tostumuzun içindeki o erimiş, sünmüş kaşar gastronomi dünyasında ders olarak okutulmalı.`,
+    `Birazdan masanıza gelecek olan sucuk ekmek, ${area} mutfağının en iddialı '${name}' atıştırmalığını bile lezzetiyle paramparça edecek!`,
+    `Şu '${name}' yemeği ${area} taraflarında ketçapsız yenirmiş. Sosisli patsonun üstüne sıkılan o ketçap mayonez çizgileri bir şaheserdir, es geçilemez!`,
+    `Ne '${name}', ne de başka bir ${area} lüks atıştırmalığı... Gece yarısı yenilen bol sosisli, turşulu patsonun o çıtır çıtır sesi dünyadaki tüm lüksleri unutturur.`,
+    `Siparişiniz hazırlanırken ${area} mutfağının '${name}' yemeğini aklınızdan çıkarın, birazdan pres makinesinden çıkacak o çıtır tost sesi size her şeyi unutturacak!`,
+
+    // --- GENEL ESNAF KÜLTÜRÜ VE OLİMPİYAT RUHU TEMALI (186-200) ---
+    `${area} mutfağında bugün '${name}' porsiyonları küçülmüş diyorlar... Boşverin onları, Olimpiyat Kokoreç'te porsiyonlar hep göz doyurur, mide şenlendirir!`,
+    `Bugün ${area} taraflarında '${name}' yemekleri robotlara yaptırıyorlarmış. Bizim dükkanda yemeğin tuzu, ustanın o meşhur bilek hareketindedir!`,
+    `Şu gördüğünüz '${name}', ${area} şeflerinin çok gizli tarifiymiş. Bizim sırrımız yok; taze ürün, köz ateşi, buz gibi şalgam ve bol bol samimiyet!`,
+    `Adamlar ${area} mutfağında '${name}' için rezervasyonla müşteri alıyormuş. Olimpiyat'ta rezervasyona gerek yok, kapımız ve ateşimiz her daim açık!`,
+    `Millet ${area} lokantalarında '${name}' yerken sessiz sessiz oturuyormuş. Bizde yemeği beklerken çay içilir, muhabbet edilir, usta ile şakalaşılır!`,
+    `Biliyor musunuz, ${area} insanı '${name}' yerken hesabı ince ince böler hesaplarmış. Bizim esnaflıkta bereket vardır, lezzet ucuza yenir!`,
+    `Bu '${name}' denen ${area} yemeği Instagram'a atmalık yapılıyormuş. Bizim yemekler direkt mideye atmalık ustam, şovumuz lezzetimizdir!`,
+    `Diyorlar ki '${name}' yiyen ${area} gurmeleri yemek bitince mendil kullanmazmış. Bizim dürümlerden damlayan yağları temizlemek için peçete şarttır!`,
+    `Şu '${name}' ${area} taraflarında çok popülermiş ama bizim şalgam suyu ve açık ayran kültürümüze sahip olmadıkları için hep bir yanları eksik kalacak.`,
+    `Eğer ${area} aşçıları bizim Olimpiyat Kokoreç'in mutfağını görselerdi, '${name}' tabaklarını bırakıp 'Bize de bir porsiyon çek usta' derlerdi.`,
+    `Onlar ${area} topraklarında '${name}' ile hava atsın. Bizim masalarda oturan her müşteri, birazdan yiyeceği sokak lezzetiyle günün asıl kralıdır!`,
+    `Bir porsiyon '${name}' yiyip kalkan ${area} insanı, bizim buradaki o dostane 'Afiyet olsun, yine bekleriz' uğurlamasını duyamadığı için çok şanssız.`,
+    `Şu '${name}' yemeğinde ${area} şefleri baharat miktarını gramla ölçermiş. Bizim usta baharatı göz kararı ve yürekten atar, lezzet de oradan gelir!`,
+    `Dünya mutfağından '${name}'... ${area} halkı seviyor olabilir ama bizim dükkandaki o çay bardağı şıkırtısı ve ızgara cızırtısı dünyadaki en güzel müziktir.`,
+    `Şimdi arkanıza yaslanın, ${area} mutfağının '${name}' yemeğini unutun. Gerçek bir Olimpiyat şampiyonu gibi sokak lezzetlerimizin tadını çıkarma vakti geldi!`
+]
+
+                // Havuzdan rastgele bir efsane cümle seç
+                const randomMsgIndex = Math.floor(Math.random() * challengeMessages.length);
+                const message = challengeMessages[randomMsgIndex];
                 
-                // 7 saniye dolunca eski yazıyı yarım saniyede usulca sil
-                triviaEl.style.transition = 'opacity 0.5s ease-out';
-                triviaEl.style.opacity = '0';
-                await sleep(500); // Silinme animasyonunun bitmesini bekle
-                
-                // Sıradaki bilgiye geç, liste bittiyse başa dön
-                currentTriviaIndex++;
-                if (currentTriviaIndex >= foodFacts.length) {
-                    currentTriviaIndex = 0;
-                }
+                return { type: 'meal', text: message, img: img };
+            } catch (e) {
+                return null; // Eğer API çökerse sessizce normal bilgilere (Trivia) döner
             }
         }
 
-        function initTrivia() {
-            // İlk açılışta müşteriye hep aynı söz denk gelmesin diye rastgele başlat
-            currentTriviaIndex = Math.floor(Math.random() * foodFacts.length);
+        // Akıllı Döngü Sistemi
+        async function startTriviaLoop() {
+            const triviaEl = document.getElementById('triviaText');
+            const imgEl = document.getElementById('mealImage');
+            const titleEl = document.getElementById('triviaTitle');
             
-            // Motoru ateşle
+            while (true) {
+                // Ekranları canlandır
+                triviaEl.style.opacity = '1';
+                triviaEl.style.transition = 'none';
+                
+                // %50 Şansla Dünya Mutfağı, %50 Şansla Kendi Bilgi Listen çıksın
+                const showMealChallenge = Math.random() > 0.5;
+                let contentToType = "";
+
+                if (showMealChallenge) {
+                    const mealData = await fetchWorldMeal();
+                    if (mealData) {
+                        // Dünya Mutfağı Konseptine Geç
+                        titleEl.textContent = "Dünya Mutfağında Bugün 🌍";
+                        titleEl.className = "text-blue-600 font-black text-lg mb-2 transition-colors duration-300";
+                        
+                        imgEl.src = mealData.img;
+                        imgEl.classList.remove('hidden');
+                        setTimeout(() => { imgEl.style.opacity = '1'; }, 50); // Resmi yavaşça aydınlat
+                        
+                        contentToType = mealData.text;
+                    } else {
+                        // İnternet anlık koptuysa kendi bilgilerimizden (Trivia) devam et
+                        setupNormalTrivia(titleEl, imgEl);
+                        contentToType = foodFacts[currentTriviaIndex];
+                        currentTriviaIndex = (currentTriviaIndex + 1) % foodFacts.length;
+                    }
+                } else {
+                    // Normal "Biliyor muydunuz?" Konseptine Geç
+                    setupNormalTrivia(titleEl, imgEl);
+                    contentToType = foodFacts[currentTriviaIndex];
+                    currentTriviaIndex = (currentTriviaIndex + 1) % foodFacts.length; // Sıradakine geç
+                }
+                
+                // Seçilen yazıyı daktiloyla bas
+                await typeWriterEffect(contentToType, 'triviaText');
+                
+                // Okunması için 8.5 saniye bekle
+                await sleep(8500);
+                
+                // Eski yazıyı (ve varsa resmi) yavaşça karartarak sil
+                triviaEl.style.transition = 'opacity 0.5s ease-out';
+                triviaEl.style.opacity = '0';
+                imgEl.style.opacity = '0'; 
+                
+                await sleep(500); // Kararmanın bitmesini bekle
+                imgEl.classList.add('hidden'); // Resmi tamamen kaldır ki yer kaplamasın
+            }
+        }
+
+        // Kendi Biliyor muydunuz listemizi ayarlayan ufak yardımcı fonksiyon
+        function setupNormalTrivia(titleEl, imgEl) {
+            titleEl.textContent = "Biliyor muydunuz? 🧠";
+            titleEl.className = "text-orange-600 font-black text-lg mb-2 transition-colors duration-300";
+            imgEl.style.opacity = '0';
+        }
+
+        function initTrivia() {
+            // İlk açılışta müşteriye hep aynı bilgi denk gelmesin diye listeyi rastgele bir noktadan başlat
+            currentTriviaIndex = Math.floor(Math.random() * foodFacts.length);
             startTriviaLoop();
         }
 
