@@ -183,7 +183,7 @@
             background-color: #000000;
             width: 200mm;
             height: 280mm;
-            padding: 10mm 8mm;
+            padding: 7mm 8mm;
             border: 3mm solid #ffcc00;
             position: relative;
             page-break-inside: avoid;
@@ -236,7 +236,7 @@
 
         .main-title {
             color: #ffcc00;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 900;
             letter-spacing: 2px;
         }
@@ -260,7 +260,7 @@
 
         /* Kategori arası boşluklar ve başlık boyutu düşürüldü */
         .category-block {
-            margin-bottom: 8px;
+            margin-bottom: 15px;
             page-break-inside: avoid;
         }
 
@@ -305,7 +305,7 @@
 
         /* Midye alanı daraltıldı */
         .midye-block {
-            margin-top: 15px;
+            margin-top: 16px;
             color: #ffffff;
             font-size: 16px;
             font-weight: 900;
@@ -667,7 +667,7 @@
 
                 <div class="logo-placeholder-area">
                     <div class="my-logo-box">
-                        <img src="file_00000000a4647246a61cf005bd316d6f.png" alt="" width="250"
+                        <img src="file_00000000a4647246a61cf005bd316d6f.png" alt="" width="200"
                             style="margin-top: -54px;">
                     </div>
                     <div class="main-title">GÜNCEL FİYAT LİSTESİ</div>
@@ -2020,8 +2020,8 @@
             { cat: "TAVUK KOKOREÇ", items: ["Yarım Tavuk Kokoreç", "Üç Çeyrek Ekmek Kokoreç"] },
             { cat: "PATSO", items: ["Sade Patso", "Sosisli Patso", "Ciğerli Patso", "Köfteli Patso", "Kaşarlı Patso", "Tavuklu Patso", "Amerikanlı Patso", "Porsiyon Patates"] },
             { cat: "TAVUK DÖNER", items: ["Yarım Ekmek Tavuk Döner", "Tombik Ekmek Tavuk Döner", "Üç Çeyrek Ekmek Döner", "Dürüm Tavuk Döner", "Pilav Üstü Tavuk Döner"] },
-            { cat: "SANDVİÇ - TOST", items: ["Sosisli Sandviç", "Yarım Ekmek Kaşarlı Tost", "Yarım Ekmek Karışık Tost"] },
-            { cat: "HAMBURGERLER", items: ["Hamburger", "Cheeseburger", "Islak Hamburger"] },
+            { cat: "SANDVİÇ - TOST", items: ["Sosisli Sandviç","Goralı Sandiviç", "Yarım Ekmek Kaşarlı Tost", "Yarım Ekmek Karışık Tost"] },
+            { cat: "HAMBURGERLER", items: ["Hamburger", "Double Hamburger", "Cheeseburger", "Islak Hamburger","Islak Cheeseburger"] },
             { cat: "KÖFTE", items: ["Yarım Ekmek Köfte", "Üç Çeyrek Ekmek Köfte", "Porsiyon Köfte"] },
             { cat: "CİĞER", items: ["Yarım Ekmek Ciğer", "Üç Çeyrek Ekmek Ciğer", "Porsiyon Ciğer"] },
             { cat: "SUCUK EKMEK", items: ["Yarım Ekmek Sucuk", "Üç Çeyrek Ekmek Sucuk"] },
@@ -2161,7 +2161,7 @@
             leftCol.innerHTML = '';
             rightCol.innerHTML = '';
 
-            const leftCategories = ["KOKOREÇ", "TAVUK KOKOREÇ", "PATSO", "KÖFTE", "CİĞER", "SUCUK EKMEK"];
+            const leftCategories = ["KOKOREÇ", "TAVUK KOKOREÇ", "PATSO", "KÖFTE", "CİĞER", "SUCUK EKMEK","MİDYE"];
 
             expectedPdfLayout.forEach(group => {
                 let html = "";
