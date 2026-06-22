@@ -8,6 +8,7 @@
 
     <link rel="icon" type="image/jpeg" href="/logo.jpg">
     <link rel="shortcut icon" href="/logo.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -99,6 +100,290 @@
             display: block;
             opacity: 1;
             transform: translateY(0);
+        }
+
+
+        /* --- OLİMPİYAT A4 BASKI TASARIMI (KOMPAKT VERSİYON - TAŞMAYI ÖNLER) --- */
+        @media print {
+
+            /* SADECE YAZDIRILACAK ALANI GÖSTER, DİĞER HER ŞEYİ GİZLE */
+            body>*:not(#printModuleArea):not(#labelPrintArea) {
+                display: none !important;
+            }
+
+            #printModuleArea,
+            #labelPrintArea {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                background-color: #000000 !important;
+                overflow: visible !important;
+                z-index: 9999 !important;
+            }
+
+            /* Geri dön ve yazdır butonlarının olduğu üst paneli baskıda gizle */
+            .no-print {
+                display: none !important;
+            }
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            body {
+                background-color: #000000;
+                padding: 0;
+                margin: 0;
+            }
+
+            .a4-menu-page {
+                margin-top: 5mm;
+                box-shadow: none;
+                width: 200mm;
+                height: 287mm;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        #printModuleArea {
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        #labelPrintArea {
+            background-color: #ffffff !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .a4-menu-page {
+            background-color: #000000;
+            width: 200mm;
+            height: 280mm;
+            padding: 10mm 8mm;
+            border: 4mm solid #ffcc00;
+            position: relative;
+            page-break-inside: avoid;
+            margin: 0 auto;
+        }
+
+        /* Boşluklar ve fontlar daraltıldı */
+        .menu-top-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .top-left {
+            display: table-cell;
+            color: #a0a0a0;
+            font-size: 11px;
+            font-weight: 500;
+            vertical-align: top;
+        }
+
+        .top-right {
+            display: table-cell;
+            text-align: right;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1.2;
+            vertical-align: top;
+        }
+
+        .sub-date {
+            color: #a0a0a0;
+            font-size: 10px;
+            font-weight: normal;
+        }
+
+        /* Logo altındaki boşluk azaltıldı */
+        .logo-placeholder-area {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .my-logo-box {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-title {
+            color: #ffcc00;
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .menu-table-container {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .menu-column {
+            display: table-cell;
+            width: 48%;
+            vertical-align: top;
+        }
+
+        .menu-spacer {
+            display: table-cell;
+            width: 4%;
+        }
+
+        /* Kategori arası boşluklar ve başlık boyutu düşürüldü */
+        .category-block {
+            margin-bottom: 8px;
+            page-break-inside: avoid;
+        }
+
+        .category-block h3 {
+            color: #ffcc00;
+            font-size: 18px;
+            font-weight: 900;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 2px;
+        }
+
+        /* Ürün isimleri 16px'ten 14px'e, aralıklar 5px'ten 2px'e çekildi */
+        .item {
+            display: table;
+            width: 100%;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .item-name {
+            display: table-cell;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .item-name::first-letter {
+            color: #ffcc00;
+            padding-right: 3px;
+        }
+
+        .price {
+            display: table-cell;
+            text-align: right;
+            color: #ffcc00;
+            font-weight: 700;
+            width: 70px;
+        }
+
+        /* Midye alanı daraltıldı */
+        .midye-block {
+            margin-top: 15px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            border: 1px dashed #ffcc00;
+            padding: 5px;
+            text-align: center;
+            page-break-inside: avoid;
+        }
+
+        .midye-block::first-letter {
+            color: #ffcc00;
+        }
+
+        .midye-block .price {
+            font-size: 16px;
+            display: inline;
+            float: none;
+        }
+
+        /* --- DEV ETİKET (A4) STİLLERİ (Görselin Birebir Aynısı) --- */
+        .a4-label-page {
+            width: 210mm;
+            height: 296mm;
+            background-color: #ffffff;
+            margin: 0 auto 20mm auto;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            page-break-after: always;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 3'lü Bölünmüş Sayfa */
+        .label-split-3 {
+            height: 33.333%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 3px dashed #cccccc;
+            box-sizing: border-box;
+        }
+
+        .label-split-3:last-child {
+            border-bottom: none;
+        }
+
+        .price-text-3 {
+            font-size: 240px;
+            /* Görseldeki devasa boyut */
+            font-weight: 900;
+            color: #000000;
+            line-height: 0.8;
+            letter-spacing: -8px;
+            display: flex;
+            align-items: baseline;
+        }
+
+        .currency-text-3 {
+            font-size: 130px;
+            color: #ff0000;
+            font-weight: 900;
+            margin-left: 5px;
+        }
+
+        /* 2'li Bölünmüş Özel Sayfa (Kokoreç & Döner İçin) */
+        .label-split-2 {
+            height: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 3px dashed #cccccc;
+            box-sizing: border-box;
+        }
+
+        .label-split-2:last-child {
+            border-bottom: none;
+        }
+
+        .price-text-2 {
+            font-size: 320px;
+            /* 2'li sayfa için ekranı yırtan dev font */
+            font-weight: 900;
+            color: #000000;
+            line-height: 0.8;
+            letter-spacing: -12px;
+            display: flex;
+            align-items: baseline;
+        }
+
+        .currency-text-2 {
+            font-size: 170px;
+            color: #ff0000;
+            font-weight: 900;
+            margin-left: 5px;
         }
     </style>
 </head>
@@ -207,6 +492,14 @@
                     class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     📊 İstatistik
                 </button>
+                <button onclick="openPrintModule()"
+                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    <span>🖨️</span>Fiyat Listesi
+                </button>
+                <button id="showLabels"
+                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    🏷️ Etiket Yazdırma
+                </button>
                 <button id="showGlobalDateUpdate"
                     class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     📅 Ortak Tarih
@@ -276,6 +569,89 @@
                 <button id="saveEditProduct"
                     class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-4 py-3 rounded-xl font-bold mt-2 shadow-md hover:opacity-95 transition transform active:scale-95">Değişiklikleri
                     Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="missingProductsModal"
+        class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg relative flex flex-col max-h-[90vh]">
+            <div class="mb-4 text-center">
+                <span
+                    class="bg-[#fbcc25] text-gray-950 font-black px-4 py-1.5 rounded-lg text-sm uppercase tracking-wider inline-block mb-3">⚠️
+                    Dikkat: Ürünler Bulunamadı</span>
+                <h2 class="text-xl font-black text-gray-800">Menüde Eksik Ürünler Var!</h2>
+                <p class="text-xs text-gray-500 mt-1 px-4">Yazdırma işlemine devam etmek için PDF şablonunda olup
+                    veritabanınızda olmayan aşağıdaki ürünlere anlık fiyat giriniz.</p>
+            </div>
+
+            <div id="missingProductsList"
+                class="overflow-y-auto flex-grow space-y-3 pr-2 scrollbar-none mb-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
+            </div>
+
+            <div class="mt-auto pt-2 flex gap-2">
+                <button onclick="document.getElementById('missingProductsModal').classList.add('hidden')"
+                    class="flex-1 bg-gray-200 text-gray-800 font-bold py-3 rounded-xl hover:bg-gray-300 transition">İptal</button>
+                <button onclick="applyManualPrices()"
+                    class="flex-1 bg-[#fbcc25] text-gray-950 font-black py-3 rounded-xl shadow-md hover:scale-[1.02] transition">Fiyatları
+                    Uygula ve Çiz</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="labelPrintArea" class="hidden fixed inset-0 flex flex-col h-screen overflow-y-auto bg-gray-200 z-[60]">
+        <div
+            class="p-4 bg-white border-b border-gray-300 shadow-sm flex justify-between items-center no-print sticky top-0 z-50">
+            <button onclick="closeLabelModule()"
+                class="bg-gray-200 text-gray-800 hover:bg-gray-300 px-4 py-2.5 rounded-xl font-bold transition">⬅ İptal
+                Et / Geri Dön</button>
+            <h2 class="text-xl font-black text-gray-800 hidden sm:block">🏷️ Dev Etiket Önizlemesi</h2>
+            <button onclick="window.print()"
+                class="bg-blue-600 text-white font-black px-6 py-2.5 rounded-xl hover:bg-blue-700 shadow-lg flex items-center gap-2 transition transform hover:scale-105">
+                <span>🖨️</span> Etiketleri Yazdır
+            </button>
+        </div>
+        <div id="labelPagesContainer" class="flex-grow flex flex-col items-center py-8"></div>
+    </div>
+
+    <div id="printModuleArea" class="hidden fixed inset-0 flex flex-col h-screen overflow-y-auto bg-[#1a1a1a] z-50">
+
+        <div
+            class="p-4 bg-black border-b border-yellow-600 shadow-sm flex justify-between items-center no-print sticky top-0 z-50">
+            <button onclick="closePrintModule()"
+                class="bg-gray-800 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl font-bold transition">⬅ Geri
+                Dön</button>
+            <button onclick="window.print()"
+                class="bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center gap-2 transition transform hover:scale-105">
+                <span>🖨️</span> Menüyü Yazdır (A4)
+            </button>
+        </div>
+
+        <div class="flex-grow flex justify-center py-8">
+            <div class="a4-menu-page">
+
+                <div class="menu-top-row">
+                    <div class="top-left">Tüm vergiler dahildir.</div>
+                    <div class="top-right">
+                        <span id="printDateEl"></span><br>
+                        <span class="sub-date">Fiyat değişim tarihi</span>
+                    </div>
+                </div>
+
+                <div class="logo-placeholder-area">
+                    <div class="my-logo-box">
+                        <img src="file_00000000a4647246a61cf005bd316d6f.png" alt="" width="250"
+                            style="margin-top: -54px;">
+                    </div>
+                    <div class="main-title">GÜNCEL FİYAT LİSTESİ</div>
+                </div>
+
+                <div class="menu-table-container">
+                    <div class="menu-column" id="printLeftColumn"></div>
+                    <div class="menu-spacer"></div>
+                    <div class="menu-column" id="printRightColumn"></div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -1274,162 +1650,162 @@
         }
 
         function initActiveChart() {
-    // Mevcut aktif bir grafik nesnesi varsa hafızadan temizle
-    if (currentChartInstance) {
-        currentChartInstance.destroy();
-        currentChartInstance = null;
-    }
-
-    const todayStr = new Date().toISOString().slice(0, 10);
-
-    // 1. GRAFİK: SAATLİK VE DAKİKALIK YOĞUNLUK
-    if (activeChartTab === 'hourly') {
-        database.ref('visitors_hourly/' + statsMenuType + '/' + todayStr).once('value', (snapshot) => {
-            const hourlyData = snapshot.val() || {};
-            
-            // Verileri işleyip dakikasına göre düzene sokalım
-            let timeMap = {};
-            for (let key in hourlyData) {
-                // Eski veriler sadece saat ise (Örn: "14"), "14:00" yap. Yeniler zaten "14:26" gelecek.
-                let timeLabel = key.includes(':') ? key : String(key).padStart(2, '0') + ':00';
-                timeMap[timeLabel] = (timeMap[timeLabel] || 0) + hourlyData[key];
+            // Mevcut aktif bir grafik nesnesi varsa hafızadan temizle
+            if (currentChartInstance) {
+                currentChartInstance.destroy();
+                currentChartInstance = null;
             }
 
-            // Saatleri kronolojik sıraya diz (Sabahtan akşama doğru)
-            const labels = Object.keys(timeMap).sort();
-            const dataValues = labels.map(time => timeMap[time]);
+            const todayStr = new Date().toISOString().slice(0, 10);
 
-            // Eğer henüz hiç giriş yoksa grafik boş kalmasın diye
-            if(labels.length === 0) {
-                labels.push("Henüz Giriş Yok");
-                dataValues.push(0);
-            }
+            // 1. GRAFİK: SAATLİK VE DAKİKALIK YOĞUNLUK
+            if (activeChartTab === 'hourly') {
+                database.ref('visitors_hourly/' + statsMenuType + '/' + todayStr).once('value', (snapshot) => {
+                    const hourlyData = snapshot.val() || {};
 
-            const ctx = document.getElementById('hourlyChart').getContext('2d');
-            currentChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: { 
-                    labels: labels, 
-                    datasets: [{ 
-                        label: 'Siteye Giren Kullanıcı', 
-                        data: dataValues, 
-                        borderColor: '#ea580c', 
-                        backgroundColor: 'rgba(254, 240, 138, 0.3)', // Şık hardal arka plan dolgusu
-                        borderWidth: 3, 
-                        pointBackgroundColor: '#b91c1c',
-                        pointHoverRadius: 7, // Fareyle üstüne gelince nokta büyüsün
-                        tension: 0.2, // Çizgiler noktaları net göstersin diye daha düz
-                        fill: true 
-                    }] 
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: {
-                        // FARE İLE ÜSTÜNE GELİNCE ÇIKAN ÖZEL KUTUCUK (TOOLTIP)
-                        tooltip: {
-                            backgroundColor: 'rgba(0,0,0,0.85)',
-                            titleColor: '#fbcc25', // Başlık hardal sarısı
-                            titleFont: { size: 14, family: 'sans-serif', weight: 'bold' },
-                            bodyFont: { size: 13 },
-                            padding: 12,
-                            callbacks: {
-                                title: function(context) {
-                                    return 'Tam Saat: ' + context[0].label; // Örn: Tam Saat: 14:26
-                                },
-                                label: function(context) {
-                                    return context.raw + ' Kişi Giriş Yaptı'; // Örn: 2 Kişi Giriş Yaptı
+                    // Verileri işleyip dakikasına göre düzene sokalım
+                    let timeMap = {};
+                    for (let key in hourlyData) {
+                        // Eski veriler sadece saat ise (Örn: "14"), "14:00" yap. Yeniler zaten "14:26" gelecek.
+                        let timeLabel = key.includes(':') ? key : String(key).padStart(2, '0') + ':00';
+                        timeMap[timeLabel] = (timeMap[timeLabel] || 0) + hourlyData[key];
+                    }
+
+                    // Saatleri kronolojik sıraya diz (Sabahtan akşama doğru)
+                    const labels = Object.keys(timeMap).sort();
+                    const dataValues = labels.map(time => timeMap[time]);
+
+                    // Eğer henüz hiç giriş yoksa grafik boş kalmasın diye
+                    if (labels.length === 0) {
+                        labels.push("Henüz Giriş Yok");
+                        dataValues.push(0);
+                    }
+
+                    const ctx = document.getElementById('hourlyChart').getContext('2d');
+                    currentChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Siteye Giren Kullanıcı',
+                                data: dataValues,
+                                borderColor: '#ea580c',
+                                backgroundColor: 'rgba(254, 240, 138, 0.3)', // Şık hardal arka plan dolgusu
+                                borderWidth: 3,
+                                pointBackgroundColor: '#b91c1c',
+                                pointHoverRadius: 7, // Fareyle üstüne gelince nokta büyüsün
+                                tension: 0.2, // Çizgiler noktaları net göstersin diye daha düz
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                // FARE İLE ÜSTÜNE GELİNCE ÇIKAN ÖZEL KUTUCUK (TOOLTIP)
+                                tooltip: {
+                                    backgroundColor: 'rgba(0,0,0,0.85)',
+                                    titleColor: '#fbcc25', // Başlık hardal sarısı
+                                    titleFont: { size: 14, family: 'sans-serif', weight: 'bold' },
+                                    bodyFont: { size: 13 },
+                                    padding: 12,
+                                    callbacks: {
+                                        title: function (context) {
+                                            return 'Tam Saat: ' + context[0].label; // Örn: Tam Saat: 14:26
+                                        },
+                                        label: function (context) {
+                                            return context.raw + ' Kişi Giriş Yaptı'; // Örn: 2 Kişi Giriş Yaptı
+                                        }
+                                    }
                                 }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                                x: { ticks: { maxTicksLimit: 12 } } // Çok dakika olursa yazılar üst üste binmesin
                             }
                         }
-                    },
-                    scales: { 
-                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                        x: { ticks: { maxTicksLimit: 12 } } // Çok dakika olursa yazılar üst üste binmesin
-                    } 
-                }
-            });
-        });
-    }
-    // 2. GRAFİK: KATEGORİ İLGİSİ (Gerçek Tıklamalar)
-    else if (activeChartTab === 'category') {
-        database.ref('stats/category_clicks/' + statsMenuType).once('value', (snapshot) => {
-            const data = snapshot.val() || {};
-            let labels = Object.keys(data);
-            let values = Object.values(data);
-            
-            // Eğer henüz hiç tıklama yoksa grafik boş kalmasın diye uyarı basalım
-            if(labels.length === 0) { labels = ["Henüz Veri Yok"]; values = [1]; }
-
-            const ctx = document.getElementById('categoryChart').getContext('2d');
-            currentChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: { labels: labels, datasets: [{ data: values, backgroundColor: ['#b91c1c', '#f97316', '#f59e0b', '#84cc16', '#06b6d4', '#3b82f6', '#8b5cf6'] }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        });
-    } 
-    // 3. GRAFİK: HAFTALIK TRAFİK (Son 7 Günün Toplamı)
-    else if (activeChartTab === 'weekly') {
-        database.ref('visitors_hourly/' + statsMenuType).once('value', (snapshot) => {
-            const allData = snapshot.val() || {};
-            let labels = [];
-            let values = [];
-            
-            // Son 7 günün tarihlerini geriye doğru bul
-            for(let i=6; i>=0; i--) {
-                let d = new Date();
-                d.setDate(d.getDate() - i);
-                let dStr = d.toISOString().slice(0, 10);
-                let dayName = d.toLocaleDateString('tr-TR', {weekday: 'short'});
-                labels.push(dayName);
-                
-                // O güne ait tüm saatlerin toplamını al
-                let dayTotal = 0;
-                if(allData[dStr]) {
-                    Object.values(allData[dStr]).forEach(val => dayTotal += val);
-                }
-                values.push(dayTotal);
+                    });
+                });
             }
+            // 2. GRAFİK: KATEGORİ İLGİSİ (Gerçek Tıklamalar)
+            else if (activeChartTab === 'category') {
+                database.ref('stats/category_clicks/' + statsMenuType).once('value', (snapshot) => {
+                    const data = snapshot.val() || {};
+                    let labels = Object.keys(data);
+                    let values = Object.values(data);
 
-            const ctx = document.getElementById('weeklyChart').getContext('2d');
-            currentChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: { labels: labels, datasets: [{ label: 'Günlük Toplam Ziyaretçi', data: values, backgroundColor: '#b91c1c', borderRadius: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-        });
-    } 
-    // 4. GRAFİK: EN POPÜLER ÜRÜNLER (Gerçek İncelemeler)
-    else if (activeChartTab === 'products') {
-        database.ref('stats/product_clicks/' + statsMenuType).once('value', (snapshot) => {
-            const clicks = snapshot.val() || {};
-            let list = [];
-            
-            // Firebase'deki ID'leri ürünlerin gerçek isimleriyle eşleştir
-            for(let key in clicks) {
-                let p = products.find(prod => prod.key === key); 
-                if(p) list.push({ name: p.name, count: clicks[key] });
+                    // Eğer henüz hiç tıklama yoksa grafik boş kalmasın diye uyarı basalım
+                    if (labels.length === 0) { labels = ["Henüz Veri Yok"]; values = [1]; }
+
+                    const ctx = document.getElementById('categoryChart').getContext('2d');
+                    currentChartInstance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: { labels: labels, datasets: [{ data: values, backgroundColor: ['#b91c1c', '#f97316', '#f59e0b', '#84cc16', '#06b6d4', '#3b82f6', '#8b5cf6'] }] },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                });
             }
-            
-            // En çok tıklanandan en aza doğru sırala
-            list.sort((a, b) => b.count - a.count);
-            list = list.slice(0, 5); // Sadece zirvedeki en iyi 5 ürünü al
-            
-            let labels = list.map(item => item.name);
-            let values = list.map(item => item.count);
-            
-            if(labels.length === 0) { labels = ["Henüz Ürün İncelenmedi"]; values = [0]; }
+            // 3. GRAFİK: HAFTALIK TRAFİK (Son 7 Günün Toplamı)
+            else if (activeChartTab === 'weekly') {
+                database.ref('visitors_hourly/' + statsMenuType).once('value', (snapshot) => {
+                    const allData = snapshot.val() || {};
+                    let labels = [];
+                    let values = [];
 
-            const ctx = document.getElementById('productsChart').getContext('2d');
-            currentChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: { labels: labels, datasets: [{ label: 'Ürün İnceleme Sayısı', data: values, backgroundColor: '#f59e0b', borderRadius: 4 }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-        });
-    }
-}
+                    // Son 7 günün tarihlerini geriye doğru bul
+                    for (let i = 6; i >= 0; i--) {
+                        let d = new Date();
+                        d.setDate(d.getDate() - i);
+                        let dStr = d.toISOString().slice(0, 10);
+                        let dayName = d.toLocaleDateString('tr-TR', { weekday: 'short' });
+                        labels.push(dayName);
+
+                        // O güne ait tüm saatlerin toplamını al
+                        let dayTotal = 0;
+                        if (allData[dStr]) {
+                            Object.values(allData[dStr]).forEach(val => dayTotal += val);
+                        }
+                        values.push(dayTotal);
+                    }
+
+                    const ctx = document.getElementById('weeklyChart').getContext('2d');
+                    currentChartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: { labels: labels, datasets: [{ label: 'Günlük Toplam Ziyaretçi', data: values, backgroundColor: '#b91c1c', borderRadius: 6 }] },
+                        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                    });
+                });
+            }
+            // 4. GRAFİK: EN POPÜLER ÜRÜNLER (Gerçek İncelemeler)
+            else if (activeChartTab === 'products') {
+                database.ref('stats/product_clicks/' + statsMenuType).once('value', (snapshot) => {
+                    const clicks = snapshot.val() || {};
+                    let list = [];
+
+                    // Firebase'deki ID'leri ürünlerin gerçek isimleriyle eşleştir
+                    for (let key in clicks) {
+                        let p = products.find(prod => prod.key === key);
+                        if (p) list.push({ name: p.name, count: clicks[key] });
+                    }
+
+                    // En çok tıklanandan en aza doğru sırala
+                    list.sort((a, b) => b.count - a.count);
+                    list = list.slice(0, 5); // Sadece zirvedeki en iyi 5 ürünü al
+
+                    let labels = list.map(item => item.name);
+                    let values = list.map(item => item.count);
+
+                    if (labels.length === 0) { labels = ["Henüz Ürün İncelenmedi"]; values = [0]; }
+
+                    const ctx = document.getElementById('productsChart').getContext('2d');
+                    currentChartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: { labels: labels, datasets: [{ label: 'Ürün İnceleme Sayısı', data: values, backgroundColor: '#f59e0b', borderRadius: 4 }] },
+                        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                    });
+                });
+            }
+        }
 
         function renderGlobalDateModule() {
             setActiveTab('showGlobalDateUpdate');
@@ -1567,6 +1943,8 @@
             showStatsBtn.addEventListener('click', renderStatsModule);
             document.getElementById('showGlobalDateUpdate').addEventListener('click', renderGlobalDateModule);
 
+            document.getElementById('showLabels').addEventListener('click', renderLabelModule);
+
             document.getElementById('switchToInPlace').addEventListener('click', () => setFirebaseRefs('in_place'));
             document.getElementById('switchToDelivery').addEventListener('click', () => setFirebaseRefs('delivery'));
             document.getElementById('copyToDeliveryBtn').addEventListener('click', copyMenuDataToDelivery);
@@ -1606,6 +1984,372 @@
                 } catch (error) { alert("Hata: " + error.message); }
             });
         });
+
+        // --- 🖨️ SİYAH/GOLD A4 LİSTE MOTORU ---
+
+        // PDF'teki içerik şablonu (Sıralama güncellendi: İÇECEKLER önce, MİDYE en sonda)
+        const expectedPdfLayout = [
+            { cat: "KOKOREÇ", items: ["Yarım Ekmek Kokoreç", "Yarım Ekmek İzmir Kokoreç", "Üç Çeyrek Ekmek Kokoreç", "Porsiyon Kokoreç"] },
+            { cat: "TAVUK KOKOREÇ", items: ["Yarım Tavuk Kokoreç", "Üç Çeyrek Ekmek Kokoreç"] },
+            { cat: "PATSO", items: ["Sade Patso", "Sosisli Patso", "Ciğerli Patso", "Köfteli Patso", "Kaşarlı Patso", "Tavuklu Patso", "Amerikanlı Patso", "Porsiyon Patates"] },
+            { cat: "TAVUK DÖNER", items: ["Yarım Ekmek Tavuk Döner", "Tombik Ekmek Tavuk Döner", "Üç Çeyrek Ekmek Döner", "Dürüm Tavuk Döner", "Pilav Üstü Tavuk Döner"] },
+            { cat: "SANDVİÇ - TOST", items: ["Sosisli Sandviç", "Yarım Ekmek Kaşarlı Tost", "Yarım Ekmek Karışık Tost"] },
+            { cat: "HAMBURGERLER", items: ["Hamburger", "Cheeseburger", "Islak Hamburger"] },
+            { cat: "KÖFTE", items: ["Yarım Ekmek Köfte", "Üç Çeyrek Ekmek Köfte", "Porsiyon Köfte"] },
+            { cat: "CİĞER", items: ["Yarım Ekmek Ciğer", "Üç Çeyrek Ekmek Ciğer", "Porsiyon Ciğer"] },
+            { cat: "SUCUK EKMEK", items: ["Yarım Ekmek Sucuk", "Üç Çeyrek Ekmek Sucuk"] },
+            { cat: "İÇECEKLER", items: ["Kutu İçecekler", "Şişe Kola", "Büyük Ayran", "Küçük Ayran", "Limonata (Büyük)", "Limonata (Küçük)", "Çamlıca Gazoz", "Sade Soda", "Limonlu Soda", "Şalgam Suyu", "Su", "Çay","1 Litre Kola","2.5 Litre Kola"] },
+            { cat: "MİDYE", items: ["Midye Tane"] }
+        ];
+
+        // 1. HAM SÖZLÜK: Buraya kelimeleri istediğin gibi (büyük, küçük, karışık) ekleyebilirsin.
+        const rawProductAliases = {
+            "üç Çeyrek Ekmek Kokoreç": "üç çeyrek kokoreç",
+            "BÜYÜK AYRAN": "kapalı ayran",
+            "MİDYE tane": "midye (adet)",
+            "Şalgam Suyu": "şalgam",
+            "yarım tavuk KOKOREÇ": "yarım ekmek tavuk kokoreç",
+            "Tavuklu Patso": "Tavuk dönerli Patso",
+            "Üç Çeyrek Ekmek Döner": "Üç Çeyrek Ekmek Tavuk Döner",
+            "Pilav Üstü Tavuk Döner": "Pilavüstü Tavuk Döner",
+            "Sosisli Sandviç": "Sosisli Sandiviç",
+            "Yarım Ekmek Kaşarlı Tost": "Kaşarlı Tost",
+            "Yarım Ekmek Karışık Tost": "Karışık Tost",
+            "Yarım Ekmek Sucuk": "Sucuk ekmek",
+            "Üç Çeyrek Ekmek Sucuk": "Üç Çeyrek Ekmek Köfte",
+            "Limonata (Büyük)": "Açık Ayran",
+            "Limonata (Küçük)": "Küçük Ayran"
+
+
+
+
+        };
+
+        // 2. AKILLI MOTOR: Sen yukarıya ne yazarsan yaz, bu motor her şeyi "tr-TR" (Türkçe) 
+        // standartlarına göre pürüzsüzce küçültür ve eşleştirme hatalarını sıfıra indirir.
+        const productAliases = {};
+        for (let key in rawProductAliases) {
+            productAliases[key.toLocaleLowerCase('tr-TR').trim()] = rawProductAliases[key].toLocaleLowerCase('tr-TR').trim();
+        }
+
+        let missingProductsGlobal = [];
+        let manualPricesGlobal = {};
+
+        function openPrintModule() {
+            const printArea = document.getElementById('printModuleArea');
+            if (printArea) printArea.classList.remove('hidden');
+            analyzeAndBuildPrintMenu();
+        }
+
+        function closePrintModule() {
+            const printArea = document.getElementById('printModuleArea');
+            if (printArea) printArea.classList.add('hidden');
+        }
+
+        function analyzeAndBuildPrintMenu() {
+            currentPrintJob = 'menu';
+            missingProductsGlobal = [];
+            const dbProductMap = {};
+            let latestUpdate = 0;
+
+            products.forEach(p => {
+                // toLocaleLowerCase('tr-TR') kullanımı I ve İ harflerinin çökmesini engeller
+                const cleanName = (p.name || "").toLocaleLowerCase('tr-TR').trim();
+                dbProductMap[cleanName] = p.discountPrice || p.price;
+
+                if (p.lastUpdated && p.lastUpdated > latestUpdate) {
+                    latestUpdate = p.lastUpdated;
+                }
+            });
+
+            expectedPdfLayout.forEach(group => {
+                group.items.forEach(itemName => {
+                    let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
+
+                    if (productAliases[searchName]) {
+                        searchName = productAliases[searchName];
+                    }
+
+                    if (!dbProductMap[searchName] && !manualPricesGlobal[itemName]) {
+                        missingProductsGlobal.push(itemName);
+                    }
+                });
+            });
+
+            if (missingProductsGlobal.length > 0) {
+                showMissingProductsModal();
+            } else {
+                renderA4Menu(dbProductMap, latestUpdate);
+            }
+        }
+
+        function showMissingProductsModal() {
+            const listContainer = document.getElementById('missingProductsList');
+            listContainer.innerHTML = '';
+
+            missingProductsGlobal.forEach((item, index) => {
+                listContainer.innerHTML += `
+                    <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-gray-200 shadow-sm">
+                        <label class="font-bold text-gray-800 text-xs">${item}</label>
+                        <div class="flex items-center gap-1.5">
+                            <input type="number" id="manual_price_${index}" placeholder="0" class="w-16 p-1 text-right border rounded bg-gray-50 font-bold focus:ring-[#fbcc25] focus:border-[#fbcc25] text-sm">
+                            <span class="text-[#fbcc25] font-black">₺</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('missingProductsModal').classList.remove('hidden');
+        }
+
+        let currentPrintJob = 'menu'; // 'menu' veya 'label'
+        let currentLabelRequest = [];
+        let isLabelJobSpecial = false;
+
+        function applyManualPrices() {
+            missingProductsGlobal.forEach((item, index) => {
+                const val = document.getElementById(`manual_price_${index}`).value;
+                manualPricesGlobal[item] = (val && val.trim() !== '') ? val : "0";
+            });
+            document.getElementById('missingProductsModal').classList.add('hidden');
+
+            // Hangi modüldeysek ona geri dön
+            if (currentPrintJob === 'menu') {
+                analyzeAndBuildPrintMenu();
+            } else {
+                executeLabelPrint();
+            }
+        }
+
+        function renderA4Menu(dbProductMap, latestUpdateTs) {
+            const dateObj = latestUpdateTs === 0 ? new Date() : new Date(latestUpdateTs);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('printDateEl').textContent = dateObj.toLocaleDateString('tr-TR', options);
+
+            const leftCol = document.getElementById('printLeftColumn');
+            const rightCol = document.getElementById('printRightColumn');
+            leftCol.innerHTML = '';
+            rightCol.innerHTML = '';
+
+            const leftCategories = ["KOKOREÇ", "TAVUK KOKOREÇ", "PATSO", "KÖFTE", "CİĞER", "SUCUK EKMEK"];
+
+            expectedPdfLayout.forEach(group => {
+                let html = "";
+
+                if (group.cat === "MİDYE") {
+                    let searchName = group.items[0].toLocaleLowerCase('tr-TR').trim();
+                    if (productAliases[searchName]) searchName = productAliases[searchName];
+
+                    let price = dbProductMap[searchName] || manualPricesGlobal[group.items[0]] || "0";
+                    // Satır içi CSS kaldırıldı, doğrudan .price sınıfı kullanıldı.
+                    html = `<div class="midye-block">❖ MİDYE TANE <span class="price">${price}₺</span></div>`;
+                }
+                else {
+                    html = `<div class="category-block"><h3>${group.cat}</h3>`;
+                    group.items.forEach(itemName => {
+                        let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
+                        if (productAliases[searchName]) {
+                            searchName = productAliases[searchName];
+                        }
+
+                        let price = dbProductMap[searchName] || manualPricesGlobal[itemName] || "0";
+                        // Satır içi CSS kaldırıldı, doğrudan .price sınıfı kullanıldı.
+                        html += `<div class="item"><span class="item-name">❖ ${itemName}:</span> <span class="price">${price}₺</span></div>`;
+                    });
+                    html += `</div>`;
+                }
+
+                // Sütun ayrımı
+                if (leftCategories.includes(group.cat)) {
+                    leftCol.innerHTML += html;
+                } else {
+                    rightCol.innerHTML += html;
+                }
+            });
+        }
+
+        // --- 🏷️ DEV ETİKET YAZDIRMA MOTORU ---
+
+        const labelLists = {
+            outside: [
+                "Yarım Ekmek Kokoreç", "Pilavüstü Tavuk Döner", "Yarım Ekmek Tavuk Kokoreç", "Sade Patso",
+                "Sucuk Ekmek", "Hamburger", "Cheeseburger", "Yarım Ekmek Ciğer",
+                "Yarım Ekmek Köfte", "Yarım Ekmek Tavuk Döner", "Dürüm Tavuk Döner ", "Tombik Ekmek Tavuk Döner", "Sosisli Sandiviç"
+            ],
+            inside: [
+                "Yarım Ekmek Kokoreç", "Yarım Ekmek Tavuk Kokoreç", "Yarım Ekmek Ciğer",
+                "Yarım Ekmek Köfte", "Tombik Döner Menü Ayranlı", "Dürüm Döner Menü Ayranlı",
+                "Yarım Ekmek Menü Ayranlı", "Sosisli Patso", "Pilavüstü Tavuk Döner", "Porsiyon Ciğer", "Porsiyon Köfte"
+            ]
+        };
+
+        function renderLabelModule() {
+            setActiveTab('showLabels');
+            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
+
+            loadModule(`
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in max-w-4xl mx-auto">
+                    <h2 class="text-2xl font-black text-gray-800 mb-6 flex items-center gap-2">🏷️ Dev Etiket Yazdırma Sistemi</h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <button onclick="startLabelPrint('outside')" class="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-2xl font-black text-lg shadow-md hover:scale-[1.02] transition">
+                            🌤️ Sadece Dışarının Etiketini Yazdır
+                        </button>
+                        <button onclick="startLabelPrint('inside')" class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white p-6 rounded-2xl font-black text-lg shadow-md hover:scale-[1.02] transition">
+                            🏠 Sadece İçerinin Etiketini Yazdır
+                        </button>
+                        <button onclick="startLabelPrint('both')" class="bg-gradient-to-br from-purple-500 to-purple-700 text-white p-6 rounded-2xl font-black text-lg shadow-md hover:scale-[1.02] transition">
+                            🔥 Her İkisininkini De Yazdır
+                        </button>
+                        <button onclick="toggleManualLabelSelection()" class="bg-gradient-to-br from-gray-700 to-gray-900 text-white p-6 rounded-2xl font-black text-lg shadow-md hover:scale-[1.02] transition">
+                            ✅ Tüm Ürünlerden Manuel Seç
+                        </button>
+                    </div>
+
+                    <div id="manualLabelSelectionArea" class="hidden border-2 border-gray-100 rounded-2xl p-4 bg-gray-50">
+                        <h3 class="font-black text-gray-800 mb-3">Yazdırılacak Ürünleri Seçin:</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-[40vh] overflow-y-auto mb-4 p-2" id="manualLabelCheckboxes"></div>
+                        <button onclick="startManualLabelPrint()" class="w-full bg-orange-600 text-white font-black py-3.5 rounded-xl shadow-md hover:bg-orange-700 transition">Seçilenleri A4'e Çevir ve Yazdır</button>
+                    </div>
+                </div>
+            `);
+
+            // DOM Yüklendiğinde sol menü butonuna tıklandığını algılaması için dinleyiciyi bağla (Sayfanın başındaki dinleyicilere de eklendiğini varsayıyorum)
+            document.getElementById('showLabels').addEventListener('click', renderLabelModule);
+        }
+
+        // DOMContentLoaded İçindeki Listeners kısmına (showStatsBtn vs. altına) şunu eklemeyi unutma:
+        // document.getElementById('showLabels').addEventListener('click', renderLabelModule);
+
+        function toggleManualLabelSelection() {
+            const area = document.getElementById('manualLabelSelectionArea');
+            area.classList.toggle('hidden');
+
+            if (!area.classList.contains('hidden')) {
+                const boxContainer = document.getElementById('manualLabelCheckboxes');
+                boxContainer.innerHTML = '';
+                const sorted = sortProductsByOrder([...products]);
+                sorted.forEach(p => {
+                    boxContainer.innerHTML += `
+                        <label class="flex items-center gap-2 p-2 bg-white border rounded-lg cursor-pointer hover:bg-orange-50 transition">
+                            <input type="checkbox" value="${p.name}" class="manual-label-cb w-4 h-4 accent-orange-500">
+                            <span class="text-xs font-bold text-gray-700 truncate">${p.name}</span>
+                        </label>
+                    `;
+                });
+            }
+        }
+
+        function startManualLabelPrint() {
+            const checkboxes = document.querySelectorAll('.manual-label-cb:checked');
+            const selectedItems = Array.from(checkboxes).map(cb => cb.value);
+            if (selectedItems.length === 0) { alert('Lütfen en az bir ürün seçin.'); return; }
+            startLabelPrint('manual', selectedItems);
+        }
+
+        function startLabelPrint(type, manualItems = []) {
+            currentPrintJob = 'label';
+            isLabelJobSpecial = (type === 'outside' || type === 'both');
+
+            let requestedItems = [];
+            if (type === 'outside') requestedItems = [...labelLists.outside];
+            else if (type === 'inside') requestedItems = [...labelLists.inside];
+            else if (type === 'both') requestedItems = [...new Set([...labelLists.outside, ...labelLists.inside])];
+            else if (type === 'manual') requestedItems = manualItems;
+
+            currentLabelRequest = requestedItems;
+
+            // Sözlükle eşleştirerek eksikleri bul
+            missingProductsGlobal = [];
+            const dbProductMap = {};
+            products.forEach(p => {
+                const cleanName = (p.name || "").toLocaleLowerCase('tr-TR').trim();
+                dbProductMap[cleanName] = true;
+            });
+
+            requestedItems.forEach(itemName => {
+                let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
+                if (productAliases[searchName]) searchName = productAliases[searchName];
+
+                if (!dbProductMap[searchName] && !manualPricesGlobal[itemName]) {
+                    missingProductsGlobal.push(itemName);
+                }
+            });
+
+            if (missingProductsGlobal.length > 0) {
+                showMissingProductsModal();
+            } else {
+                executeLabelPrint();
+            }
+        }
+
+        function executeLabelPrint() {
+            const container = document.getElementById('labelPagesContainer');
+            container.innerHTML = '';
+
+            const dbProductMap = {};
+            products.forEach(p => {
+                const cleanName = (p.name || "").toLocaleLowerCase('tr-TR').trim();
+                dbProductMap[cleanName] = p.discountPrice || p.price;
+            });
+
+            let itemsToProcess = [...currentLabelRequest];
+
+            // KURAL: Dışarı veya İkisi seçildiyse, Yarım Kokoreç ve Pilavüstü Döner en büyük (2'li) basılacak!
+            if (isLabelJobSpecial) {
+                const specialKeys = ["Yarım Ekmek Kokoreç", "Pilavüstü Tavuk Döner", "pilav üstü tavuk döner", "pilav üstü döner"];
+                const specialItemsFound = itemsToProcess.filter(item => specialKeys.some(sk => item.toLocaleLowerCase('tr-TR').trim() === sk.toLocaleLowerCase('tr-TR').trim()));
+
+                // Bulunan özel ürünleri ana listeden çıkart
+                itemsToProcess = itemsToProcess.filter(item => !specialItemsFound.includes(item));
+
+                if (specialItemsFound.length > 0) {
+                    // Bunlar 2'li dev sayfaya basılıyor
+                    const page = document.createElement('div');
+                    page.className = 'a4-label-page';
+
+                    specialItemsFound.forEach(itemName => {
+                        let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
+                        if (productAliases[searchName]) searchName = productAliases[searchName];
+                        let price = dbProductMap[searchName] || manualPricesGlobal[itemName] || "0";
+
+                        page.innerHTML += `
+                            <div class="label-split-2">
+                                <div class="price-text-2">${price}<span class="currency-text-2">₺</span></div>
+                            </div>
+                        `;
+                    });
+                    container.appendChild(page);
+                }
+            }
+
+            // Geri kalan tüm ürünler 3'lü eşit parçalara bölünecek
+            for (let i = 0; i < itemsToProcess.length; i += 3) {
+                const chunk = itemsToProcess.slice(i, i + 3);
+                const page = document.createElement('div');
+                page.className = 'a4-label-page';
+
+                chunk.forEach(itemName => {
+                    let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
+                    if (productAliases[searchName]) searchName = productAliases[searchName];
+                    let price = dbProductMap[searchName] || manualPricesGlobal[itemName] || "0";
+
+                    page.innerHTML += `
+                        <div class="label-split-3">
+                            <div class="price-text-3">${price}<span class="currency-text-3">₺</span></div>
+                        </div>
+                    `;
+                });
+                container.appendChild(page);
+            }
+
+            // Modülü Aç
+            document.getElementById('labelPrintArea').classList.remove('hidden');
+        }
+
+        function closeLabelModule() {
+            document.getElementById('labelPrintArea').classList.add('hidden');
+        }
     </script>
 </body>
 
