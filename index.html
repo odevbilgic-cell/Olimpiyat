@@ -273,7 +273,7 @@
         <div class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center relative overflow-hidden shadow-sm">
             <div class="absolute -right-4 -bottom-4 text-7xl opacity-35 grayscale"><img src="1000129368.png" alt="" width="90" style="transform: translateY(-4px) rotate(25deg);"></div>
             <h4 class="text-orange-600 font-black text-[14px] mb-2">Biliyor muydunuz?</h4>
-            <p id="triviaText" class="text-gray-700 text-[12px] font-semibold italic leading-relaxed">
+           <p id="triviaText" class="text-gray-700 text-sm font-semibold italic leading-relaxed min-h-[60px]">
                 ...
             </p>
         </div>
@@ -2645,10 +2645,79 @@
             "Olimpiyat Kokoreç ailesi olarak, bu ekranı okurken yüzünüzde oluşan gülümsemenin yemeğinize ekstra lezzet katacağına inanıyoruz!"
         ];
 
+        // --- 🧠 SİPARİŞ BEKLERKEN TRIVIA MOTORU (DAKTİLO EFEKTİ) ---
+        
+        let currentTriviaIndex = 0;
+        
+        // JS Bekletici Fonksiyonu (Daktilo vuruş aralıkları için)
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        async function typeWriterEffect(text, elementId) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = '&ldquo;'; // Açılış tırnağını koy
+            
+            // Yanıp sönen imleç (cursor) oluştur
+            const cursor = document.createElement('span');
+            cursor.innerHTML = '|';
+            cursor.style.color = '#ea580c'; // Turuncu Olimpiyat rengi imleç
+            cursor.style.fontWeight = '900';
+            cursor.style.animation = 'blink 1s step-end infinite';
+            
+            // Eğer sayfada blink animasyonu yoksa otomatik ekle
+            if (!document.getElementById('cursor-style')) {
+                const style = document.createElement('style');
+                style.id = 'cursor-style';
+                style.innerHTML = '@keyframes blink { 50% { opacity: 0; } }';
+                document.head.appendChild(style);
+            }
+
+            el.appendChild(cursor);
+
+            // Harfleri döngüyle tek tek yazdır
+            for (let i = 0; i < text.length; i++) {
+                const charNode = document.createTextNode(text.charAt(i));
+                el.insertBefore(charNode, cursor); // Harfi imleçten hemen önceye koy
+                await sleep(35); // YAZMA HIZI: 35 milisaniye (Düşürürsen hızlanır, artırırsan yavaşlar)
+            }
+            
+            const endQuote = document.createTextNode('”');
+            el.insertBefore(endQuote, cursor); // Kapanış tırnağını koy
+        }
+
+        async function startTriviaLoop() {
+            const triviaEl = document.getElementById('triviaText');
+            
+            // Sonsuz daktilo döngüsü
+            while (true) {
+                // Kutuyu görünür yap
+                triviaEl.style.opacity = '1';
+                triviaEl.style.transition = 'none'; 
+                
+                // Daktiloyu çalıştır
+                await typeWriterEffect(foodFacts[currentTriviaIndex], 'triviaText');
+                
+                // Yazı bittikten sonra müşterinin okuması için tam 7 saniye bekle
+                await sleep(10000);
+                
+                // 7 saniye dolunca eski yazıyı yarım saniyede usulca sil
+                triviaEl.style.transition = 'opacity 0.5s ease-out';
+                triviaEl.style.opacity = '0';
+                await sleep(500); // Silinme animasyonunun bitmesini bekle
+                
+                // Sıradaki bilgiye geç, liste bittiyse başa dön
+                currentTriviaIndex++;
+                if (currentTriviaIndex >= foodFacts.length) {
+                    currentTriviaIndex = 0;
+                }
+            }
+        }
+
         function initTrivia() {
-            // Havuzdan rastgele bir bilgi seçer
-            const randomIndex = Math.floor(Math.random() * foodFacts.length);
-            document.getElementById('triviaText').innerHTML = `&ldquo;${foodFacts[randomIndex]}&rdquo;`;
+            // İlk açılışta müşteriye hep aynı söz denk gelmesin diye rastgele başlat
+            currentTriviaIndex = Math.floor(Math.random() * foodFacts.length);
+            
+            // Motoru ateşle
+            startTriviaLoop();
         }
 
         // Müşteri sayfaya girdiği an motorları ateşle
