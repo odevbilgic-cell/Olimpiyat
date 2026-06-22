@@ -418,7 +418,7 @@
                 margin: 0px;
                 zoom: 60%; /* Telefon ekranında A4'ü %45 oranında küçültür */
                 transform-origin: top center;
-               /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
+                margin-bottom: -150mm !important; /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
             }
 
             #logoAna{
@@ -434,6 +434,7 @@
         @media screen and (max-width: 480px) {
             .a4-menu-page, .a4-label-page {
                 transform: scale(0.40); /* Daha küçük telefonlar için %40 */
+                margin-bottom: -160mm !important;
                
             }
         }
