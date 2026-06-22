@@ -356,7 +356,7 @@
         }
 
         .price-text-3 {
-            font-size: 300px;
+            font-size: 260px;
             /* Görseldeki devasa boyut */
             font-weight: 900;
             color: #000000;
@@ -418,7 +418,7 @@
                 margin: 0px;
                 zoom: 60%; /* Telefon ekranında A4'ü %45 oranında küçültür */
                 transform-origin: top center;
-                margin-bottom: -150mm !important; /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
+                margin-bottom: -180mm !important; /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
             }
 
             #logoAna{
@@ -428,9 +428,21 @@
             margin: auto;
             width: 150px;
         }
-
              
+        } 
+        
+        @media screen and (max-width: 71.5mm) and (max-height:146.7mm) {
+
+            .a4-menu-page, .a4-label-page {
+                margin: 0px;
+                zoom: 20%; /* Telefon ekranında A4'ü %45 oranında küçültür */
+                transform-origin: top center;
+                margin-bottom: -180mm !important; /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
+            }
+
         }
+
+
         @media screen and (max-width: 480px) {
             .a4-menu-page, .a4-label-page {
                 transform: scale(0.40); /* Daha küçük telefonlar için %40 */
