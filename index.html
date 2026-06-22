@@ -244,7 +244,7 @@
         </div>
     </header>
 
-    <div id="weatherWidget" class="mx-4 mt-4 mb-6 bg-gradient-to-r from-gray-950 to-black border border-[#d4af37] rounded-2xl p-4 shadow-[0_5px_15px_rgba(212,175,55,0.15)] flex items-center gap-4 transition-all duration-500">
+   <!--  <div id="weatherWidget" class="mx-4 mt-4 mb-6 bg-gradient-to-r from-gray-950 to-black border border-[#d4af37] rounded-2xl p-4 shadow-[0_5px_15px_rgba(212,175,55,0.15)] flex items-center gap-4 transition-all duration-500">
         <div id="weatherIcon" class="text-4xl drop-shadow-md">🌤️</div>
         <div class="flex-1">
             <h3 class="text-[#d4af37] font-black text-sm uppercase tracking-wider mb-1 flex items-center gap-2">
@@ -256,7 +256,7 @@
             </p>
         </div>
     </div>
-
+ -->
     <nav id="categoryTabs"
         class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
 
@@ -271,9 +271,9 @@
             Sipariş Beklerken ⏳
         </div>
         <div class="bg-white border-2 border-dashed border-gray-300 rounded-2xl p-6 text-center relative overflow-hidden shadow-sm">
-            <div class="absolute -right-4 -bottom-4 text-7xl opacity-5 grayscale">🍔</div>
-            <h4 class="text-orange-600 font-black text-lg mb-2">Biliyor muydunuz?</h4>
-            <p id="triviaText" class="text-gray-700 text-sm font-semibold italic leading-relaxed">
+            <div class="absolute -right-4 -bottom-4 text-7xl opacity-35 grayscale"><img src="1000129368.png" alt="" width="90" style="transform: translateY(-4px) rotate(25deg);"></div>
+            <h4 class="text-orange-600 font-black text-[14px] mb-2">Biliyor muydunuz?</h4>
+            <p id="triviaText" class="text-gray-700 text-[12px] font-semibold italic leading-relaxed">
                 ...
             </p>
         </div>
@@ -2360,7 +2360,7 @@
             quizHistory = [];
         }
 
-        // --- 🌤️ HAVA DURUMU VE AKILLI LEZZET MOTORU ---
+       /*  // --- 🌤️ HAVA DURUMU VE AKILLI LEZZET MOTORU ---
         async function initSmartWeather() {
             try {
                 // Open-Meteo API: Ücretsiz, Kotasız. (Enlem: 41.0138, Boylam: 28.9497 -> İstanbul)
@@ -2390,7 +2390,7 @@
                 // Eğer internet veya API kaynaklı bir sorun olursa menüyü bozmamak için widget'ı usulca gizle
                 document.getElementById('weatherWidget').style.display = 'none';
             }
-        }
+        } */
 
         // --- 🧠 SİPARİŞ BEKLERKEN TRIVIA MOTORU ---
         // Türk sokak lezzetlerine ve Olimpiyat konseptine uygun veri havuzu
@@ -2653,7 +2653,6 @@
 
         // Müşteri sayfaya girdiği an motorları ateşle
         document.addEventListener('DOMContentLoaded', () => {
-            initSmartWeather();
             initTrivia();
         });
     </script>
