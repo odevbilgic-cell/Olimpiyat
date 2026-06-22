@@ -407,15 +407,18 @@
         /* --- MOBİL EKRANLAR İÇİN A4 ÖNİZLEME UYUMU (Baskıyı Etkilemez) --- */
         @media screen and (max-width: 768px) {
             .a4-menu-page, .a4-label-page {
-                transform: scale(0.45); /* Telefon ekranında A4'ü %45 oranında küçültür */
+                margin: 0px;
+                zoom: 60%; /* Telefon ekranında A4'ü %45 oranında küçültür */
                 transform-origin: top center;
-                margin-bottom: -150mm !important; /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
+               /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
             }
+
+             
         }
         @media screen and (max-width: 480px) {
             .a4-menu-page, .a4-label-page {
                 transform: scale(0.40); /* Daha küçük telefonlar için %40 */
-                margin-bottom: -165mm !important;
+               
             }
         }
     </style>
