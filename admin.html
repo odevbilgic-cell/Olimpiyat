@@ -104,27 +104,32 @@
 
 
         /* --- OLİMPİYAT A4 BASKI TASARIMI (KOMPAKT VERSİYON - TAŞMAYI ÖNLER) --- */
+       /* --- YAZDIRMA ÇAKIŞMALARINI ÖNLEYEN KESİN ÇÖZÜM --- */
+       /* --- YAZDIRMA ÇAKIŞMALARINI VE SAYFA KESİLMESİNİ ÖNLEYEN KESİN ÇÖZÜM --- */
         @media print {
-
-            /* SADECE YAZDIRILACAK ALANI GÖSTER, DİĞER HER ŞEYİ GİZLE */
-            body>*:not(#printModuleArea):not(#labelPrintArea) {
+            /* 1. Tüm sayfa elemanlarını yazıcıda varsayılan olarak gizle */
+            body > * {
                 display: none !important;
             }
 
-            #printModuleArea,
-            #labelPrintArea {
-                display: block !important;
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
+            /* 2. EĞER MENÜ YA DA ETİKET AÇIKSA, ONLARI YAZDIR (FLEX İPTAL, BLOCK KULLAN) */
+            body > #printModuleArea:not(.hidden),
+            body > #labelPrintArea:not(.hidden) {
+                display: block !important;  /* Flex iptal edildi, block yapıldı ki sayfalar bölünebilsin */
+                position: static !important; /* Absolute iptal edildi, kağıt akışına bırakıldı */
                 width: 100% !important;
                 height: auto !important;
-                background-color: #000000 !important;
                 overflow: visible !important;
-                z-index: 9999 !important;
             }
 
-            /* Geri dön ve yazdır butonlarının olduğu üst paneli baskıda gizle */
+            /* 3. Etiketleri tutan ana konteyneri de blok yapıyoruz ki alt alta kağıtlara taşsın */
+            #labelPagesContainer {
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* Butonları yazıcıda gizle */
             .no-print {
                 display: none !important;
             }
@@ -135,20 +140,34 @@
             }
 
             body {
-                background-color: #000000;
                 padding: 0;
                 margin: 0;
+                background-color: #ffffff; /* Kağıt arkaplanı varsayılan beyaz */
             }
 
+            /* Menü A4 sayfası ayarı (Siyah) */
             .a4-menu-page {
-                margin-top: 5mm;
-                box-shadow: none;
+                margin: 0mm auto 0 auto !important;
+                box-shadow: none !important;
+                background-color: #000000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
                 width: 200mm;
                 height: 287mm;
+            }
+
+            /* Etiket A4 sayfası ayarı (Beyaz ve çok sayfalı) */
+            .a4-label-page {
+                margin: 0 auto !important;
+                box-shadow: none !important;
+                background-color: #ffffff !important;
+                page-break-after: always !important; /* Tarayıcıya zorla YENİ SAYFAYA GEÇ komutu */
+                break-after: page !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
         }
+            
 
         #printModuleArea {
             font-family: 'Montserrat', Arial, sans-serif;
@@ -165,7 +184,7 @@
             width: 200mm;
             height: 280mm;
             padding: 10mm 8mm;
-            border: 4mm solid #ffcc00;
+            border: 3mm solid #ffcc00;
             position: relative;
             page-break-inside: avoid;
             margin: 0 auto;
@@ -337,7 +356,7 @@
         }
 
         .price-text-3 {
-            font-size: 240px;
+            font-size: 300px;
             /* Görseldeki devasa boyut */
             font-weight: 900;
             color: #000000;
@@ -370,7 +389,6 @@
 
         .price-text-2 {
             font-size: 320px;
-            /* 2'li sayfa için ekranı yırtan dev font */
             font-weight: 900;
             color: #000000;
             line-height: 0.8;
@@ -384,6 +402,21 @@
             color: #ff0000;
             font-weight: 900;
             margin-left: 5px;
+        }
+
+        /* --- MOBİL EKRANLAR İÇİN A4 ÖNİZLEME UYUMU (Baskıyı Etkilemez) --- */
+        @media screen and (max-width: 768px) {
+            .a4-menu-page, .a4-label-page {
+                transform: scale(0.45); /* Telefon ekranında A4'ü %45 oranında küçültür */
+                transform-origin: top center;
+                margin-bottom: -150mm !important; /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
+            }
+        }
+        @media screen and (max-width: 480px) {
+            .a4-menu-page, .a4-label-page {
+                transform: scale(0.40); /* Daha küçük telefonlar için %40 */
+                margin-bottom: -165mm !important;
+            }
         }
     </style>
 </head>
@@ -600,29 +633,20 @@
     </div>
 
     <div id="labelPrintArea" class="hidden fixed inset-0 flex flex-col h-screen overflow-y-auto bg-gray-200 z-[60]">
-        <div
-            class="p-4 bg-white border-b border-gray-300 shadow-sm flex justify-between items-center no-print sticky top-0 z-50">
-            <button onclick="closeLabelModule()"
-                class="bg-gray-200 text-gray-800 hover:bg-gray-300 px-4 py-2.5 rounded-xl font-bold transition">⬅ İptal
-                Et / Geri Dön</button>
-            <h2 class="text-xl font-black text-gray-800 hidden sm:block">🏷️ Dev Etiket Önizlemesi</h2>
-            <button onclick="window.print()"
-                class="bg-blue-600 text-white font-black px-6 py-2.5 rounded-xl hover:bg-blue-700 shadow-lg flex items-center gap-2 transition transform hover:scale-105">
+        <div class="p-3 sm:p-4 bg-white border-b border-gray-300 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3 no-print sticky top-0 z-50">
+            <button onclick="closeLabelModule()" class="w-full sm:w-auto bg-gray-200 text-gray-800 hover:bg-gray-300 px-4 py-2.5 rounded-xl font-bold transition text-sm text-center">⬅ İptal Et / Geri Dön</button>
+            <h2 class="text-xl font-black text-gray-800 hidden md:block">🏷️ Dev Etiket Önizlemesi</h2>
+            <button onclick="window.print()" class="w-full sm:w-auto bg-blue-600 text-white font-black px-6 py-2.5 rounded-xl hover:bg-blue-700 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">
                 <span>🖨️</span> Etiketleri Yazdır
             </button>
         </div>
         <div id="labelPagesContainer" class="flex-grow flex flex-col items-center py-8"></div>
     </div>
 
-    <div id="printModuleArea" class="hidden fixed inset-0 flex flex-col h-screen overflow-y-auto bg-[#1a1a1a] z-50">
-
-        <div
-            class="p-4 bg-black border-b border-yellow-600 shadow-sm flex justify-between items-center no-print sticky top-0 z-50">
-            <button onclick="closePrintModule()"
-                class="bg-gray-800 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl font-bold transition">⬅ Geri
-                Dön</button>
-            <button onclick="window.print()"
-                class="bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center gap-2 transition transform hover:scale-105">
+   <div id="printModuleArea" class="hidden fixed inset-0 flex flex-col h-screen overflow-y-auto bg-[#1a1a1a] z-50">
+        <div class="p-3 sm:p-4 bg-black border-b border-yellow-600 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3 no-print sticky top-0 z-50">
+            <button onclick="closePrintModule()" class="w-full sm:w-auto bg-gray-800 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl font-bold transition text-sm text-center">⬅ Geri Dön</button>
+            <button onclick="window.print()" class="w-full sm:w-auto bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">
                 <span>🖨️</span> Menüyü Yazdır (A4)
             </button>
         </div>
@@ -2035,7 +2059,11 @@
         let missingProductsGlobal = [];
         let manualPricesGlobal = {};
 
-        function openPrintModule() {
+       function openPrintModule() {
+            // Güvenlik kilidi: Etiket modülünü zorla gizle
+            const labelArea = document.getElementById('labelPrintArea');
+            if (labelArea) labelArea.classList.add('hidden');
+
             const printArea = document.getElementById('printModuleArea');
             if (printArea) printArea.classList.remove('hidden');
             analyzeAndBuildPrintMenu();
@@ -2083,22 +2111,21 @@
             }
         }
 
-        function showMissingProductsModal() {
+       function showMissingProductsModal() {
             const listContainer = document.getElementById('missingProductsList');
             listContainer.innerHTML = '';
 
             missingProductsGlobal.forEach((item, index) => {
                 listContainer.innerHTML += `
-                    <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-gray-200 shadow-sm">
-                        <label class="font-bold text-gray-800 text-xs">${item}</label>
-                        <div class="flex items-center gap-1.5">
-                            <input type="number" id="manual_price_${index}" placeholder="0" class="w-16 p-1 text-right border rounded bg-gray-50 font-bold focus:ring-[#fbcc25] focus:border-[#fbcc25] text-sm">
+                    <div class="flex items-center justify-between bg-white p-2 sm:p-2.5 rounded-lg border border-gray-200 shadow-sm gap-2">
+                        <label class="font-bold text-gray-800 text-[11px] sm:text-xs truncate flex-1" title="${item}">${item}</label>
+                        <div class="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+                            <input type="number" id="manual_price_${index}" placeholder="0" class="w-14 sm:w-16 p-1 text-right border rounded bg-gray-50 font-bold focus:ring-[#fbcc25] focus:border-[#fbcc25] text-sm">
                             <span class="text-[#fbcc25] font-black">₺</span>
                         </div>
                     </div>
                 `;
             });
-
             document.getElementById('missingProductsModal').classList.remove('hidden');
         }
 
@@ -2189,32 +2216,30 @@
 
             loadModule(`
                 <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in max-w-4xl mx-auto">
-                    <h2 class="text-2xl font-black text-gray-800 mb-6 flex items-center gap-2">🏷️ Dev Etiket Yazdırma Sistemi</h2>
+                    <h2 class="text-xl sm:text-2xl font-black text-gray-800 mb-4 sm:mb-6 flex items-center gap-2">🏷️ Dev Etiket Yazdırma Sistemi</h2>
                     
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                        <button onclick="startLabelPrint('outside')" class="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-6 rounded-2xl font-black text-lg shadow-md hover:scale-[1.02] transition">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
+                        <button onclick="startLabelPrint('outside')" class="bg-gradient-to-br from-blue-500 to-blue-700 text-white p-4 sm:p-6 rounded-2xl font-black text-sm sm:text-lg shadow-md hover:scale-[1.02] transition">
                             🌤️ Sadece Dışarının Etiketini Yazdır
                         </button>
-                        <button onclick="startLabelPrint('inside')" class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white p-6 rounded-2xl font-black text-lg shadow-md hover:scale-[1.02] transition">
+                        <button onclick="startLabelPrint('inside')" class="bg-gradient-to-br from-emerald-500 to-emerald-700 text-white p-4 sm:p-6 rounded-2xl font-black text-sm sm:text-lg shadow-md hover:scale-[1.02] transition">
                             🏠 Sadece İçerinin Etiketini Yazdır
                         </button>
-                        <button onclick="startLabelPrint('both')" class="bg-gradient-to-br from-purple-500 to-purple-700 text-white p-6 rounded-2xl font-black text-lg shadow-md hover:scale-[1.02] transition">
+                        <button onclick="startLabelPrint('both')" class="bg-gradient-to-br from-purple-500 to-purple-700 text-white p-4 sm:p-6 rounded-2xl font-black text-sm sm:text-lg shadow-md hover:scale-[1.02] transition">
                             🔥 Her İkisininkini De Yazdır
                         </button>
-                        <button onclick="toggleManualLabelSelection()" class="bg-gradient-to-br from-gray-700 to-gray-900 text-white p-6 rounded-2xl font-black text-lg shadow-md hover:scale-[1.02] transition">
+                        <button onclick="toggleManualLabelSelection()" class="bg-gradient-to-br from-gray-700 to-gray-900 text-white p-4 sm:p-6 rounded-2xl font-black text-sm sm:text-lg shadow-md hover:scale-[1.02] transition">
                             ✅ Tüm Ürünlerden Manuel Seç
                         </button>
                     </div>
 
-                    <div id="manualLabelSelectionArea" class="hidden border-2 border-gray-100 rounded-2xl p-4 bg-gray-50">
-                        <h3 class="font-black text-gray-800 mb-3">Yazdırılacak Ürünleri Seçin:</h3>
+                    <div id="manualLabelSelectionArea" class="hidden border-2 border-gray-100 rounded-2xl p-3 sm:p-4 bg-gray-50">
+                        <h3 class="font-black text-sm sm:text-base text-gray-800 mb-3">Yazdırılacak Ürünleri Seçin:</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-[40vh] overflow-y-auto mb-4 p-2" id="manualLabelCheckboxes"></div>
-                        <button onclick="startManualLabelPrint()" class="w-full bg-orange-600 text-white font-black py-3.5 rounded-xl shadow-md hover:bg-orange-700 transition">Seçilenleri A4'e Çevir ve Yazdır</button>
+                        <button onclick="startManualLabelPrint()" class="w-full bg-orange-600 text-white font-black py-3 rounded-xl shadow-md hover:bg-orange-700 transition text-sm sm:text-base">Seçilenleri A4'e Çevir ve Yazdır</button>
                     </div>
                 </div>
             `);
-
-            // DOM Yüklendiğinde sol menü butonuna tıklandığını algılaması için dinleyiciyi bağla (Sayfanın başındaki dinleyicilere de eklendiğini varsayıyorum)
             document.getElementById('showLabels').addEventListener('click', renderLabelModule);
         }
 
@@ -2321,6 +2346,13 @@
                     });
                     container.appendChild(page);
                 }
+
+                // Güvenlik kilidi: Menü modülünü zorla gizle
+            const printArea = document.getElementById('printModuleArea');
+            if (printArea) printArea.classList.add('hidden');
+
+            // Etiket Modülünü Aç
+            document.getElementById('labelPrintArea').classList.remove('hidden');
             }
 
             // Geri kalan tüm ürünler 3'lü eşit parçalara bölünecek
