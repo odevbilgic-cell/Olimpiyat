@@ -431,23 +431,87 @@
              
         } 
         
-        @media screen and (max-width: 71.5mm) and (max-height:146.7mm) {
-
-            .a4-menu-page, .a4-label-page {
-                margin: 0px;
-                zoom: 20%; /* Telefon ekranında A4'ü %45 oranında küçültür */
-                transform-origin: top center;
-                margin-bottom: -180mm !important; /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
-            }
-
-        }
 
 
         @media screen and (max-width: 480px) {
-            .a4-menu-page, .a4-label-page {
-                transform: scale(0.40); /* Daha küçük telefonlar için %40 */
+             .a4-label-page {
+                transform: scale(0.45); /* Daha küçük telefonlar için %40 */
                 margin-bottom: -160mm !important;
                
+            }
+
+            .a4-menu-page{
+                zoom: 50%; /* Daha küçük telefonlar için %40 */
+                margin-bottom: -160mm !important;
+            }
+        }
+
+
+        /* --- MOBİL & IPHONE 13 ÖZEL OPTİMİZASYONLARI (Kusursuz WebKit/Safari Görünümü) --- */
+        
+        /* 1. iPhone Çentik (Notch) ve Alt Kaydırma Çizgisi (Home Indicator) Uyumu */
+        .sticky.top-0 {
+            padding-top: max(0.75rem, env(safe-area-inset-top)) !important;
+        }
+        
+        /* 2. Tüm Modaller İçin İyileştirmeler - iOS klavye açılınca taşmayı önleme */
+        .animate-pop-in {
+            /* Ekranın altı ve üstündeki ölü alanları hesaba katarak boyutu sınırlandırır */
+            max-height: calc(100vh - env(safe-area-inset-bottom) - env(safe-area-inset-top) - 2rem) !important;
+            overflow-y: auto !important;
+            overscroll-behavior: contain; /* İçe doğru kaydırmada arkaplanın kaymasını engeller */
+        }
+
+        /* 3. Genel Tablet ve Geniş Telefonlar (Max 768px) */
+        @media screen and (max-width: 768px) {
+            #logoAna {
+                width: 140px;
+                margin: auto;
+            }
+            .a4-menu-page, .a4-label-page {
+                /* Safari'nin sevmediği 'zoom' yerine 'transform: scale' kullanıyoruz */
+                transform: scale(0.60) !important;
+                transform-origin: top center !important;
+                margin-top: 0 !important;
+                margin-bottom: -110mm !important; 
+            }
+        }
+
+        /* 4. Standart Telefonlar (Max 480px) */
+        @media screen and (max-width: 480px) {
+             .a4-label-page {
+                transform: scale(0.52) !important;
+                transform-origin: top center !important;
+                margin-bottom: -135mm !important;
+            }
+        }
+
+        /* 5. iPhone 13, 13 Pro, 14 ve Benzeri Cihazlar (Tam 390px viewport) */
+        @media screen and (max-width: 395px) {
+            .a4-menu-page, .a4-label-page {
+                transform: scale(0.47) !important; 
+                transform-origin: top center !important;
+                margin-bottom: -150mm !important;
+            }
+            
+            /* iPhone ekranında üst butonların parmakla kolay basılması için tam genişlikte alt alta dizilmesi */
+            #printModuleArea .sticky, #labelPrintArea .sticky {
+                flex-direction: column !important;
+                gap: 8px !important;
+                padding-bottom: 12px !important;
+            }
+            
+            #printModuleArea .sticky button, #labelPrintArea .sticky button {
+                width: 100% !important;
+                padding: 14px !important;
+                font-size: 14px !important;
+                justify-content: center !important;
+            }
+            
+            /* Sol menü ikonlarının ve metinlerin iPhone ekranına tam oturması için daraltılması */
+            .tab-button {
+                padding: 8px 10px !important;
+                font-size: 12px !important;
             }
         }
     </style>
@@ -487,6 +551,14 @@
                     <input id="panelPassword" type="password" placeholder="••••••••"
                         class="border-2 border-gray-100 w-full p-3 rounded-xl focus:outline-none focus:border-orange-500 transition font-medium bg-gray-50 focus:bg-white" />
                 </div>
+
+                <div class="flex items-center gap-2 mt-1 mb-2 px-1">
+                    <input type="checkbox" id="rememberMe" class="w-4 h-4 accent-orange-600 cursor-pointer rounded">
+                    <label for="rememberMe" class="text-xs font-bold text-gray-600 cursor-pointer select-none">Beni Hatırla (Oturumu Açık Tut)</label>
+                </div>
+
+                <p id="panelLoginError" class="text-red-600 text-xs font-bold text-center hidden">❌ Kullanıcı adı veya
+                    şifre hatalı!</p>
 
                 <p id="panelLoginError" class="text-red-600 text-xs font-bold text-center hidden">❌ Kullanıcı adı veya
                     şifre hatalı!</p>
@@ -629,6 +701,12 @@
                             class="border p-2.5 rounded-xl focus:border-orange-500 outline-none text-sm font-semibold bg-white"></select>
                     </div>
                 </div>
+
+                <!-- YENİ EKLENEN RAFA KALDIR KUTUCUĞU -->
+                <label class="flex items-center gap-3 p-3 bg-red-50 border border-red-100 rounded-xl cursor-pointer hover:bg-red-100 transition mt-2">
+                    <input type="checkbox" id="editIsArchived" class="w-5 h-5 accent-red-600 rounded cursor-pointer">
+                    <span class="text-sm font-black text-red-700">📦 Rafa Kaldır (Müşteriye Gizle)</span>
+                </label>
 
                 <button id="saveEditProduct"
                     class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-4 py-3 rounded-xl font-bold mt-2 shadow-md hover:opacity-95 transition transform active:scale-95">Değişiklikleri
@@ -783,13 +861,19 @@
             refreshActiveModule();
         }
 
-        function refreshActiveModule() {
+       function refreshActiveModule() {
             const activeTab = document.querySelector('.tab-button.active');
             if (activeTab) {
                 const activeId = activeTab.id;
                 if (activeId === 'showProducts') {
                     const filterSelect = document.getElementById('filterCategory');
-                    renderProductList(filterSelect ? filterSelect.value : 'Tümü');
+                    const toggleArchiveBtn = document.getElementById('toggleArchiveBtn');
+                    // Rafım modundaysak ona göre yenile, değilsek normal menüyü yenile
+                    if (toggleArchiveBtn && toggleArchiveBtn.classList.contains('bg-orange-500')) {
+                        renderProductList('Tümü', true);
+                    } else {
+                        renderProductList(filterSelect ? filterSelect.value : 'Tümü', false);
+                    }
                 } else if (activeId === 'showBulkUpdate') {
                     const bulkSelect = document.getElementById('bulkCategory');
                     renderBulkPriceList(bulkSelect ? bulkSelect.value : 'Tümü');
@@ -904,66 +988,161 @@
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
                 <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in">
-                    <h2 class="text-2xl font-black text-gray-800 mb-4 flex items-center gap-1">📦 ${menuTitle} Ürün Yönetimi</h2>
-                    <div class="mb-4">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
+                        <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-1">📦 ${menuTitle}</h2>
+                        <button id="toggleArchiveBtn" class="bg-gray-800 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-gray-900 transition flex items-center justify-center gap-2 active:scale-95 w-full sm:w-auto">
+                            <span>📦</span> Rafım (Gizlenenler)
+                        </button>
+                    </div>
+                    
+                    <div id="productControls" class="mb-4">
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kategoriye Göre Filtrele</label>
                         <select id="filterCategory" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-semibold bg-gray-50 outline-none focus:border-orange-500">
                             <option value="Tümü">Tüm Kategoriler</option>
                             ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
                         </select>
                     </div>
+                    
+                    <div id="archiveControls" class="hidden mb-4 p-4 bg-red-50 border border-red-100 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3 shadow-inner">
+                        <span class="text-sm font-black text-red-700">Rafa Kaldırılan (Gizli) Ürünler</span>
+                        <button id="unarchiveSelectedBtn" class="w-full sm:w-auto bg-green-600 text-white px-4 py-2.5 rounded-xl text-xs font-black shadow-md hover:bg-green-700 transition active:scale-95">✅ Seçilenleri Raftan Çıkar</button>
+                    </div>
+
                     <ul id="productList" class="flex flex-col gap-2.5">
                         <li class="p-4 text-center text-gray-400 text-sm">Ürünler yükleniyor...</li>
                     </ul>
                 </div>
             `);
+            
             const filterSelect = document.getElementById('filterCategory');
-            filterSelect.addEventListener('change', () => renderProductList(filterSelect.value));
-            if (products.length > 0) renderProductList(filterSelect.value);
+            filterSelect.addEventListener('change', () => renderProductList(filterSelect.value, false));
+            
+            let isShowingArchive = false;
+            document.getElementById('toggleArchiveBtn').addEventListener('click', (e) => {
+                isShowingArchive = !isShowingArchive;
+                const btn = e.currentTarget;
+                if(isShowingArchive) {
+                    btn.innerHTML = '<span>⬅️</span> Ürünlere Dön';
+                    btn.classList.replace('bg-gray-800', 'bg-orange-500');
+                    btn.classList.replace('hover:bg-gray-900', 'hover:bg-orange-600');
+                    document.getElementById('productControls').classList.add('hidden');
+                    document.getElementById('archiveControls').classList.remove('hidden');
+                    renderProductList('Tümü', true);
+                } else {
+                    btn.innerHTML = '<span>📦</span> Rafım (Gizlenenler)';
+                    btn.classList.replace('bg-orange-500', 'bg-gray-800');
+                    btn.classList.replace('hover:bg-orange-600', 'hover:bg-gray-900');
+                    document.getElementById('productControls').classList.remove('hidden');
+                    document.getElementById('archiveControls').classList.add('hidden');
+                    renderProductList(document.getElementById('filterCategory').value, false);
+                }
+            });
+
+            document.getElementById('unarchiveSelectedBtn').addEventListener('click', unarchiveSelected);
+
+            if (products.length > 0) renderProductList(filterSelect.value, false);
         }
 
-        function renderProductList(filter = 'Tümü') {
+       function renderProductList(filter = 'Tümü', isArchiveView = false) {
             const listEl = document.getElementById('productList');
             if (!listEl) return;
             listEl.innerHTML = '';
 
             const sortedProducts = sortProductsByOrder([...products]);
-            const filtered = filter === 'Tümü' ? sortedProducts : sortedProducts.filter(p => p.category === filter);
+            
+            // Rafa kaldırılanları (isArchived) ayır
+            let filtered;
+            if (isArchiveView) {
+                filtered = sortedProducts.filter(p => p.isArchived === true);
+            } else {
+                filtered = sortedProducts.filter(p => p.isArchived !== true);
+                if (filter !== 'Tümü') filtered = filtered.filter(p => p.category === filter);
+            }
 
             if (filtered.length === 0) {
-                listEl.innerHTML = '<li class="p-4 text-center bg-gray-50 rounded-xl text-gray-400 text-sm border border-dashed">Bu kategoride henüz ürün bulunmamaktadır.</li>';
+                listEl.innerHTML = `<li class="p-4 text-center bg-gray-50 rounded-xl text-gray-400 text-sm border border-dashed">${isArchiveView ? 'Rafta hiçbir ürün bulunmuyor.' : 'Bu kategoride henüz ürün bulunmamaktadır.'}</li>`;
                 return;
             }
 
             filtered.forEach((p) => {
                 const item = document.createElement('li');
                 item.className = 'flex flex-col sm:flex-row justify-between sm:items-center bg-gray-50 p-3.5 rounded-xl border border-gray-100 gap-3 hover:bg-gray-100/50 transition';
-                item.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="font-bold text-gray-800 text-sm sm:text-base">${p.name}</span>
-                        <span class="text-xs font-bold text-orange-600 mt-0.5 bg-orange-100 px-2 py-0.5 rounded-md w-fit">${p.category}</span>
-                    </div>
-                    <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-gray-200/60">
-                        <span class="text-sm font-black text-gray-700 bg-white border px-3 py-1.5 rounded-lg shadow-sm">${p.price} ₺</span>
-                        <div class="flex gap-2">
-                            <button data-key="${p.key}" class="editBtn bg-amber-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Düzenle</button>
-                            <button data-key="${p.key}" class="deleteBtn bg-red-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Sil</button>
+                
+                if (isArchiveView) {
+                    // 📦 RAF GÖRÜNÜMÜ (Tiklenebilir)
+                    item.innerHTML = `
+                        <label class="flex items-center gap-3 cursor-pointer flex-1">
+                            <input type="checkbox" value="${p.key}" class="archive-cb w-5 h-5 accent-green-600 rounded cursor-pointer">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-gray-500 line-through text-sm sm:text-base">${p.name}</span>
+                                <span class="text-xs font-bold text-red-400 mt-0.5">${p.category} - ${p.price} ₺</span>
+                            </div>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <button data-key="${p.key}" class="deleteBtn bg-gray-300 text-gray-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition hover:bg-red-500 hover:text-white">Kalıcı Sil</button>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    // 🍽️ NORMAL ÜRÜN GÖRÜNÜMÜ
+                    item.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="font-bold text-gray-800 text-sm sm:text-base">${p.name}</span>
+                            <span class="text-xs font-bold text-orange-600 mt-0.5 bg-orange-100 px-2 py-0.5 rounded-md w-fit">${p.category}</span>
+                        </div>
+                        <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-gray-200/60">
+                            <span class="text-sm font-black text-gray-700 bg-white border px-3 py-1.5 rounded-lg shadow-sm">${p.price} ₺</span>
+                            <div class="flex gap-2">
+                                <button data-key="${p.key}" class="editBtn bg-amber-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Düzenle</button>
+                                <button data-key="${p.key}" class="deleteBtn bg-red-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Sil</button>
+                            </div>
+                        </div>
+                    `;
+                }
                 listEl.appendChild(item);
             });
 
+            // Buton Dinleyicileri
             document.querySelectorAll('.deleteBtn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const productKeyToDelete = e.target.dataset.key;
-                    if (confirm("Bu ürünü silmek istediğinizden emin misiniz?")) {
-                        try { await deleteProductFromFirebase(productKeyToDelete); alert("Ürün silindi."); }
+                    if (confirm("Bu ürünü tamamen silmek istediğinizden emin misiniz?")) {
+                        try { await deleteProductFromFirebase(productKeyToDelete); }
                         catch (error) { alert("Hata: " + error.message); }
                     }
                 });
             });
-            document.querySelectorAll('.editBtn').forEach(btn => btn.addEventListener('click', (e) => openEditModal(e.target.dataset.key)));
+            
+            if (!isArchiveView) {
+                document.querySelectorAll('.editBtn').forEach(btn => btn.addEventListener('click', (e) => openEditModal(e.target.dataset.key)));
+            }
+        }
+
+        // Raftan Toplu Çıkarma İşlemi
+        async function unarchiveSelected() {
+            const checkboxes = document.querySelectorAll('.archive-cb:checked');
+            if (checkboxes.length === 0) {
+                alert("Lütfen raftan çıkarmak istediğiniz ürünleri işaretleyin.");
+                return;
+            }
+
+            if(!confirm(`Seçilen ${checkboxes.length} ürün raftan çıkarılacak ve müşteriye tekrar gösterilecek. Onaylıyor musunuz?`)) return;
+
+            const updates = {};
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
+            const currentTime = Date.now();
+
+            checkboxes.forEach(cb => {
+                updates[`${pathPrefix}/${cb.value}/isArchived`] = false;
+                updates[`${pathPrefix}/${cb.value}/lastUpdated`] = currentTime;
+            });
+
+            try {
+                await database.ref().update(updates);
+                alert("Ürünler başarıyla raftan çıkarıldı!");
+                renderProductList('Tümü', true); // Raf ekranını güncelle
+            } catch (error) {
+                alert("Hata: " + error.message);
+            }
         }
 
         function renderSortingModule() {
@@ -1935,6 +2114,11 @@
                 editImagePreview.src = productToEdit.image || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="gray"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 002-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
                 editProductModal.classList.remove('hidden');
             }
+
+            // YENİ: Rafa kaldırılmışsa tiki otomatik doldur
+                const archiveCheckbox = document.getElementById('editIsArchived');
+                if(archiveCheckbox) archiveCheckbox.checked = productToEdit.isArchived === true;
+                editProductModal.classList.remove('hidden');
         }
 
         let activeListeners = {};
@@ -1971,16 +2155,29 @@
             const passwordInput = document.getElementById('panelPassword');
             const loginError = document.getElementById('panelLoginError');
             const submitLoginBtn = document.getElementById('submitPanelLoginBtn');
+            const rememberMeCheckbox = document.getElementById('rememberMe'); // YENİ: Beni Hatırla Kutucuğu
 
-            if (sessionStorage.getItem('olimpiyat_admin_logged_in') === 'true') loginOverlay.classList.add('hidden');
+            // YENİ: Sayfa yüklendiğinde hem geçici (session) hem kalıcı (local) hafızayı kontrol et
+            if (sessionStorage.getItem('olimpiyat_admin_logged_in') === 'true' || localStorage.getItem('olimpiyat_admin_logged_in') === 'true') {
+                loginOverlay.classList.add('hidden');
+            }
 
             function handleAdminLogin() {
                 if (usernameInput.value.trim() === 'Olimpiyat' && passwordInput.value === 'Olimpiyatkoko34.') {
                     loginError.classList.add('hidden');
-                    sessionStorage.setItem('olimpiyat_admin_logged_in', 'true');
+                    
+                    // YENİ: Beni hatırla seçiliyse kalıcıya, değilse geçici hafızaya kaydet
+                    if (rememberMeCheckbox && rememberMeCheckbox.checked) {
+                        localStorage.setItem('olimpiyat_admin_logged_in', 'true');
+                    } else {
+                        sessionStorage.setItem('olimpiyat_admin_logged_in', 'true');
+                    }
+                    
                     loginOverlay.classList.add('hidden');
                 } else {
-                    loginError.classList.remove('hidden'); passwordInput.value = ''; passwordInput.focus();
+                    loginError.classList.remove('hidden'); 
+                    passwordInput.value = ''; 
+                    passwordInput.focus();
                 }
             }
 
@@ -2007,9 +2204,14 @@
             closeEditProductModal.addEventListener('click', () => editProductModal.classList.add('hidden'));
             uploadEditImageBtn.addEventListener('click', (e) => { e.preventDefault(); openCloudinaryWidget(editImageURLInput, editImagePreview); });
 
-            // Sol menüdeki çıkış butonu dinleyicisi
+            // YENİLENEN: Çıkış butonu dinleyicisi (Çıkış yapıldığında her iki hafızayı da temizler)
             const logoutBtn = document.querySelector('a[href="index.html"]');
-            if (logoutBtn) logoutBtn.addEventListener('click', () => sessionStorage.removeItem('olimpiyat_admin_logged_in'));
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    sessionStorage.removeItem('olimpiyat_admin_logged_in');
+                    localStorage.removeItem('olimpiyat_admin_logged_in');
+                });
+            }
 
             saveEditProductButton.addEventListener('click', async () => {
                 const productKey = document.getElementById('editProductKey').value;
@@ -2026,7 +2228,8 @@
                     descEN: document.getElementById('editDescEN').value.trim(),
                     price: newPrice,
                     category: document.getElementById('editCategory').value,
-                    image: editImageURLInput.value.trim()
+                    image: editImageURLInput.value.trim(),
+                    isArchived: document.getElementById('editIsArchived') ? document.getElementById('editIsArchived').checked : false // RAF DURUMU
                 };
 
                 if (isPriceChanged) updates.lastUpdated = Date.now();
@@ -2308,10 +2511,16 @@
             isLabelJobSpecial = (type === 'outside' || type === 'both');
 
             let requestedItems = [];
-            if (type === 'outside') requestedItems = [...labelLists.outside];
-            else if (type === 'inside') requestedItems = [...labelLists.inside];
-            else if (type === 'both') requestedItems = [...new Set([...labelLists.outside, ...labelLists.inside])];
-            else if (type === 'manual') requestedItems = manualItems;
+            if (type === 'outside') {
+                requestedItems = [...labelLists.outside];
+            } else if (type === 'inside') {
+                requestedItems = [...labelLists.inside];
+            } else if (type === 'both') {
+                // Set kullanmadan direkt uç uca ekliyoruz, böylece ortak ürünler silinmiyor!
+                requestedItems = [...labelLists.outside, ...labelLists.inside];
+            } else if (type === 'manual') {
+                requestedItems = manualItems;
+            }
 
             currentLabelRequest = requestedItems;
 
@@ -2328,7 +2537,10 @@
                 if (productAliases[searchName]) searchName = productAliases[searchName];
 
                 if (!dbProductMap[searchName] && !manualPricesGlobal[itemName]) {
-                    missingProductsGlobal.push(itemName);
+                    // Aynı eksik ürün 2 defa listelenmesin diye ufak bir kontrol:
+                    if (!missingProductsGlobal.includes(itemName)) {
+                        missingProductsGlobal.push(itemName);
+                    }
                 }
             });
 
@@ -2350,14 +2562,20 @@
             });
 
             let itemsToProcess = [...currentLabelRequest];
+            let specialItemsFound = [];
 
-            // KURAL: Dışarı veya İkisi seçildiyse, Yarım Kokoreç ve Pilavüstü Döner en büyük (2'li) basılacak!
+            // KURAL: SADECE dışarı listesinden gelen Yarım Kokoreç ve Pilavüstü Döner büyük (2'li) basılacak!
             if (isLabelJobSpecial) {
-                const specialKeys = ["Yarım Ekmek Kokoreç", "Pilavüstü Tavuk Döner", "pilav üstü tavuk döner", "pilav üstü döner"];
-                const specialItemsFound = itemsToProcess.filter(item => specialKeys.some(sk => item.toLocaleLowerCase('tr-TR').trim() === sk.toLocaleLowerCase('tr-TR').trim()));
+                const specialKeys = ["yarım ekmek kokoreç", "pilavüstü tavuk döner", "pilav üstü tavuk döner", "pilav üstü döner"];
 
-                // Bulunan özel ürünleri ana listeden çıkart
-                itemsToProcess = itemsToProcess.filter(item => !specialItemsFound.includes(item));
+                // Tüm aynı isimleri toplamak yerine, sadece İLK bulduğu (Dışarı listesinden gelen) ürünü koparır.
+                // Böylece arkadan gelen İçeri listesindeki adaşları 3'lü standart listede kalır.
+                specialKeys.forEach(sk => {
+                    const foundIndex = itemsToProcess.findIndex(item => item.toLocaleLowerCase('tr-TR').trim() === sk);
+                    if (foundIndex !== -1) {
+                        specialItemsFound.push(itemsToProcess.splice(foundIndex, 1)[0]);
+                    }
+                });
 
                 if (specialItemsFound.length > 0) {
                     // Bunlar 2'li dev sayfaya basılıyor
@@ -2379,14 +2597,14 @@
                 }
 
                 // Güvenlik kilidi: Menü modülünü zorla gizle
-            const printArea = document.getElementById('printModuleArea');
-            if (printArea) printArea.classList.add('hidden');
+                const printArea = document.getElementById('printModuleArea');
+                if (printArea) printArea.classList.add('hidden');
 
-            // Etiket Modülünü Aç
-            document.getElementById('labelPrintArea').classList.remove('hidden');
+                // Etiket Modülünü Aç
+                document.getElementById('labelPrintArea').classList.remove('hidden');
             }
 
-            // Geri kalan tüm ürünler 3'lü eşit parçalara bölünecek
+            // Geri kalan tüm ürünler (içerinin kokoreci/döneri dahil) 3'lü eşit parçalara bölünecek
             for (let i = 0; i < itemsToProcess.length; i += 3) {
                 const chunk = itemsToProcess.slice(i, i + 3);
                 const page = document.createElement('div');
