@@ -2696,7 +2696,6 @@
         }
 
         //         // 🌍 DÜNYA MUTFAĞI + WIKIPEDIA + ESNAF HARMANI
-                // 🌍 DÜNYA MUTFAĞI + WIKIPEDIA (GELİŞMİŞ TANIM MOTORU) + ESNAF HARMANI
         async function fetchWorldMeal() {
             try {
                 // 1. Ücretsiz TheMealDB API'den rastgele yemek çek
@@ -2708,32 +2707,28 @@
                 const name = meal.strMeal;
                 const img = meal.strMealThumb;
 
-                // 2. Yemeğin adını Türkçe Wikipedia'da arat (KÖKTEN ÇÖZÜM)
+                // 2. Yemeğin adını Türkçe Wikipedia'da arat
                 let wikiDescription = "";
                 try {
-                    // Eski "snippet" (kaynakça çeken) arama yerine, makalenin direkt en üstündeki "GİRİŞ TANIMINI" (extracts) çeken kod:
-                    const wikiUrl = `https://tr.wikipedia.org/w/api.php?action=query&prop=extracts&exsentences=2&exlimit=1&explaintext=1&format=json&origin=*&generator=search&gsrsearch=${encodeURIComponent(name)}&gsrlimit=1`;
+                    const wikiUrl = `https://tr.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name)}&utf8=&format=json&origin=*`;
                     const wikiRes = await fetch(wikiUrl);
                     const wikiData = await wikiRes.json();
                     
-                    if (wikiData.query && wikiData.query.pages) {
-                        const pages = wikiData.query.pages;
-                        const pageId = Object.keys(pages)[0];
-                        const extract = pages[pageId].extract;
-                        
-                        // Eğer ansiklopedik 
-                        bir tanım bulduysa ve saçma sapan kaynakça işaretleri içermiyorsa al
-                        if (extract && extract.length > 15 && !extract.includes("ISBN") && !extract.includes("http")) {
-                            wikiDescription = extract.replace(/\n/g, " ").trim(); // Satır atlamalarını temizle
-                        }
+                    if (wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
+                        // Wiki'den gelen özet (snippet) metnini al
+                        let snippet = wikiData.query.search[0].snippet;
+                        // İçindeki HTML etiketlerini (örn: <span class="searchmatch">) temizle
+                        snippet = snippet.replace(/<\/?[^>]+(>|$)/g, "");
+                        // Bozuk karakterleri düzelt
+                        const txt = document.createElement("textarea");
+                        txt.innerHTML = snippet;
+                        wikiDescription = txt.value.trim();
                     }
                 } catch (wikiError) {
-                    console.log("Wikipedia anlaşılamadı, esnaf cümlelerine geçiliyor.");
+                    console.log("Wikipedia API Hatası, kendi cümlelerimize geçiliyor.");
                 }
 
                 let message = "";
-
-
 
                 // 3. EĞER WIKIPEDIA'DA BULUNDUYSA: Ansiklopedi + Sokak Ağzı Harmanı!
                 if (wikiDescription.length > 10) {
