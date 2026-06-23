@@ -2967,19 +2967,7 @@
             }
         }
 
-                // MÜŞTERİYE GÖSTERİLECEK DİNAMİK MEYDAN OKUMA CÜMLELERİ
-                // MÜŞTERİYE GÖSTERİLECEK DİNAMİK MEYDAN OKUMA CÜMLELERİ (DEV HAVUZ - 200 ADET)
 
-
-                // Havuzdan rastgele bir efsane cümle seç
-                const randomMsgIndex = Math.floor(Math.random() * challengeMessages.length);
-                const message = challengeMessages[randomMsgIndex];
-                
-                return { type: 'meal', text: message, img: img };
-            } catch (e) {
-                return null; // Eğer API çökerse sessizce normal bilgilere (Trivia) döner
-            }
-        }
 
         // Akıllı Döngü Sistemi
         async function startTriviaLoop() {
