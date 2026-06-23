@@ -2696,6 +2696,7 @@
         }
 
         //         // 🌍 DÜNYA MUTFAĞI + WIKIPEDIA + ESNAF HARMANI
+       // 🌍 DÜNYA MUTFAĞI + WIKIPEDIA (GELİŞMİŞ TANIM MOTORU) + ESNAF HARMANI
         async function fetchWorldMeal() {
             try {
                 // 1. Ücretsiz TheMealDB API'den rastgele yemek çek
@@ -2707,39 +2708,163 @@
                 const name = meal.strMeal;
                 const img = meal.strMealThumb;
 
-                // 2. Yemeğin adını Türkçe Wikipedia'da arat
+                // 2. Yemeğin adını Türkçe Wikipedia'da arat (KÖKTEN ÇÖZÜM)
                 let wikiDescription = "";
                 try {
-                    const wikiUrl = `https://tr.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name)}&utf8=&format=json&origin=*`;
+                    // Eski "snippet" (kaynakça çeken) arama yerine, makalenin direkt en üstündeki "GİRİŞ TANIMINI" (extracts) çeken kod:
+                    const wikiUrl = `https://tr.wikipedia.org/w/api.php?action=query&prop=extracts&exsentences=2&exlimit=1&explaintext=1&format=json&origin=*&generator=search&gsrsearch=${encodeURIComponent(name)}&gsrlimit=1`;
                     const wikiRes = await fetch(wikiUrl);
                     const wikiData = await wikiRes.json();
                     
-                    if (wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
-                        // Wiki'den gelen özet (snippet) metnini al
-                        let snippet = wikiData.query.search[0].snippet;
-                        // İçindeki HTML etiketlerini (örn: <span class="searchmatch">) temizle
-                        snippet = snippet.replace(/<\/?[^>]+(>|$)/g, "");
-                        // Bozuk karakterleri düzelt
-                        const txt = document.createElement("textarea");
-                        txt.innerHTML = snippet;
-                        wikiDescription = txt.value.trim();
+                    if (wikiData.query && wikiData.query.pages) {
+                        const pages = wikiData.query.pages;
+                        const pageId = Object.keys(pages)[0];
+                        const extract = pages[pageId].extract;
+                        
+                        // Eğer ansiklopedik bir tanım bulduysa ve saçma sapan kaynakça işaretleri içermiyorsa al
+                        if (extract && extract.length > 15 && !extract.includes("ISBN") && !extract.includes("http")) {
+                            wikiDescription = extract.replace(/\n/g, " ").trim(); // Satır atlamalarını temizle
+                        }
                     }
                 } catch (wikiError) {
-                    console.log("Wikipedia API Hatası, kendi cümlelerimize geçiliyor.");
+                    console.log("Wikipedia anlaşılamadı, esnaf cümlelerine geçiliyor.");
                 }
 
                 let message = "";
 
-                // 3. EĞER WIKIPEDIA'DA BULUNDUYSA: Ansiklopedi + Sokak Ağzı Harmanı!
+                // 3. EĞER WIKIPEDIA'DA TERTEMİZ BİR TANIM BULUNDUYSA: Ansiklopedi + Sokak Ağzı Harmanı!
                 if (wikiDescription.length > 10) {
-                    // Metin çok uzunsa 130 karakterde kes ki daktilo çok uzamasın
-                    let shortWiki = wikiDescription.length > 130 ? wikiDescription.substring(0, 130) + "..." : wikiDescription;
+                    // Tanım çok uzunsa 120 karakterde nazikçe kes ki daktilo çok uzayıp müşteriyi sıkmasın
+                    let shortWiki = wikiDescription.length > 120 ? wikiDescription.substring(0, 120) + "..." : wikiDescription;
                     
                     message = `Wikipedia'ya göre '${name}'; ${shortWiki} diye tanımlanıyor. Valla ustam ansiklopedilere saygımız sonsuz ama, hiçbir bilimsel tanım bizim mangal ateşinde pişen lezzetlerimizin verdiği o samimi hissi anlatmaya yetmez! Siparişiniz usta ellerde hazırlanıyor.`;
                 } 
-                // 4. EĞER WIKIPEDIA'DA YOKSA: Daha önceki o efsanevi esnaf laflarından birini patlat!
+                // 4. EĞER WIKIPEDIA'DA YOKSA (Veya dipnota takıldıysa): Daha önceki o efsanevi esnaf laflarından birini patlat!
                 else {
+                    // DİKKAT: Buraya senin o kopyaladığın devasa 200'lük cümle havuzunu koymalısın. Örnek olarak birkaç tane bıraktım.
                     const challengeMessages = [
+                        `${area} mutfağında bugün haritada bile zor bulacağınız '${name}' yemeğini yiyorlarmış... Boşverin ustam, hiçbir sos közde ağır ağır pişen kokorecin dumanıyla yarışamaz!`,
+                        `Bugün ${area} taraflarında '${name}' diye bir şeyler atıştırıyorlarmış... Bıraksınlar bu işleri, yaprak gibi açılmış ateşte terleyen tavuk dönerimizin yerini tutar mı hiç? Siparişiniz yolda!`,
+                        `Millet ${area} lokantalarında '${name}' yiyerek gurmelik taslıyor... Halbuki bilmezler ki en büyük gurmelik, Olimpiyat'ta yenilen o dumanı tüten sokak lezzetleridir!`,
+                        `Yabancılar ${area} taraflarında '${name}' ile doymaya çalışadursun... Bizim bol kekikli, acılı kokorecimizin ilk ısırığındaki hazzı asla bilemeyecekler. Beklediğinize değecek!`
+                    ];
+                    
+                    const randomMsgIndex = Math.floor(Math.random() * challengeMessages.length);
+                    message = challengeMessages[randomMsgIndex];
+                }
+                
+                return { type: 'meal', text: message, img: img };
+            } catch (e) {
+                return null; // Eğer API komple çökerse ekran bozulmasın, Trivia API'ye (kendi Biliyor muydunuz listene) dönsün
+            }
+        }// 🌍 DÜNYA MUTFAĞI + WIKIPEDIA (GELİŞMİŞ TANIM MOTORU) + ESNAF HARMANI
+        async function fetchWorldMeal() {
+            try {
+                // 1. Ücretsiz TheMealDB API'den rastgele yemek çek
+                const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
+                const data = await res.json();
+                const meal = data.meals[0];
+                
+                const area = meal.strArea !== "Unknown" ? meal.strArea : "Dünya";
+                const name = meal.strMeal;
+                const img = meal.strMealThumb;
+
+                // 2. Yemeğin adını Türkçe Wikipedia'da arat (KÖKTEN ÇÖZÜM)
+                let wikiDescription = "";
+                try {
+                    // Eski "snippet" (kaynakça çeken) arama yerine, makalenin direkt en üstündeki "GİRİŞ TANIMINI" (extracts) çeken kod:
+                    const wikiUrl = `https://tr.wikipedia.org/w/api.php?action=query&prop=extracts&exsentences=2&exlimit=1&explaintext=1&format=json&origin=*&generator=search&gsrsearch=${encodeURIComponent(name)}&gsrlimit=1`;
+                    const wikiRes = await fetch(wikiUrl);
+                    const wikiData = await wikiRes.json();
+                    
+                    if (wikiData.query && wikiData.query.pages) {
+                        const pages = wikiData.query.pages;
+                        const pageId = Object.keys(pages)[0];
+                        const extract = pages[pageId].extract;
+                        
+                        // Eğer ansiklopedik bir tanım bulduysa ve saçma sapan kaynakça işaretleri içermiyorsa al
+                        if (extract && extract.length > 15 && !extract.includes("ISBN") && !extract.includes("http")) {
+                            wikiDescription = extract.replace(/\n/g, " ").trim(); // Satır atlamalarını temizle
+                        }
+                    }
+                } catch (wikiError) {
+                    console.log("Wikipedia anlaşılamadı, esnaf cümlelerine geçiliyor.");
+                }
+
+                let message = "";
+
+                // 3. EĞER WIKIPEDIA'DA TERTEMİZ BİR TANIM BULUNDUYSA: Ansiklopedi + Sokak Ağzı Harmanı!
+                if (wikiDescription.length > 10) {
+                    // Tanım çok uzunsa 120 karakterde nazikçe kes ki daktilo çok uzayıp müşteriyi sıkmasın
+                    let shortWiki = wikiDescription.length > 120 ? wikiDescription.substring(0, 120) + "..." : wikiDescription;
+                    
+                    message = `Wikipedia'ya göre '${name}'; ${shortWiki} diye tanımlanıyor. Valla ustam ansiklopedilere saygımız sonsuz ama, hiçbir bilimsel tanım bizim mangal ateşinde pişen lezzetlerimizin verdiği o samimi hissi anlatmaya yetmez! Siparişiniz usta ellerde hazırlanıyor.`;
+                } 
+                // 4. EĞER WIKIPEDIA'DA YOKSA (Veya dipnota takıldıysa): Daha önceki o efsanevi esnaf laflarından birini patlat!
+                else {
+                    // DİKKAT: Buraya senin o kopyaladığın devasa 200'lük cümle havuzunu koymalısın. Örnek olarak birkaç tane bıraktım.
+                    const challengeMessages = [
+                        `${area} mutfağında bugün haritada bile zor bulacağınız '${name}' yemeğini yiyorlarmış... Boşverin ustam, hiçbir sos közde ağır ağır pişen kokorecin dumanıyla yarışamaz!`,
+                        `Bugün ${area} taraflarında '${name}' diye bir şeyler atıştırıyorlarmış... Bıraksınlar bu işleri, yaprak gibi açılmış ateşte terleyen tavuk dönerimizin yerini tutar mı hiç? Siparişiniz yolda!`,
+                        `Millet ${area} lokantalarında '${name}' yiyerek gurmelik taslıyor... Halbuki bilmezler ki en büyük gurmelik, Olimpiyat'ta yenilen o dumanı tüten sokak lezzetleridir!`,
+                        `Yabancılar ${area} taraflarında '${name}' ile doymaya çalışadursun... Bizim bol kekikli, acılı kokorecimizin ilk ısırığındaki hazzı asla bilemeyecekler. Beklediğinize değecek!`
+                    ];
+                    
+                    const randomMsgIndex = Math.floor(Math.random() * challengeMessages.length);
+                    message = challengeMessages[randomMsgIndex];
+                }
+                
+                return { type: 'meal', text: message, img: img };
+            } catch (e) {
+                return null; // Eğer API komple çökerse ekran bozulmasın, Trivia API'ye (kendi Biliyor muydunuz listene) dönsün
+            }
+        }// 🌍 DÜNYA MUTFAĞI + WIKIPEDIA (GELİŞMİŞ TANIM MOTORU) + ESNAF HARMANI
+        async function fetchWorldMeal() {
+            try {
+                // 1. Ücretsiz TheMealDB API'den rastgele yemek çek
+                const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
+                const data = await res.json();
+                const meal = data.meals[0];
+                
+                const area = meal.strArea !== "Unknown" ? meal.strArea : "Dünya";
+                const name = meal.strMeal;
+                const img = meal.strMealThumb;
+
+                // 2. Yemeğin adını Türkçe Wikipedia'da arat (KÖKTEN ÇÖZÜM)
+                let wikiDescription = "";
+                try {
+                    // Eski "snippet" (kaynakça çeken) arama yerine, makalenin direkt en üstündeki "GİRİŞ TANIMINI" (extracts) çeken kod:
+                    const wikiUrl = `https://tr.wikipedia.org/w/api.php?action=query&prop=extracts&exsentences=2&exlimit=1&explaintext=1&format=json&origin=*&generator=search&gsrsearch=${encodeURIComponent(name)}&gsrlimit=1`;
+                    const wikiRes = await fetch(wikiUrl);
+                    const wikiData = await wikiRes.json();
+                    
+                    if (wikiData.query && wikiData.query.pages) {
+                        const pages = wikiData.query.pages;
+                        const pageId = Object.keys(pages)[0];
+                        const extract = pages[pageId].extract;
+                        
+                        // Eğer ansiklopedik bir tanım bulduysa ve saçma sapan kaynakça işaretleri içermiyorsa al
+                        if (extract && extract.length > 15 && !extract.includes("ISBN") && !extract.includes("http")) {
+                            wikiDescription = extract.replace(/\n/g, " ").trim(); // Satır atlamalarını temizle
+                        }
+                    }
+                } catch (wikiError) {
+                    console.log("Wikipedia anlaşılamadı, esnaf cümlelerine geçiliyor.");
+                }
+
+                let message = "";
+
+                // 3. EĞER WIKIPEDIA'DA TERTEMİZ BİR TANIM BULUNDUYSA: Ansiklopedi + Sokak Ağzı Harmanı!
+                if (wikiDescription.length > 10) {
+                    // Tanım çok uzunsa 120 karakterde nazikçe kes ki daktilo çok uzayıp müşteriyi sıkmasın
+                    let shortWiki = wikiDescription.length > 120 ? wikiDescription.substring(0, 120) + "..." : wikiDescription;
+                    
+                    message = `Wikipedia'ya göre '${name}'; ${shortWiki} diye tanımlanıyor. Valla ustam ansiklopedilere saygımız sonsuz ama, hiçbir bilimsel tanım bizim mangal ateşinde pişen lezzetlerimizin verdiği o samimi hissi anlatmaya yetmez! Siparişiniz usta ellerde hazırlanıyor.`;
+                } 
+                // 4. EĞER WIKIPEDIA'DA YOKSA (Veya dipnota takıldıysa): Daha önceki o efsanevi esnaf laflarından birini patlat!
+                else {
+                    // DİKKAT: Buraya senin o kopyaladığın devasa 200'lük cümle havuzunu koymalısın. Örnek olarak birkaç tane bıraktım.
+                   const challengeMessages = [
     // --- KOKOREÇ TEMALI (1-30) ---
     `${area} mutfağında bugün haritada bile zor bulacağınız '${name}' yemeğini yiyorlarmış... Boşverin ustam, hiçbir sos közde ağır ağır pişen kokorecin dumanıyla yarışamaz!`,
     `${area} taraflarında '${name}' diye bir şeyler atıştırıyorlarmış... Bıraksınlar bu işleri, yaprak gibi açılmış ateşte terleyen tavuk dönerimizin yerini tutar mı hiç? Siparişiniz yolda!`,
@@ -2956,6 +3081,9 @@
     `Dünya mutfağından '${name}'... ${area} halkı seviyor olabilir ama bizim dükkandaki o çay bardağı şıkırtısı ve ızgara cızırtısı dünyadaki en güzel müziktir.`,
     `Şimdi arkanıza yaslanın, ${area} mutfağının '${name}' yemeğini unutun. Gerçek bir Olimpiyat şampiyonu gibi sokak lezzetlerimizin tadını çıkarma vakti geldi!`
 ];
+                    
+                   
+                    
                     
                     const randomMsgIndex = Math.floor(Math.random() * challengeMessages.length);
                     message = challengeMessages[randomMsgIndex];
