@@ -2843,47 +2843,55 @@
         function loadQRPdf(type) {
             const viewer = document.getElementById('qrPdfViewer');
             
-            // DİKKAT USTAM: BURAYA KENDİ PDF DOSYALARININ LİNKLERİNİ VEYA İSİMLERİNİ YAZ!
+            // DİKKAT USTAM: Google Drive linklerini eklerken her zaman "/preview" formatında eklemelisin!
             if(type === 'genis') {
-                currentPdfUrl = "genis_dispanser.pdf"; 
+                // "uc?id=" yerine "file/d/.../preview" formatına çevirdik!
+                currentPdfUrl = "https://drive.google.com/file/d/1GliAaoE0G8vloctRyC6IZJK3BwBRwoMn/preview"; 
             } else if (type === 'uckenarli') {
-                currentPdfUrl = "uc_kenarli_dispanser.pdf"; 
+                currentPdfUrl = "uc_kenarli_dispanser.pdf"; // Kendi klasöründeyse böyle kalabilir
             } else if (type === 'dar') {
                 currentPdfUrl = "dar_dispanser.pdf"; 
             }
             
-            // ÇÖZÜM 1: A4 kağıdı sınıfını çöpe attık! Direkt ekranı kaplayan, şık ve büyük PDF okuyucu:
-            // toolbar=1 yaptık ki, farenizi üstüne götürünce PDF'in kendi indirme/yazdırma ikonları da görünsün.
+            // ÇÖZÜM: Google Drive linkleri <embed> ile değil <iframe> ile kusursuz çalışır.
             viewer.innerHTML = `
-                <embed src="${currentPdfUrl}#view=FitH&scrollbar=0&toolbar=1&navpanes=0" type="application/pdf" class="w-full h-[75vh] rounded-2xl shadow-2xl border-4 border-gray-800" />
+                <iframe src="${currentPdfUrl}" class="w-full h-[75vh] rounded-2xl shadow-2xl border-4 border-gray-800" allow="autoplay"></iframe>
             `;
         }
 
         // ÇÖZÜM 2: AKILLI YAZDIRMA MOTORU (PDF ve HTML İçin Ayrı Çalışır)
         // Ekrandaki 'window.print()' komutunu ezip kendi zeki motorumuzu bağlıyoruz:
+        // ÇÖZÜM 2: AKILLI YAZDIRMA MOTORU (Google Drive ve Yerel PDF'ler İçin Ayrı Çalışır)
         setTimeout(() => {
             const printBtns = document.querySelectorAll('button[onclick="window.print()"]');
             printBtns.forEach(btn => {
-                btn.removeAttribute('onclick'); // Eski aptal yazdırmayı sil
+                btn.removeAttribute('onclick'); // Eski yazdırmayı sil
                 
                 btn.addEventListener('click', () => {
                     const qrContainer = document.getElementById('qrPreviewContainer');
                     
-                    // Eğer QR PDF ekranındaysak, web sayfasını değil SADECE PDF'İ yazıcıya yolla!
+                    // Eğer QR PDF ekranındaysak
                     if (qrContainer && !qrContainer.classList.contains('hidden') && currentPdfUrl !== "") {
                         
-                        // Gizli bir çerçeve oluşturup PDF'i içine atıyoruz ve sadece onu yazdırıyoruz
-                        const hideFrame = document.createElement('iframe');
-                        hideFrame.style.display = 'none';
-                        hideFrame.src = currentPdfUrl;
-                        document.body.appendChild(hideFrame);
-                        
-                        hideFrame.onload = function() {
-                            setTimeout(() => {
-                                hideFrame.contentWindow.focus();
-                                hideFrame.contentWindow.print();
-                            }, 500); // PDF'in tam yüklenmesi için yarım saniye bekle ve yazıcıyı ateşle
-                        };
+                        // KURAL 1: Eğer link Google Drive gibi DIŞ bir kaynaksa (http ile başlıyorsa)
+                        if (currentPdfUrl.startsWith('http')) {
+                            alert("Ustam, Google Drive dosyaları güvenlik gereği direkt yazdırılamaz. Dosya yeni sekmede açılacak, oradaki yazdır (🖨️) ikonuna basabilirsin.");
+                            window.open(currentPdfUrl, '_blank');
+                        } 
+                        // KURAL 2: Eğer dosya senin kendi klasöründeyse (dar_dispanser.pdf gibi yerel dosyaysa)
+                        else {
+                            const hideFrame = document.createElement('iframe');
+                            hideFrame.style.display = 'none';
+                            hideFrame.src = currentPdfUrl;
+                            document.body.appendChild(hideFrame);
+                            
+                            hideFrame.onload = function() {
+                                setTimeout(() => {
+                                    hideFrame.contentWindow.focus();
+                                    hideFrame.contentWindow.print();
+                                }, 500); // PDF'in tam yüklenmesi için yarım saniye bekle ve yazıcıyı ateşle
+                            };
+                        }
                         
                     } else {
                         // QR ekranında değilsek (A4 Fiyat veya İçecek listesindeysek) normal ekranı yazdır
