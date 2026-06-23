@@ -838,11 +838,18 @@
             const productsArray = [];
             dataSnapshot.forEach(childSnapshot => {
                 const product = childSnapshot.val();
+                
+                // 🛑 YENİ EKLENEN KİLİT: Eğer ürün rafa kaldırıldıysa, müşteri listesine HİÇ ALMA!
+                if (product.isArchived === true) return; 
+
                 product.key = childSnapshot.key;
                 product.lastUpdated = product.lastUpdated || Date.now();
                 productsArray.push(product);
             });
+
+            // Ürün sıralaması: order değerine göre sıralanır
             productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
+
             return productsArray;
         }
 
