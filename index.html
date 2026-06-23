@@ -2695,23 +2695,51 @@
             el.insertBefore(endQuote, cursor);
         }
 
-        // Dünya Mutfağı API'sinden Rastgele Yemek Çekme Fonksiyonu
-        // Dünya Mutfağı API'sinden Rastgele Yemek Çekme Fonksiyonu
+        //         // 🌍 DÜNYA MUTFAĞI + WIKIPEDIA + ESNAF HARMANI
         async function fetchWorldMeal() {
             try {
-                // Ücretsiz TheMealDB API
+                // 1. Ücretsiz TheMealDB API'den rastgele yemek çek
                 const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
                 const data = await res.json();
                 const meal = data.meals[0];
                 
-                // Bölge ismi 'Unknown' gelirse diye önlem
                 const area = meal.strArea !== "Unknown" ? meal.strArea : "Dünya";
                 const name = meal.strMeal;
                 const img = meal.strMealThumb;
-                
-                // MÜŞTERİYE GÖSTERİLECEK DİNAMİK MEYDAN OKUMA CÜMLELERİ
-                // MÜŞTERİYE GÖSTERİLECEK DİNAMİK MEYDAN OKUMA CÜMLELERİ (DEV HAVUZ - 200 ADET)
-const challengeMessages = [
+
+                // 2. Yemeğin adını Türkçe Wikipedia'da arat
+                let wikiDescription = "";
+                try {
+                    const wikiUrl = `https://tr.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name)}&utf8=&format=json&origin=*`;
+                    const wikiRes = await fetch(wikiUrl);
+                    const wikiData = await wikiRes.json();
+                    
+                    if (wikiData.query && wikiData.query.search && wikiData.query.search.length > 0) {
+                        // Wiki'den gelen özet (snippet) metnini al
+                        let snippet = wikiData.query.search[0].snippet;
+                        // İçindeki HTML etiketlerini (örn: <span class="searchmatch">) temizle
+                        snippet = snippet.replace(/<\/?[^>]+(>|$)/g, "");
+                        // Bozuk karakterleri düzelt
+                        const txt = document.createElement("textarea");
+                        txt.innerHTML = snippet;
+                        wikiDescription = txt.value.trim();
+                    }
+                } catch (wikiError) {
+                    console.log("Wikipedia API Hatası, kendi cümlelerimize geçiliyor.");
+                }
+
+                let message = "";
+
+                // 3. EĞER WIKIPEDIA'DA BULUNDUYSA: Ansiklopedi + Sokak Ağzı Harmanı!
+                if (wikiDescription.length > 10) {
+                    // Metin çok uzunsa 130 karakterde kes ki daktilo çok uzamasın
+                    let shortWiki = wikiDescription.length > 130 ? wikiDescription.substring(0, 130) + "..." : wikiDescription;
+                    
+                    message = `Wikipedia'ya göre '${name}'; ${shortWiki} diye tanımlanıyor. Valla ustam ansiklopedilere saygımız sonsuz ama, hiçbir bilimsel tanım bizim mangal ateşinde pişen lezzetlerimizin verdiği o samimi hissi anlatmaya yetmez! Siparişiniz usta ellerde hazırlanıyor.`;
+                } 
+                // 4. EĞER WIKIPEDIA'DA YOKSA: Daha önceki o efsanevi esnaf laflarından birini patlat!
+                else {
+                    const challengeMessages = [
     // --- KOKOREÇ TEMALI (1-30) ---
     `${area} mutfağında bugün haritada bile zor bulacağınız '${name}' yemeğini yiyorlarmış... Boşverin ustam, hiçbir sos közde ağır ağır pişen kokorecin dumanıyla yarışamaz!`,
     `${area} taraflarında '${name}' diye bir şeyler atıştırıyorlarmış... Bıraksınlar bu işleri, yaprak gibi açılmış ateşte terleyen tavuk dönerimizin yerini tutar mı hiç? Siparişiniz yolda!`,
@@ -2927,7 +2955,21 @@ const challengeMessages = [
     `Şu '${name}' yemeğinde ${area} şefleri baharat miktarını gramla ölçermiş. Bizim usta baharatı göz kararı ve yürekten atar, lezzet de oradan gelir!`,
     `Dünya mutfağından '${name}'... ${area} halkı seviyor olabilir ama bizim dükkandaki o çay bardağı şıkırtısı ve ızgara cızırtısı dünyadaki en güzel müziktir.`,
     `Şimdi arkanıza yaslanın, ${area} mutfağının '${name}' yemeğini unutun. Gerçek bir Olimpiyat şampiyonu gibi sokak lezzetlerimizin tadını çıkarma vakti geldi!`
-]
+];
+                    
+                    const randomMsgIndex = Math.floor(Math.random() * challengeMessages.length);
+                    message = challengeMessages[randomMsgIndex];
+                }
+                
+                return { type: 'meal', text: message, img: img };
+            } catch (e) {
+                return null; // Eğer API komple çökerse ekran bozulmasın, Trivia API'ye dönsün
+            }
+        }
+
+                // MÜŞTERİYE GÖSTERİLECEK DİNAMİK MEYDAN OKUMA CÜMLELERİ
+                // MÜŞTERİYE GÖSTERİLECEK DİNAMİK MEYDAN OKUMA CÜMLELERİ (DEV HAVUZ - 200 ADET)
+
 
                 // Havuzdan rastgele bir efsane cümle seç
                 const randomMsgIndex = Math.floor(Math.random() * challengeMessages.length);
