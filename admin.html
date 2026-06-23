@@ -514,6 +514,89 @@
                 font-size: 12px !important;
             }
         }
+
+        /* --- YENİ: İÇECEK LİSTESİ (5.6 x 9.8 cm) VE SIDEBAR STİLLERİ --- */
+        /* --- YENİ: İÇECEK LİSTESİ (5.6 x 9.8 cm) STİLLERİ --- */
+        .drink-menu-page {
+            width: 58mm;
+            height: 88mm;
+            background: black !important; /* Kırmızı ton zorunlu */
+            -webkit-print-color-adjust: exact !important; /* Yazıcıya renkleri zorla basma emri */
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            border: 2mm solid #d4af37 !important; /* Altın sarısı çerçeve */
+            margin: 0 auto;
+            position: relative;
+            box-sizing: border-box;
+            padding: 4mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            color: white !important;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+        }
+        .drink-menu-title {
+            color: #d4af37;
+            font-weight: 900;
+            font-size: 13px;
+            text-transform: uppercase;
+            text-align: center;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 3px;
+            margin-bottom: 6px;
+            width: 100%;
+        }
+        .drink-item {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10.5px;
+            font-weight: bold;
+            margin-bottom: 3px;
+            border-bottom: 1px dashed rgba(255,255,255,0.15);
+            padding-bottom: 2px;
+        }
+        .drink-price {
+            color: #d4af37;
+            font-weight: 900;
+        }
+        
+        /* Sol Menü Kapanma Animasyonu */
+        .print-sidebar {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 220px; /* Yaklaşık %10-%15 arası ideal görünüm */
+        }
+        .print-sidebar.collapsed {
+            width: 0 !important;
+            min-width: 0 !important;
+            overflow: hidden;
+            border: none !important;
+            padding: 0 !important;
+            opacity: 0;
+        }
+
+        /* Yazıcı Çıktı Ayarı (Sadece açık olanı basar) */
+        @media print {
+            body > #printModuleArea:not(.hidden) #a4PreviewContainer.hidden,
+            body > #printModuleArea:not(.hidden) #drinkMenuPreviewContainer.hidden {
+                display: none !important;
+            }
+            body > #printModuleArea:not(.hidden) #a4PreviewContainer:not(.hidden),
+            body > #printModuleArea:not(.hidden) #drinkMenuPreviewContainer:not(.hidden) {
+                display: block !important;
+            }
+            .print-sidebar, #expandPrintSidebarBtn { display: none !important; }
+
+            body > #printModuleArea:not(.hidden) #qrPreviewContainer.hidden {
+                display: none !important;
+            }
+            body > #printModuleArea:not(.hidden) #qrPreviewContainer:not(.hidden) {
+                display: flex !important;
+                width: 100% !important;
+            }
+        }
     </style>
 </head>
 
@@ -632,10 +715,7 @@
                     class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     <span>🖨️</span>Fiyat Listesi
                 </button>
-                <button id="showLabels"
-                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    🏷️ Etiket Yazdırma
-                </button>
+            
                 <button id="showGlobalDateUpdate"
                     class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     📅 Ortak Tarih
@@ -741,48 +821,103 @@
         </div>
     </div>
 
-    <div id="labelPrintArea" class="hidden fixed inset-0 flex flex-col h-screen overflow-y-auto bg-gray-200 z-[60]">
-        <div class="p-3 sm:p-4 bg-white border-b border-gray-300 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3 no-print sticky top-0 z-50">
-            <button onclick="closeLabelModule()" class="w-full sm:w-auto bg-gray-200 text-gray-800 hover:bg-gray-300 px-4 py-2.5 rounded-xl font-bold transition text-sm text-center">⬅ İptal Et / Geri Dön</button>
-            <h2 class="text-xl font-black text-gray-800 hidden md:block">🏷️ Dev Etiket Önizlemesi</h2>
-            <button onclick="window.print()" class="w-full sm:w-auto bg-blue-600 text-white font-black px-6 py-2.5 rounded-xl hover:bg-blue-700 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">
-                <span>🖨️</span> Etiketleri Yazdır
-            </button>
-        </div>
-        <div id="labelPagesContainer" class="flex-grow flex flex-col items-center py-8"></div>
-    </div>
 
-   <div id="printModuleArea" class="hidden fixed inset-0 flex flex-col h-screen overflow-y-auto bg-[#1a1a1a] z-50">
-        <div class="p-3 sm:p-4 bg-black border-b border-yellow-600 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3 no-print sticky top-0 z-50">
-            <button onclick="closePrintModule()" class="w-full sm:w-auto bg-gray-800 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl font-bold transition text-sm text-center">⬅ Geri Dön</button>
-            <button onclick="window.print()" class="w-full sm:w-auto bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">
-                <span>🖨️</span> Menüyü Yazdır (A4)
-            </button>
+   <div id="printModuleArea" class="hidden fixed inset-0 flex flex-row h-screen overflow-hidden bg-[#1a1a1a] z-50">
+        
+        <div id="printSidebar" class="print-sidebar bg-black border-r border-yellow-600 flex flex-col relative z-20 flex-shrink-0">
+            <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+                <h3 class="text-white font-black text-sm tracking-wider uppercase">Baskı Türü</h3>
+                <button id="togglePrintSidebarBtn" class="text-gray-400 hover:text-white transition font-black">◀</button>
+            </div>
+            <div class="flex flex-col gap-2 p-3">
+                <button id="btnA4Menu" class="print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95">📄 Fiyat Listesi (A4)</button>
+                <button id="btnDrinkMenu" class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">🥤 İçecek Listesi</button>
+                <button id="btnLabelPrint" class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">🏷️ Dev Etiketler</button>
+                <button id="btnQRPrint" class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">📱 QR Etiketi</button>
+            </div>
         </div>
 
-        <div class="flex-grow flex justify-center py-8">
-            <div class="a4-menu-page">
+        <button id="expandPrintSidebarBtn" class="hidden absolute left-0 top-1/2 transform -translate-y-1/2 bg-yellow-500 text-black p-3 rounded-r-xl font-black z-30 shadow-md hover:bg-yellow-400">▶</button>
 
-                <div class="menu-top-row">
-                    <div class="top-left">Tüm vergiler dahildir.</div>
-                    <div class="top-right">
-                        <span id="printDateEl"></span><br>
-                        <span class="sub-date">Fiyat değişim tarihi</span>
+        <div class="flex-1 flex flex-col h-full overflow-hidden relative">
+            
+            <div class="p-3 sm:p-4 bg-black border-b border-yellow-600 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3 no-print z-10 flex-shrink-0">
+                <button onclick="closePrintModule()" class="w-full sm:w-auto bg-gray-800 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl font-bold transition text-sm text-center">⬅ Panele Dön</button>
+                <button onclick="window.print()" class="w-full sm:w-auto bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">
+                    <span>🖨️</span> Ekrandakini Yazdır
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto flex justify-center py-8">
+                
+                <div id="a4PreviewContainer" class="block">
+                    <div class="a4-menu-page">
+                        <div class="menu-top-row">
+                            <div class="top-left">Tüm vergiler dahildir.</div>
+                            <div class="top-right">
+                                <span id="printDateEl"></span><br>
+                                <span class="sub-date">Fiyat değişim tarihi</span>
+                            </div>
+                        </div>
+                        <div class="logo-placeholder-area">
+                            <div class="my-logo-box">
+                                <img src="file_00000000a4647246a61cf005bd316d6f.png" alt="" width="200" style="margin-top: -54px;">
+                            </div>
+                            <div class="main-title">GÜNCEL FİYAT LİSTESİ</div>
+                        </div>
+                        <div class="menu-table-container">
+                            <div class="menu-column" id="printLeftColumn"></div>
+                            <div class="menu-spacer"></div>
+                            <div class="menu-column" id="printRightColumn"></div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="logo-placeholder-area">
-                    <div class="my-logo-box">
-                        <img src="file_00000000a4647246a61cf005bd316d6f.png" alt="" width="200"
-                            style="margin-top: -54px;">
+                <div id="drinkMenuPreviewContainer" class="hidden">
+                    <div class="drink-menu-page">
+                        <h2 class="drink-menu-title">İçecek Listesi</h2>
+                        <div id="drinkMenuList" class="w-full flex flex-col mt-1"></div>
                     </div>
-                    <div class="main-title">GÜNCEL FİYAT LİSTESİ</div>
                 </div>
 
-                <div class="menu-table-container">
-                    <div class="menu-column" id="printLeftColumn"></div>
-                    <div class="menu-spacer"></div>
-                    <div class="menu-column" id="printRightColumn"></div>
+                <div id="labelPreviewContainer" class="hidden w-full max-w-4xl px-4 flex flex-col items-center">
+                    <div class="w-full bg-gray-900 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl border border-gray-700 no-print flex flex-col gap-4">
+                        <h3 class="text-white font-black text-lg text-center border-b border-gray-700 pb-2">Hangi Etiketler Basılacak?</h3>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <button onclick="startLabelPrint('outside')" class="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🌤️ Sadece Dışarısı</button>
+                            <button onclick="startLabelPrint('inside')" class="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🏠 Sadece İçerisi</button>
+                            <button onclick="startLabelPrint('both')" class="bg-gradient-to-br from-purple-600 to-purple-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🔥 Her İkisi De</button>
+                        </div>
+
+                        <button onclick="toggleManualLabelSelection()" class="w-full bg-gray-700 text-white py-3 rounded-xl font-bold text-xs sm:text-sm hover:bg-gray-600 transition border border-gray-600">✅ Manuel Seçim Yap</button>
+
+                        <div id="manualLabelSelectionArea" class="hidden border border-gray-600 rounded-xl p-3 bg-gray-800 mt-2">
+                            <h4 class="text-white text-xs font-bold mb-2">Ürünleri İşaretleyin:</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-40 overflow-y-auto mb-3" id="manualLabelCheckboxes"></div>
+                            <button onclick="startManualLabelPrint()" class="w-full bg-orange-600 text-white font-black py-2.5 rounded-lg shadow-md hover:bg-orange-700 transition text-sm">Seçilenleri Önizlemeye Aktar</button>
+                        </div>
+                    </div>
+
+                    <div id="labelPagesContainer" class="w-full flex flex-col items-center">
+                        <span class="text-gray-500 text-sm italic mt-10 no-print">Yukarıdan bir etiket türü seçtiğinizde önizlemeler burada belirecektir.</span>
+                    </div>
+                </div>
+
+                <div id="qrPreviewContainer" class="hidden w-full max-w-4xl px-4 flex flex-col items-center">
+                    <div class="w-full bg-gray-900 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl border border-gray-700 no-print flex flex-col gap-4">
+                        <h3 class="text-white font-black text-lg text-center border-b border-gray-700 pb-2">Hangi QR Dispanser Şablonu Gösterilecek?</h3>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <button onclick="loadQRPdf('genis')" class="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🔲 Geniş Dispanser</button>
+                            <button onclick="loadQRPdf('uckenarli')" class="bg-gradient-to-br from-teal-600 to-teal-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">📐 Üç Kenarlı Dispanser</button>
+                            <button onclick="loadQRPdf('dar')" class="bg-gradient-to-br from-cyan-600 to-cyan-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">▯ Dar Dispanser</button>
+                        </div>
+                    </div>
+
+                    <div id="qrPdfViewer" class="w-full flex flex-col items-center justify-center overflow-visible pb-10">
+                        <span class="text-gray-500 text-sm italic mt-10 no-print">Yukarıdan bir dispanser türü seçtiğinizde A4 önizlemesi burada belirecektir.</span>
+                    </div>
                 </div>
 
             </div>
@@ -2596,12 +2731,7 @@
                     container.appendChild(page);
                 }
 
-                // Güvenlik kilidi: Menü modülünü zorla gizle
-                const printArea = document.getElementById('printModuleArea');
-                if (printArea) printArea.classList.add('hidden');
-
-                // Etiket Modülünü Aç
-                document.getElementById('labelPrintArea').classList.remove('hidden');
+                
             }
 
             // Geri kalan tüm ürünler (içerinin kokoreci/döneri dahil) 3'lü eşit parçalara bölünecek
@@ -2630,6 +2760,170 @@
 
         function closeLabelModule() {
             document.getElementById('labelPrintArea').classList.add('hidden');
+        }
+
+       // --- 🖨️ BASKI MODÜLÜ SEKMELER, İÇECEK LİSTESİ VE QR MOTORU ---
+        
+        const btnA4Menu = document.getElementById('btnA4Menu');
+        const btnDrinkMenu = document.getElementById('btnDrinkMenu');
+        const btnLabelPrint = document.getElementById('btnLabelPrint'); 
+        const btnQRPrint = document.getElementById('btnQRPrint'); // YENİ
+        
+        const a4Container = document.getElementById('a4PreviewContainer');
+        const drinkContainer = document.getElementById('drinkMenuPreviewContainer');
+        const labelContainer = document.getElementById('labelPreviewContainer'); 
+        const qrContainer = document.getElementById('qrPreviewContainer'); // YENİ
+        
+        const printSidebar = document.getElementById('printSidebar');
+        const togglePrintSidebarBtn = document.getElementById('togglePrintSidebarBtn');
+        const expandPrintSidebarBtn = document.getElementById('expandPrintSidebarBtn');
+
+        // Sol paneli kapat
+        togglePrintSidebarBtn.addEventListener('click', () => {
+            printSidebar.classList.add('collapsed');
+            expandPrintSidebarBtn.classList.remove('hidden');
+        });
+
+        // Sol paneli geri aç
+        expandPrintSidebarBtn.addEventListener('click', () => {
+            printSidebar.classList.remove('collapsed');
+            expandPrintSidebarBtn.classList.add('hidden');
+        });
+
+        // Tıklanan buton haricindekileri griye (pasife) çeviren temizlik motoru
+        function resetPrintTabButtons() {
+            [btnA4Menu, btnDrinkMenu, btnLabelPrint, btnQRPrint].forEach(btn => {
+                if(btn) btn.className = "print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95";
+            });
+            if(a4Container) a4Container.classList.add('hidden');
+            if(drinkContainer) drinkContainer.classList.add('hidden');
+            if(labelContainer) labelContainer.classList.add('hidden');
+            if(qrContainer) qrContainer.classList.add('hidden');
+        }
+
+        // A4 Fiyat Listesine Geç
+        btnA4Menu.addEventListener('click', () => {
+            resetPrintTabButtons();
+            btnA4Menu.className = "print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95";
+            a4Container.classList.remove('hidden');
+        });
+
+        // Mini İçecek Listesine Geç
+        btnDrinkMenu.addEventListener('click', () => {
+            resetPrintTabButtons();
+            btnDrinkMenu.className = "print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95";
+            drinkContainer.classList.remove('hidden');
+            renderDrinkMenuPreview();
+        });
+
+        // Dev Etiketlere Geç
+        if(btnLabelPrint) {
+            btnLabelPrint.addEventListener('click', () => {
+                resetPrintTabButtons();
+                btnLabelPrint.className = "print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95";
+                labelContainer.classList.remove('hidden');
+                document.getElementById('labelPagesContainer').innerHTML = '<span class="text-gray-500 text-sm italic mt-10 no-print">Yukarıdan bir etiket türü seçtiğinizde önizlemeler burada belirecektir.</span>';
+            });
+        }
+
+        // YENİ: QR Etiketi Ekranına Geç
+        if(btnQRPrint) {
+            btnQRPrint.addEventListener('click', () => {
+                resetPrintTabButtons();
+                btnQRPrint.className = "print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95";
+                qrContainer.classList.remove('hidden');
+                
+                // Ekrana girildiğinde PDF alanını sıfırla
+                document.getElementById('qrPdfViewer').innerHTML = '<span class="text-gray-400 font-bold">Yukarıdan bir dispanser türü seçin.</span>';
+            });
+        }
+       // YENİ: Tıklanan Butona Göre İlgili PDF Dosyanı Tam Ekran Basan Fonksiyon
+        let currentPdfUrl = ""; // Hangi PDF'in açık olduğunu aklında tutar
+
+        function loadQRPdf(type) {
+            const viewer = document.getElementById('qrPdfViewer');
+            
+            // DİKKAT USTAM: BURAYA KENDİ PDF DOSYALARININ LİNKLERİNİ VEYA İSİMLERİNİ YAZ!
+            if(type === 'genis') {
+                currentPdfUrl = "genis_dispanser.pdf"; 
+            } else if (type === 'uckenarli') {
+                currentPdfUrl = "uc_kenarli_dispanser.pdf"; 
+            } else if (type === 'dar') {
+                currentPdfUrl = "dar_dispanser.pdf"; 
+            }
+            
+            // ÇÖZÜM 1: A4 kağıdı sınıfını çöpe attık! Direkt ekranı kaplayan, şık ve büyük PDF okuyucu:
+            // toolbar=1 yaptık ki, farenizi üstüne götürünce PDF'in kendi indirme/yazdırma ikonları da görünsün.
+            viewer.innerHTML = `
+                <embed src="${currentPdfUrl}#view=FitH&scrollbar=0&toolbar=1&navpanes=0" type="application/pdf" class="w-full h-[75vh] rounded-2xl shadow-2xl border-4 border-gray-800" />
+            `;
+        }
+
+        // ÇÖZÜM 2: AKILLI YAZDIRMA MOTORU (PDF ve HTML İçin Ayrı Çalışır)
+        // Ekrandaki 'window.print()' komutunu ezip kendi zeki motorumuzu bağlıyoruz:
+        setTimeout(() => {
+            const printBtns = document.querySelectorAll('button[onclick="window.print()"]');
+            printBtns.forEach(btn => {
+                btn.removeAttribute('onclick'); // Eski aptal yazdırmayı sil
+                
+                btn.addEventListener('click', () => {
+                    const qrContainer = document.getElementById('qrPreviewContainer');
+                    
+                    // Eğer QR PDF ekranındaysak, web sayfasını değil SADECE PDF'İ yazıcıya yolla!
+                    if (qrContainer && !qrContainer.classList.contains('hidden') && currentPdfUrl !== "") {
+                        
+                        // Gizli bir çerçeve oluşturup PDF'i içine atıyoruz ve sadece onu yazdırıyoruz
+                        const hideFrame = document.createElement('iframe');
+                        hideFrame.style.display = 'none';
+                        hideFrame.src = currentPdfUrl;
+                        document.body.appendChild(hideFrame);
+                        
+                        hideFrame.onload = function() {
+                            setTimeout(() => {
+                                hideFrame.contentWindow.focus();
+                                hideFrame.contentWindow.print();
+                            }, 500); // PDF'in tam yüklenmesi için yarım saniye bekle ve yazıcıyı ateşle
+                        };
+                        
+                    } else {
+                        // QR ekranında değilsek (A4 Fiyat veya İçecek listesindeysek) normal ekranı yazdır
+                        window.print();
+                    }
+                });
+            });
+        }, 1000);
+
+        // İçecekleri Veritabanından Çekip Kartın İçine Basar
+        function renderDrinkMenuPreview() {
+            const listEl = document.getElementById('drinkMenuList');
+            listEl.innerHTML = '';
+            
+            // Sadece "İçecekler" kategorisini filtrele (Arşivdekileri ve "Çay"ı hariç tut)
+            const drinks = products.filter(p => {
+                const isDrink = p.category === 'İçecekler';
+                const isNotArchived = p.isArchived !== true;
+                const isNotTea = p.name.toLocaleLowerCase('tr-TR').trim() !== 'çay';
+                
+                return isDrink && isNotArchived && isNotTea;
+            });
+            
+            drinks.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
+            
+            if(drinks.length === 0){
+                listEl.innerHTML = '<span class="text-[9px] text-white/70 text-center mt-4 italic block w-full">İçecek bulunamadı.</span>';
+                return;
+            }
+            
+            drinks.forEach(d => {
+                const name = d.name;
+                const price = d.discountPrice || d.price;
+                listEl.innerHTML += `
+                    <div class="drink-item">
+                        <span class="truncate pr-1">${name}</span>
+                        <span class="drink-price">${price}₺</span>
+                    </div>
+                `;
+            });
         }
     </script>
 </body>
