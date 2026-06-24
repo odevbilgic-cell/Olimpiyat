@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yönetici Paneli | Olimpiyat Kokoreç</title>
 
-    <link rel="icon" type="image/png" href="/logom.png">
-    <link rel="shortcut icon" href="/logom.png">
+    <link rel="icon" type="image/jpeg" href="/logo.jpg">
+    <link rel="shortcut icon" href="/logo.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 
 
@@ -520,11 +520,11 @@
         .drink-menu-page {
             width: 58mm;
             height: 88mm;
-            background: black !important; /* Kırmızı ton zorunlu */
+            background: rgb(255, 255, 255) !important; /* Kırmızı ton zorunlu */
             -webkit-print-color-adjust: exact !important; /* Yazıcıya renkleri zorla basma emri */
             print-color-adjust: exact !important;
             color-adjust: exact !important;
-            border: 2mm solid #d4af37 !important; /* Altın sarısı çerçeve */
+            border: 2mm solid #ff0000 !important; /* Altın sarısı çerçeve */
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -532,17 +532,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: white !important;
+            color: rgb(0, 0, 0) !important;
             font-family: 'Montserrat', sans-serif;
             overflow: hidden;
         }
         .drink-menu-title {
-            color: #d4af37;
+            color: #ff0000;
             font-weight: 900;
             font-size: 13px;
             text-transform: uppercase;
             text-align: center;
-            border-bottom: 2px solid #d4af37;
+            border-bottom: 2px solid #ff0000;
             padding-bottom: 3px;
             margin-bottom: 6px;
             width: 100%;
@@ -558,7 +558,7 @@
             padding-bottom: 2px;
         }
         .drink-price {
-            color: #d4af37;
+            color: #ff0000;
             font-weight: 900;
         }
         
@@ -709,6 +709,9 @@
                 <button id="showStats"
                     class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     📊 İstatistik
+                </button>
+                <button id="showDebtCalculator" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                    💳 Borç Hesapla
                 </button>
                 <button onclick="openPrintModule()"
                     class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
@@ -947,6 +950,10 @@
         const deliveryCampaignsPath = 'delivery_campaigns';
         const deliveryCampaignInfoPath = 'delivery_campaign_info';
         const visitorsPath = 'visitors';
+
+        const ekstrelerPath = 'ekstreler'; // YENİ: Ekstrelerin tutulacağı yer
+        let ekstrelerRef = database.ref(ekstrelerPath); // YENİ: Ekstre referansı
+        let allEkstreData = {}; // Gelen ekstreleri hafızada tutacağımız obje
 
         let currentMenuType = 'in_place';
         let productsRef;
@@ -2227,6 +2234,374 @@
             });
         }
 
+       // --- 💳 AKILLI BORÇ & EKSTRE YÖNETİM MODÜLÜ (GÜNCELLENMİŞ) ---
+        let selectedEkstreKey = null; 
+
+        function renderDebtCalculatorModule() {
+            setActiveTab('showDebtCalculator');
+            
+            const ekstreKeys = Object.keys(allEkstreData).sort((a, b) => b.localeCompare(a));
+            
+            if (!selectedEkstreKey && ekstreKeys.length > 0) {
+                selectedEkstreKey = ekstreKeys[0];
+            }
+
+            let buttonsHtml = '';
+            if (ekstreKeys.length > 0) {
+                ekstreKeys.slice(0, 3).forEach(key => {
+                    const isActive = key === selectedEkstreKey;
+                    buttonsHtml += `
+                        <button onclick="changeActiveEkstre('${key}')" class="flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm transition shadow-sm border ${isActive ? 'bg-orange-500 text-white border-orange-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-orange-50'}">
+                            📅 ${allEkstreData[key].title || key}
+                        </button>
+                    `;
+                });
+            } else {
+                buttonsHtml = `<div class="w-full text-center text-xs font-bold text-gray-400 p-2 border border-dashed rounded-xl">Henüz çekilmiş ekstre yok. Node.js servisiyle çekim yapın.</div>`;
+            }
+
+            let dukkanItemsHtml = ''; let evItemsHtml = '';
+            let dukkanTotal = 0; let evTotal = 0;
+
+            if (selectedEkstreKey && allEkstreData[selectedEkstreKey] && allEkstreData[selectedEkstreKey].items) {
+                const items = allEkstreData[selectedEkstreKey].items;
+                
+                Object.keys(items).forEach(itemKey => {
+                    const item = items[itemKey];
+                    const amountStr = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    
+                    if (item.category === 'dukkan') {
+                        dukkanTotal += parseFloat(item.amount);
+                        dukkanItemsHtml += `
+                            <div class="flex items-center justify-between p-2.5 bg-orange-50 border border-orange-100 rounded-lg shadow-sm hover:shadow transition group animate-pop-in">
+                                <div class="flex flex-col w-3/4 pr-2">
+                                    <span class="text-[11px] font-black text-gray-800 truncate" title="${item.desc}">${item.desc}</span>
+                                    <span class="text-[9px] font-bold text-gray-400">${item.date} ${item.time !== '--:--' ? item.time : ''}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-black text-orange-600 whitespace-nowrap">${amountStr} ₺</span>
+                                    <button onclick="moveEkstreItem('${selectedEkstreKey}', '${itemKey}', 'ev')" class="w-7 h-7 bg-white border border-gray-200 rounded-md text-gray-500 hover:bg-blue-50 hover:text-blue-600 font-bold shadow-sm transition flex items-center justify-center flex-shrink-0" title="Eve Taşı">▶</button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        evTotal += parseFloat(item.amount);
+                        evItemsHtml += `
+                            <div class="flex items-center justify-between p-2.5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm hover:shadow transition group animate-pop-in">
+                                <div class="flex items-center gap-2">
+                                    <button onclick="moveEkstreItem('${selectedEkstreKey}', '${itemKey}', 'dukkan')" class="w-7 h-7 bg-white border border-gray-200 rounded-md text-gray-500 hover:bg-orange-50 hover:text-orange-600 font-bold shadow-sm transition flex items-center justify-center flex-shrink-0" title="Dükkana Taşı">◀</button>
+                                    <span class="text-xs font-black text-blue-600 whitespace-nowrap">${amountStr} ₺</span>
+                                </div>
+                                <div class="flex flex-col w-3/4 items-end pl-2">
+                                    <span class="text-[11px] font-black text-gray-800 truncate text-right w-full" title="${item.desc}">${item.desc}</span>
+                                    <span class="text-[9px] font-bold text-gray-400 text-right">${item.date}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            }
+
+            const genelToplam = dukkanTotal + evTotal;
+
+            loadModule(`
+                <div id="ekstreDashboardArea" class="bg-white rounded-2xl shadow-sm p-3 sm:p-5 border border-orange-100 animate-pop-in h-auto min-h-[88vh] flex flex-col">
+                    
+                    <div class="flex flex-col mb-4 gap-3 flex-shrink-0 border-b border-gray-100 pb-4">
+                        <div class="flex justify-between items-center flex-wrap gap-2">
+                            <h2 class="text-lg sm:text-xl font-black text-gray-800 flex items-center gap-2">💳 Akıllı Borç Yönetimi</h2>
+                            <div class="flex gap-2">
+                                <button onclick="printDebtReceipt()" class="bg-[#ffcc00] text-black px-4 py-2 rounded-xl text-xs font-black shadow-md hover:bg-yellow-500 transition flex items-center gap-1 active:scale-95">
+                                    🖨️ Fişi Yazdır
+                                </button>
+                                <button id="triggerNodeJsFetchBtn" class="bg-gray-900 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-black transition flex items-center gap-1">
+                                    ⚙️ Node.js Çek
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 w-full">
+                            ${buttonsHtml}
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-100 p-3 rounded-xl mb-4 flex flex-col sm:flex-row gap-2 items-center flex-shrink-0 border border-gray-200">
+                        <span class="font-bold text-xs text-gray-600 w-full sm:w-auto">✍️ Manuel Ekle:</span>
+                        <input type="text" id="manualDebtDesc" placeholder="Harcama Açıklaması (Örn: Çaycı)" class="p-2 text-xs rounded-lg border w-full sm:flex-1 outline-none focus:border-orange-500 font-semibold">
+                        <input type="number" id="manualDebtAmount" placeholder="Tutar (₺)" class="p-2 text-xs rounded-lg border w-full sm:w-28 outline-none focus:border-orange-500 font-bold text-right">
+                        <select id="manualDebtCategory" class="p-2 text-xs rounded-lg border w-full sm:w-28 outline-none focus:border-orange-500 font-bold bg-white">
+                            <option value="dukkan">Dükkan</option>
+                            <option value="ev">Ev</option>
+                        </select>
+                        <button onclick="addManualDebt()" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-5 py-2 rounded-lg font-black text-xs shadow-md hover:opacity-90 transition w-full sm:w-auto">Ekle</button>
+                    </div>
+
+                    <div class="flex-1 flex flex-col md:flex-row gap-4 mb-4">
+                        <div class="flex-1 flex flex-col bg-gray-50 rounded-2xl border border-gray-200 h-fit">
+                            <div class="bg-orange-100/50 p-3 border-b border-orange-200 flex justify-between items-center rounded-t-2xl">
+                                <h3 class="font-black text-sm text-orange-700 flex items-center gap-1">🏪 Dükkan Giderleri</h3>
+                            </div>
+                            <div class="p-3 flex flex-col gap-2">
+                                ${dukkanItemsHtml || '<div class="text-center text-xs text-gray-400 my-4 font-bold">Dükkan harcaması bulunmuyor.</div>'}
+                            </div>
+                            <div class="bg-orange-500 p-3 text-white flex justify-between items-center rounded-b-2xl">
+                                <span class="text-xs font-bold uppercase">Dükkan Yekün</span>
+                                <span class="text-lg font-black">${dukkanTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 flex flex-col bg-gray-50 rounded-2xl border border-gray-200 h-fit">
+                            <div class="bg-blue-100/50 p-3 border-b border-blue-200 flex justify-between items-center rounded-t-2xl">
+                                <h3 class="font-black text-sm text-blue-700 flex items-center gap-1">🏠 Ev Giderleri</h3>
+                            </div>
+                            <div class="p-3 flex flex-col gap-2">
+                                ${evItemsHtml || '<div class="text-center text-xs text-gray-400 my-4 font-bold">Ev harcaması bulunmuyor.</div>'}
+                            </div>
+                            <div class="bg-blue-600 p-3 text-white flex justify-between items-center rounded-b-2xl">
+                                <span class="text-lg font-black">${evTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                                <span class="text-xs font-bold uppercase">Ev Yekün</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900 rounded-xl p-4 flex justify-between items-center shadow-lg sticky bottom-4 z-20">
+                        <span class="text-gray-400 font-bold text-xs uppercase tracking-widest">Aylık Kredi Kartı Toplamı</span>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-3xl font-black text-yellow-400">${genelToplam.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                            <span class="text-xl font-bold text-yellow-400">₺</span>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            document.getElementById('triggerNodeJsFetchBtn').addEventListener('click', triggerNodeBackend);
+        }
+
+        window.changeActiveEkstre = function(ekstreKey) {
+            selectedEkstreKey = ekstreKey;
+            renderDebtCalculatorModule();
+        };
+
+        window.moveEkstreItem = async function(ekstreKey, itemKey, newCategory) {
+            try {
+                await ekstrelerRef.child(ekstreKey).child('items').child(itemKey).update({ category: newCategory });
+            } catch (err) { alert("Taşıma hatası: " + err.message); }
+        };
+
+        // YENİ: Manuel Harcama Ekleme Fonksiyonu
+        window.addManualDebt = async function() {
+            if(!selectedEkstreKey) return alert("Önce işlem yapılacak bir ekstre seçin!");
+            const desc = document.getElementById('manualDebtDesc').value.trim();
+            const amount = parseFloat(document.getElementById('manualDebtAmount').value);
+            const cat = document.getElementById('manualDebtCategory').value;
+
+            if(!desc || isNaN(amount) || amount <= 0) return alert("Lütfen geçerli bir açıklama ve tutar girin.");
+
+            // Bugünün tarihini formatla
+            const now = new Date();
+            const dateStr = ("0" + now.getDate()).slice(-2) + "/" + ("0" + (now.getMonth() + 1)).slice(-2) + "/" + now.getFullYear();
+
+            try {
+                // Firebase'e "Manuel Ekleme" olarak direkt pushla
+                await ekstrelerRef.child(selectedEkstreKey).child('items').push({
+                    date: dateStr,
+                    time: 'Manuel',
+                    desc: desc,
+                    amount: amount,
+                    category: cat
+                });
+            } catch (err) { alert("Hata: " + err.message); }
+        };
+
+        // YENİ: 58x88mm Termal Fiş Yazdırma Fonksiyonu
+       // YENİ: Seçenekli 58mm Termal Fiş Yazdırma Fonksiyonu
+        window.printDebtReceipt = function() {
+            if (!selectedEkstreKey || !allEkstreData[selectedEkstreKey]) return alert("Yazdırılacak ekstre yok!");
+            
+            // Fiş basım seçenekleri
+            const secim = prompt("Ne yazdırmak istersin?\n\n1: Sadece Dükkan\n2: Sadece Ev\n3: Her İkisini Birden", "3");
+            if (!secim) return;
+
+            const data = allEkstreData[selectedEkstreKey];
+            let dukkanItems = ''; let evItems = '';
+            let dukkanTotal = 0; let evTotal = 0;
+
+            Object.values(data.items || {}).forEach(item => {
+                const price = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
+                let cleanName = item.desc.replace(/^\d+[-]/, '').trim();
+                
+                const rowHtml = `
+                    <div style="margin-bottom:6px; border-bottom:1px solid #eee; padding-bottom:2px;">
+                        <div style="display:flex; justify-content:space-between; font-size:9px;">
+                            <span style="font-weight:bold;">${item.date}</span>
+                            <span style="font-weight:900;">${price} ₺</span>
+                        </div>
+                        <div style="font-size:10px; font-weight:700; word-wrap:break-word; margin-top:1px;">
+                            ${cleanName}
+                        </div>
+                    </div>`;
+                
+                if (item.category === 'dukkan') { dukkanTotal += item.amount; dukkanItems += rowHtml; } 
+                else { evTotal += item.amount; evItems += rowHtml; }
+            });
+
+            // Seçime göre HTML oluştur
+            let printHTML = `<div style="width: 54mm; background: white; color: black; font-family: sans-serif; padding: 2mm; margin:0 auto;">
+                <div style="text-align: center; font-weight: 900; font-size: 14px; border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 8px;">
+                    ${data.title.toUpperCase()}
+                </div>`;
+
+            if (secim === "1" || secim === "3") {
+                printHTML += `<div style="font-weight: 900; font-size: 11px; margin-bottom: 5px; border-bottom: 2px solid black;">🏪 DÜKKAN GİDERLERİ</div>
+                              ${dukkanItems || '<div style="font-size:9px; margin-bottom:10px;">Yok</div>'}
+                              <div style="text-align: right; font-weight: 900; font-size: 12px; margin-bottom: 12px;">TOPLAM: ${dukkanTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>`;
+            }
+
+            if (secim === "2" || secim === "3") {
+                printHTML += `<div style="font-weight: 900; font-size: 11px; margin-bottom: 5px; border-bottom: 2px solid black;">🏠 EV GİDERLERİ</div>
+                              ${evItems || '<div style="font-size:9px; margin-bottom:10px;">Yok</div>'}
+                              <div style="text-align: right; font-weight: 900; font-size: 12px; margin-bottom: 12px;">TOPLAM: ${evTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>`;
+            }
+
+            // Eğer 3 seçildiyse Genel Toplamı bas
+            if (secim === "3") {
+                printHTML += `<div style="border-top: 3px solid black; padding-top: 8px; text-align: right;">
+                                <span style="font-size: 12px; font-weight: bold;">GENEL TOPLAM</span>
+                                <div style="font-size: 24px; font-weight: 900; margin-top:2px;">${(dukkanTotal + evTotal).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>
+                              </div>`;
+            }
+
+            printHTML += `</div>`;
+
+            // Yazdırma işlemi
+            let printArea = document.getElementById('debtPrintArea');
+            if (!printArea) {
+                printArea = document.createElement('div');
+                printArea.id = 'debtPrintArea';
+                document.body.appendChild(printArea);
+            }
+            printArea.innerHTML = printHTML;
+            document.body.classList.add('print-debt-mode');
+            window.print();
+            document.body.classList.remove('print-debt-mode');
+        };
+
+        // (Eski triggerNodeBackend fonksiyonu olduğu gibi kalıyor)
+        async function triggerNodeBackend() {
+            const btn = document.getElementById('triggerNodeJsFetchBtn');
+            btn.innerHTML = "⏳ Çekiliyor...";
+            btn.disabled = true;
+            try {
+                const backendUrl = 'https://olimpiyat-api.onrender.com/api/fetch-latest-ekstreler';
+                const response = await fetch(backendUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+                const data = await response.json();
+                if(data.success) alert(data.message); 
+                else alert("Node.js Hatası: " + data.error);
+            } catch (error) {
+                alert("Sunucuya bağlanılamadı. Gizli API servisinizin Render.com'da açık olduğundan emin olun.");
+            } finally {
+                btn.innerHTML = "⚙️ Node.js Çekim Tetikle";
+                btn.disabled = false;
+            }
+        }
+
+        function simulateGmailFetch() {
+            const btn = document.getElementById('fetchGmailPdfBtn');
+            const listArea = document.getElementById('ekstreListArea');
+            const warning = document.getElementById('gmailWarning');
+            
+            btn.innerHTML = '<span>⏳</span> Çekiliyor...';
+            btn.classList.add('animate-pulse');
+            
+            // Gmail/Backend entegrasyonu kurulana kadar uyarıyı gizleyelim ki arayüz temiz olsun
+            if(warning) warning.classList.add('hidden');
+
+            // USTAMIN GERÇEK ENPARA KREDİ KARTI EKSTRESİ (Haziran 2026)
+            const extractedData = [
+                { date: '03/05/2026', time: '--:--', desc: 'MOKA U IS NET ELEKTRON', amount: 3900.00 },
+                { date: '04/05/2026', time: '--:--', desc: 'TIKLA GELSİN', amount: 263.00 },
+                { date: '04/05/2026', time: '--:--', desc: 'IYZICO/istanbulkart.ist', amount: 601.00 },
+                { date: '06/05/2026', time: '--:--', desc: 'TIKLA GELSİN', amount: 163.00 },
+                { date: '08/05/2026', time: '--:--', desc: 'TIKLA GELSİN', amount: 188.00 },
+                { date: '11/05/2026', time: '--:--', desc: 'Trendyol - Yemek', amount: 234.99 },
+                { date: '15/05/2026', time: '--:--', desc: 'TIKLA GELSİN', amount: 138.00 },
+                { date: '15/05/2026', time: '--:--', desc: 'PIDEM SPINE TOWER', amount: 395.00 },
+                { date: '16/05/2026', time: '--:--', desc: 'GETIR PERAKENDE LOJISTIK', amount: 206.99 },
+                { date: '18/05/2026', time: '--:--', desc: 'TURK TELEKOM (TELEFON)', amount: 379.00 },
+                { date: '18/05/2026', time: '--:--', desc: 'TURK TELEKOM INTERNET/TV', amount: 909.00 },
+                { date: '18/05/2026', time: '--:--', desc: 'TURK TELEKOM INTERNET/TV', amount: 735.50 },
+                { date: '19/03/2026', time: '--:--', desc: 'RICCON (Taksit 3/3)', amount: 182.65 },
+                { date: '20/05/2026', time: '--:--', desc: 'TIKLA GELSİN', amount: 395.00 },
+                { date: '22/05/2026', time: '--:--', desc: 'ENERJISA AYESAS - ODEME', amount: 675.00 },
+                { date: '22/05/2026', time: '--:--', desc: 'TIKLA GELSİN', amount: 263.00 },
+                { date: '26/05/2026', time: '--:--', desc: 'ISKI-ODEME', amount: 583.00 },
+                { date: '26/05/2026', time: '--:--', desc: 'UMRANIYE V.D.', amount: 8439.70 },
+                { date: '26/05/2026', time: '--:--', desc: 'UMRANIYE V.D.', amount: 35053.11 },
+                { date: '26/05/2026', time: '--:--', desc: 'OZ BEREKET GIDA', amount: 3207.35 },
+                { date: '29/05/2026', time: '--:--', desc: 'TADEK GIDA', amount: 790.00 },
+                { date: '29/05/2026', time: '--:--', desc: 'LEFTIES MEYDAN ISTAN', amount: 2480.00 },
+                { date: '29/05/2026', time: '--:--', desc: 'FLO-M1 MEYDAN UMRAN', amount: 3079.98 },
+                { date: '29/05/2026', time: '--:--', desc: 'LEFTIES MEYDAN ISTAN', amount: 2980.00 },
+                { date: '29/05/2026', time: '--:--', desc: 'LEFTIES MEYDAN ISTAN', amount: 1240.00 },
+                { date: '30/05/2026', time: '--:--', desc: 'Trendyol - Yemek', amount: 285.99 },
+                { date: '30/05/2026', time: '--:--', desc: 'HEPSIPAY/HEPSIBURADA', amount: 949.00 },
+                { date: '31/05/2026', time: '--:--', desc: 'HEPSIPAY/HEPSIBURADA (Taksit 1/3)', amount: 413.34 }
+            ];
+
+            // Sahte bekleme süresi (PDF ayıklama gecikmesi simülasyonu)
+            setTimeout(() => {
+                btn.innerHTML = '<span>✅</span> Ekstre Yüklendi';
+                btn.classList.remove('animate-pulse', 'from-purple-600', 'to-blue-600');
+                btn.classList.add('bg-emerald-600');
+                
+                listArea.innerHTML = ''; 
+                
+                extractedData.forEach((item, index) => {
+                    listArea.innerHTML += `
+                        <label class="flex items-center justify-between p-2.5 sm:p-3 bg-gray-50 border border-gray-100 rounded-xl hover:bg-orange-50 transition cursor-pointer group animate-pop-in select-none" style="animation-delay: ${index * 0.03}s">
+                            <div class="flex items-center gap-2 sm:gap-6 w-full">
+                                <div class="flex flex-col w-1/3 sm:w-1/4 flex-shrink-0">
+                                    <span class="text-[11px] sm:text-xs font-bold text-gray-500">${item.date}</span>
+                                    <span class="text-[9px] sm:text-[10px] font-bold text-gray-400">${item.time}</span>
+                                </div>
+                                <div class="flex flex-col w-1/3 sm:w-2/4">
+                                    <span class="text-xs sm:text-sm font-black text-gray-800 group-hover:text-orange-700 transition truncate" title="${item.desc}">${item.desc}</span>
+                                </div>
+                                <div class="flex items-center justify-end gap-2 sm:gap-4 w-1/3 sm:w-1/4 flex-shrink-0">
+                                    <span class="text-sm sm:text-base font-black text-red-600 whitespace-nowrap">${item.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺</span>
+                                    <input type="checkbox" class="ekstre-cb w-5 h-5 accent-orange-500 cursor-pointer shadow-sm" value="${item.amount}">
+                                </div>
+                            </div>
+                        </label>
+                    `;
+                });
+
+                // Ekrana basıldıktan sonra checkbox'lara hesaplama dinleyicisi ekle
+                const checkboxes = document.querySelectorAll('.ekstre-cb');
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', calculateSelectedDebt);
+                });
+
+                // Başlangıçta toplamı sıfırla
+                calculateSelectedDebt();
+
+            }, 800);
+        }
+
+        // Tiklenen kutucukları anlık hesaplayan Dinamik Matematik Motoru
+        function calculateSelectedDebt() {
+            const checkboxes = document.querySelectorAll('.ekstre-cb:checked');
+            let total = 0;
+            
+            checkboxes.forEach(cb => {
+                total += parseFloat(cb.value);
+            });
+
+            document.getElementById('selectedCount').textContent = `${checkboxes.length} adet harcama`;
+            
+            // Sonucu gerçek para birimi formatına (Örn: 1.250,50 ₺) çevirir
+            document.getElementById('selectedTotalAmount').textContent = total.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+        }
+
            
         function renderGlobalDateModule() {
             setActiveTab('showGlobalDateUpdate');
@@ -2333,6 +2708,35 @@
             activeListeners.campaignPriceText = campaignInfoRef.child('price_text').on('value', (s) => {
                 campaignPriceText = s.val() || "";
             });
+
+            // Ekstre verilerini canlı dinle ve Eski Verileri Otomatik Sil
+            activeListeners.ekstreler = ekstrelerRef.on('value', (s) => {
+                allEkstreData = s.val() || {};
+                
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth() + 1; // 1 ile 12 arası
+
+                // 1 Yılı (12 Ayı) Geçen Ekstreleri Otomatik Silme Algoritması
+                Object.keys(allEkstreData).forEach(key => {
+                    const [yearStr, monthStr] = key.split('-');
+                    const year = parseInt(yearStr);
+                    const month = parseInt(monthStr);
+                    
+                    const monthDiff = (currentYear - year) * 12 + (currentMonth - month);
+                    
+                    // Eğer ekstre 12 aydan daha eskiyse veritabanından tamamen uçur
+                    if (monthDiff > 12) {
+                        ekstrelerRef.child(key).remove();
+                        delete allEkstreData[key]; // Ekranda da gösterme
+                    }
+                });
+
+                // Eğer ekstre modülü açıksa ekranı yenile
+                if(document.getElementById('ekstreDashboardArea')) {
+                    renderDebtCalculatorModule(); 
+                }
+            });
         }
 
         // --- DOM HAZIR OLDUĞUNDA TETİKLE ---
@@ -2380,6 +2784,8 @@
             showAddProductBtn.addEventListener('click', renderAddProductModule);
             showBulkUpdateBtn.addEventListener('click', renderBulkUpdateModule);
             showStatsBtn.addEventListener('click', renderStatsModule);
+            // YENİ EKLENEN
+            document.getElementById('showDebtCalculator').addEventListener('click', renderDebtCalculatorModule);
             document.getElementById('showGlobalDateUpdate').addEventListener('click', renderGlobalDateModule);
 
             
