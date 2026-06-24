@@ -104,19 +104,22 @@
 
 
         /* --- OLİMPİYAT A4 BASKI TASARIMI (KOMPAKT VERSİYON - TAŞMAYI ÖNLER) --- */
-       /* --- YAZDIRMA ÇAKIŞMALARINI ÖNLEYEN KESİN ÇÖZÜM --- */
-       /* --- YAZDIRMA ÇAKIŞMALARINI VE SAYFA KESİLMESİNİ ÖNLEYEN KESİN ÇÖZÜM --- */
+        /* --- YAZDIRMA ÇAKIŞMALARINI ÖNLEYEN KESİN ÇÖZÜM --- */
+        /* --- YAZDIRMA ÇAKIŞMALARINI VE SAYFA KESİLMESİNİ ÖNLEYEN KESİN ÇÖZÜM --- */
         @media print {
+
             /* 1. Tüm sayfa elemanlarını yazıcıda varsayılan olarak gizle */
-            body > * {
+            body>* {
                 display: none !important;
             }
 
             /* 2. EĞER MENÜ YA DA ETİKET AÇIKSA, ONLARI YAZDIR (FLEX İPTAL, BLOCK KULLAN) */
-            body > #printModuleArea:not(.hidden),
-            body > #labelPrintArea:not(.hidden) {
-                display: block !important;  /* Flex iptal edildi, block yapıldı ki sayfalar bölünebilsin */
-                position: static !important; /* Absolute iptal edildi, kağıt akışına bırakıldı */
+            body>#printModuleArea:not(.hidden),
+            body>#labelPrintArea:not(.hidden) {
+                display: block !important;
+                /* Flex iptal edildi, block yapıldı ki sayfalar bölünebilsin */
+                position: static !important;
+                /* Absolute iptal edildi, kağıt akışına bırakıldı */
                 width: 100% !important;
                 height: auto !important;
                 overflow: visible !important;
@@ -142,7 +145,8 @@
             body {
                 padding: 0;
                 margin: 0;
-                background-color: #ffffff; /* Kağıt arkaplanı varsayılan beyaz */
+                background-color: #ffffff;
+                /* Kağıt arkaplanı varsayılan beyaz */
             }
 
             /* Menü A4 sayfası ayarı (Siyah) */
@@ -161,13 +165,14 @@
                 margin: 0 auto !important;
                 box-shadow: none !important;
                 background-color: #ffffff !important;
-                page-break-after: always !important; /* Tarayıcıya zorla YENİ SAYFAYA GEÇ komutu */
+                page-break-after: always !important;
+                /* Tarayıcıya zorla YENİ SAYFAYA GEÇ komutu */
                 break-after: page !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
         }
-            
+
 
         #printModuleArea {
             font-family: 'Montserrat', Arial, sans-serif;
@@ -403,7 +408,7 @@
             margin-left: 5px;
         }
 
-        #logoAna{
+        #logoAna {
             justify-content: center;
             align-items: center;
             vertical-align: middle;
@@ -413,52 +418,59 @@
 
         /* --- MOBİL EKRANLAR İÇİN A4 ÖNİZLEME UYUMU (Baskıyı Etkilemez) --- */
         @media screen and (max-width: 768px) {
-            .a4-menu-page, .a4-label-page {
+
+            .a4-menu-page,
+            .a4-label-page {
                 margin: 0px;
-                zoom: 60%; /* Telefon ekranında A4'ü %45 oranında küçültür */
+                zoom: 60%;
+                /* Telefon ekranında A4'ü %45 oranında küçültür */
                 transform-origin: top center;
-                margin-bottom: -180mm !important; /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
+                margin-bottom: -180mm !important;
+                /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
             }
 
-            #logoAna{
-            justify-content: center;
-            align-items: center;
-            vertical-align: middle;
-            margin: auto;
-            width: 150px;
+            #logoAna {
+                justify-content: center;
+                align-items: center;
+                vertical-align: middle;
+                margin: auto;
+                width: 150px;
+            }
+
         }
-             
-        } 
-        
+
 
 
         @media screen and (max-width: 480px) {
-             .a4-label-page {
-                transform: scale(0.45); /* Daha küçük telefonlar için %40 */
+            .a4-label-page {
+                transform: scale(0.45);
+                /* Daha küçük telefonlar için %40 */
                 margin-bottom: -160mm !important;
-               
+
             }
 
-            .a4-menu-page{
-                zoom: 50%; /* Daha küçük telefonlar için %40 */
+            .a4-menu-page {
+                zoom: 50%;
+                /* Daha küçük telefonlar için %40 */
                 margin-bottom: -160mm !important;
             }
         }
 
 
         /* --- MOBİL & IPHONE 13 ÖZEL OPTİMİZASYONLARI (Kusursuz WebKit/Safari Görünümü) --- */
-        
+
         /* 1. iPhone Çentik (Notch) ve Alt Kaydırma Çizgisi (Home Indicator) Uyumu */
         .sticky.top-0 {
             padding-top: max(0.75rem, env(safe-area-inset-top)) !important;
         }
-        
+
         /* 2. Tüm Modaller İçin İyileştirmeler - iOS klavye açılınca taşmayı önleme */
         .animate-pop-in {
             /* Ekranın altı ve üstündeki ölü alanları hesaba katarak boyutu sınırlandırır */
             max-height: calc(100vh - env(safe-area-inset-bottom) - env(safe-area-inset-top) - 2rem) !important;
             overflow-y: auto !important;
-            overscroll-behavior: contain; /* İçe doğru kaydırmada arkaplanın kaymasını engeller */
+            overscroll-behavior: contain;
+            /* İçe doğru kaydırmada arkaplanın kaymasını engeller */
         }
 
         /* 3. Genel Tablet ve Geniş Telefonlar (Max 768px) */
@@ -467,18 +479,20 @@
                 width: 140px;
                 margin: auto;
             }
-            .a4-menu-page, .a4-label-page {
+
+            .a4-menu-page,
+            .a4-label-page {
                 /* Safari'nin sevmediği 'zoom' yerine 'transform: scale' kullanıyoruz */
                 transform: scale(0.60) !important;
                 transform-origin: top center !important;
                 margin-top: 0 !important;
-                margin-bottom: -110mm !important; 
+                margin-bottom: -110mm !important;
             }
         }
 
         /* 4. Standart Telefonlar (Max 480px) */
         @media screen and (max-width: 480px) {
-             .a4-label-page {
+            .a4-label-page {
                 transform: scale(0.52) !important;
                 transform-origin: top center !important;
                 margin-bottom: -135mm !important;
@@ -487,27 +501,31 @@
 
         /* 5. iPhone 13, 13 Pro, 14 ve Benzeri Cihazlar (Tam 390px viewport) */
         @media screen and (max-width: 395px) {
-            .a4-menu-page, .a4-label-page {
-                transform: scale(0.47) !important; 
+
+            .a4-menu-page,
+            .a4-label-page {
+                transform: scale(0.47) !important;
                 transform-origin: top center !important;
                 margin-bottom: -150mm !important;
             }
-            
-            
+
+
             /* iPhone ekranında üst butonların parmakla kolay basılması için tam genişlikte alt alta dizilmesi */
-            #printModuleArea .sticky, #labelPrintArea .sticky {
+            #printModuleArea .sticky,
+            #labelPrintArea .sticky {
                 flex-direction: column !important;
                 gap: 8px !important;
                 padding-bottom: 12px !important;
             }
-            
-            #printModuleArea .sticky button, #labelPrintArea .sticky button {
+
+            #printModuleArea .sticky button,
+            #labelPrintArea .sticky button {
                 width: 100% !important;
                 padding: 14px !important;
                 font-size: 14px !important;
                 justify-content: center !important;
             }
-            
+
             /* Sol menü ikonlarının ve metinlerin iPhone ekranına tam oturması için daraltılması */
             .tab-button {
                 padding: 8px 10px !important;
@@ -520,11 +538,14 @@
         .drink-menu-page {
             width: 58mm;
             height: 88mm;
-            background: rgb(255, 255, 255) !important; /* Kırmızı ton zorunlu */
-            -webkit-print-color-adjust: exact !important; /* Yazıcıya renkleri zorla basma emri */
+            background: rgb(255, 255, 255) !important;
+            /* Kırmızı ton zorunlu */
+            -webkit-print-color-adjust: exact !important;
+            /* Yazıcıya renkleri zorla basma emri */
             print-color-adjust: exact !important;
             color-adjust: exact !important;
-            border: 2mm solid #ff0000 !important; /* Altın sarısı çerçeve */
+            border: 2mm solid #ff0000 !important;
+            /* Altın sarısı çerçeve */
             margin: 0 auto;
             position: relative;
             box-sizing: border-box;
@@ -536,6 +557,7 @@
             font-family: 'Montserrat', sans-serif;
             overflow: hidden;
         }
+
         .drink-menu-title {
             color: #ff0000;
             font-weight: 900;
@@ -547,6 +569,7 @@
             margin-bottom: 6px;
             width: 100%;
         }
+
         .drink-item {
             width: 100%;
             display: flex;
@@ -554,19 +577,22 @@
             font-size: 10.5px;
             font-weight: bold;
             margin-bottom: 3px;
-            border-bottom: 1px dashed rgba(255,255,255,0.15);
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
             padding-bottom: 2px;
         }
+
         .drink-price {
             color: #ff0000;
             font-weight: 900;
         }
-        
+
         /* Sol Menü Kapanma Animasyonu */
         .print-sidebar {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 220px; /* Yaklaşık %10-%15 arası ideal görünüm */
+            width: 220px;
+            /* Yaklaşık %10-%15 arası ideal görünüm */
         }
+
         .print-sidebar.collapsed {
             width: 0 !important;
             min-width: 0 !important;
@@ -578,20 +604,27 @@
 
         /* Yazıcı Çıktı Ayarı (Sadece açık olanı basar) */
         @media print {
-            body > #printModuleArea:not(.hidden) #a4PreviewContainer.hidden,
-            body > #printModuleArea:not(.hidden) #drinkMenuPreviewContainer.hidden {
+
+            body>#printModuleArea:not(.hidden) #a4PreviewContainer.hidden,
+            body>#printModuleArea:not(.hidden) #drinkMenuPreviewContainer.hidden {
                 display: none !important;
             }
-            body > #printModuleArea:not(.hidden) #a4PreviewContainer:not(.hidden),
-            body > #printModuleArea:not(.hidden) #drinkMenuPreviewContainer:not(.hidden) {
+
+            body>#printModuleArea:not(.hidden) #a4PreviewContainer:not(.hidden),
+            body>#printModuleArea:not(.hidden) #drinkMenuPreviewContainer:not(.hidden) {
                 display: block !important;
             }
-            .print-sidebar, #expandPrintSidebarBtn { display: none !important; }
 
-            body > #printModuleArea:not(.hidden) #qrPreviewContainer.hidden {
+            .print-sidebar,
+            #expandPrintSidebarBtn {
                 display: none !important;
             }
-            body > #printModuleArea:not(.hidden) #qrPreviewContainer:not(.hidden) {
+
+            body>#printModuleArea:not(.hidden) #qrPreviewContainer.hidden {
+                display: none !important;
+            }
+
+            body>#printModuleArea:not(.hidden) #qrPreviewContainer:not(.hidden) {
                 display: flex !important;
                 width: 100% !important;
             }
@@ -636,7 +669,8 @@
 
                 <div class="flex items-center gap-2 mt-1 mb-2 px-1">
                     <input type="checkbox" id="rememberMe" class="w-4 h-4 accent-orange-600 cursor-pointer rounded">
-                    <label for="rememberMe" class="text-xs font-bold text-gray-600 cursor-pointer select-none">Beni Hatırla (Oturumu Açık Tut)</label>
+                    <label for="rememberMe" class="text-xs font-bold text-gray-600 cursor-pointer select-none">Beni
+                        Hatırla (Oturumu Açık Tut)</label>
                 </div>
 
                 <p id="panelLoginError" class="text-red-600 text-xs font-bold text-center hidden">❌ Kullanıcı adı veya
@@ -710,14 +744,15 @@
                     class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     📊 İstatistik
                 </button>
-                <button id="showDebtCalculator" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
+                <button id="showDebtCalculator"
+                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     💳 Borç Hesapla
                 </button>
                 <button onclick="openPrintModule()"
                     class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     <span>🖨️</span>Fiyat Listesi
                 </button>
-            
+
                 <button id="showGlobalDateUpdate"
                     class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
                     📅 Ortak Tarih
@@ -785,7 +820,8 @@
                 </div>
 
                 <!-- YENİ EKLENEN RAFA KALDIR KUTUCUĞU -->
-                <label class="flex items-center gap-3 p-3 bg-red-50 border border-red-100 rounded-xl cursor-pointer hover:bg-red-100 transition mt-2">
+                <label
+                    class="flex items-center gap-3 p-3 bg-red-50 border border-red-100 rounded-xl cursor-pointer hover:bg-red-100 transition mt-2">
                     <input type="checkbox" id="editIsArchived" class="w-5 h-5 accent-red-600 rounded cursor-pointer">
                     <span class="text-sm font-black text-red-700">📦 Rafa Kaldır (Müşteriye Gizle)</span>
                 </label>
@@ -824,34 +860,49 @@
     </div>
 
 
-   <div id="printModuleArea" class="hidden fixed inset-0 flex flex-row h-screen overflow-hidden bg-[#1a1a1a] z-50">
-        
-        <div id="printSidebar" class="print-sidebar bg-black border-r border-yellow-600 flex flex-col relative z-20 flex-shrink-0">
+    <div id="printModuleArea" class="hidden fixed inset-0 flex flex-row h-screen overflow-hidden bg-[#1a1a1a] z-50">
+
+        <div id="printSidebar"
+            class="print-sidebar bg-black border-r border-yellow-600 flex flex-col relative z-20 flex-shrink-0">
             <div class="p-4 border-b border-gray-800 flex justify-between items-center">
                 <h3 class="text-white font-black text-sm tracking-wider uppercase">Baskı Türü</h3>
-                <button id="togglePrintSidebarBtn" class="text-gray-400 hover:text-white transition font-black">◀</button>
+                <button id="togglePrintSidebarBtn"
+                    class="text-gray-400 hover:text-white transition font-black">◀</button>
             </div>
             <div class="flex flex-col gap-2 p-3">
-                <button id="btnA4Menu" class="print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95">📄 Fiyat Listesi (A4)</button>
-                <button id="btnDrinkMenu" class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">🥤 İçecek Listesi</button>
-                <button id="btnLabelPrint" class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">🏷️ Dev Etiketler</button>
-                <button id="btnQRPrint" class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">📱 QR Etiketi</button>
+                <button id="btnA4Menu"
+                    class="print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95">📄
+                    Fiyat Listesi (A4)</button>
+                <button id="btnDrinkMenu"
+                    class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">🥤
+                    İçecek Listesi</button>
+                <button id="btnLabelPrint"
+                    class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">🏷️
+                    Dev Etiketler</button>
+                <button id="btnQRPrint"
+                    class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">📱
+                    QR Etiketi</button>
             </div>
         </div>
 
-        <button id="expandPrintSidebarBtn" class="hidden absolute left-0 top-1/2 transform -translate-y-1/2 bg-yellow-500 text-black p-3 rounded-r-xl font-black z-30 shadow-md hover:bg-yellow-400">▶</button>
+        <button id="expandPrintSidebarBtn"
+            class="hidden absolute left-0 top-1/2 transform -translate-y-1/2 bg-yellow-500 text-black p-3 rounded-r-xl font-black z-30 shadow-md hover:bg-yellow-400">▶</button>
 
         <div class="flex-1 flex flex-col h-full overflow-hidden relative">
-            
-            <div class="p-3 sm:p-4 bg-black border-b border-yellow-600 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3 no-print z-10 flex-shrink-0">
-                <button onclick="closePrintModule()" class="w-full sm:w-auto bg-gray-800 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl font-bold transition text-sm text-center">⬅ Panele Dön</button>
-                <button onclick="window.print()" class="w-full sm:w-auto bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">
+
+            <div
+                class="p-3 sm:p-4 bg-black border-b border-yellow-600 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3 no-print z-10 flex-shrink-0">
+                <button onclick="closePrintModule()"
+                    class="w-full sm:w-auto bg-gray-800 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl font-bold transition text-sm text-center">⬅
+                    Panele Dön</button>
+                <button onclick="window.print()"
+                    class="w-full sm:w-auto bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">
                     <span>🖨️</span> Ekrandakini Yazdır
                 </button>
             </div>
 
             <div class="flex-1 overflow-y-auto flex justify-center py-8">
-                
+
                 <div id="a4PreviewContainer" class="block">
                     <div class="a4-menu-page">
                         <div class="menu-top-row">
@@ -863,7 +914,8 @@
                         </div>
                         <div class="logo-placeholder-area">
                             <div class="my-logo-box">
-                                <img src="file_00000000a4647246a61cf005bd316d6f.png" alt="" width="200" style="margin-top: -54px;">
+                                <img src="file_00000000a4647246a61cf005bd316d6f.png" alt="" width="200"
+                                    style="margin-top: -54px;">
                             </div>
                             <div class="main-title">GÜNCEL FİYAT LİSTESİ</div>
                         </div>
@@ -883,42 +935,67 @@
                 </div>
 
                 <div id="labelPreviewContainer" class="hidden w-full max-w-4xl px-4 flex flex-col items-center">
-                    <div class="w-full bg-gray-900 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl border border-gray-700 no-print flex flex-col gap-4">
-                        <h3 class="text-white font-black text-lg text-center border-b border-gray-700 pb-2">Hangi Etiketler Basılacak?</h3>
-                        
+                    <div
+                        class="w-full bg-gray-900 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl border border-gray-700 no-print flex flex-col gap-4">
+                        <h3 class="text-white font-black text-lg text-center border-b border-gray-700 pb-2">Hangi
+                            Etiketler Basılacak?</h3>
+
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <button onclick="startLabelPrint('outside')" class="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🌤️ Sadece Dışarısı</button>
-                            <button onclick="startLabelPrint('inside')" class="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🏠 Sadece İçerisi</button>
-                            <button onclick="startLabelPrint('both')" class="bg-gradient-to-br from-purple-600 to-purple-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🔥 Her İkisi De</button>
+                            <button onclick="startLabelPrint('outside')"
+                                class="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🌤️
+                                Sadece Dışarısı</button>
+                            <button onclick="startLabelPrint('inside')"
+                                class="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🏠
+                                Sadece İçerisi</button>
+                            <button onclick="startLabelPrint('both')"
+                                class="bg-gradient-to-br from-purple-600 to-purple-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🔥
+                                Her İkisi De</button>
                         </div>
 
-                        <button onclick="toggleManualLabelSelection()" class="w-full bg-gray-700 text-white py-3 rounded-xl font-bold text-xs sm:text-sm hover:bg-gray-600 transition border border-gray-600">✅ Manuel Seçim Yap</button>
+                        <button onclick="toggleManualLabelSelection()"
+                            class="w-full bg-gray-700 text-white py-3 rounded-xl font-bold text-xs sm:text-sm hover:bg-gray-600 transition border border-gray-600">✅
+                            Manuel Seçim Yap</button>
 
-                        <div id="manualLabelSelectionArea" class="hidden border border-gray-600 rounded-xl p-3 bg-gray-800 mt-2">
+                        <div id="manualLabelSelectionArea"
+                            class="hidden border border-gray-600 rounded-xl p-3 bg-gray-800 mt-2">
                             <h4 class="text-white text-xs font-bold mb-2">Ürünleri İşaretleyin:</h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-40 overflow-y-auto mb-3" id="manualLabelCheckboxes"></div>
-                            <button onclick="startManualLabelPrint()" class="w-full bg-orange-600 text-white font-black py-2.5 rounded-lg shadow-md hover:bg-orange-700 transition text-sm">Seçilenleri Önizlemeye Aktar</button>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-40 overflow-y-auto mb-3"
+                                id="manualLabelCheckboxes"></div>
+                            <button onclick="startManualLabelPrint()"
+                                class="w-full bg-orange-600 text-white font-black py-2.5 rounded-lg shadow-md hover:bg-orange-700 transition text-sm">Seçilenleri
+                                Önizlemeye Aktar</button>
                         </div>
                     </div>
 
                     <div id="labelPagesContainer" class="w-full flex flex-col items-center">
-                        <span class="text-gray-500 text-sm italic mt-10 no-print">Yukarıdan bir etiket türü seçtiğinizde önizlemeler burada belirecektir.</span>
+                        <span class="text-gray-500 text-sm italic mt-10 no-print">Yukarıdan bir etiket türü seçtiğinizde
+                            önizlemeler burada belirecektir.</span>
                     </div>
                 </div>
 
                 <div id="qrPreviewContainer" class="hidden w-full max-w-4xl px-4 flex flex-col items-center">
-                    <div class="w-full bg-gray-900 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl border border-gray-700 no-print flex flex-col gap-4">
-                        <h3 class="text-white font-black text-lg text-center border-b border-gray-700 pb-2">Hangi QR Dispanser Şablonu Gösterilecek?</h3>
-                        
+                    <div
+                        class="w-full bg-gray-900 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl border border-gray-700 no-print flex flex-col gap-4">
+                        <h3 class="text-white font-black text-lg text-center border-b border-gray-700 pb-2">Hangi QR
+                            Dispanser Şablonu Gösterilecek?</h3>
+
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <button onclick="loadQRPdf('genis')" class="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🔲 Geniş Dispanser</button>
-                            <button onclick="loadQRPdf('uckenarli')" class="bg-gradient-to-br from-teal-600 to-teal-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">📐 Üç Kenarlı Dispanser</button>
-                            <button onclick="loadQRPdf('dar')" class="bg-gradient-to-br from-cyan-600 to-cyan-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">▯ Dar Dispanser</button>
+                            <button onclick="loadQRPdf('genis')"
+                                class="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🔲
+                                Geniş Dispanser</button>
+                            <button onclick="loadQRPdf('uckenarli')"
+                                class="bg-gradient-to-br from-teal-600 to-teal-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">📐
+                                Üç Kenarlı Dispanser</button>
+                            <button onclick="loadQRPdf('dar')"
+                                class="bg-gradient-to-br from-cyan-600 to-cyan-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">▯
+                                Dar Dispanser</button>
                         </div>
                     </div>
 
-                    <div id="qrPdfViewer" class="w-full flex flex-col items-center justify-center overflow-visible pb-10">
-                        <span class="text-gray-500 text-sm italic mt-10 no-print">Yukarıdan bir dispanser türü seçtiğinizde A4 önizlemesi burada belirecektir.</span>
+                    <div id="qrPdfViewer"
+                        class="w-full flex flex-col items-center justify-center overflow-visible pb-10">
+                        <span class="text-gray-500 text-sm italic mt-10 no-print">Yukarıdan bir dispanser türü
+                            seçtiğinizde A4 önizlemesi burada belirecektir.</span>
                     </div>
                 </div>
 
@@ -926,8 +1003,54 @@
         </div>
     </div>
 
+    <!-- Yazdırma Seçim Modalı -->
+    <div id="printSelectionModal"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm border-t-8 border-[#ffcc00] animate-pop-in">
+            <h3 class="text-lg font-black text-gray-800 mb-4 text-center">🖨️ Ne Yazdırılsın?</h3>
+            <div class="grid grid-cols-1 gap-3">
+                <button onclick="executePrint('1')"
+                    class="bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition">🏪 Sadece
+                    Dükkan</button>
+                <button onclick="executePrint('2')"
+                    class="bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">🏠 Sadece
+                    Ev</button>
+                <button onclick="executePrint('3')"
+                    class="bg-gray-900 text-white font-black py-3 rounded-xl hover:bg-black transition">🔥 Her İkisi
+                    (Toplamlı)</button>
+                <button onclick="document.getElementById('printSelectionModal').classList.add('hidden')"
+                    class="bg-gray-200 text-gray-700 font-bold py-2 rounded-xl mt-2 text-sm">İptal</button>
+            </div>
+        </div>
+    </div>
 
     <script>
+
+        // FONTKSİYONU GLOBAL KAPSAMA ALIYORUZ
+    window.triggerNodeBackend = async function() {
+        const btn = document.getElementById('triggerNodeJsFetchBtn');
+        btn.innerHTML = "⏳ Çekiliyor...";
+        btn.disabled = true;
+        
+        try {
+            const backendUrl = 'https://olimpiyat-api.onrender.com/api/fetch-latest-ekstreler';
+            const response = await fetch(backendUrl, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' } 
+            });
+            const data = await response.json();
+            if(data.success) {
+                alert(data.message); 
+            } else {
+                alert("Node.js Hatası: " + data.error);
+            }
+        } catch (error) {
+            alert("Sunucuya bağlanılamadı. Servisin açık olduğundan emin olun.");
+        } finally {
+            btn.innerHTML = "⚙️ Node.js Çekim Tetikle";
+            btn.disabled = false;
+        }
+    };
         // --- Firebase Yapılandırması ---
         const firebaseConfig = {
             apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
@@ -1002,7 +1125,7 @@
             refreshActiveModule();
         }
 
-       function refreshActiveModule() {
+        function refreshActiveModule() {
             const activeTab = document.querySelector('.tab-button.active');
             if (activeTab) {
                 const activeId = activeTab.id;
@@ -1154,15 +1277,15 @@
                     </ul>
                 </div>
             `);
-            
+
             const filterSelect = document.getElementById('filterCategory');
             filterSelect.addEventListener('change', () => renderProductList(filterSelect.value, false));
-            
+
             let isShowingArchive = false;
             document.getElementById('toggleArchiveBtn').addEventListener('click', (e) => {
                 isShowingArchive = !isShowingArchive;
                 const btn = e.currentTarget;
-                if(isShowingArchive) {
+                if (isShowingArchive) {
                     btn.innerHTML = '<span>⬅️</span> Ürünlere Dön';
                     btn.classList.replace('bg-gray-800', 'bg-orange-500');
                     btn.classList.replace('hover:bg-gray-900', 'hover:bg-orange-600');
@@ -1184,13 +1307,13 @@
             if (products.length > 0) renderProductList(filterSelect.value, false);
         }
 
-       function renderProductList(filter = 'Tümü', isArchiveView = false) {
+        function renderProductList(filter = 'Tümü', isArchiveView = false) {
             const listEl = document.getElementById('productList');
             if (!listEl) return;
             listEl.innerHTML = '';
 
             const sortedProducts = sortProductsByOrder([...products]);
-            
+
             // Rafa kaldırılanları (isArchived) ayır
             let filtered;
             if (isArchiveView) {
@@ -1208,7 +1331,7 @@
             filtered.forEach((p) => {
                 const item = document.createElement('li');
                 item.className = 'flex flex-col sm:flex-row justify-between sm:items-center bg-gray-50 p-3.5 rounded-xl border border-gray-100 gap-3 hover:bg-gray-100/50 transition';
-                
+
                 if (isArchiveView) {
                     // 📦 RAF GÖRÜNÜMÜ (Tiklenebilir)
                     item.innerHTML = `
@@ -1252,7 +1375,7 @@
                     }
                 });
             });
-            
+
             if (!isArchiveView) {
                 document.querySelectorAll('.editBtn').forEach(btn => btn.addEventListener('click', (e) => openEditModal(e.target.dataset.key)));
             }
@@ -1266,7 +1389,7 @@
                 return;
             }
 
-            if(!confirm(`Seçilen ${checkboxes.length} ürün raftan çıkarılacak ve müşteriye tekrar gösterilecek. Onaylıyor musunuz?`)) return;
+            if (!confirm(`Seçilen ${checkboxes.length} ürün raftan çıkarılacak ve müşteriye tekrar gösterilecek. Onaylıyor musunuz?`)) return;
 
             const updates = {};
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
@@ -1763,7 +1886,7 @@
         function renderBulkUpdateModule() {
             setActiveTab('showBulkUpdate');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
-            
+
             loadModule(`
                 <div class="bg-white rounded-2xl shadow-sm p-3 sm:p-5 border border-orange-100 animate-pop-in">
                     <h2 class="text-lg sm:text-xl font-black text-gray-800 mb-3 flex items-center gap-1">💸 ${menuTitle} Toplu Fiyat Ayarı</h2>
@@ -1914,9 +2037,9 @@
             } catch (error) { alert("Hata: " + error.message); }
         }
 
-       // --- 📊 GERÇEK ZAMANLI PATRON EKRANI (FIREBASE BAĞLANTILI) ---
-        let statsMenuType = 'in_place'; 
-        let activeCharts = {}; 
+        // --- 📊 GERÇEK ZAMANLI PATRON EKRANI (FIREBASE BAĞLANTILI) ---
+        let statsMenuType = 'in_place';
+        let activeCharts = {};
 
         async function renderStatsModule() {
             setActiveTab('showStats');
@@ -1957,7 +2080,7 @@
                 let visitorsYesterday = 0;
                 Object.values(todayData).forEach(val => visitorsToday += val);
                 Object.values(yesterdayData).forEach(val => visitorsYesterday += val);
-                
+
                 let visitorTrendStr = "";
                 let visitorTrendClass = "";
                 if (visitorsToday >= visitorsYesterday) {
@@ -2009,7 +2132,7 @@
                 const hourLabels = [];
                 const hourTodayValues = [];
                 const hourYesterdayValues = [];
-                
+
                 for (let i = 0; i <= 23; i++) {
                     hourLabels.push(i.toString().padStart(2, '0') + ':00');
                     hourTodayValues.push(0);
@@ -2106,7 +2229,7 @@
                                 </h3>
                                 <div class="flex flex-col gap-3">
                                     ${topProducts.length > 0 ? topProducts.map((p, index) => `
-                                        <div class="flex items-center justify-between p-3 bg-gray-50 hover:bg-orange-50 hover:shadow-md transition duration-300 rounded-xl border border-gray-100 cursor-default" style="animation: floatUp 0.5s ease-out ${0.4 + (index*0.1)}s forwards; opacity: 0;">
+                                        <div class="flex items-center justify-between p-3 bg-gray-50 hover:bg-orange-50 hover:shadow-md transition duration-300 rounded-xl border border-gray-100 cursor-default" style="animation: floatUp 0.5s ease-out ${0.4 + (index * 0.1)}s forwards; opacity: 0;">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-black text-xs">${index + 1}</div>
                                                 <span class="font-bold text-gray-700 text-sm truncate">${p.name}</span>
@@ -2164,7 +2287,7 @@
                         {
                             label: 'Bugün',
                             data: data.hourly.today,
-                            borderColor: '#ea580c', 
+                            borderColor: '#ea580c',
                             backgroundColor: 'rgba(234, 88, 12, 0.1)',
                             borderWidth: 3,
                             pointBackgroundColor: '#ea580c',
@@ -2190,8 +2313,8 @@
                     maintainAspectRatio: false,
                     animation: {
                         duration: 2000,
-                        easing: 'easeOutQuart', 
-                        x: { from: 0 } 
+                        easing: 'easeOutQuart',
+                        x: { from: 0 }
                     },
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
@@ -2222,7 +2345,7 @@
                     maintainAspectRatio: false,
                     cutout: '65%',
                     animation: {
-                        animateScale: true, 
+                        animateScale: true,
                         animateRotate: true,
                         duration: 1800,
                         easing: 'easeOutCirc'
@@ -2234,14 +2357,14 @@
             });
         }
 
-       // --- 💳 AKILLI BORÇ & EKSTRE YÖNETİM MODÜLÜ (GÜNCELLENMİŞ) ---
-        let selectedEkstreKey = null; 
+        // --- 💳 AKILLI BORÇ & EKSTRE YÖNETİM MODÜLÜ (GÜNCELLENMİŞ) ---
+        let selectedEkstreKey = null;
 
         function renderDebtCalculatorModule() {
             setActiveTab('showDebtCalculator');
-            
+
             const ekstreKeys = Object.keys(allEkstreData).sort((a, b) => b.localeCompare(a));
-            
+
             if (!selectedEkstreKey && ekstreKeys.length > 0) {
                 selectedEkstreKey = ekstreKeys[0];
             }
@@ -2265,11 +2388,11 @@
 
             if (selectedEkstreKey && allEkstreData[selectedEkstreKey] && allEkstreData[selectedEkstreKey].items) {
                 const items = allEkstreData[selectedEkstreKey].items;
-                
+
                 Object.keys(items).forEach(itemKey => {
                     const item = items[itemKey];
                     const amountStr = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    
+
                     if (item.category === 'dukkan') {
                         dukkanTotal += parseFloat(item.amount);
                         dukkanItemsHtml += `
@@ -2299,6 +2422,8 @@
                             </div>
                         `;
                     }
+
+
                 });
             }
 
@@ -2373,28 +2498,33 @@
                 </div>
             `);
 
-            document.getElementById('triggerNodeJsFetchBtn').addEventListener('click', triggerNodeBackend);
+            // renderDebtCalculatorModule fonksiyonunun en sonuna şunu ekle:
+            // Bu kod, modül her yüklendiğinde butonu bulur ve görevini tekrar tanımlar.
+            const btn = document.getElementById('triggerNodeJsFetchBtn');
+            if (btn) {
+                btn.onclick = triggerNodeBackend;
+            }
         }
 
-        window.changeActiveEkstre = function(ekstreKey) {
+        window.changeActiveEkstre = function (ekstreKey) {
             selectedEkstreKey = ekstreKey;
             renderDebtCalculatorModule();
         };
 
-        window.moveEkstreItem = async function(ekstreKey, itemKey, newCategory) {
+        window.moveEkstreItem = async function (ekstreKey, itemKey, newCategory) {
             try {
                 await ekstrelerRef.child(ekstreKey).child('items').child(itemKey).update({ category: newCategory });
             } catch (err) { alert("Taşıma hatası: " + err.message); }
         };
 
         // YENİ: Manuel Harcama Ekleme Fonksiyonu
-        window.addManualDebt = async function() {
-            if(!selectedEkstreKey) return alert("Önce işlem yapılacak bir ekstre seçin!");
+        window.addManualDebt = async function () {
+            if (!selectedEkstreKey) return alert("Önce işlem yapılacak bir ekstre seçin!");
             const desc = document.getElementById('manualDebtDesc').value.trim();
             const amount = parseFloat(document.getElementById('manualDebtAmount').value);
             const cat = document.getElementById('manualDebtCategory').value;
 
-            if(!desc || isNaN(amount) || amount <= 0) return alert("Lütfen geçerli bir açıklama ve tutar girin.");
+            if (!desc || isNaN(amount) || amount <= 0) return alert("Lütfen geçerli bir açıklama ve tutar girin.");
 
             // Bugünün tarihini formatla
             const now = new Date();
@@ -2413,14 +2543,14 @@
         };
 
         // YENİ: 58x88mm Termal Fiş Yazdırma Fonksiyonu
-       // YENİ: Seçenekli 58mm Termal Fiş Yazdırma Fonksiyonu
-        window.printDebtReceipt = function() {
-            if (!selectedEkstreKey || !allEkstreData[selectedEkstreKey]) return alert("Yazdırılacak ekstre yok!");
-            
-            // Fiş basım seçenekleri
-            const secim = prompt("Ne yazdırmak istersin?\n\n1: Sadece Dükkan\n2: Sadece Ev\n3: Her İkisini Birden", "3");
-            if (!secim) return;
+        // 1. Butona basınca sadece pencereyi aç
+        window.printDebtReceipt = function () {
+            document.getElementById('printSelectionModal').classList.remove('hidden');
+        };
 
+        // 2. Seçime göre fişi hazırla ve yazdır
+        window.executePrint = function (secim) {
+            document.getElementById('printSelectionModal').classList.add('hidden');
             const data = allEkstreData[selectedEkstreKey];
             let dukkanItems = ''; let evItems = '';
             let dukkanTotal = 0; let evTotal = 0;
@@ -2428,51 +2558,45 @@
             Object.values(data.items || {}).forEach(item => {
                 const price = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
                 let cleanName = item.desc.replace(/^\d+[-]/, '').trim();
-                
                 const rowHtml = `
                     <div style="margin-bottom:6px; border-bottom:1px solid #eee; padding-bottom:2px;">
-                        <div style="display:flex; justify-content:space-between; font-size:9px;">
-                            <span style="font-weight:bold;">${item.date}</span>
+                        <div style="display:flex; justify-content:space-between; font-size:7px;">
+                            <span>${item.date}</span>
                             <span style="font-weight:900;">${price} ₺</span>
                         </div>
-                        <div style="font-size:10px; font-weight:700; word-wrap:break-word; margin-top:1px;">
-                            ${cleanName}
-                        </div>
+                        <div style="font-size:8px; font-weight:700; margin-top:1px;">${cleanName}</div>
                     </div>`;
-                
-                if (item.category === 'dukkan') { dukkanTotal += item.amount; dukkanItems += rowHtml; } 
+
+                if (item.category === 'dukkan') { dukkanTotal += item.amount; dukkanItems += rowHtml; }
                 else { evTotal += item.amount; evItems += rowHtml; }
             });
 
-            // Seçime göre HTML oluştur
-            let printHTML = `<div style="width: 54mm; background: white; color: black; font-family: sans-serif; padding: 2mm; margin:0 auto;">
-                <div style="text-align: center; font-weight: 900; font-size: 14px; border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 8px;">
+            let printHTML = `<div style="width: 54mm; font-family: sans-serif; padding: 2mm;">
+                <div style="text-align: center; font-weight: 900; font-size: 6px; border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 8px;">
                     ${data.title.toUpperCase()}
                 </div>`;
 
             if (secim === "1" || secim === "3") {
-                printHTML += `<div style="font-weight: 900; font-size: 11px; margin-bottom: 5px; border-bottom: 2px solid black;">🏪 DÜKKAN GİDERLERİ</div>
-                              ${dukkanItems || '<div style="font-size:9px; margin-bottom:10px;">Yok</div>'}
-                              <div style="text-align: right; font-weight: 900; font-size: 12px; margin-bottom: 12px;">TOPLAM: ${dukkanTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>`;
+                printHTML += `<div style="font-weight: 900; font-size: 7px; margin-bottom: 5px; border-bottom: 2px solid black;">🏪 DÜKKAN</div>
+                              ${dukkanItems || '<div style="font-size:5px; margin-bottom:10px;">Yok</div>'}
+                              <div style="text-align: right; font-weight: 900; font-size: 8px; margin-bottom: 12px;">TOPLAM: ${dukkanTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>`;
             }
 
             if (secim === "2" || secim === "3") {
-                printHTML += `<div style="font-weight: 900; font-size: 11px; margin-bottom: 5px; border-bottom: 2px solid black;">🏠 EV GİDERLERİ</div>
-                              ${evItems || '<div style="font-size:9px; margin-bottom:10px;">Yok</div>'}
-                              <div style="text-align: right; font-weight: 900; font-size: 12px; margin-bottom: 12px;">TOPLAM: ${evTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>`;
+                printHTML += `<div style="font-weight: 900; font-size: 7px; margin-bottom: 5px; border-bottom: 2px solid black;">🏠 EV</div>
+                              ${evItems || '<div style="font-size:5px; margin-bottom:10px;">Yok</div>'}
+                              <div style="text-align: right; font-weight: 900; font-size: 8px; margin-bottom: 12px;">TOPLAM: ${evTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>`;
             }
 
-            // Eğer 3 seçildiyse Genel Toplamı bas
             if (secim === "3") {
                 printHTML += `<div style="border-top: 3px solid black; padding-top: 8px; text-align: right;">
-                                <span style="font-size: 12px; font-weight: bold;">GENEL TOPLAM</span>
-                                <div style="font-size: 24px; font-weight: 900; margin-top:2px;">${(dukkanTotal + evTotal).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>
+                                <span style="font-size: 10px; font-weight: bold;">GENEL TOPLAM</span>
+                                <div style="font-size: 14px; font-weight: 900; margin-top:2px;">${(dukkanTotal + evTotal).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>
                               </div>`;
             }
-
             printHTML += `</div>`;
 
-            // Yazdırma işlemi
+            // Fişi doğrudan body'ye basmak yerine temiz bir alan yarat
             let printArea = document.getElementById('debtPrintArea');
             if (!printArea) {
                 printArea = document.createElement('div');
@@ -2480,40 +2604,25 @@
                 document.body.appendChild(printArea);
             }
             printArea.innerHTML = printHTML;
-            document.body.classList.add('print-debt-mode');
-            window.print();
-            document.body.classList.remove('print-debt-mode');
-        };
 
-        // (Eski triggerNodeBackend fonksiyonu olduğu gibi kalıyor)
-        async function triggerNodeBackend() {
-            const btn = document.getElementById('triggerNodeJsFetchBtn');
-            btn.innerHTML = "⏳ Çekiliyor...";
-            btn.disabled = true;
-            try {
-                const backendUrl = 'https://olimpiyat-api.onrender.com/api/fetch-latest-ekstreler';
-                const response = await fetch(backendUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-                const data = await response.json();
-                if(data.success) alert(data.message); 
-                else alert("Node.js Hatası: " + data.error);
-            } catch (error) {
-                alert("Sunucuya bağlanılamadı. Gizli API servisinizin Render.com'da açık olduğundan emin olun.");
-            } finally {
-                btn.innerHTML = "⚙️ Node.js Çekim Tetikle";
-                btn.disabled = false;
-            }
-        }
+            // ZORUNLU CSS: Yazdırma sırasında fiş dışındaki her şeyi yok et
+            const style = document.createElement('style');
+            style.innerHTML = `@media print { body > *:not(#debtPrintArea) { display: none !important; } #debtPrintArea { display: block !important; position: absolute; left: 0; top: 0; width: 58mm !important; } @page { size: 58mm auto; margin: 0; } }`;
+            document.head.appendChild(style);
+
+            window.print();
+        };
 
         function simulateGmailFetch() {
             const btn = document.getElementById('fetchGmailPdfBtn');
             const listArea = document.getElementById('ekstreListArea');
             const warning = document.getElementById('gmailWarning');
-            
+
             btn.innerHTML = '<span>⏳</span> Çekiliyor...';
             btn.classList.add('animate-pulse');
-            
+
             // Gmail/Backend entegrasyonu kurulana kadar uyarıyı gizleyelim ki arayüz temiz olsun
-            if(warning) warning.classList.add('hidden');
+            if (warning) warning.classList.add('hidden');
 
             // USTAMIN GERÇEK ENPARA KREDİ KARTI EKSTRESİ (Haziran 2026)
             const extractedData = [
@@ -2552,9 +2661,9 @@
                 btn.innerHTML = '<span>✅</span> Ekstre Yüklendi';
                 btn.classList.remove('animate-pulse', 'from-purple-600', 'to-blue-600');
                 btn.classList.add('bg-emerald-600');
-                
-                listArea.innerHTML = ''; 
-                
+
+                listArea.innerHTML = '';
+
                 extractedData.forEach((item, index) => {
                     listArea.innerHTML += `
                         <label class="flex items-center justify-between p-2.5 sm:p-3 bg-gray-50 border border-gray-100 rounded-xl hover:bg-orange-50 transition cursor-pointer group animate-pop-in select-none" style="animation-delay: ${index * 0.03}s">
@@ -2591,18 +2700,18 @@
         function calculateSelectedDebt() {
             const checkboxes = document.querySelectorAll('.ekstre-cb:checked');
             let total = 0;
-            
+
             checkboxes.forEach(cb => {
                 total += parseFloat(cb.value);
             });
 
             document.getElementById('selectedCount').textContent = `${checkboxes.length} adet harcama`;
-            
+
             // Sonucu gerçek para birimi formatına (Örn: 1.250,50 ₺) çevirir
             document.getElementById('selectedTotalAmount').textContent = total.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
         }
 
-           
+
         function renderGlobalDateModule() {
             setActiveTab('showGlobalDateUpdate');
             const todayStr = new Date().toISOString().slice(0, 10);
@@ -2678,9 +2787,9 @@
             }
 
             // YENİ: Rafa kaldırılmışsa tiki otomatik doldur
-                const archiveCheckbox = document.getElementById('editIsArchived');
-                if(archiveCheckbox) archiveCheckbox.checked = productToEdit.isArchived === true;
-                editProductModal.classList.remove('hidden');
+            const archiveCheckbox = document.getElementById('editIsArchived');
+            if (archiveCheckbox) archiveCheckbox.checked = productToEdit.isArchived === true;
+            editProductModal.classList.remove('hidden');
         }
 
         let activeListeners = {};
@@ -2712,7 +2821,7 @@
             // Ekstre verilerini canlı dinle ve Eski Verileri Otomatik Sil
             activeListeners.ekstreler = ekstrelerRef.on('value', (s) => {
                 allEkstreData = s.val() || {};
-                
+
                 const now = new Date();
                 const currentYear = now.getFullYear();
                 const currentMonth = now.getMonth() + 1; // 1 ile 12 arası
@@ -2722,9 +2831,9 @@
                     const [yearStr, monthStr] = key.split('-');
                     const year = parseInt(yearStr);
                     const month = parseInt(monthStr);
-                    
+
                     const monthDiff = (currentYear - year) * 12 + (currentMonth - month);
-                    
+
                     // Eğer ekstre 12 aydan daha eskiyse veritabanından tamamen uçur
                     if (monthDiff > 12) {
                         ekstrelerRef.child(key).remove();
@@ -2733,8 +2842,8 @@
                 });
 
                 // Eğer ekstre modülü açıksa ekranı yenile
-                if(document.getElementById('ekstreDashboardArea')) {
-                    renderDebtCalculatorModule(); 
+                if (document.getElementById('ekstreDashboardArea')) {
+                    renderDebtCalculatorModule();
                 }
             });
         }
@@ -2756,18 +2865,18 @@
             function handleAdminLogin() {
                 if (usernameInput.value.trim() === 'Olimpiyat' && passwordInput.value === 'Olimpiyatkoko34.') {
                     loginError.classList.add('hidden');
-                    
+
                     // YENİ: Beni hatırla seçiliyse kalıcıya, değilse geçici hafızaya kaydet
                     if (rememberMeCheckbox && rememberMeCheckbox.checked) {
                         localStorage.setItem('olimpiyat_admin_logged_in', 'true');
                     } else {
                         sessionStorage.setItem('olimpiyat_admin_logged_in', 'true');
                     }
-                    
+
                     loginOverlay.classList.add('hidden');
                 } else {
-                    loginError.classList.remove('hidden'); 
-                    passwordInput.value = ''; 
+                    loginError.classList.remove('hidden');
+                    passwordInput.value = '';
                     passwordInput.focus();
                 }
             }
@@ -2788,7 +2897,7 @@
             document.getElementById('showDebtCalculator').addEventListener('click', renderDebtCalculatorModule);
             document.getElementById('showGlobalDateUpdate').addEventListener('click', renderGlobalDateModule);
 
-            
+
 
             document.getElementById('switchToInPlace').addEventListener('click', () => setFirebaseRefs('in_place'));
             document.getElementById('switchToDelivery').addEventListener('click', () => setFirebaseRefs('delivery'));
@@ -2844,12 +2953,12 @@
             { cat: "TAVUK KOKOREÇ", items: ["Yarım Tavuk Kokoreç", "Üç Çeyrek Tavuk Kokoreç"] },
             { cat: "PATSO", items: ["Sade Patso", "Sosisli Patso", "Ciğerli Patso", "Köfteli Patso", "Kaşarlı Patso", "Tavuklu Patso", "Amerikanlı Patso", "Porsiyon Patates"] },
             { cat: "TAVUK DÖNER", items: ["Yarım Ekmek Tavuk Döner", "Tombik Ekmek Tavuk Döner", "Üç Çeyrek Ekmek Döner", "Dürüm Tavuk Döner", "Pilav Üstü Tavuk Döner"] },
-            { cat: "SANDVİÇ - TOST", items: ["Sosisli Sandviç","Goralı Sandiviç", "Yarım Ekmek Kaşarlı Tost", "Yarım Ekmek Karışık Tost"] },
-            { cat: "HAMBURGERLER", items: ["Hamburger", "Double Hamburger", "Cheeseburger", "Islak Hamburger","Islak Cheeseburger"] },
+            { cat: "SANDVİÇ - TOST", items: ["Sosisli Sandviç", "Goralı Sandiviç", "Yarım Ekmek Kaşarlı Tost", "Yarım Ekmek Karışık Tost"] },
+            { cat: "HAMBURGERLER", items: ["Hamburger", "Double Hamburger", "Cheeseburger", "Islak Hamburger", "Islak Cheeseburger"] },
             { cat: "KÖFTE", items: ["Yarım Ekmek Köfte", "Üç Çeyrek Ekmek Köfte", "Porsiyon Köfte"] },
             { cat: "CİĞER", items: ["Yarım Ekmek Ciğer", "Üç Çeyrek Ekmek Ciğer", "Porsiyon Ciğer"] },
             { cat: "SUCUK EKMEK", items: ["Yarım Ekmek Sucuk", "Üç Çeyrek Ekmek Sucuk"] },
-            { cat: "İÇECEKLER", items: ["Kutu İçecekler", "Şişe Kola", "Büyük Ayran", "Küçük Ayran", "Limonata (Büyük)", "Limonata (Küçük)", "Çamlıca Gazoz", "Sade Soda", "Limonlu Soda", "Şalgam Suyu", "Su", "Çay","1 Litre Kola","2.5 Litre Kola"] },
+            { cat: "İÇECEKLER", items: ["Kutu İçecekler", "Şişe Kola", "Büyük Ayran", "Küçük Ayran", "Limonata (Büyük)", "Limonata (Küçük)", "Çamlıca Gazoz", "Sade Soda", "Limonlu Soda", "Şalgam Suyu", "Su", "Çay", "1 Litre Kola", "2.5 Litre Kola"] },
             { cat: "MİDYE", items: ["Midye Tane"] }
         ];
 
@@ -2886,7 +2995,7 @@
         let missingProductsGlobal = [];
         let manualPricesGlobal = {};
 
-       function openPrintModule() {
+        function openPrintModule() {
             // Güvenlik kilidi: Etiket modülünü zorla gizle
             const labelArea = document.getElementById('labelPrintArea');
             if (labelArea) labelArea.classList.add('hidden');
@@ -2938,7 +3047,7 @@
             }
         }
 
-       function showMissingProductsModal() {
+        function showMissingProductsModal() {
             const listContainer = document.getElementById('missingProductsList');
             listContainer.innerHTML = '';
 
@@ -2985,7 +3094,7 @@
             leftCol.innerHTML = '';
             rightCol.innerHTML = '';
 
-            const leftCategories = ["KOKOREÇ", "TAVUK KOKOREÇ", "PATSO", "KÖFTE", "CİĞER", "SUCUK EKMEK","MİDYE"];
+            const leftCategories = ["KOKOREÇ", "TAVUK KOKOREÇ", "PATSO", "KÖFTE", "CİĞER", "SUCUK EKMEK", "MİDYE"];
 
             expectedPdfLayout.forEach(group => {
                 let html = "";
@@ -3189,7 +3298,7 @@
                     container.appendChild(page);
                 }
 
-                
+
             }
 
             // Geri kalan tüm ürünler (içerinin kokoreci/döneri dahil) 3'lü eşit parçalara bölünecek
@@ -3220,18 +3329,18 @@
             document.getElementById('labelPrintArea').classList.add('hidden');
         }
 
-       // --- 🖨️ BASKI MODÜLÜ SEKMELER, İÇECEK LİSTESİ VE QR MOTORU ---
-        
+        // --- 🖨️ BASKI MODÜLÜ SEKMELER, İÇECEK LİSTESİ VE QR MOTORU ---
+
         const btnA4Menu = document.getElementById('btnA4Menu');
         const btnDrinkMenu = document.getElementById('btnDrinkMenu');
-        const btnLabelPrint = document.getElementById('btnLabelPrint'); 
+        const btnLabelPrint = document.getElementById('btnLabelPrint');
         const btnQRPrint = document.getElementById('btnQRPrint'); // YENİ
-        
+
         const a4Container = document.getElementById('a4PreviewContainer');
         const drinkContainer = document.getElementById('drinkMenuPreviewContainer');
-        const labelContainer = document.getElementById('labelPreviewContainer'); 
+        const labelContainer = document.getElementById('labelPreviewContainer');
         const qrContainer = document.getElementById('qrPreviewContainer'); // YENİ
-        
+
         const printSidebar = document.getElementById('printSidebar');
         const togglePrintSidebarBtn = document.getElementById('togglePrintSidebarBtn');
         const expandPrintSidebarBtn = document.getElementById('expandPrintSidebarBtn');
@@ -3251,12 +3360,12 @@
         // Tıklanan buton haricindekileri griye (pasife) çeviren temizlik motoru
         function resetPrintTabButtons() {
             [btnA4Menu, btnDrinkMenu, btnLabelPrint, btnQRPrint].forEach(btn => {
-                if(btn) btn.className = "print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95";
+                if (btn) btn.className = "print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95";
             });
-            if(a4Container) a4Container.classList.add('hidden');
-            if(drinkContainer) drinkContainer.classList.add('hidden');
-            if(labelContainer) labelContainer.classList.add('hidden');
-            if(qrContainer) qrContainer.classList.add('hidden');
+            if (a4Container) a4Container.classList.add('hidden');
+            if (drinkContainer) drinkContainer.classList.add('hidden');
+            if (labelContainer) labelContainer.classList.add('hidden');
+            if (qrContainer) qrContainer.classList.add('hidden');
         }
 
         // A4 Fiyat Listesine Geç
@@ -3275,7 +3384,7 @@
         });
 
         // Dev Etiketlere Geç
-        if(btnLabelPrint) {
+        if (btnLabelPrint) {
             btnLabelPrint.addEventListener('click', () => {
                 resetPrintTabButtons();
                 btnLabelPrint.className = "print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95";
@@ -3285,32 +3394,32 @@
         }
 
         // YENİ: QR Etiketi Ekranına Geç
-        if(btnQRPrint) {
+        if (btnQRPrint) {
             btnQRPrint.addEventListener('click', () => {
                 resetPrintTabButtons();
                 btnQRPrint.className = "print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95";
                 qrContainer.classList.remove('hidden');
-                
+
                 // Ekrana girildiğinde PDF alanını sıfırla
                 document.getElementById('qrPdfViewer').innerHTML = '<span class="text-gray-400 font-bold">Yukarıdan bir dispanser türü seçin.</span>';
             });
         }
-       // YENİ: Tıklanan Butona Göre İlgili PDF Dosyanı Tam Ekran Basan Fonksiyon
+        // YENİ: Tıklanan Butona Göre İlgili PDF Dosyanı Tam Ekran Basan Fonksiyon
         let currentPdfUrl = ""; // Hangi PDF'in açık olduğunu aklında tutar
 
         function loadQRPdf(type) {
             const viewer = document.getElementById('qrPdfViewer');
-            
+
             // DİKKAT USTAM: Google Drive linklerini eklerken her zaman "/preview" formatında eklemelisin!
-            if(type === 'genis') {
+            if (type === 'genis') {
                 // "uc?id=" yerine "file/d/.../preview" formatına çevirdik!
-                currentPdfUrl = "https://drive.google.com/file/d/1GliAaoE0G8vloctRyC6IZJK3BwBRwoMn/preview"; 
+                currentPdfUrl = "https://drive.google.com/file/d/1GliAaoE0G8vloctRyC6IZJK3BwBRwoMn/preview";
             } else if (type === 'uckenarli') {
                 currentPdfUrl = "uc_kenarli_dispanser.pdf"; // Kendi klasöründeyse böyle kalabilir
             } else if (type === 'dar') {
-                currentPdfUrl = "dar_dispanser.pdf"; 
+                currentPdfUrl = "dar_dispanser.pdf";
             }
-            
+
             // ÇÖZÜM: Google Drive linkleri <embed> ile değil <iframe> ile kusursuz çalışır.
             viewer.innerHTML = `
                 <iframe src="${currentPdfUrl}" class="w-full h-[75vh] rounded-2xl shadow-2xl border-4 border-gray-800" allow="autoplay"></iframe>
@@ -3324,33 +3433,33 @@
             const printBtns = document.querySelectorAll('button[onclick="window.print()"]');
             printBtns.forEach(btn => {
                 btn.removeAttribute('onclick'); // Eski yazdırmayı sil
-                
+
                 btn.addEventListener('click', () => {
                     const qrContainer = document.getElementById('qrPreviewContainer');
-                    
+
                     // Eğer QR PDF ekranındaysak
                     if (qrContainer && !qrContainer.classList.contains('hidden') && currentPdfUrl !== "") {
-                        
+
                         // KURAL 1: Eğer link Google Drive gibi DIŞ bir kaynaksa (http ile başlıyorsa)
                         if (currentPdfUrl.startsWith('http')) {
                             alert("Ustam, Google Drive dosyaları güvenlik gereği direkt yazdırılamaz. Dosya yeni sekmede açılacak, oradaki yazdır (🖨️) ikonuna basabilirsin.");
                             window.open(currentPdfUrl, '_blank');
-                        } 
+                        }
                         // KURAL 2: Eğer dosya senin kendi klasöründeyse (dar_dispanser.pdf gibi yerel dosyaysa)
                         else {
                             const hideFrame = document.createElement('iframe');
                             hideFrame.style.display = 'none';
                             hideFrame.src = currentPdfUrl;
                             document.body.appendChild(hideFrame);
-                            
-                            hideFrame.onload = function() {
+
+                            hideFrame.onload = function () {
                                 setTimeout(() => {
                                     hideFrame.contentWindow.focus();
                                     hideFrame.contentWindow.print();
                                 }, 500); // PDF'in tam yüklenmesi için yarım saniye bekle ve yazıcıyı ateşle
                             };
                         }
-                        
+
                     } else {
                         // QR ekranında değilsek (A4 Fiyat veya İçecek listesindeysek) normal ekranı yazdır
                         window.print();
@@ -3363,23 +3472,23 @@
         function renderDrinkMenuPreview() {
             const listEl = document.getElementById('drinkMenuList');
             listEl.innerHTML = '';
-            
+
             // Sadece "İçecekler" kategorisini filtrele (Arşivdekileri ve "Çay"ı hariç tut)
             const drinks = products.filter(p => {
                 const isDrink = p.category === 'İçecekler';
                 const isNotArchived = p.isArchived !== true;
                 const isNotTea = p.name.toLocaleLowerCase('tr-TR').trim() !== 'çay';
-                
+
                 return isDrink && isNotArchived && isNotTea;
             });
-            
+
             drinks.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order));
-            
-            if(drinks.length === 0){
+
+            if (drinks.length === 0) {
                 listEl.innerHTML = '<span class="text-[9px] text-white/70 text-center mt-4 italic block w-full">İçecek bulunamadı.</span>';
                 return;
             }
-            
+
             drinks.forEach(d => {
                 const name = d.name;
                 const price = d.discountPrice || d.price;
