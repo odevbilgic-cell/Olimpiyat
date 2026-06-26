@@ -2366,24 +2366,46 @@
 function renderDebtCalculatorModule() {
     setActiveTab('showDebtCalculator');
 
-    const ekstreKeys = Object.keys(allEkstreData).sort((a, b) => b.localeCompare(a));
+    // 1. Ekstreleri "Eskiden Yeniye" sıralıyoruz ki sağ ok ileri, sol ok geri gitsin
+    const ekstreKeys = Object.keys(allEkstreData).sort((a, b) => a.localeCompare(b));
 
+    // 2. Eğer ilk kez açılıyorsa her zaman EN YENİ (son sıradaki) ayı otomatik seç
     if (!selectedEkstreKey && ekstreKeys.length > 0) {
-        selectedEkstreKey = ekstreKeys[0];
+        selectedEkstreKey = ekstreKeys[ekstreKeys.length - 1];
     }
 
+    // 3. Sağ-Sol Oklu Sürgülü Slider Menüsü
     let buttonsHtml = '';
     if (ekstreKeys.length > 0) {
-        ekstreKeys.slice(0, 3).forEach(key => {
-            const isActive = key === selectedEkstreKey;
-            buttonsHtml += `
-                <button onclick="changeActiveEkstre('${key}')" class="flex-1 py-2.5 rounded-xl font-black text-xs sm:text-sm transition shadow-sm border ${isActive ? 'bg-orange-500 text-white border-orange-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-orange-50'}">
-                    📅 ${allEkstreData[key].title || key}
+        // Şu anki ayın indeksini bul
+        const currentIndex = ekstreKeys.indexOf(selectedEkstreKey);
+        
+        // Sol Ok (Önceki Ay): index'ten 1 çıkart
+        const prevKey = currentIndex > 0 ? ekstreKeys[currentIndex - 1] : null;
+        // Sağ Ok (Sonraki Ay): index'e 1 ekle
+        const nextKey = currentIndex < ekstreKeys.length - 1 ? ekstreKeys[currentIndex + 1] : null;
+        
+        const currentTitle = allEkstreData[selectedEkstreKey].title || selectedEkstreKey;
+
+        buttonsHtml = `
+            <div class="flex items-center justify-between w-full bg-orange-50 border border-orange-200 rounded-xl p-1.5 shadow-sm mt-1">
+                <button ${!prevKey ? 'disabled' : ''} onclick="changeActiveEkstre('${prevKey}')" 
+                    class="w-10 h-10 flex items-center justify-center bg-white border border-orange-200 rounded-lg text-orange-600 font-black hover:bg-orange-500 hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed">
+                    ◀
                 </button>
-            `;
-        });
+                
+                <div class="flex-1 text-center font-black text-sm sm:text-base text-orange-800 tracking-wide select-none">
+                    📅 ${currentTitle}
+                </div>
+                
+                <button ${!nextKey ? 'disabled' : ''} onclick="changeActiveEkstre('${nextKey}')" 
+                    class="w-10 h-10 flex items-center justify-center bg-white border border-orange-200 rounded-lg text-orange-600 font-black hover:bg-orange-500 hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed">
+                    ▶
+                </button>
+            </div>
+        `;
     } else {
-        buttonsHtml = `<div class="w-full text-center text-xs font-bold text-gray-400 p-2 border border-dashed rounded-xl">Henüz çekilmiş ekstre yok. Node.js servisiyle çekim yapın.</div>`;
+        buttonsHtml = `<div class="w-full text-center text-xs font-bold text-gray-400 p-3 border border-dashed rounded-xl mt-1">Henüz çekilmiş ekstre yok. Node.js servisiyle çekim yapın.</div>`;
     }
 
     let dukkanItemsHtml = ''; let evItemsHtml = '';
@@ -2447,9 +2469,7 @@ function renderDebtCalculatorModule() {
                         </button>
                     </div>
                 </div>
-                <div class="flex gap-2 w-full">
-                    ${buttonsHtml}
-                </div>
+                ${buttonsHtml}
             </div>
 
             <div class="bg-gray-100 p-3 rounded-xl mb-4 flex flex-col sm:flex-row gap-2 items-center flex-shrink-0 border border-gray-200">
@@ -2534,7 +2554,6 @@ function renderDebtCalculatorModule() {
                     </div>
                 </div>
             </div>
-
         </div>
     `);
 
