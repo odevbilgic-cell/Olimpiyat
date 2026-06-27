@@ -2769,6 +2769,7 @@ window.addManualDebt = async function() {
         };
 
         // 2. Seçime göre fişi hazırla ve yazdır
+       // 2. Seçime göre fişi hazırla ve yazdır
         window.executePrint = function (secim) {
             document.getElementById('printSelectionModal').classList.add('hidden');
             const data = allEkstreData[selectedEkstreKey];
@@ -2825,9 +2826,23 @@ window.addManualDebt = async function() {
             }
             printArea.innerHTML = printHTML;
 
-            // ZORUNLU CSS: Yazdırma sırasında fiş dışındaki her şeyi yok et
+            // 🎯 YENİ EKLENEN KISIM: Eski stili temizle ki çoklanmasın
+            let oldStyle = document.getElementById('debtPrintStyle');
+            if (oldStyle) oldStyle.remove();
+
+            // ZORUNLU CSS: Yazdırma sırasında fişi göster, EKRANDA (Web sayfasında) GİZLE!
             const style = document.createElement('style');
-            style.innerHTML = `@media print { body > *:not(#debtPrintArea) { display: none !important; } #debtPrintArea { display: block !important; position: absolute; left: 0; top: 0; width: 58mm !important; } @page { size: 58mm auto; margin: 0; } }`;
+            style.id = 'debtPrintStyle';
+            style.innerHTML = `
+                @media screen {
+                    #debtPrintArea { display: none !important; }
+                }
+                @media print { 
+                    body > *:not(#debtPrintArea) { display: none !important; } 
+                    #debtPrintArea { display: block !important; position: absolute; left: 0; top: 0; width: 58mm !important; } 
+                    @page { size: 58mm auto; margin: 0; } 
+                }
+            `;
             document.head.appendChild(style);
 
             window.print();
