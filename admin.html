@@ -2363,7 +2363,7 @@
 
 // --- 💳 AKILLI BORÇ YÖNETİMİ ANA MODÜLÜ ---
 // --- 💳 AKILLI BORÇ YÖNETİMİ ANA MODÜLÜ ---
-function renderDebtCalculatorModule() {
+window.renderDebtCalculatorModule = function() {
     setActiveTab('showDebtCalculator');
 
     // 1. Ekstreleri "Eskiden Yeniye" sıralıyoruz ki sağ ok ileri, sol ok geri gitsin
@@ -2377,12 +2377,9 @@ function renderDebtCalculatorModule() {
     // 3. Sağ-Sol Oklu Sürgülü Slider Menüsü
     let buttonsHtml = '';
     if (ekstreKeys.length > 0) {
-        // Şu anki ayın indeksini bul
         const currentIndex = ekstreKeys.indexOf(selectedEkstreKey);
         
-        // Sol Ok (Önceki Ay): index'ten 1 çıkart
         const prevKey = currentIndex > 0 ? ekstreKeys[currentIndex - 1] : null;
-        // Sağ Ok (Sonraki Ay): index'e 1 ekle
         const nextKey = currentIndex < ekstreKeys.length - 1 ? ekstreKeys[currentIndex + 1] : null;
         
         const currentTitle = allEkstreData[selectedEkstreKey].title || selectedEkstreKey;
@@ -2412,10 +2409,42 @@ function renderDebtCalculatorModule() {
     let dukkanTotal = 0; let evTotal = 0;
 
     if (selectedEkstreKey && allEkstreData[selectedEkstreKey] && allEkstreData[selectedEkstreKey].items) {
-        const items = allEkstreData[selectedEkstreKey].items;
+        const itemsObj = allEkstreData[selectedEkstreKey].items;
 
-        Object.keys(items).forEach(itemKey => {
-            const item = items[itemKey];
+        // 🚀 1. Firebase'den gelen objeyi bir diziye (array) çeviriyoruz
+        const itemsArray = Object.keys(itemsObj).map(key => {
+            return { key: key, ...itemsObj[key] };
+        });
+
+        // 🚀 2. Gelişmiş Tarih/Saat Sıralama Motoru (En Yeniden En Eskiye)
+        itemsArray.sort((a, b) => {
+            const parseDateString = (dateStr, timeStr) => {
+                if (!dateStr) return 0;
+                
+                // Tarihi parçala (Örn: 31/05/2026 veya 31/05/26)
+                let [d, m, y] = dateStr.split('/');
+                if (y && y.length === 2) y = '20' + y; // Eğer yıl "26" şeklinde kısa yazılmışsa "2026" yap
+                
+                let hr = 0, min = 0;
+                
+                // Eğer geçerli bir saat varsa onu da hesaba kat (Örn: Manuel eklendiyse)
+                if (timeStr && timeStr.includes(':') && !isNaN(parseInt(timeStr.split(':')[0]))) {
+                    let parts = timeStr.split(':');
+                    hr = parseInt(parts[0]);
+                    min = parseInt(parts[1]);
+                }
+                
+                // Zaman damgasına (timestamp) çevir
+                return new Date(y, m - 1, d, hr, min).getTime();
+            };
+
+            // b'den a'yı çıkararak "Azalan" (En yeni tarih en üstte) sıralaması yapıyoruz
+            return parseDateString(b.date, b.time) - parseDateString(a.date, a.time);
+        });
+
+        // 🚀 3. Artık TIKIR TIKIR SIRALANMIŞ olan dizi üzerinden HTML bastırıyoruz
+        itemsArray.forEach(item => {
+            const itemKey = item.key;
             const amountStr = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             if (item.category === 'dukkan') {
@@ -2561,7 +2590,7 @@ function renderDebtCalculatorModule() {
     if (btn) {
         btn.onclick = triggerNodeBackend;
     }
-}
+};
 
 // --- 💳 BORÇ YÖNETİMİ İŞLEM FONKSİYONLARI ---
 
