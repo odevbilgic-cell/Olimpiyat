@@ -24,13 +24,21 @@
 
         /* 📱 MOBİL TARAYICI ALT BAR KESİLME ÇÖZÜMÜ */
         .h-dvh {
-            height: 100vh; /* Eski cihazlar için yedek */
-            height: 100dvh; /* Modern mobil tarayıcılar için dinamik ekran boyu */
+            height: 100vh;
+            /* Eski cihazlar için yedek */
+            height: 100dvh;
+            /* Modern mobil tarayıcılar için dinamik ekran boyu */
         }
 
         /* 🚫 YATAY KAYDIRMA ÇUBUĞUNU GİZLEME (Ama kaydırma çalışır) */
-        .scrollbar-none::-webkit-scrollbar { display: none; }
-        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
         /* Aktif ana menü butonu */
         .admin-menu-button.active {
@@ -493,11 +501,13 @@
             .a4-menu-page,
             .a4-label-page {
                 /* Safari'nin sevmediği 'zoom' yerine 'transform: scale' kullanıyoruz */
-                transform: scale(0.60) !important;
+                transform: scale(0.50) !important;
                 transform-origin: top center !important;
                 margin-top: 0 !important;
                 margin-bottom: -110mm !important;
             }
+
+            
         }
 
         /* 4. Standart Telefonlar (Max 480px) */
@@ -514,10 +524,14 @@
 
             .a4-menu-page,
             .a4-label-page {
-                transform: scale(0.47) !important;
+                transform: scale(0.37) !important;
                 transform-origin: top center !important;
                 margin-bottom: -150mm !important;
             }
+
+            
+                
+            
 
 
             /* iPhone ekranında üst butonların parmakla kolay basılması için tam genişlikte alt alta dizilmesi */
@@ -695,45 +709,73 @@
         </div>
     </div>
 
- <div class="flex flex-col md:flex-row min-h-screen w-full bg-gray-50">
+    <div class="flex flex-col md:flex-row min-h-screen w-full bg-gray-50">
 
-        <div class="w-full md:w-64 bg-gradient-to-b from-red-700 via-red-800 to-amber-900 text-white flex flex-col p-2 md:p-3 shadow-md z-30 md:sticky md:top-0 md:h-screen md:overflow-y-auto flex-shrink-0">
-            
-            <div class="flex items-center justify-between md:flex-col md:items-center md:justify-center border-b border-red-500/40 pb-1.5 mb-1.5 md:mb-3 gap-1">
+        <div
+            class="w-full md:w-64 bg-gradient-to-b from-red-700 via-red-800 to-amber-900 text-white flex flex-col p-2 md:p-3 shadow-md z-30 md:sticky md:top-0 md:h-screen md:overflow-y-auto flex-shrink-0">
+
+            <div
+                class="flex items-center justify-between md:flex-col md:items-center md:justify-center border-b border-red-500/40 pb-1.5 mb-1.5 md:mb-3 gap-1">
                 <div class="flex flex-shrink-0 w-20 sm:w-24 md:w-full justify-start md:justify-center">
-                    <img src="file_00000000a4647246a61cf005bd316d6f.png" id="logoAna" class="w-full h-auto object-contain max-w-[100px] md:max-w-[160px]">
+                    <img src="file_00000000a4647246a61cf005bd316d6f.png" id="logoAna"
+                        class="w-full h-auto object-contain max-w-[100px] md:max-w-[160px]">
                 </div>
-                
+
                 <div class="flex items-center gap-1 md:hidden">
-                    <button id="mobileMenuToggleBtn" class="bg-orange-500 text-white px-2.5 py-1.5 rounded-md text-[11px] font-black shadow-sm flex items-center gap-1 active:scale-95 transition whitespace-nowrap">
+                    <button id="mobileMenuToggleBtn"
+                        class="bg-orange-500 text-white px-2.5 py-1.5 rounded-md text-[11px] font-black shadow-sm flex items-center gap-1 active:scale-95 transition whitespace-nowrap">
                         🍽️ Yerinde
                     </button>
-                    <a href="index.html" class="px-2.5 py-1.5 bg-red-600 rounded-md text-[11px] font-black shadow-sm whitespace-nowrap active:scale-95 transition">Çıkış</a>
+                    <a href="index.html"
+                        class="px-2.5 py-1.5 bg-red-600 rounded-md text-[11px] font-black shadow-sm whitespace-nowrap active:scale-95 transition">Çıkış</a>
                 </div>
             </div>
 
             <div class="hidden md:block mb-2 md:mb-4 border-b border-red-500/40 pb-2 md:pb-3">
-                <button id="switchToInPlace" data-menu="in_place" class="admin-menu-button active w-full text-left px-2 py-1.5 rounded-lg transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40">
+                <button id="switchToInPlace" data-menu="in_place"
+                    class="admin-menu-button active w-full text-left px-2 py-1.5 rounded-lg transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40">
                     🍽️ <span class="truncate">Yerinde Menü</span>
                 </button>
-                <button id="switchToDelivery" data-menu="delivery" class="admin-menu-button w-full text-left px-2 py-1.5 rounded-lg transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40 mt-1.5">
+                <button id="switchToDelivery" data-menu="delivery"
+                    class="admin-menu-button w-full text-left px-2 py-1.5 rounded-lg transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40 mt-1.5">
                     🛵 <span class="truncate">Paket Servis</span>
                 </button>
             </div>
 
-            <div class="flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-1 md:pb-0 -mx-2 px-2 md:mx-0 md:px-0 scrollbar-none flex-shrink-0">
-                <button id="showProducts" class="tab-button active text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📦 Ürünler</button>
-                <button id="showSorting" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">⬆️ Sıralama</button>
-                <button id="showCampaigns" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">🖼️ Kampanyalar</button>
-                <button id="showAddProduct" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">➕ Yeni Ürün</button>
-                <button id="showBulkUpdate" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💸 Toplu Fiyat</button>
-                <button id="showStats" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📊 İstatistik</button>
-                <button id="showDebtCalculator" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💳 Borç Hesapla</button>
-                <button onclick="openPrintModule()" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0"><span>🖨️</span>Fiyat Listesi</button>
-                <button id="showGlobalDateUpdate" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📅 Ortak Tarih</button>
+            <div
+                class="flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-1 md:pb-0 -mx-2 px-2 md:mx-0 md:px-0 scrollbar-none flex-shrink-0">
+                <button id="showProducts"
+                    class="tab-button active text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📦
+                    Ürünler</button>
+                <button id="showSorting"
+                    class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">⬆️
+                    Sıralama</button>
+                <button id="showCampaigns"
+                    class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">🖼️
+                    Kampanyalar</button>
+                <button id="showAddProduct"
+                    class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">➕
+                    Yeni Ürün</button>
+                <button id="showBulkUpdate"
+                    class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💸
+                    Toplu Fiyat</button>
+                <button id="showStats"
+                    class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📊
+                    İstatistik</button>
+                <button id="showDebtCalculator"
+                    class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💳
+                    Borç Hesapla</button>
+                <button onclick="openPrintModule()"
+                    class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0"><span>🖨️</span>Fiyat
+                    Listesi</button>
+                <button id="showGlobalDateUpdate"
+                    class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📅
+                    Ortak Tarih</button>
             </div>
 
-            <a href="index.html" class="hidden md:block mt-auto p-2 bg-red-600 text-center rounded-lg text-sm font-bold hover:bg-red-700 shadow-md transition">Güvenli Çıkış Yap</a>
+            <a href="index.html"
+                class="hidden md:block mt-auto p-2 bg-red-600 text-center rounded-lg text-sm font-bold hover:bg-red-700 shadow-md transition">Güvenli
+                Çıkış Yap</a>
         </div>
 
         <main class="flex-1 h-full overflow-y-auto p-3 sm:p-6 md:p-8 w-full relative scrollbar-none">
@@ -998,30 +1040,30 @@
 
 
         // FONTKSİYONU GLOBAL KAPSAMA ALIYORUZ
-    window.triggerNodeBackend = async function() {
-        const btn = document.getElementById('triggerNodeJsFetchBtn');
-        btn.innerHTML = "⏳ Çekiliyor...";
-        btn.disabled = true;
-        
-        try {
-            const backendUrl = 'https://olimpiyat-api.onrender.com/api/fetch-latest-ekstreler';
-            const response = await fetch(backendUrl, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' } 
-            });
-            const data = await response.json();
-            if(data.success) {
-                alert(data.message); 
-            } else {
-                alert("Node.js Hatası: " + data.error);
+        window.triggerNodeBackend = async function () {
+            const btn = document.getElementById('triggerNodeJsFetchBtn');
+            btn.innerHTML = "⏳ Çekiliyor...";
+            btn.disabled = true;
+
+            try {
+                const backendUrl = 'https://olimpiyat-api.onrender.com/api/fetch-latest-ekstreler';
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                } else {
+                    alert("Node.js Hatası: " + data.error);
+                }
+            } catch (error) {
+                alert("Sunucuya bağlanılamadı. Servisin açık olduğundan emin olun.");
+            } finally {
+                btn.innerHTML = "⚙️ Node.js Çekim Tetikle";
+                btn.disabled = false;
             }
-        } catch (error) {
-            alert("Sunucuya bağlanılamadı. Servisin açık olduğundan emin olun.");
-        } finally {
-            btn.innerHTML = "⚙️ Node.js Çekim Tetikle";
-            btn.disabled = false;
-        }
-    };
+        };
         // --- Firebase Yapılandırması ---
         const firebaseConfig = {
             apiKey: "AIzaSyDcYNF0hMow-y1MuV3GXLG9vY_MK0tJTGs",
@@ -1135,16 +1177,16 @@
         }
 
         // MOBİL TEKLİ BUTON DİNLEYİCİSİ (Yerinde <-> Paket Geçişi Yapar)
-            const mobileMenuToggleBtn = document.getElementById('mobileMenuToggleBtn');
-            if (mobileMenuToggleBtn) {
-                mobileMenuToggleBtn.addEventListener('click', () => {
-                    if (currentMenuType === 'in_place') {
-                        setFirebaseRefs('delivery');
-                    } else {
-                        setFirebaseRefs('in_place');
-                    }
-                });
-            }
+        const mobileMenuToggleBtn = document.getElementById('mobileMenuToggleBtn');
+        if (mobileMenuToggleBtn) {
+            mobileMenuToggleBtn.addEventListener('click', () => {
+                if (currentMenuType === 'in_place') {
+                    setFirebaseRefs('delivery');
+                } else {
+                    setFirebaseRefs('in_place');
+                }
+            });
+        }
 
         async function copyMenuDataToDelivery() {
             if (currentMenuType !== 'delivery') return;
@@ -1236,10 +1278,10 @@
         function renderProductsModule() {
             setActiveTab('showProducts');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
-            
+
             // YENİ: Kopyalama butonu SADECE Paket Servis menüsündeyken başlığın yanına eklenecek
-            const copyBtnHtml = currentMenuType === 'delivery' 
-                ? `<button id="headerCopyToDeliveryBtn" class="ml-auto bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-black hover:bg-blue-700 transition shadow-md whitespace-nowrap">🔄 Yerinde Menüyü Kopyala</button>` 
+            const copyBtnHtml = currentMenuType === 'delivery'
+                ? `<button id="headerCopyToDeliveryBtn" class="ml-auto bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-black hover:bg-blue-700 transition shadow-md whitespace-nowrap">🔄 Yerinde Menüyü Kopyala</button>`
                 : '';
 
             loadModule(`
@@ -1534,7 +1576,7 @@
         function renderCampaignModule() {
             setActiveTab('showCampaigns');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
-           loadModule(`
+            loadModule(`
                 <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh] max-w-2xl mx-auto">
                     <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 flex-shrink-0">🖼️ ${menuTitle} Kampanya Yönetimi</h2>
                     
@@ -2369,30 +2411,30 @@
         // --- 💳 AKILLI BORÇ & EKSTRE YÖNETİM MODÜLÜ (GÜNCELLENMİŞ) ---
         let selectedEkstreKey = null;
 
-// --- 💳 AKILLI BORÇ YÖNETİMİ ANA MODÜLÜ ---
-// --- 💳 AKILLI BORÇ YÖNETİMİ ANA MODÜLÜ ---
-window.renderDebtCalculatorModule = function() {
-    setActiveTab('showDebtCalculator');
+        // --- 💳 AKILLI BORÇ YÖNETİMİ ANA MODÜLÜ ---
+        // --- 💳 AKILLI BORÇ YÖNETİMİ ANA MODÜLÜ ---
+        window.renderDebtCalculatorModule = function () {
+            setActiveTab('showDebtCalculator');
 
-    // 1. Ekstreleri "Eskiden Yeniye" sıralıyoruz ki sağ ok ileri, sol ok geri gitsin
-    const ekstreKeys = Object.keys(allEkstreData).sort((a, b) => a.localeCompare(b));
+            // 1. Ekstreleri "Eskiden Yeniye" sıralıyoruz ki sağ ok ileri, sol ok geri gitsin
+            const ekstreKeys = Object.keys(allEkstreData).sort((a, b) => a.localeCompare(b));
 
-    // 2. Eğer ilk kez açılıyorsa her zaman EN YENİ (son sıradaki) ayı otomatik seç
-    if (!selectedEkstreKey && ekstreKeys.length > 0) {
-        selectedEkstreKey = ekstreKeys[ekstreKeys.length - 1];
-    }
+            // 2. Eğer ilk kez açılıyorsa her zaman EN YENİ (son sıradaki) ayı otomatik seç
+            if (!selectedEkstreKey && ekstreKeys.length > 0) {
+                selectedEkstreKey = ekstreKeys[ekstreKeys.length - 1];
+            }
 
-    // 3. Sağ-Sol Oklu Sürgülü Slider Menüsü
-    let buttonsHtml = '';
-    if (ekstreKeys.length > 0) {
-        const currentIndex = ekstreKeys.indexOf(selectedEkstreKey);
-        
-        const prevKey = currentIndex > 0 ? ekstreKeys[currentIndex - 1] : null;
-        const nextKey = currentIndex < ekstreKeys.length - 1 ? ekstreKeys[currentIndex + 1] : null;
-        
-        const currentTitle = allEkstreData[selectedEkstreKey].title || selectedEkstreKey;
+            // 3. Sağ-Sol Oklu Sürgülü Slider Menüsü
+            let buttonsHtml = '';
+            if (ekstreKeys.length > 0) {
+                const currentIndex = ekstreKeys.indexOf(selectedEkstreKey);
 
-        buttonsHtml = `
+                const prevKey = currentIndex > 0 ? ekstreKeys[currentIndex - 1] : null;
+                const nextKey = currentIndex < ekstreKeys.length - 1 ? ekstreKeys[currentIndex + 1] : null;
+
+                const currentTitle = allEkstreData[selectedEkstreKey].title || selectedEkstreKey;
+
+                buttonsHtml = `
             <div class="flex items-center justify-between w-full bg-orange-50 border border-orange-200 rounded-xl p-1.5 shadow-sm mt-1">
                 <button ${!prevKey ? 'disabled' : ''} onclick="changeActiveEkstre('${prevKey}')" 
                     class="w-10 h-10 flex items-center justify-center bg-white border border-orange-200 rounded-lg text-orange-600 font-black hover:bg-orange-500 hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed">
@@ -2409,55 +2451,55 @@ window.renderDebtCalculatorModule = function() {
                 </button>
             </div>
         `;
-    } else {
-        buttonsHtml = `<div class="w-full text-center text-xs font-bold text-gray-400 p-3 border border-dashed rounded-xl mt-1">Henüz çekilmiş ekstre yok. Node.js servisiyle çekim yapın.</div>`;
-    }
+            } else {
+                buttonsHtml = `<div class="w-full text-center text-xs font-bold text-gray-400 p-3 border border-dashed rounded-xl mt-1">Henüz çekilmiş ekstre yok. Node.js servisiyle çekim yapın.</div>`;
+            }
 
-    let dukkanItemsHtml = ''; let evItemsHtml = '';
-    let dukkanTotal = 0; let evTotal = 0;
+            let dukkanItemsHtml = ''; let evItemsHtml = '';
+            let dukkanTotal = 0; let evTotal = 0;
 
-    if (selectedEkstreKey && allEkstreData[selectedEkstreKey] && allEkstreData[selectedEkstreKey].items) {
-        const itemsObj = allEkstreData[selectedEkstreKey].items;
+            if (selectedEkstreKey && allEkstreData[selectedEkstreKey] && allEkstreData[selectedEkstreKey].items) {
+                const itemsObj = allEkstreData[selectedEkstreKey].items;
 
-        // 🚀 1. Firebase'den gelen objeyi bir diziye (array) çeviriyoruz
-        const itemsArray = Object.keys(itemsObj).map(key => {
-            return { key: key, ...itemsObj[key] };
-        });
+                // 🚀 1. Firebase'den gelen objeyi bir diziye (array) çeviriyoruz
+                const itemsArray = Object.keys(itemsObj).map(key => {
+                    return { key: key, ...itemsObj[key] };
+                });
 
-        // 🚀 2. Gelişmiş Tarih/Saat Sıralama Motoru (En Yeniden En Eskiye)
-        itemsArray.sort((a, b) => {
-            const parseDateString = (dateStr, timeStr) => {
-                if (!dateStr) return 0;
-                
-                // Tarihi parçala (Örn: 31/05/2026 veya 31/05/26)
-                let [d, m, y] = dateStr.split('/');
-                if (y && y.length === 2) y = '20' + y; // Eğer yıl "26" şeklinde kısa yazılmışsa "2026" yap
-                
-                let hr = 0, min = 0;
-                
-                // Eğer geçerli bir saat varsa onu da hesaba kat (Örn: Manuel eklendiyse)
-                if (timeStr && timeStr.includes(':') && !isNaN(parseInt(timeStr.split(':')[0]))) {
-                    let parts = timeStr.split(':');
-                    hr = parseInt(parts[0]);
-                    min = parseInt(parts[1]);
-                }
-                
-                // Zaman damgasına (timestamp) çevir
-                return new Date(y, m - 1, d, hr, min).getTime();
-            };
+                // 🚀 2. Gelişmiş Tarih/Saat Sıralama Motoru (En Yeniden En Eskiye)
+                itemsArray.sort((a, b) => {
+                    const parseDateString = (dateStr, timeStr) => {
+                        if (!dateStr) return 0;
 
-            // b'den a'yı çıkararak "Azalan" (En yeni tarih en üstte) sıralaması yapıyoruz
-            return parseDateString(b.date, b.time) - parseDateString(a.date, a.time);
-        });
+                        // Tarihi parçala (Örn: 31/05/2026 veya 31/05/26)
+                        let [d, m, y] = dateStr.split('/');
+                        if (y && y.length === 2) y = '20' + y; // Eğer yıl "26" şeklinde kısa yazılmışsa "2026" yap
 
-        // 🚀 3. Artık TIKIR TIKIR SIRALANMIŞ olan dizi üzerinden HTML bastırıyoruz
-        itemsArray.forEach(item => {
-            const itemKey = item.key;
-            const amountStr = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        let hr = 0, min = 0;
 
-            if (item.category === 'dukkan') {
-                dukkanTotal += parseFloat(item.amount);
-                dukkanItemsHtml += `
+                        // Eğer geçerli bir saat varsa onu da hesaba kat (Örn: Manuel eklendiyse)
+                        if (timeStr && timeStr.includes(':') && !isNaN(parseInt(timeStr.split(':')[0]))) {
+                            let parts = timeStr.split(':');
+                            hr = parseInt(parts[0]);
+                            min = parseInt(parts[1]);
+                        }
+
+                        // Zaman damgasına (timestamp) çevir
+                        return new Date(y, m - 1, d, hr, min).getTime();
+                    };
+
+                    // b'den a'yı çıkararak "Azalan" (En yeni tarih en üstte) sıralaması yapıyoruz
+                    return parseDateString(b.date, b.time) - parseDateString(a.date, a.time);
+                });
+
+                // 🚀 3. Artık TIKIR TIKIR SIRALANMIŞ olan dizi üzerinden HTML bastırıyoruz
+                itemsArray.forEach(item => {
+                    const itemKey = item.key;
+                    const amountStr = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                    if (item.category === 'dukkan') {
+                        dukkanTotal += parseFloat(item.amount);
+                        dukkanItemsHtml += `
                     <div class="flex items-center justify-between px-2.5 bg-orange-50 border border-orange-100 rounded-lg shadow-sm hover:shadow transition group h-16 flex-shrink-0">
                         <div class="flex flex-col w-3/5 pr-2">
                             <span class="text-[13px] font-black text-gray-800 truncate block" title="${item.desc}">${item.desc}</span>
@@ -2470,9 +2512,9 @@ window.renderDebtCalculatorModule = function() {
                         </div>
                     </div>
                 `;
-            } else {
-                evTotal += parseFloat(item.amount);
-                evItemsHtml += `
+                    } else {
+                        evTotal += parseFloat(item.amount);
+                        evItemsHtml += `
                     <div class="flex items-center justify-between px-2.5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm hover:shadow transition group h-16 flex-shrink-0">
                         <div class="flex items-center gap-1.5 flex-shrink-0">
                             <button onclick="moveEkstreItem('${selectedEkstreKey}', '${itemKey}', 'dukkan')" class="w-7 h-7 bg-white border border-gray-200 rounded-md text-gray-500 hover:bg-orange-50 hover:text-orange-600 font-bold shadow-sm transition flex items-center justify-center" title="Dükkana Taşı">◀</button>
@@ -2485,13 +2527,13 @@ window.renderDebtCalculatorModule = function() {
                         </div>
                     </div>
                 `;
+                    }
+                });
             }
-        });
-    }
 
-    const genelToplam = dukkanTotal + evTotal;
+            const genelToplam = dukkanTotal + evTotal;
 
-    loadModule(`
+            loadModule(`
         <div id="ekstreDashboardArea" class="bg-white rounded-2xl shadow-sm p-3 sm:p-5 border border-orange-100 h-auto min-h-[88vh] flex flex-col relative">
             
             <div class="flex flex-col mb-4 gap-3 flex-shrink-0 border-b border-gray-100 pb-4">
@@ -2594,181 +2636,181 @@ window.renderDebtCalculatorModule = function() {
         </div>
     `);
 
-    const btn = document.getElementById('triggerNodeJsFetchBtn');
-    if (btn) {
-        btn.onclick = triggerNodeBackend;
-    }
-};
+            const btn = document.getElementById('triggerNodeJsFetchBtn');
+            if (btn) {
+                btn.onclick = triggerNodeBackend;
+            }
+        };
 
-// --- 💳 BORÇ YÖNETİMİ İŞLEM FONKSİYONLARI ---
+        // --- 💳 BORÇ YÖNETİMİ İŞLEM FONKSİYONLARI ---
 
-window.changeActiveEkstre = function (ekstreKey) {
-    selectedEkstreKey = ekstreKey;
-    renderDebtCalculatorModule();
-};
+        window.changeActiveEkstre = function (ekstreKey) {
+            selectedEkstreKey = ekstreKey;
+            renderDebtCalculatorModule();
+        };
 
-window.moveEkstreItem = async function (ekstreKey, itemKey, newCategory) {
-    try {
-        await ekstrelerRef.child(ekstreKey).child('items').child(itemKey).update({ category: newCategory });
-    } catch (err) { 
-        alert("Taşıma hatası: " + err.message); 
-    }
-};
+        window.moveEkstreItem = async function (ekstreKey, itemKey, newCategory) {
+            try {
+                await ekstrelerRef.child(ekstreKey).child('items').child(itemKey).update({ category: newCategory });
+            } catch (err) {
+                alert("Taşıma hatası: " + err.message);
+            }
+        };
 
-// YENİ: Modal (Popup) Açma Fonksiyonu
-window.openEditDebtModal = function(ekstreKey, itemKey) {
-    const item = allEkstreData[ekstreKey].items[itemKey];
-    
-    // Gizli inputlara verileri göm
-    document.getElementById('editDebtEkstreKey').value = ekstreKey;
-    document.getElementById('editDebtItemKey').value = itemKey;
-    
-    // Açıklama ve tutarı doldur
-    document.getElementById('editDebtDescInput').value = item.desc || "";
-    document.getElementById('editDebtAmountInput').value = item.amount || 0;
-    
-    // Tarihi Formatla (Gelen "GG/AA/YYYY" bilgisini <input type="date"> için "YYYY-AA-GG" formatına çevirir)
-    let dateVal = "";
-    if (item.date && item.date.includes('/')) {
-        const parts = item.date.split('/');
-        if(parts.length === 3) {
-            dateVal = `${parts[2]}-${parts[1]}-${parts[0]}`;
-        }
-    }
-    
-    // Eğer gelen veride tarih yoksa (veya okunamadıysa) anlık bugünün tarihini varsayılan yap
-    if (!dateVal) {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        dateVal = `${yyyy}-${mm}-${dd}`;
-    }
-    
-    document.getElementById('editDebtDateInput').value = dateVal;
-    
-    // Modalı Göster
-    document.getElementById('editDebtModal').classList.remove('hidden');
-};
+        // YENİ: Modal (Popup) Açma Fonksiyonu
+        window.openEditDebtModal = function (ekstreKey, itemKey) {
+            const item = allEkstreData[ekstreKey].items[itemKey];
 
-// YENİ: Modalı Kapatma Fonksiyonu
-window.closeEditDebtModal = function() {
-    document.getElementById('editDebtModal').classList.add('hidden');
-};
+            // Gizli inputlara verileri göm
+            document.getElementById('editDebtEkstreKey').value = ekstreKey;
+            document.getElementById('editDebtItemKey').value = itemKey;
 
-// YENİ: Düzenlemeleri Veritabanına Kaydetme Fonksiyonu
-window.saveEditDebt = async function() {
-    const ekstreKey = document.getElementById('editDebtEkstreKey').value;
-    const itemKey = document.getElementById('editDebtItemKey').value;
-    
-    const newDesc = document.getElementById('editDebtDescInput').value.trim();
-    const newAmountStr = document.getElementById('editDebtAmountInput').value;
-    const newAmount = parseFloat(newAmountStr);
-    const newDateVal = document.getElementById('editDebtDateInput').value; // Seçilen "YYYY-AA-GG" tarihi
-    
-    if (!newDesc || isNaN(newAmount)) {
-        alert("Lütfen açıklama ve tutarı eksiksiz girin!");
-        return;
-    }
+            // Açıklama ve tutarı doldur
+            document.getElementById('editDebtDescInput').value = item.desc || "";
+            document.getElementById('editDebtAmountInput').value = item.amount || 0;
 
-    // Seçilen "YYYY-AA-GG" tarihini tekrar sisteme uygun olan "GG/AA/YYYY" formatına geri çevirir
-    let finalDate = "";
-    if (newDateVal) {
-        const parts = newDateVal.split('-');
-        if (parts.length === 3) {
-            finalDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
-    }
+            // Tarihi Formatla (Gelen "GG/AA/YYYY" bilgisini <input type="date"> için "YYYY-AA-GG" formatına çevirir)
+            let dateVal = "";
+            if (item.date && item.date.includes('/')) {
+                const parts = item.date.split('/');
+                if (parts.length === 3) {
+                    dateVal = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+            }
 
-    try {
-        await ekstrelerRef.child(ekstreKey).child('items').child(itemKey).update({ 
-            desc: newDesc,
-            amount: newAmount,
-            date: finalDate
-        });
-        closeEditDebtModal(); // Başarılı olursa popup'ı kapat
-    } catch (err) { 
-        alert("Düzenleme hatası: " + err.message); 
-    }
-};
+            // Eğer gelen veride tarih yoksa (veya okunamadıysa) anlık bugünün tarihini varsayılan yap
+            if (!dateVal) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                dateVal = `${yyyy}-${mm}-${dd}`;
+            }
 
-// YENİ: Harcamayı Kalıcı Silme Fonksiyonu
-window.deleteEditDebt = async function() {
-    const ekstreKey = document.getElementById('editDebtEkstreKey').value;
-    const itemKey = document.getElementById('editDebtItemKey').value;
-    
-    if(confirm("Bu harcamayı listeden KALICI OLARAK silmek istediğinize emin misiniz?")) {
-        try {
-            await ekstrelerRef.child(ekstreKey).child('items').child(itemKey).remove();
-            closeEditDebtModal(); // Silindikten sonra popup'ı kapat
-        } catch (err) { 
-            alert("Silme hatası: " + err.message); 
-        }
-    }
-};
+            document.getElementById('editDebtDateInput').value = dateVal;
 
-// YENİ: Manuel Harcama Ekleme Fonksiyonu
-window.addManualDebt = async function() {
-    if (!selectedEkstreKey) {
-        alert("Lütfen önce bir ay/ekstre seçin veya 'Node.js Çek' butonuyla yeni ekstre oluşturun.");
-        return;
-    }
+            // Modalı Göster
+            document.getElementById('editDebtModal').classList.remove('hidden');
+        };
 
-    const descInput = document.getElementById('manualDebtDesc');
-    const amountInput = document.getElementById('manualDebtAmount');
-    const categorySelect = document.getElementById('manualDebtCategory');
+        // YENİ: Modalı Kapatma Fonksiyonu
+        window.closeEditDebtModal = function () {
+            document.getElementById('editDebtModal').classList.add('hidden');
+        };
 
-    const desc = descInput.value.trim();
-    const amountStr = amountInput.value.trim();
-    const category = categorySelect.value;
+        // YENİ: Düzenlemeleri Veritabanına Kaydetme Fonksiyonu
+        window.saveEditDebt = async function () {
+            const ekstreKey = document.getElementById('editDebtEkstreKey').value;
+            const itemKey = document.getElementById('editDebtItemKey').value;
 
-    // Virgülleri noktaya çevirerek tutarı rakama dönüştür
-    const amount = parseFloat(amountStr.replace(',', '.'));
+            const newDesc = document.getElementById('editDebtDescInput').value.trim();
+            const newAmountStr = document.getElementById('editDebtAmountInput').value;
+            const newAmount = parseFloat(newAmountStr);
+            const newDateVal = document.getElementById('editDebtDateInput').value; // Seçilen "YYYY-AA-GG" tarihi
 
-    if (!desc) {
-        alert("Lütfen harcama için bir açıklama (Örn: Çaycı) girin.");
-        return;
-    }
+            if (!newDesc || isNaN(newAmount)) {
+                alert("Lütfen açıklama ve tutarı eksiksiz girin!");
+                return;
+            }
 
-    if (isNaN(amount) || amount <= 0) {
-        alert("Lütfen geçerli bir tutar girin.");
-        return;
-    }
+            // Seçilen "YYYY-AA-GG" tarihini tekrar sisteme uygun olan "GG/AA/YYYY" formatına geri çevirir
+            let finalDate = "";
+            if (newDateVal) {
+                const parts = newDateVal.split('-');
+                if (parts.length === 3) {
+                    finalDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                }
+            }
 
-    // Anlık tarih (GG/AA/YYYY) ve saat (SS:DD) bilgisini oluştur
-    const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const dd = String(now.getDate()).padStart(2, '0');
-    const hh = String(now.getHours()).padStart(2, '0');
-    const min = String(now.getMinutes()).padStart(2, '0');
+            try {
+                await ekstrelerRef.child(ekstreKey).child('items').child(itemKey).update({
+                    desc: newDesc,
+                    amount: newAmount,
+                    date: finalDate
+                });
+                closeEditDebtModal(); // Başarılı olursa popup'ı kapat
+            } catch (err) {
+                alert("Düzenleme hatası: " + err.message);
+            }
+        };
 
-    const dateStr = `${dd}/${mm}/${yyyy}`;
-    const timeStr = `${hh}:${min}`;
+        // YENİ: Harcamayı Kalıcı Silme Fonksiyonu
+        window.deleteEditDebt = async function () {
+            const ekstreKey = document.getElementById('editDebtEkstreKey').value;
+            const itemKey = document.getElementById('editDebtItemKey').value;
 
-    // Veritabanına gönderilecek yeni harcama objesi
-    const newItem = {
-        desc: desc,
-        amount: amount,
-        category: category,
-        date: dateStr,
-        time: timeStr
-    };
+            if (confirm("Bu harcamayı listeden KALICI OLARAK silmek istediğinize emin misiniz?")) {
+                try {
+                    await ekstrelerRef.child(ekstreKey).child('items').child(itemKey).remove();
+                    closeEditDebtModal(); // Silindikten sonra popup'ı kapat
+                } catch (err) {
+                    alert("Silme hatası: " + err.message);
+                }
+            }
+        };
 
-    try {
-        // Firebase'e (veya ilgili veritabanına) yeni kaydı push ile ekle
-        await ekstrelerRef.child(selectedEkstreKey).child('items').push(newItem);
-        
-        // Ekleme başarılı olunca kutucukları temizle
-        descInput.value = '';
-        amountInput.value = '';
-        descInput.focus(); // Bir sonraki ekleme için imleci açıklamaya geri koy
-        
-    } catch (err) {
-        alert("Harcama eklenirken bir hata oluştu: " + err.message);
-    }
-};
-          
+        // YENİ: Manuel Harcama Ekleme Fonksiyonu
+        window.addManualDebt = async function () {
+            if (!selectedEkstreKey) {
+                alert("Lütfen önce bir ay/ekstre seçin veya 'Node.js Çek' butonuyla yeni ekstre oluşturun.");
+                return;
+            }
+
+            const descInput = document.getElementById('manualDebtDesc');
+            const amountInput = document.getElementById('manualDebtAmount');
+            const categorySelect = document.getElementById('manualDebtCategory');
+
+            const desc = descInput.value.trim();
+            const amountStr = amountInput.value.trim();
+            const category = categorySelect.value;
+
+            // Virgülleri noktaya çevirerek tutarı rakama dönüştür
+            const amount = parseFloat(amountStr.replace(',', '.'));
+
+            if (!desc) {
+                alert("Lütfen harcama için bir açıklama (Örn: Çaycı) girin.");
+                return;
+            }
+
+            if (isNaN(amount) || amount <= 0) {
+                alert("Lütfen geçerli bir tutar girin.");
+                return;
+            }
+
+            // Anlık tarih (GG/AA/YYYY) ve saat (SS:DD) bilgisini oluştur
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+
+            const dateStr = `${dd}/${mm}/${yyyy}`;
+            const timeStr = `${hh}:${min}`;
+
+            // Veritabanına gönderilecek yeni harcama objesi
+            const newItem = {
+                desc: desc,
+                amount: amount,
+                category: category,
+                date: dateStr,
+                time: timeStr
+            };
+
+            try {
+                // Firebase'e (veya ilgili veritabanına) yeni kaydı push ile ekle
+                await ekstrelerRef.child(selectedEkstreKey).child('items').push(newItem);
+
+                // Ekleme başarılı olunca kutucukları temizle
+                descInput.value = '';
+                amountInput.value = '';
+                descInput.focus(); // Bir sonraki ekleme için imleci açıklamaya geri koy
+
+            } catch (err) {
+                alert("Harcama eklenirken bir hata oluştu: " + err.message);
+            }
+        };
+
 
         // YENİ: 58x88mm Termal Fiş Yazdırma Fonksiyonu
         // 1. Butona basınca sadece pencereyi aç
@@ -2777,10 +2819,10 @@ window.addManualDebt = async function() {
         };
 
         // 2. Seçime göre fişi hazırla ve yazdır
-       // 2. Seçime göre fişi hazırla ve yazdır
-                // 2. Seçime göre fişi hazırla ve yazdır (TERMAL YAZICI İÇİN KUSURSUZLAŞTIRILDI)
-       // 2. Seçime göre fişi hazırla ve yazdır (TERMAL YAZICI İÇİN KUSURSUZLAŞTIRILDI)
-       // 2. Seçime göre fişi hazırla ve yazdır (TERMAL YAZICI - EN ÜSTTEN BAŞLAMA ÇÖZÜMÜ)
+        // 2. Seçime göre fişi hazırla ve yazdır
+        // 2. Seçime göre fişi hazırla ve yazdır (TERMAL YAZICI İÇİN KUSURSUZLAŞTIRILDI)
+        // 2. Seçime göre fişi hazırla ve yazdır (TERMAL YAZICI İÇİN KUSURSUZLAŞTIRILDI)
+        // 2. Seçime göre fişi hazırla ve yazdır (TERMAL YAZICI - EN ÜSTTEN BAŞLAMA ÇÖZÜMÜ)
         window.executePrint = function (secim) {
             document.getElementById('printSelectionModal').classList.add('hidden');
             const data = allEkstreData[selectedEkstreKey];
@@ -2790,7 +2832,7 @@ window.addManualDebt = async function() {
             Object.values(data.items || {}).forEach(item => {
                 const price = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
                 let cleanName = item.desc.replace(/^\d+[-]/, '').trim();
-                
+
                 const rowHtml = `
                     <div style="margin-bottom:8px; border-bottom:1px dashed #000; padding-bottom:4px;">
                         <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; color:#000;">
@@ -3173,13 +3215,13 @@ window.addManualDebt = async function() {
 
             document.getElementById('switchToInPlace').addEventListener('click', () => setFirebaseRefs('in_place'));
             document.getElementById('switchToDelivery').addEventListener('click', () => setFirebaseRefs('delivery'));
-           document.getElementById('switchToInPlace').addEventListener('click', () => setFirebaseRefs('in_place'));
+            document.getElementById('switchToInPlace').addEventListener('click', () => setFirebaseRefs('in_place'));
             document.getElementById('switchToDelivery').addEventListener('click', () => setFirebaseRefs('delivery'));
-            
+
             // DÜZELTME 1: JS'yi çökerten hatalı 'copyToDeliveryBtn' satırı buradan tamamen silindi.
             // Bu sayede alt satırdaki çarpı ikonu artık sorunsuz çalışacak.
             closeEditProductModal.addEventListener('click', () => editProductModal.classList.add('hidden'));
-            
+
             uploadEditImageBtn.addEventListener('click', (e) => { e.preventDefault(); openCloudinaryWidget(editImageURLInput, editImagePreview); });
 
             // DÜZELTME 2: Tüm çıkış butonlarını bulup sayfadan atmadan giriş ekranını getiren sistem
@@ -3189,10 +3231,10 @@ window.addManualDebt = async function() {
                     e.preventDefault(); // Sayfa yenilemesini/yönlendirmesini durdurur
                     sessionStorage.removeItem('olimpiyat_admin_logged_in');
                     localStorage.removeItem('olimpiyat_admin_logged_in');
-                    
+
                     // Giriş panelini geri getir ve şifreyi temizle
                     document.getElementById('adminLoginOverlay').classList.remove('hidden');
-                    document.getElementById('panelPassword').value = ''; 
+                    document.getElementById('panelPassword').value = '';
                 });
             });
 
