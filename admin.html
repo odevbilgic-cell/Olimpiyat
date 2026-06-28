@@ -28,6 +28,10 @@
             height: 100dvh; /* Modern mobil tarayıcılar için dinamik ekran boyu */
         }
 
+        /* 🚫 YATAY KAYDIRMA ÇUBUĞUNU GİZLEME (Ama kaydırma çalışır) */
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
         /* Aktif ana menü butonu */
         .admin-menu-button.active {
             background: linear-gradient(135deg, #ef4444, #f97316);
@@ -693,45 +697,45 @@
         </div>
     </div>
 
-   <div class="flex flex-col md:flex-row h-dvh w-full overflow-hidden bg-gray-50">
+ <div class="flex flex-col md:flex-row min-h-screen w-full bg-gray-50">
 
-        <div class="w-full md:w-64 bg-gradient-to-b from-red-700 via-red-800 to-amber-900 text-white flex flex-col p-3 md:p-4 shadow-xl z-30 flex-shrink-0 md:h-full md:overflow-y-auto">
+        <div class="w-full md:w-64 bg-gradient-to-b from-red-700 via-red-800 to-amber-900 text-white flex flex-col p-2 md:p-3 shadow-md z-30 md:sticky md:top-0 md:h-screen md:overflow-y-auto flex-shrink-0">
             
-            <div class="flex items-center justify-between md:flex-col md:items-center md:justify-center border-b border-red-500/40 pb-2 mb-2 md:mb-4 gap-2">
-                <div class="flex flex-shrink-0 w-24 sm:w-28 md:w-full justify-start md:justify-center">
-                    <img src="file_00000000a4647246a61cf005bd316d6f.png" id="logoAna" class="w-full h-auto object-contain max-w-[120px] md:max-w-[200px]">
+            <div class="flex items-center justify-between md:flex-col md:items-center md:justify-center border-b border-red-500/40 pb-1.5 mb-1.5 md:mb-3 gap-1">
+                <div class="flex flex-shrink-0 w-20 sm:w-24 md:w-full justify-start md:justify-center">
+                    <img src="file_00000000a4647246a61cf005bd316d6f.png" id="logoAna" class="w-full h-auto object-contain max-w-[100px] md:max-w-[160px]">
                 </div>
                 
-                <div class="flex items-center gap-1.5 md:hidden">
-                    <button id="mobileMenuToggleBtn" class="bg-orange-500 text-white px-3 py-2 rounded-lg text-xs font-black shadow-md flex items-center gap-1 active:scale-95 transition whitespace-nowrap">
+                <div class="flex items-center gap-1 md:hidden">
+                    <button id="mobileMenuToggleBtn" class="bg-orange-500 text-white px-2.5 py-1.5 rounded-md text-[11px] font-black shadow-sm flex items-center gap-1 active:scale-95 transition whitespace-nowrap">
                         🍽️ Yerinde
                     </button>
-                    <a href="index.html" class="px-3 py-2 bg-red-600 rounded-lg text-xs font-black shadow-md whitespace-nowrap active:scale-95 transition">Çıkış</a>
+                    <a href="index.html" class="px-2.5 py-1.5 bg-red-600 rounded-md text-[11px] font-black shadow-sm whitespace-nowrap active:scale-95 transition">Çıkış</a>
                 </div>
             </div>
 
-            <div class="hidden md:block mb-3 md:mb-6 border-b border-red-500/40 pb-3 md:pb-4">
-                <button id="switchToInPlace" data-menu="in_place" class="admin-menu-button active w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40">
+            <div class="hidden md:block mb-2 md:mb-4 border-b border-red-500/40 pb-2 md:pb-3">
+                <button id="switchToInPlace" data-menu="in_place" class="admin-menu-button active w-full text-left px-2 py-1.5 rounded-lg transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40">
                     🍽️ <span class="truncate">Yerinde Menü</span>
                 </button>
-                <button id="switchToDelivery" data-menu="delivery" class="admin-menu-button w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40 mt-2">
+                <button id="switchToDelivery" data-menu="delivery" class="admin-menu-button w-full text-left px-2 py-1.5 rounded-lg transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40 mt-1.5">
                     🛵 <span class="truncate">Paket Servis</span>
                 </button>
             </div>
 
-            <div class="flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 -mx-3 px-3 md:mx-0 md:px-0 scrollbar-none flex-shrink-0">
-                <button id="showProducts" class="tab-button active text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📦 Ürünler</button>
-                <button id="showSorting" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">⬆️ Sıralama</button>
-                <button id="showCampaigns" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">🖼️ Kampanyalar</button>
-                <button id="showAddProduct" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">➕ Yeni Ürün</button>
-                <button id="showBulkUpdate" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💸 Toplu Fiyat</button>
-                <button id="showStats" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📊 İstatistik</button>
-                <button id="showDebtCalculator" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💳 Borç Hesapla</button>
-                <button onclick="openPrintModule()" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0"><span>🖨️</span>Fiyat Listesi</button>
-                <button id="showGlobalDateUpdate" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📅 Ortak Tarih</button>
+            <div class="flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-1 md:pb-0 -mx-2 px-2 md:mx-0 md:px-0 scrollbar-none flex-shrink-0">
+                <button id="showProducts" class="tab-button active text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📦 Ürünler</button>
+                <button id="showSorting" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">⬆️ Sıralama</button>
+                <button id="showCampaigns" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">🖼️ Kampanyalar</button>
+                <button id="showAddProduct" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">➕ Yeni Ürün</button>
+                <button id="showBulkUpdate" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💸 Toplu Fiyat</button>
+                <button id="showStats" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📊 İstatistik</button>
+                <button id="showDebtCalculator" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💳 Borç Hesapla</button>
+                <button onclick="openPrintModule()" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0"><span>🖨️</span>Fiyat Listesi</button>
+                <button id="showGlobalDateUpdate" class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📅 Ortak Tarih</button>
             </div>
 
-            <a href="index.html" class="hidden md:block mt-auto p-2.5 bg-red-600 text-center rounded-xl font-bold hover:bg-red-700 shadow-md transition">Güvenli Çıkış Yap</a>
+            <a href="index.html" class="hidden md:block mt-auto p-2 bg-red-600 text-center rounded-lg text-sm font-bold hover:bg-red-700 shadow-md transition">Güvenli Çıkış Yap</a>
         </div>
 
         <main class="flex-1 h-full overflow-y-auto p-3 sm:p-6 md:p-8 w-full relative scrollbar-none">
@@ -1098,22 +1102,14 @@
             const activeTab = document.querySelector('.tab-button.active');
             if (activeTab) {
                 const activeId = activeTab.id;
-                if (activeId === 'showProducts') {
-                    const filterSelect = document.getElementById('filterCategory');
-                    const toggleArchiveBtn = document.getElementById('toggleArchiveBtn');
-                    // Rafım modundaysak ona göre yenile, değilsek normal menüyü yenile
-                    if (toggleArchiveBtn && toggleArchiveBtn.classList.contains('bg-orange-500')) {
-                        renderProductList('Tümü', true);
-                    } else {
-                        renderProductList(filterSelect ? filterSelect.value : 'Tümü', false);
-                    }
-                } else if (activeId === 'showBulkUpdate') {
-                    const bulkSelect = document.getElementById('bulkCategory');
-                    renderBulkPriceList(bulkSelect ? bulkSelect.value : 'Tümü');
-                } else if (activeId === 'showSorting') {
-                    const sortSelect = document.getElementById('sortCategory');
-                    if (sortSelect && sortSelect.value) loadSortableList(sortSelect.value);
-                }
+                // EKRANI TAMAMEN YENİDEN ÇİZ (Başlıkların değişmesi için bu şart)
+                if (activeId === 'showProducts') renderProductsModule();
+                else if (activeId === 'showSorting') renderSortingModule();
+                else if (activeId === 'showCampaigns') renderCampaignModule();
+                else if (activeId === 'showAddProduct') renderAddProductModule();
+                else if (activeId === 'showBulkUpdate') renderBulkUpdateModule();
+                else if (activeId === 'showStats') renderStatsModule();
+                else if (activeId === 'showDebtCalculator') renderDebtCalculatorModule();
             } else {
                 renderProductsModule();
             }
@@ -1137,10 +1133,7 @@
                     mobileToggle.className = 'bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-black shadow-md flex items-center gap-1 active:scale-95 transition whitespace-nowrap';
                 }
             }
-
-            const copyContainer = document.getElementById('copyToDeliveryContainer');
-            if (menuType === 'delivery') copyContainer.classList.remove('hidden');
-            else copyContainer.classList.add('hidden');
+            // (Eski sol menüdeki copyContainer gizleme kodunu sildik çünkü buton artık içeride)
         }
 
         // MOBİL TEKLİ BUTON DİNLEYİCİSİ (Yerinde <-> Paket Geçişi Yapar)
@@ -1245,10 +1238,19 @@
         function renderProductsModule() {
             setActiveTab('showProducts');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
+            
+            // YENİ: Kopyalama butonu SADECE Paket Servis menüsündeyken başlığın yanına eklenecek
+            const copyBtnHtml = currentMenuType === 'delivery' 
+                ? `<button id="headerCopyToDeliveryBtn" class="ml-auto bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-black hover:bg-blue-700 transition shadow-md whitespace-nowrap">🔄 Yerinde Menüyü Kopyala</button>` 
+                : '';
+
             loadModule(`
                 <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh]">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 flex-shrink-0">
-                        <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-1">📦 ${menuTitle}</h2>
+                        <div class="flex items-center w-full sm:w-auto gap-3">
+                            <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-1">📦 ${menuTitle}</h2>
+                            ${copyBtnHtml}
+                        </div>
                         <button id="toggleArchiveBtn" class="bg-gray-800 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-gray-900 transition flex items-center justify-center gap-2 active:scale-95 w-full sm:w-auto">
                             <span>📦</span> Rafım (Gizlenenler)
                         </button>
@@ -1272,6 +1274,13 @@
                     </ul>
                 </div>
             `);
+
+            // YENİ: Başlıktaki kopyalama butonuna tıklama olayını ekle
+            const headerCopyBtn = document.getElementById('headerCopyToDeliveryBtn');
+            if (headerCopyBtn) {
+                headerCopyBtn.addEventListener('click', copyMenuDataToDelivery);
+            }
+
             const filterSelect = document.getElementById('filterCategory');
             filterSelect.addEventListener('change', () => renderProductList(filterSelect.value, false));
 
