@@ -697,25 +697,25 @@
 
         <div class="w-full md:w-64 bg-gradient-to-b from-red-700 via-red-800 to-amber-900 text-white flex flex-col p-3 md:p-4 shadow-xl z-30 flex-shrink-0 md:h-full md:overflow-y-auto">
             
-            <div class="flex items-center justify-between md:block border-b border-red-500/40 pb-2 mb-3 md:mb-4">
-                <div class="flex items-center gap-2">
-                    <img src="file_00000000a4647246a61cf005bd316d6f.png" id="logoAna" width="40%">
+            <div class="flex items-center justify-between md:flex-col md:items-center md:justify-center border-b border-red-500/40 pb-2 mb-2 md:mb-4 gap-2">
+                <div class="flex flex-shrink-0 w-24 sm:w-28 md:w-full justify-start md:justify-center">
+                    <img src="file_00000000a4647246a61cf005bd316d6f.png" id="logoAna" class="w-full h-auto object-contain max-w-[120px] md:max-w-[200px]">
                 </div>
-                <a href="index.html" class="md:hidden px-3 py-1.5 bg-red-600 rounded-lg text-xs font-bold shadow-md">Çıkış</a>
+                
+                <div class="flex items-center gap-1.5 md:hidden">
+                    <button id="mobileMenuToggleBtn" class="bg-orange-500 text-white px-3 py-2 rounded-lg text-xs font-black shadow-md flex items-center gap-1 active:scale-95 transition whitespace-nowrap">
+                        🍽️ Yerinde
+                    </button>
+                    <a href="index.html" class="px-3 py-2 bg-red-600 rounded-lg text-xs font-black shadow-md whitespace-nowrap active:scale-95 transition">Çıkış</a>
+                </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 md:block mb-3 md:mb-6 border-b border-red-500/40 pb-3 md:pb-4">
+            <div class="hidden md:block mb-3 md:mb-6 border-b border-red-500/40 pb-3 md:pb-4">
                 <button id="switchToInPlace" data-menu="in_place" class="admin-menu-button active w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40">
                     🍽️ <span class="truncate">Yerinde Menü</span>
                 </button>
-                <button id="switchToDelivery" data-menu="delivery" class="admin-menu-button w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40 md:mt-2">
+                <button id="switchToDelivery" data-menu="delivery" class="admin-menu-button w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40 mt-2">
                     🛵 <span class="truncate">Paket Servis</span>
-                </button>
-            </div>
-
-            <div id="copyToDeliveryContainer" class="mb-4 md:mb-6 border-b border-red-500/40 pb-4 hidden">
-                <button id="copyToDeliveryBtn" class="bg-blue-600 text-white px-3 py-2.5 text-xs rounded-xl hover:bg-blue-700 transition font-black w-full shadow-md">
-                    Yerinde Menüyü Buraya Kopyala
                 </button>
             </div>
 
@@ -735,7 +735,7 @@
         </div>
 
         <main class="flex-1 h-full overflow-y-auto p-3 sm:p-6 md:p-8 w-full relative scrollbar-none">
-            <div id="contentContainer" class="max-w-5xl mx-auto w-full pb-32 md:pb-8"></div>
+            <div id="contentContainer" class="max-w-5xl mx-auto w-full pb-0 md:pb-0"></div>
         </main>
     </div>
 
@@ -1120,14 +1120,40 @@
         }
 
         function updateMenuButtonState(menuType) {
+            // Masaüstü butonlarını güncelle
             adminMenuButtons.forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.menu === menuType) btn.classList.add('active');
             });
+
+            // Mobil Tekli Butonun Rengini ve Yazısını Senkronize Et
+            const mobileToggle = document.getElementById('mobileMenuToggleBtn');
+            if (mobileToggle) {
+                if (menuType === 'in_place') {
+                    mobileToggle.innerHTML = '🍽️ Yerinde';
+                    mobileToggle.className = 'bg-orange-500 text-white px-3 py-2 rounded-lg text-xs font-black shadow-md flex items-center gap-1 active:scale-95 transition whitespace-nowrap';
+                } else {
+                    mobileToggle.innerHTML = '🛵 Paket';
+                    mobileToggle.className = 'bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-black shadow-md flex items-center gap-1 active:scale-95 transition whitespace-nowrap';
+                }
+            }
+
             const copyContainer = document.getElementById('copyToDeliveryContainer');
             if (menuType === 'delivery') copyContainer.classList.remove('hidden');
             else copyContainer.classList.add('hidden');
         }
+
+        // MOBİL TEKLİ BUTON DİNLEYİCİSİ (Yerinde <-> Paket Geçişi Yapar)
+            const mobileMenuToggleBtn = document.getElementById('mobileMenuToggleBtn');
+            if (mobileMenuToggleBtn) {
+                mobileMenuToggleBtn.addEventListener('click', () => {
+                    if (currentMenuType === 'in_place') {
+                        setFirebaseRefs('delivery');
+                    } else {
+                        setFirebaseRefs('in_place');
+                    }
+                });
+            }
 
         async function copyMenuDataToDelivery() {
             if (currentMenuType !== 'delivery') return;
@@ -1220,7 +1246,7 @@
             setActiveTab('showProducts');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[82dvh] md:h-[85dvh]">
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh]">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 flex-shrink-0">
                         <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-1">📦 ${menuTitle}</h2>
                         <button id="toggleArchiveBtn" class="bg-gray-800 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-gray-900 transition flex items-center justify-center gap-2 active:scale-95 w-full sm:w-auto">
@@ -1382,7 +1408,7 @@
             setActiveTab('showSorting');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[82dvh] md:h-[85dvh]">
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh]">
                     <div class="flex-shrink-0">
                         <h2 class="text-2xl font-black text-gray-800 mb-2 flex items-center gap-1">⬆️ ${menuTitle} Sıralama Ayarı</h2>
                         <p class="mb-4 text-xs sm:text-sm text-gray-500">Ürünleri sürükleyip bırakarak menüdeki dizilimlerini parmağınızla ayarlayabilirsiniz.</p>
@@ -1502,7 +1528,7 @@
             setActiveTab('showCampaigns');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
            loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[82dvh] md:h-[85dvh] max-w-2xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh] max-w-2xl mx-auto">
                     <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 flex-shrink-0">🖼️ ${menuTitle} Kampanya Yönetimi</h2>
                     
                     <div class="flex-1 overflow-y-auto pr-2 pb-2">
@@ -1864,7 +1890,7 @@
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
 
             loadModule(`
-            <div class="bg-white rounded-2xl shadow-sm p-3 sm:p-5 border border-orange-100 animate-pop-in flex flex-col h-[82dvh] md:h-[85dvh]">
+            <div class="bg-white rounded-2xl shadow-sm p-3 sm:p-5 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh]">
                 <h2 class="text-lg sm:text-xl font-black text-gray-800 mb-3 flex items-center gap-1 flex-shrink-0">💸 ${menuTitle} Toplu Fiyat Ayarı</h2>
                 
                 <div class="border border-orange-200 p-2 sm:p-3 mb-3 rounded-xl bg-orange-50/50 flex flex-col gap-2 shadow-inner flex-shrink-0">
