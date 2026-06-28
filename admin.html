@@ -693,87 +693,50 @@
         </div>
     </div>
 
-    <div class="flex flex-col md:flex-row h-screen overflow-hidden">
+   <div class="flex flex-col md:flex-row h-dvh w-full overflow-hidden bg-gray-50">
 
-        <div class="w-full md:w-64 bg-gradient-to-b from-red-700 via-red-800 to-amber-900 text-white flex flex-col p-4 shadow-xl z-30 relative md:static flex-shrink-0">
-            <div class="flex items-center justify-between md:block border-b border-red-500/40 pb-2 mb-4">
+        <div class="w-full md:w-64 bg-gradient-to-b from-red-700 via-red-800 to-amber-900 text-white flex flex-col p-3 md:p-4 shadow-xl z-30 flex-shrink-0 md:h-full md:overflow-y-auto">
+            
+            <div class="flex items-center justify-between md:block border-b border-red-500/40 pb-2 mb-3 md:mb-4">
                 <div class="flex items-center gap-2">
                     <img src="file_00000000a4647246a61cf005bd316d6f.png" id="logoAna" width="40%">
-                    </h1>
                 </div>
-                <a href="index.html"
-                    class="md:hidden px-3 py-1.5 bg-red-600 rounded-lg text-xs font-bold shadow-md">Çıkış</a>
+                <a href="index.html" class="md:hidden px-3 py-1.5 bg-red-600 rounded-lg text-xs font-bold shadow-md">Çıkış</a>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 md:block mb-4 md:mb-6 border-b border-red-500/40 pb-4">
-                <button id="switchToInPlace" data-menu="in_place"
-                    class="admin-menu-button active w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40">
+            <div class="grid grid-cols-2 gap-2 md:block mb-3 md:mb-6 border-b border-red-500/40 pb-3 md:pb-4">
+                <button id="switchToInPlace" data-menu="in_place" class="admin-menu-button active w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40">
                     🍽️ <span class="truncate">Yerinde Menü</span>
                 </button>
-                <button id="switchToDelivery" data-menu="delivery"
-                    class="admin-menu-button w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40 md:mt-2">
+                <button id="switchToDelivery" data-menu="delivery" class="admin-menu-button w-full text-left p-2.5 rounded-xl transition text-xs sm:text-sm font-bold flex items-center gap-1 bg-red-900/40 md:mt-2">
                     🛵 <span class="truncate">Paket Servis</span>
                 </button>
             </div>
 
             <div id="copyToDeliveryContainer" class="mb-4 md:mb-6 border-b border-red-500/40 pb-4 hidden">
-                <button id="copyToDeliveryBtn"
-                    class="bg-blue-600 text-white px-3 py-2.5 text-xs rounded-xl hover:bg-blue-700 transition font-black w-full shadow-md">
+                <button id="copyToDeliveryBtn" class="bg-blue-600 text-white px-3 py-2.5 text-xs rounded-xl hover:bg-blue-700 transition font-black w-full shadow-md">
                     Yerinde Menüyü Buraya Kopyala
                 </button>
             </div>
 
-            <div
-                class="flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-none">
-                <button id="showProducts"
-                    class="tab-button active text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    📦 Ürünler
-                </button>
-                <button id="showSorting"
-                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    ⬆️ Sıralama
-                </button>
-                <button id="showCampaigns"
-                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    🖼️ Kampanyalar
-                </button>
-                <button id="showAddProduct"
-                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    ➕ Yeni Ürün
-                </button>
-                <button id="showBulkUpdate"
-                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    💸 Toplu Fiyat
-                </button>
-                <button id="showStats"
-                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    📊 İstatistik
-                </button>
-                <button id="showDebtCalculator"
-                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    💳 Borç Hesapla
-                </button>
-                <button onclick="openPrintModule()"
-                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    <span>🖨️</span>Fiyat Listesi
-                </button>
-
-                <button id="showGlobalDateUpdate"
-                    class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">
-                    📅 Ortak Tarih
-                </button>
+            <div class="flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 -mx-3 px-3 md:mx-0 md:px-0 scrollbar-none flex-shrink-0">
+                <button id="showProducts" class="tab-button active text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📦 Ürünler</button>
+                <button id="showSorting" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">⬆️ Sıralama</button>
+                <button id="showCampaigns" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">🖼️ Kampanyalar</button>
+                <button id="showAddProduct" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">➕ Yeni Ürün</button>
+                <button id="showBulkUpdate" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💸 Toplu Fiyat</button>
+                <button id="showStats" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📊 İstatistik</button>
+                <button id="showDebtCalculator" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💳 Borç Hesapla</button>
+                <button onclick="openPrintModule()" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0"><span>🖨️</span>Fiyat Listesi</button>
+                <button id="showGlobalDateUpdate" class="tab-button text-left p-2.5 rounded-xl hover:bg-white/10 transition text-xs sm:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📅 Ortak Tarih</button>
             </div>
 
-            <a href="index.html"
-                class="hidden md:block mt-auto p-2.5 bg-red-600 text-center rounded-xl font-bold hover:bg-red-700 shadow-md transition">
-                Güvenli Çıkış Yap
-            </a>
+            <a href="index.html" class="hidden md:block mt-auto p-2.5 bg-red-600 text-center rounded-xl font-bold hover:bg-red-700 shadow-md transition">Güvenli Çıkış Yap</a>
         </div>
 
-       <main class="flex-1 p-3 sm:p-6 md:p-8 overflow-y-auto pb-24 md:pb-8 w-full">
-        <div id="contentContainer" class="max-w-5xl mx-auto w-full">
-        </div>
-    </main>
+        <main class="flex-1 h-full overflow-y-auto p-3 sm:p-6 md:p-8 w-full relative scrollbar-none">
+            <div id="contentContainer" class="max-w-5xl mx-auto w-full pb-32 md:pb-8"></div>
+        </main>
     </div>
 
     <div id="editProductModal"
@@ -1257,15 +1220,15 @@
             setActiveTab('showProducts');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in">
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4">
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[82dvh] md:h-[85dvh]">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 flex-shrink-0">
                         <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-1">📦 ${menuTitle}</h2>
                         <button id="toggleArchiveBtn" class="bg-gray-800 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-gray-900 transition flex items-center justify-center gap-2 active:scale-95 w-full sm:w-auto">
                             <span>📦</span> Rafım (Gizlenenler)
                         </button>
                     </div>
                     
-                    <div id="productControls" class="mb-4">
+                    <div id="productControls" class="mb-4 flex-shrink-0">
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kategoriye Göre Filtrele</label>
                         <select id="filterCategory" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-semibold bg-gray-50 outline-none focus:border-orange-500">
                             <option value="Tümü">Tüm Kategoriler</option>
@@ -1273,17 +1236,16 @@
                         </select>
                     </div>
                     
-                    <div id="archiveControls" class="hidden mb-4 p-4 bg-red-50 border border-red-100 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3 shadow-inner">
+                    <div id="archiveControls" class="hidden mb-4 p-4 bg-red-50 border border-red-100 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3 shadow-inner flex-shrink-0">
                         <span class="text-sm font-black text-red-700">Rafa Kaldırılan (Gizli) Ürünler</span>
                         <button id="unarchiveSelectedBtn" class="w-full sm:w-auto bg-green-600 text-white px-4 py-2.5 rounded-xl text-xs font-black shadow-md hover:bg-green-700 transition active:scale-95">✅ Seçilenleri Raftan Çıkar</button>
                     </div>
 
-                    <ul id="productList" class="flex flex-col gap-2.5">
+                    <ul id="productList" class="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-2 pb-2">
                         <li class="p-4 text-center text-gray-400 text-sm">Ürünler yükleniyor...</li>
                     </ul>
                 </div>
             `);
-
             const filterSelect = document.getElementById('filterCategory');
             filterSelect.addEventListener('change', () => renderProductList(filterSelect.value, false));
 
@@ -1420,22 +1382,26 @@
             setActiveTab('showSorting');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in">
-                    <h2 class="text-2xl font-black text-gray-800 mb-2 flex items-center gap-1">⬆️ ${menuTitle} Sıralama Ayarı</h2>
-                    <p class="mb-4 text-xs sm:text-sm text-gray-500">Ürünleri sürükleyip bırakarak menüdeki dizilimlerini parmağınızla ayarlayabilirsiniz.</p>
-                    
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sıralanacak Kategori Seçin</label>
-                    <select id="sortCategory" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-semibold bg-gray-50 outline-none focus:border-orange-500 mb-4">
-                        <option value="">-- Kategori Seçiniz --</option>
-                        <option value="Tümü">Tümü (Tüm Ürünler)</option> ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                    </select>
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[82dvh] md:h-[85dvh]">
+                    <div class="flex-shrink-0">
+                        <h2 class="text-2xl font-black text-gray-800 mb-2 flex items-center gap-1">⬆️ ${menuTitle} Sıralama Ayarı</h2>
+                        <p class="mb-4 text-xs sm:text-sm text-gray-500">Ürünleri sürükleyip bırakarak menüdeki dizilimlerini parmağınızla ayarlayabilirsiniz.</p>
+                        
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sıralanacak Kategori Seçin</label>
+                        <select id="sortCategory" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-semibold bg-gray-50 outline-none focus:border-orange-500 mb-4">
+                            <option value="">-- Kategori Seçiniz --</option>
+                            <option value="Tümü">Tümü (Tüm Ürünler)</option> ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                        </select>
+                    </div>
 
-                    <ul id="sortableList" class="flex flex-col gap-2 p-2 border border-dashed rounded-xl bg-gray-50/50 min-h-[100px]">
+                    <ul id="sortableList" class="flex flex-col gap-2 p-2 border border-dashed rounded-xl bg-gray-50/50 flex-1 overflow-y-auto pr-2">
                         <li class="text-gray-400 text-center text-xs sm:text-sm py-6">Lütfen yukarıdan bir kategori seçiniz.</li>
                     </ul>
                     
-                    <button id="saveSorting" class="mt-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-3 rounded-xl text-sm sm:text-base font-bold shadow-md active:scale-95 transition w-full hidden">Yeni Sıralamayı Kaydet</button>
-                    <p id="sortingStatus" class="mt-3 text-center text-xs font-bold hidden"></p>
+                    <div class="flex-shrink-0 mt-2">
+                        <button id="saveSorting" class="mt-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-3 rounded-xl text-sm sm:text-base font-bold shadow-md active:scale-95 transition w-full hidden">Yeni Sıralamayı Kaydet</button>
+                        <p id="sortingStatus" class="mt-2 text-center text-xs font-bold hidden"></p>
+                    </div>
                 </div>
             `);
 
@@ -1535,43 +1501,47 @@
         function renderCampaignModule() {
             setActiveTab('showCampaigns');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
-            loadModule(`
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">🖼️ ${menuTitle} Kampanya Yönetimi</h2>
-                <div class="p-6 bg-white rounded-lg shadow-md max-w-2xl">
+           loadModule(`
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[82dvh] md:h-[85dvh] max-w-2xl mx-auto">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 flex-shrink-0">🖼️ ${menuTitle} Kampanya Yönetimi</h2>
                     
-                    <div class="border-2 border-amber-100 p-4 mb-6 rounded-xl bg-amber-50/50">
-                        <h3 class="font-bold mb-2 text-orange-600 text-sm uppercase tracking-wider">Kampanya Toplu Fiyat Ayarı</h3>
-                        <p class="text-xs text-gray-500 mb-3">Gireceğiniz miktar mevcut tüm afiş fiyatlarının üzerine eklenecektir. İndirim için başına eksi (-) koyun.</p>
-                        <div class="flex gap-2">
-                            <input id="bulkCampaignAdjustmentValue" type="number" placeholder="Örn: 10 veya -20" class="border-2 border-gray-100 p-2 rounded-xl flex-1 text-sm outline-none font-bold focus:border-orange-500" />
-                            <button id="applyBulkCampaignAdjustmentBtn" class="bg-orange-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-orange-600 transition shadow-sm active:scale-95">Tüm Afişlere Uygula</button>
+                    <div class="flex-1 overflow-y-auto pr-2 pb-2">
+                        <div class="border-2 border-amber-100 p-4 mb-4 rounded-xl bg-amber-50/50">
+                            <h3 class="font-bold mb-2 text-orange-600 text-sm uppercase tracking-wider">Kampanya Toplu Fiyat Ayarı</h3>
+                            <p class="text-xs text-gray-500 mb-3">Gireceğiniz miktar mevcut tüm afiş fiyatlarının üzerine eklenecektir. İndirim için başına eksi (-) koyun.</p>
+                            <div class="flex gap-2">
+                                <input id="bulkCampaignAdjustmentValue" type="number" placeholder="Örn: 10 veya -20" class="border-2 border-gray-100 p-2 rounded-xl flex-1 text-sm outline-none font-bold focus:border-orange-500" />
+                                <button id="applyBulkCampaignAdjustmentBtn" class="bg-orange-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-orange-600 transition shadow-sm active:scale-95">Tüm Afişlere Uygula</button>
+                            </div>
                         </div>
+
+                        <div class="border p-4 mb-4 rounded-lg bg-orange-50/50 border-orange-200">
+                            <h3 class="font-bold mb-3 text-orange-700 text-sm uppercase tracking-wider">Yeni Kampanya Kartı Ekle</h3>
+                            <div class="mb-3">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">1. Afiş Görseli Seçin</label>
+                                <button id="uploadNewCampaignImageBtn" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition w-full shadow-sm">Görsel Yükle (Cloudinary)</button>
+                                <img id="newCampaignImagePreview" class="campaign-image-preview hidden" src="" alt="Önizleme">
+                                <input type="hidden" id="newCampaignImageURL" value="" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">2. Fiyat Girin (Blob/Kutucuk İçin)</label>
+                                <input id="newCampaignPriceInput" type="text" placeholder="Örn: 250 ₺" class="border-2 border-gray-100 p-2.5 rounded-xl w-full font-bold text-sm outline-none focus:border-orange-500" />
+                            </div>
+                            <button id="addCampaignUrlBtn" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-4 py-3 rounded-xl font-bold transition w-full shadow-md hidden">✅ Listeye Dahil Et</button>
+                        </div>
+
+                        <h3 class="font-bold text-lg mb-2 text-gray-800">Aktif Afişler (${campaignUrls.length} Adet)</h3>
+                        <p class="mb-2 text-xs text-gray-500">Sürükleyerek sırasını değiştirebilir, fiyatları kutulardan anlık düzenleyebilirsiniz.</p>
+                        
+                        <ul id="sortableCampaignList" class="flex flex-col gap-3.5 p-2 border border-dashed rounded-xl bg-gray-50/50 min-h-[50px]"></ul>
                     </div>
 
-                    <div class="border p-4 mb-6 rounded-lg bg-orange-50/50 border-orange-200">
-                        <h3 class="font-bold mb-3 text-orange-700 text-sm uppercase tracking-wider">Yeni Kampanya Kartı Ekle</h3>
-                        <div class="mb-3">
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">1. Afiş Görseli Seçin</label>
-                            <button id="uploadNewCampaignImageBtn" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition w-full shadow-sm">Görsel Yükle (Cloudinary)</button>
-                            <img id="newCampaignImagePreview" class="campaign-image-preview hidden" src="" alt="Önizleme">
-                            <input type="hidden" id="newCampaignImageURL" value="" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">2. Fiyat Girin (Blob/Kutucuk İçin)</label>
-                            <input id="newCampaignPriceInput" type="text" placeholder="Örn: 250 ₺" class="border-2 border-gray-100 p-2.5 rounded-xl w-full font-bold text-sm outline-none focus:border-orange-500" />
-                        </div>
-                        <button id="addCampaignUrlBtn" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-4 py-3 rounded-xl font-bold transition w-full shadow-md hidden">✅ Listeye Dahil Et</button>
+                    <div class="flex-shrink-0 mt-2">
+                        <button id="saveAllCampaignChangesBtn" class="mt-2 bg-gray-800 text-white px-4 py-3 rounded-xl text-sm sm:text-base font-bold hover:bg-gray-900 transition w-full hidden shadow-md">
+                            Tüm Düzenlemeleri ve Sıralamayı Kaydet
+                        </button>
+                        <p id="campaignSortingStatus" class="mt-2 text-center text-xs font-bold text-emerald-600 hidden"></p>
                     </div>
-
-                    <h3 class="font-bold text-lg mb-2 text-gray-800">Aktif Afişler (${campaignUrls.length} Adet)</h3>
-                    <p class="mb-4 text-xs text-gray-500">Sürükleyerek sırasını değiştirebilir, fiyatları kutulardan anlık düzenleyebilirsiniz.</p>
-                    
-                    <ul id="sortableCampaignList" class="flex flex-col gap-3.5 p-2 border border-dashed rounded-xl bg-gray-50/50 min-h-[50px]"></ul>
-
-                    <button id="saveAllCampaignChangesBtn" class="mt-4 bg-gray-800 text-white px-4 py-3 rounded-xl text-sm sm:text-base font-bold hover:bg-gray-900 transition w-full hidden shadow-md">
-                        Tüm Düzenlemeleri ve Sıralamayı Kaydet
-                    </button>
-                    <p id="campaignSortingStatus" class="mt-2 text-center text-xs font-bold text-emerald-600 hidden"></p>
                 </div>
             `);
 
@@ -1894,55 +1864,55 @@
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
 
             loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-3 sm:p-5 border border-orange-100 animate-pop-in">
-                    <h2 class="text-lg sm:text-xl font-black text-gray-800 mb-3 flex items-center gap-1">💸 ${menuTitle} Toplu Fiyat Ayarı</h2>
-                    
-                    <div class="border border-orange-200 p-2 sm:p-3 mb-3 rounded-xl bg-orange-50/50 flex flex-col gap-2 shadow-inner">
-                        <div class="flex items-center gap-1">
-                            <span class="text-lg">🪄</span>
-                            <h3 class="font-black text-orange-700 text-xs sm:text-sm uppercase tracking-wider">Otomatik Zam/İndirim Sihirbazı</h3>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 items-end">
-                            <div class="flex flex-col">
-                                <label class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase mb-0.5">1. Kategori Seç</label>
-                                <select id="bulkCategory" class="border border-gray-200 p-1.5 sm:p-2 rounded-lg text-xs font-semibold bg-white outline-none focus:border-orange-500">
-                                    <option value="Tümü">Tüm Ürünler</option>
-                                    ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div class="flex flex-col">
-                                <label class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase mb-0.5">2. Tür</label>
-                                <div class="flex gap-2 p-1.5 sm:p-2 border border-gray-200 rounded-lg bg-white text-xs font-bold items-center justify-center h-[30px] sm:h-[34px]">
-                                    <label class="flex items-center cursor-pointer"><input type="radio" name="updateType" value="percent" checked class="mr-1 accent-orange-500">%</label>
-                                    <label class="flex items-center cursor-pointer"><input type="radio" name="updateType" value="fixed" class="mr-1 accent-orange-500">₺</label>
-                                </div>
-                            </div>
-                            <div class="flex flex-col">
-                                <label class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase mb-0.5">3. Miktar (+ veya -)</label>
-                                <input id="updateValue" type="number" placeholder="Örn: 15, -10" class="border border-gray-200 p-1.5 sm:p-2 rounded-lg text-xs font-bold outline-none focus:border-orange-500 bg-white h-[30px] sm:h-[34px]" />
-                            </div>
-                            <button id="applyBulkAdjustment" class="bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-bold shadow-sm hover:bg-blue-700 transition active:scale-95 h-[30px] sm:h-[34px]">Aşağıya Yansıt</button>
-                        </div>
+            <div class="bg-white rounded-2xl shadow-sm p-3 sm:p-5 border border-orange-100 animate-pop-in flex flex-col h-[82dvh] md:h-[85dvh]">
+                <h2 class="text-lg sm:text-xl font-black text-gray-800 mb-3 flex items-center gap-1 flex-shrink-0">💸 ${menuTitle} Toplu Fiyat Ayarı</h2>
+                
+                <div class="border border-orange-200 p-2 sm:p-3 mb-3 rounded-xl bg-orange-50/50 flex flex-col gap-2 shadow-inner flex-shrink-0">
+                    <div class="flex items-center gap-1">
+                        <span class="text-lg">🪄</span>
+                        <h3 class="font-black text-orange-700 text-xs sm:text-sm uppercase tracking-wider">Otomatik Zam/İndirim Sihirbazı</h3>
                     </div>
-
-                    <div class="flex flex-col">
-                        <h3 class="font-bold text-sm mb-1 text-gray-800">📋 Fiyat Listesi (Manuel de düzenlenebilir)</h3>
-                        
-                        <div class="hidden sm:flex font-bold text-[10px] uppercase tracking-wider bg-gray-100 p-2 rounded-t-lg text-gray-500">
-                            <span class="w-2/5 pl-2">Ürün Adı</span>
-                            <span class="w-1/5 text-right pr-6">Eski Fiyat</span>
-                            <span class="w-1/5 text-right pr-2">Yeni Fiyat</span>
-                            <span class="w-1/5 text-right pr-2">İndirimli Fiyat</span>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 items-end">
+                        <div class="flex flex-col">
+                            <label class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase mb-0.5">1. Kategori Seç</label>
+                            <select id="bulkCategory" class="border border-gray-200 p-1.5 sm:p-2 rounded-lg text-xs font-semibold bg-white outline-none focus:border-orange-500">
+                                <option value="Tümü">Tüm Ürünler</option>
+                                ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                            </select>
                         </div>
-                        
-                        <form id="bulkUpdateForm" class="flex flex-col gap-1.5 max-h-[65vh] overflow-y-auto pr-1 pb-2 border-b border-gray-100"></form>
-                        
-                        <button id="saveManualPrices" class="mt-3 bg-red-600 text-white px-4 py-3 sm:py-3.5 rounded-xl font-black text-sm sm:text-base shadow-md hover:bg-red-700 transition w-full active:scale-95">YUKARIDAKİ TÜM FİYATLARI VERİTABANINA İŞLE</button>
-                        <p id="bulkStatus" class="mt-2 text-center text-xs font-bold text-emerald-600 hidden"></p>
+                        <div class="flex flex-col">
+                            <label class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase mb-0.5">2. Tür</label>
+                            <div class="flex gap-2 p-1.5 sm:p-2 border border-gray-200 rounded-lg bg-white text-xs font-bold items-center justify-center h-[30px] sm:h-[34px]">
+                                <label class="flex items-center cursor-pointer"><input type="radio" name="updateType" value="percent" checked class="mr-1 accent-orange-500">%</label>
+                                <label class="flex items-center cursor-pointer"><input type="radio" name="updateType" value="fixed" class="mr-1 accent-orange-500">₺</label>
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase mb-0.5">3. Miktar (+ veya -)</label>
+                            <input id="updateValue" type="number" placeholder="Örn: 15, -10" class="border border-gray-200 p-1.5 sm:p-2 rounded-lg text-xs font-bold outline-none focus:border-orange-500 bg-white h-[30px] sm:h-[34px]" />
+                        </div>
+                        <button id="applyBulkAdjustment" class="bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-bold shadow-sm hover:bg-blue-700 transition active:scale-95 h-[30px] sm:h-[34px]">Aşağıya Yansıt</button>
                     </div>
                 </div>
-            `);
+
+                <div class="flex flex-col flex-1 overflow-hidden">
+                    <h3 class="font-bold text-sm mb-1 text-gray-800 flex-shrink-0">📋 Fiyat Listesi (Manuel de düzenlenebilir)</h3>
+                    
+                    <div class="hidden sm:flex font-bold text-[10px] uppercase tracking-wider bg-gray-100 p-2 rounded-t-lg text-gray-500 flex-shrink-0">
+                        <span class="w-2/5 pl-2">Ürün Adı</span>
+                        <span class="w-1/5 text-right pr-6">Eski Fiyat</span>
+                        <span class="w-1/5 text-right pr-2">Yeni Fiyat</span>
+                        <span class="w-1/5 text-right pr-2">İndirimli Fiyat</span>
+                    </div>
+                    
+                    <form id="bulkUpdateForm" class="flex flex-col gap-1.5 flex-1 overflow-y-auto pr-2 pb-2 border-b border-gray-100 mt-1"></form>
+                    
+                    <button id="saveManualPrices" class="mt-3 bg-red-600 text-white px-4 py-3 sm:py-3.5 rounded-xl font-black text-sm sm:text-base shadow-md hover:bg-red-700 transition w-full active:scale-95 flex-shrink-0">YUKARIDAKİ TÜM FİYATLARI VERİTABANINA İŞLE</button>
+                    <p id="bulkStatus" class="mt-2 text-center text-xs font-bold text-emerald-600 hidden flex-shrink-0"></p>
+                </div>
+            </div>
+        `);
 
             document.getElementById('bulkCategory').addEventListener('change', () => renderBulkPriceList(document.getElementById('bulkCategory').value));
             document.getElementById('applyBulkAdjustment').addEventListener('click', applyBulkAdjustment);
