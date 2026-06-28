@@ -529,97 +529,7 @@
                 margin-bottom: -150mm !important;
                 
             }
-            /* --- DÜZELTİLEN KISIM: iPhone Taşma Sorunu (Tek Satır - Küçültülmüş Font) --- */
-        
-        .menu-table-container {
-            display: flex;
-            width: 100%;
-            justify-content: space-between;
-        }
-
-        .menu-column {
-            width: 48%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .menu-spacer {
-            display: none; 
-        }
-
-        .item {
-            display: flex;
-            width: 100%;
-            justify-content: space-between;
-            align-items: center;
-            color: #ffffff;
-            font-size: 5px; /* Taşmayı önlemek için 16px'ten 13px'e düşürüldü */
-            font-weight: 700;
-            margin-bottom: 4px;
-            gap: 4px;
-        }
-
-        .item-name {
-            text-align: left;
-            white-space: nowrap; /* KESİNLİKLE alt satıra geçmez, tek satır kalır */
-            flex: 1; 
-        }
-
-        .item-name::first-letter {
-            color: #ffcc00;
-            padding-right: 2px;
-        }
-
-        .price {
-            text-align: right;
-            color: #ffcc00;
-            font-weight: 700;
-            white-space: nowrap; /* Fiyat asla bölünmez */
-            flex-shrink: 0; /* Fiyat alanı daralmaz, net kalır */
-        }
-
-         .category-block h3 {
-            color: #ffcc00;
-            font-size: 7px;
-            font-weight: 900;
-            margin-bottom: 4px;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid #222;
-            padding-bottom: 2px;
-        }
-
-        /* Midye alanı daraltıldı */
-        .midye-block {
-            margin-top: 6px;
-            color: #ffffff;
-            font-size: 6px;
-            font-weight: 900;
-            letter-spacing: 0.5px;
-            border: 1px dashed #ffcc00;
-            padding: 5px;
-            text-align: center;
-            page-break-inside: avoid;
-        }
-
-        .main-title {
-            color: #ffcc00;
-            font-size: 7px;
-            font-weight: 900;
-            letter-spacing: 2px;
-        }
-
-        .sub-date {
-            color: #d1cece;
-            font-size: 5px;
-            font-weight: normal;
-        }
-        /* --- DÜZELTME SONU --- */
-
-
-            
-                
-            
-
+          
 
             /* iPhone ekranında üst butonların parmakla kolay basılması için tam genişlikte alt alta dizilmesi */
             #printModuleArea .sticky,
@@ -2512,32 +2422,47 @@
             }
 
             // 3. Sağ-Sol Oklu Sürgülü Slider Menüsü
-            let buttonsHtml = '';
-            if (ekstreKeys.length > 0) {
+           if (ekstreKeys.length > 0) {
                 const currentIndex = ekstreKeys.indexOf(selectedEkstreKey);
-
                 const prevKey = currentIndex > 0 ? ekstreKeys[currentIndex - 1] : null;
                 const nextKey = currentIndex < ekstreKeys.length - 1 ? ekstreKeys[currentIndex + 1] : null;
-
-                const currentTitle = allEkstreData[selectedEkstreKey].title || selectedEkstreKey;
+                
+                // YENİ: Ekstre tarihini (YYYY-MM) alıp bir önceki ayın adını bulma motoru
+                let displayTitle = selectedEkstreKey;
+                if (selectedEkstreKey && selectedEkstreKey.includes('-')) {
+                    const aylarTR = ["", "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+                    let [y, m] = selectedEkstreKey.split('-');
+                    let yearNum = parseInt(y);
+                    let monthNum = parseInt(m);
+                    
+                    monthNum -= 1; // Bir önceki aya git
+                    if (monthNum === 0) { // Eğer Ocak ayındaysak Aralık'a ve bir önceki yıla geç
+                        monthNum = 12;
+                        yearNum -= 1;
+                    }
+                    displayTitle = `${aylarTR[monthNum]} ${yearNum} Harcamaları`;
+                } else if (allEkstreData[selectedEkstreKey].title) {
+                    displayTitle = allEkstreData[selectedEkstreKey].title;
+                }
 
                 buttonsHtml = `
-            <div class="flex items-center justify-between w-full bg-orange-50 border border-orange-200 rounded-xl p-1.5 shadow-sm mt-1">
-                <button ${!prevKey ? 'disabled' : ''} onclick="changeActiveEkstre('${prevKey}')" 
-                    class="w-10 h-10 flex items-center justify-center bg-white border border-orange-200 rounded-lg text-orange-600 font-black hover:bg-orange-500 hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed">
-                    ◀
-                </button>
-                
-                <div class="flex-1 text-center font-black text-sm sm:text-base text-orange-800 tracking-wide select-none">
-                    📅 ${currentTitle}
-                </div>
-                
-                <button ${!nextKey ? 'disabled' : ''} onclick="changeActiveEkstre('${nextKey}')" 
-                    class="w-10 h-10 flex items-center justify-center bg-white border border-orange-200 rounded-lg text-orange-600 font-black hover:bg-orange-500 hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed">
-                    ▶
-                </button>
-            </div>
-        `;
+                    <div class="flex items-center justify-between w-full bg-orange-50 border border-orange-200 rounded-xl p-1.5 shadow-sm mt-1">
+                        <button ${!prevKey ? 'disabled' : ''} onclick="window.changeActiveEkstre('${prevKey}')" 
+                            class="w-10 h-10 flex items-center justify-center bg-white border border-orange-200 rounded-lg text-orange-600 font-black hover:bg-orange-500 hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed">
+                            ◀
+                        </button>
+                        
+                        <div class="flex-1 text-center font-black text-sm sm:text-base text-orange-800 tracking-wide select-none">
+                            📅 ${displayTitle}
+                        </div>
+                        
+                        <button ${!nextKey ? 'disabled' : ''} onclick="window.changeActiveEkstre('${nextKey}')" 
+                            class="w-10 h-10 flex items-center justify-center bg-white border border-orange-200 rounded-lg text-orange-600 font-black hover:bg-orange-500 hover:text-white transition disabled:opacity-40 disabled:cursor-not-allowed">
+                            ▶
+                        </button>
+                    </div>
+                `;
+            
             } else {
                 buttonsHtml = `<div class="w-full text-center text-xs font-bold text-gray-400 p-3 border border-dashed rounded-xl mt-1">Henüz çekilmiş ekstre yok. Node.js servisiyle çekim yapın.</div>`;
             }
@@ -2916,10 +2841,26 @@
             let dukkanItems = ''; let evItems = '';
             let dukkanTotal = 0; let evTotal = 0;
 
+            // YENİ: Fiş yazdırırken de başlığı bir önceki aya göre ayarla ve BÜYÜK HARF yap
+            let printTitle = data.title ? data.title.toUpperCase() : selectedEkstreKey;
+            if (selectedEkstreKey && selectedEkstreKey.includes('-')) {
+                const aylarTR = ["", "OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK"];
+                let [y, m] = selectedEkstreKey.split('-');
+                let yearNum = parseInt(y);
+                let monthNum = parseInt(m);
+                
+                monthNum -= 1;
+                if (monthNum === 0) {
+                    monthNum = 12;
+                    yearNum -= 1;
+                }
+                printTitle = `${aylarTR[monthNum]} ${yearNum} HARCAMALARI`;
+            }
+
             Object.values(data.items || {}).forEach(item => {
                 const price = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
                 let cleanName = item.desc.replace(/^\d+[-]/, '').trim();
-
+                
                 const rowHtml = `
                     <div style="margin-bottom:8px; border-bottom:1px dashed #000; padding-bottom:4px;">
                         <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; color:#000;">
@@ -2935,7 +2876,7 @@
 
             let printHTML = `<div style="width: 56mm; font-family: Arial, Helvetica, sans-serif; padding: 1mm; color: #000; background-color: #fff;">
                 <div style="text-align: center; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px;">
-                    ${data.title.toUpperCase()}
+                    ${printTitle}
                 </div>`;
 
             if (secim === "1" || secim === "3") {
