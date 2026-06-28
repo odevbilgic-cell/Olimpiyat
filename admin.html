@@ -526,8 +526,69 @@
             .a4-label-page {
                 transform: scale(0.97) !important;
                 transform-origin: top center !important;
-                margin-bottom: 0mm !important;
+                margin-bottom: -150mm !important;
+                
             }
+            /* --- DÜZELTİLEN KISIM: iPhone Taşma Sorunu (Tek Satır - Küçültülmüş Font) --- */
+        
+        .menu-table-container {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .menu-column {
+            width: 48%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-spacer {
+            display: none; 
+        }
+
+        .item {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+            font-size: 9px; /* Taşmayı önlemek için 16px'ten 13px'e düşürüldü */
+            font-weight: 700;
+            margin-bottom: 4px;
+            gap: 4px;
+        }
+
+        .item-name {
+            text-align: left;
+            white-space: nowrap; /* KESİNLİKLE alt satıra geçmez, tek satır kalır */
+            flex: 1; 
+        }
+
+        .item-name::first-letter {
+            color: #ffcc00;
+            padding-right: 2px;
+        }
+
+        .price {
+            text-align: right;
+            color: #ffcc00;
+            font-weight: 700;
+            white-space: nowrap; /* Fiyat asla bölünmez */
+            flex-shrink: 0; /* Fiyat alanı daralmaz, net kalır */
+        }
+
+         .category-block h3 {
+            color: #ffcc00;
+            font-size: 12px;
+            font-weight: 900;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 2px;
+        }
+        /* --- DÜZELTME SONU --- */
+
 
             
                 
