@@ -686,9 +686,6 @@
                 <p id="panelLoginError" class="text-red-600 text-xs font-bold text-center hidden">❌ Kullanıcı adı veya
                     şifre hatalı!</p>
 
-                <p id="panelLoginError" class="text-red-600 text-xs font-bold text-center hidden">❌ Kullanıcı adı veya
-                    şifre hatalı!</p>
-
                 <button id="submitPanelLoginBtn"
                     class="w-full bg-gradient-to-r from-red-600 to-orange-500 text-white px-6 py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 shadow-lg hover:opacity-95 transition transform active:scale-95 cursor-pointer">
                     <span>SİSTEME GİRİŞ YAP</span>
@@ -3175,19 +3172,28 @@ window.addManualDebt = async function() {
 
             document.getElementById('switchToInPlace').addEventListener('click', () => setFirebaseRefs('in_place'));
             document.getElementById('switchToDelivery').addEventListener('click', () => setFirebaseRefs('delivery'));
-            document.getElementById('copyToDeliveryBtn').addEventListener('click', copyMenuDataToDelivery);
-
+           document.getElementById('switchToInPlace').addEventListener('click', () => setFirebaseRefs('in_place'));
+            document.getElementById('switchToDelivery').addEventListener('click', () => setFirebaseRefs('delivery'));
+            
+            // DÜZELTME 1: JS'yi çökerten hatalı 'copyToDeliveryBtn' satırı buradan tamamen silindi.
+            // Bu sayede alt satırdaki çarpı ikonu artık sorunsuz çalışacak.
             closeEditProductModal.addEventListener('click', () => editProductModal.classList.add('hidden'));
+            
             uploadEditImageBtn.addEventListener('click', (e) => { e.preventDefault(); openCloudinaryWidget(editImageURLInput, editImagePreview); });
 
-            // YENİLENEN: Çıkış butonu dinleyicisi (Çıkış yapıldığında her iki hafızayı da temizler)
-            const logoutBtn = document.querySelector('a[href="index.html"]');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', () => {
+            // DÜZELTME 2: Tüm çıkış butonlarını bulup sayfadan atmadan giriş ekranını getiren sistem
+            const logoutBtns = document.querySelectorAll('a[href="index.html"]');
+            logoutBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault(); // Sayfa yenilemesini/yönlendirmesini durdurur
                     sessionStorage.removeItem('olimpiyat_admin_logged_in');
                     localStorage.removeItem('olimpiyat_admin_logged_in');
+                    
+                    // Giriş panelini geri getir ve şifreyi temizle
+                    document.getElementById('adminLoginOverlay').classList.remove('hidden');
+                    document.getElementById('panelPassword').value = ''; 
                 });
-            }
+            });
 
             saveEditProductButton.addEventListener('click', async () => {
                 const productKey = document.getElementById('editProductKey').value;
