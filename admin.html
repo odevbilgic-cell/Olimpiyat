@@ -2746,6 +2746,7 @@ window.addManualDebt = async function() {
         // 2. Seçime göre fişi hazırla ve yazdır
        // 2. Seçime göre fişi hazırla ve yazdır
                 // 2. Seçime göre fişi hazırla ve yazdır (TERMAL YAZICI İÇİN KUSURSUZLAŞTIRILDI)
+       // 2. Seçime göre fişi hazırla ve yazdır (TERMAL YAZICI İÇİN KUSURSUZLAŞTIRILDI)
         window.executePrint = function (secim) {
             document.getElementById('printSelectionModal').classList.add('hidden');
             const data = allEkstreData[selectedEkstreKey];
@@ -2756,7 +2757,7 @@ window.addManualDebt = async function() {
                 const price = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
                 let cleanName = item.desc.replace(/^\d+[-]/, '').trim();
                 
-                // TERMAL UYUM: Fontlar büyütüldü (12px-13px), kalınlıklar normale (bold) çekildi.
+                // TERMAL UYUM: Fontlar büyütüldü (12px-13px), renk SAF SİYAH yapıldı.
                 const rowHtml = `
                     <div style="margin-bottom:8px; border-bottom:1px dashed #000; padding-bottom:4px;">
                         <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; color:#000;">
@@ -2770,8 +2771,8 @@ window.addManualDebt = async function() {
                 else { evTotal += item.amount; evItems += rowHtml; }
             });
 
-            // TERMAL UYUM: Font zorla "Arial" yapıldı. Özel web fontları engellendi.
-            let printHTML = `<div style="width: 56mm; font-family: Arial, Helvetica, sans-serif; padding: 1mm; color: #000; background: #fff;">
+            // TERMAL UYUM: Font zorla "Arial" yapıldı, arkaplan SAF BEYAZ yapıldı.
+            let printHTML = `<div style="width: 56mm; font-family: Arial, Helvetica, sans-serif; padding: 1mm; color: #000; background-color: #fff;">
                 <div style="text-align: center; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px;">
                     ${data.title.toUpperCase()}
                 </div>`;
@@ -2807,7 +2808,8 @@ window.addManualDebt = async function() {
             let oldStyle = document.getElementById('debtPrintStyle');
             if (oldStyle) oldStyle.remove();
 
-            // TERMAL UYUM CSS: Sadece fişin net görünmesi için görünürlük ayarları yapıldı.
+            // 🎯 ÇÖZÜM BURADA: Eski 'visibility: hidden' mantığı silindi.
+            // Bunun yerine sadece "diğer her şeyi gizle (display: none)" yöntemi uygulandı.
             const style = document.createElement('style');
             style.id = 'debtPrintStyle';
             style.innerHTML = `
@@ -2815,23 +2817,37 @@ window.addManualDebt = async function() {
                     #debtPrintArea { display: none !important; }
                 }
                 @media print { 
-                    body * { visibility: hidden; }
-                    body { background: #fff !important; margin: 0; padding: 0; }
-                    #debtPrintArea, #debtPrintArea * { visibility: visible; }
+                    /* Sayfadaki her şeyi geçici olarak yokediyoruz */
+                    body > *:not(#debtPrintArea) { 
+                        display: none !important; 
+                    }
+                    
+                    /* Termal fişi tertemiz kağıda basıyoruz */
+                    body { 
+                        background-color: white !important; 
+                        margin: 0 !important; 
+                        padding: 0 !important; 
+                    }
+                    
                     #debtPrintArea { 
+                        display: block !important; 
                         position: absolute; 
                         left: 0; 
                         top: 0; 
                         width: 58mm !important; 
                         margin: 0;
                         padding: 0;
-                        color: #000 !important;
                     }
-                    @page { size: 58mm auto; margin: 0; } 
+                    
+                    @page { 
+                        size: 58mm auto; 
+                        margin: 0; 
+                    } 
                 }
             `;
             document.head.appendChild(style);
 
+            // Print ekranını tetikle
             window.print();
         };
 
