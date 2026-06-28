@@ -2745,6 +2745,7 @@ window.addManualDebt = async function() {
 
         // 2. Seçime göre fişi hazırla ve yazdır
        // 2. Seçime göre fişi hazırla ve yazdır
+                // 2. Seçime göre fişi hazırla ve yazdır (TERMAL YAZICI İÇİN KUSURSUZLAŞTIRILDI)
         window.executePrint = function (secim) {
             document.getElementById('printSelectionModal').classList.add('hidden');
             const data = allEkstreData[selectedEkstreKey];
@@ -2754,45 +2755,47 @@ window.addManualDebt = async function() {
             Object.values(data.items || {}).forEach(item => {
                 const price = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
                 let cleanName = item.desc.replace(/^\d+[-]/, '').trim();
+                
+                // TERMAL UYUM: Fontlar büyütüldü (12px-13px), kalınlıklar normale (bold) çekildi.
                 const rowHtml = `
-                    <div style="margin-bottom:6px; border-bottom:1px solid #eee; padding-bottom:2px;">
-                        <div style="display:flex; justify-content:space-between; font-size:7px;">
+                    <div style="margin-bottom:8px; border-bottom:1px dashed #000; padding-bottom:4px;">
+                        <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; color:#000;">
                             <span>${item.date}</span>
-                            <span style="font-weight:900;">${price} ₺</span>
+                            <span>${price} ₺</span>
                         </div>
-                        <div style="font-size:8px; font-weight:700; margin-top:1px;">${cleanName}</div>
+                        <div style="font-size:13px; font-weight:bold; color:#000; margin-top:2px;">${cleanName}</div>
                     </div>`;
 
                 if (item.category === 'dukkan') { dukkanTotal += item.amount; dukkanItems += rowHtml; }
                 else { evTotal += item.amount; evItems += rowHtml; }
             });
 
-            let printHTML = `<div style="width: 54mm; font-family: sans-serif; padding: 2mm;">
-                <div style="text-align: center; font-weight: 900; font-size: 6px; border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 8px;">
+            // TERMAL UYUM: Font zorla "Arial" yapıldı. Özel web fontları engellendi.
+            let printHTML = `<div style="width: 56mm; font-family: Arial, Helvetica, sans-serif; padding: 1mm; color: #000; background: #fff;">
+                <div style="text-align: center; font-weight: bold; font-size: 14px; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px;">
                     ${data.title.toUpperCase()}
                 </div>`;
 
             if (secim === "1" || secim === "3") {
-                printHTML += `<div style="font-weight: 900; font-size: 7px; margin-bottom: 5px; border-bottom: 2px solid black;">🏪 DÜKKAN</div>
-                              ${dukkanItems || '<div style="font-size:5px; margin-bottom:10px;">Yok</div>'}
-                              <div style="text-align: right; font-weight: 900; font-size: 8px; margin-bottom: 12px;">TOPLAM: ${dukkanTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>`;
+                printHTML += `<div style="font-weight: bold; font-size: 14px; margin-bottom: 6px; border-bottom: 2px solid #000; padding-bottom:2px;">🏪 DÜKKAN</div>
+                              ${dukkanItems || '<div style="font-size:12px; margin-bottom:10px;">Yok</div>'}
+                              <div style="text-align: right; font-weight: bold; font-size: 14px; margin-bottom: 15px;">TOPLAM: ${dukkanTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>`;
             }
 
             if (secim === "2" || secim === "3") {
-                printHTML += `<div style="font-weight: 900; font-size: 7px; margin-bottom: 5px; border-bottom: 2px solid black;">🏠 EV</div>
-                              ${evItems || '<div style="font-size:5px; margin-bottom:10px;">Yok</div>'}
-                              <div style="text-align: right; font-weight: 900; font-size: 8px; margin-bottom: 12px;">TOPLAM: ${evTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>`;
+                printHTML += `<div style="font-weight: bold; font-size: 14px; margin-bottom: 6px; border-bottom: 2px solid #000; padding-bottom:2px;">🏠 EV</div>
+                              ${evItems || '<div style="font-size:12px; margin-bottom:10px;">Yok</div>'}
+                              <div style="text-align: right; font-weight: bold; font-size: 14px; margin-bottom: 15px;">TOPLAM: ${evTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>`;
             }
 
             if (secim === "3") {
-                printHTML += `<div style="border-top: 3px solid black; padding-top: 8px; text-align: right;">
-                                <span style="font-size: 10px; font-weight: bold;">GENEL TOPLAM</span>
-                                <div style="font-size: 14px; font-weight: 900; margin-top:2px;">${(dukkanTotal + evTotal).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>
+                printHTML += `<div style="border-top: 3px solid #000; padding-top: 10px; text-align: right;">
+                                <div style="font-size: 12px; font-weight: bold;">GENEL TOPLAM</div>
+                                <div style="font-size: 18px; font-weight: bold; margin-top:2px;">${(dukkanTotal + evTotal).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</div>
                               </div>`;
             }
             printHTML += `</div>`;
 
-            // Fişi doğrudan body'ye basmak yerine temiz bir alan yarat
             let printArea = document.getElementById('debtPrintArea');
             if (!printArea) {
                 printArea = document.createElement('div');
@@ -2801,11 +2804,10 @@ window.addManualDebt = async function() {
             }
             printArea.innerHTML = printHTML;
 
-            // 🎯 YENİ EKLENEN KISIM: Eski stili temizle ki çoklanmasın
             let oldStyle = document.getElementById('debtPrintStyle');
             if (oldStyle) oldStyle.remove();
 
-            // ZORUNLU CSS: Yazdırma sırasında fişi göster, EKRANDA (Web sayfasında) GİZLE!
+            // TERMAL UYUM CSS: Sadece fişin net görünmesi için görünürlük ayarları yapıldı.
             const style = document.createElement('style');
             style.id = 'debtPrintStyle';
             style.innerHTML = `
@@ -2813,8 +2815,18 @@ window.addManualDebt = async function() {
                     #debtPrintArea { display: none !important; }
                 }
                 @media print { 
-                    body > *:not(#debtPrintArea) { display: none !important; } 
-                    #debtPrintArea { display: block !important; position: absolute; left: 0; top: 0; width: 58mm !important; } 
+                    body * { visibility: hidden; }
+                    body { background: #fff !important; margin: 0; padding: 0; }
+                    #debtPrintArea, #debtPrintArea * { visibility: visible; }
+                    #debtPrintArea { 
+                        position: absolute; 
+                        left: 0; 
+                        top: 0; 
+                        width: 58mm !important; 
+                        margin: 0;
+                        padding: 0;
+                        color: #000 !important;
+                    }
                     @page { size: 58mm auto; margin: 0; } 
                 }
             `;
@@ -2822,6 +2834,7 @@ window.addManualDebt = async function() {
 
             window.print();
         };
+
 
         function simulateGmailFetch() {
             const btn = document.getElementById('fetchGmailPdfBtn');
