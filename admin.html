@@ -2634,6 +2634,7 @@
                 <div class="flex-1 flex flex-col bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden shadow-inner h-[350px] md:h-[550px]">
                     <div class="bg-orange-100/50 p-3 border-b border-orange-200 flex justify-between items-center flex-shrink-0 cursor-default">
                         <h3 class="font-black text-sm text-orange-700 flex items-center gap-1">🏪 Dükkan Giderleri</h3>
+                        <button onclick="openDebtPreviewModal('dukkan')" class="text-orange-600 bg-white border border-orange-200 hover:bg-orange-200 p-1.5 rounded-lg transition shadow-sm" title="Önizle ve Yazdır">👁️</button>
                     </div>
                     <div class="p-3 flex flex-col gap-2 flex-1 overflow-y-auto">
                         ${dukkanItemsHtml || '<div class="text-center text-xs text-gray-400 my-4 font-bold">Dükkan harcaması bulunmuyor.</div>'}
@@ -2647,6 +2648,7 @@
                 <div class="flex-1 flex flex-col bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden shadow-inner h-[350px] md:h-[550px]">
                     <div class="bg-blue-100/50 p-3 border-b border-blue-200 flex justify-between items-center flex-shrink-0 cursor-default">
                         <h3 class="font-black text-sm text-blue-700 flex items-center gap-1">🏠 Ev Giderleri</h3>
+                        <button onclick="openDebtPreviewModal('ev')" class="text-blue-600 bg-white border border-blue-200 hover:bg-blue-200 p-1.5 rounded-lg transition shadow-sm" title="Önizle ve Yazdır">👁️</button>
                     </div>
                     <div class="p-3 flex flex-col gap-2 flex-1 overflow-y-auto">
                         ${evItemsHtml || '<div class="text-center text-xs text-gray-400 my-4 font-bold">Ev harcaması bulunmuyor.</div>'}
@@ -2701,12 +2703,129 @@
                 </div>
             </div>
         </div>
+
+        <!-- Önizleme ve Yazdırma Modalı -->
+            <div id="debtPreviewModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-[110] p-4">
+                <div id="debtPreviewModalContent" class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] flex flex-col relative animate-pop-in border-t-8 border-orange-500 overflow-hidden">
+                    
+                    <div id="debtPreviewHeader" class="bg-orange-50 p-3 sm:p-4 border-b border-orange-100 flex justify-between items-center flex-shrink-0">
+                        <h2 id="debtPreviewTitle" class="text-base sm:text-lg font-black text-orange-800 flex items-center gap-2 truncate">🏪 Dükkan Özeti</h2>
+                        <div class="flex items-center gap-2">
+                            <button id="debtPreviewPrintBtn" onclick="printFromPreviewModal('dukkan')" class="bg-black text-white px-3 py-1.5 rounded-lg text-xs font-black shadow-md hover:bg-gray-800 transition flex items-center gap-1">🖨️ Yazdır</button>
+                            <button onclick="closeDebtPreviewModal()" class="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 font-bold shadow-sm transition">✖</button>
+                        </div>
+                    </div>
+
+                    <div id="debtPreviewList" class="flex-1 overflow-y-auto p-3 sm:p-4 flex flex-col gap-2.5 bg-gray-50/50">
+                        <!-- Veriler JS ile buraya dolacak -->
+                    </div>
+
+                    <div id="debtPreviewFooter" class="bg-orange-500 p-3 sm:p-4 text-white flex justify-between items-center flex-shrink-0">
+                        <span class="text-xs font-bold uppercase tracking-wider">Genel Toplam</span>
+                        <span id="debtPreviewTotal" class="text-xl font-black">0,00 ₺</span>
+                    </div>
+                </div>
+            </div>
     `);
 
             const btn = document.getElementById('triggerNodeJsFetchBtn');
             if (btn) {
                 btn.onclick = triggerNodeBackend;
             }
+
+            // --- 👁️ GÖZ BUTONU VE ÖNİZLEME MOTORU ---
+            window.openDebtPreviewModal = function (category) {
+                const data = allEkstreData[selectedEkstreKey];
+                if (!data || !data.items) return;
+
+                const modal = document.getElementById('debtPreviewModal');
+                const content = document.getElementById('debtPreviewModalContent');
+                const header = document.getElementById('debtPreviewHeader');
+                const titleEl = document.getElementById('debtPreviewTitle');
+                const listEl = document.getElementById('debtPreviewList');
+                const footer = document.getElementById('debtPreviewFooter');
+                const totalEl = document.getElementById('debtPreviewTotal');
+                const printBtn = document.getElementById('debtPreviewPrintBtn');
+
+                let total = 0;
+                let itemsHtml = '';
+
+                // Seçilen kategoriye ait verileri çekip en yeniden eskiye sıralıyoruz
+                const itemsArray = Object.keys(data.items).map(key => ({ key, ...data.items[key] })).filter(item => item.category === category);
+
+                itemsArray.sort((a, b) => {
+                    const parseDateString = (dateStr, timeStr) => {
+                        if (!dateStr) return 0;
+                        let [d, m, y] = dateStr.split('/');
+                        if (y && y.length === 2) y = '20' + y;
+                        let hr = 0, min = 0;
+                        if (timeStr && timeStr.includes(':') && !isNaN(parseInt(timeStr.split(':')[0]))) {
+                            let parts = timeStr.split(':');
+                            hr = parseInt(parts[0]);
+                            min = parseInt(parts[1]);
+                        }
+                        return new Date(y, m - 1, d, hr, min).getTime();
+                    };
+                    return parseDateString(b.date, b.time) - parseDateString(a.date, a.time);
+                });
+
+                // Verileri HTML listesine dök
+                if (itemsArray.length === 0) {
+                    itemsHtml = `<div class="text-center text-gray-400 font-bold mt-4">Bu listeye ait harcama bulunamadı.</div>`;
+                } else {
+                    itemsArray.forEach(item => {
+                        total += parseFloat(item.amount);
+                        const amountStr = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        let cleanName = item.desc.replace(/^\d+[-]/, '').trim();
+
+                        const textColorClass = category === 'dukkan' ? 'text-orange-600' : 'text-blue-600';
+
+                        itemsHtml += `
+                        <div class="bg-white p-3 border border-gray-200 rounded-xl shadow-sm flex flex-col gap-1 hover:shadow-md transition">
+                            <div class="flex justify-between items-start gap-2">
+                                <span class="font-bold text-gray-800 text-sm leading-tight">${cleanName}</span>
+                                <span class="font-black text-sm whitespace-nowrap ${textColorClass}">${amountStr} ₺</span>
+                            </div>
+                            <span class="text-[10px] font-bold text-gray-400">${item.date} ${item.time !== '--:--' ? item.time : ''}</span>
+                        </div>
+                    `;
+                    });
+                }
+
+                // Tıklanan kategoriye göre Dinamik Tema ayarlaması (Turuncu / Mavi)
+                if (category === 'dukkan') {
+                    content.className = "bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] flex flex-col relative animate-pop-in border-t-8 border-orange-500 overflow-hidden";
+                    header.className = "bg-orange-50 p-3 sm:p-4 border-b border-orange-100 flex justify-between items-center flex-shrink-0";
+                    titleEl.innerHTML = "🏪 Dükkan Özeti";
+                    titleEl.className = "text-base sm:text-lg font-black text-orange-800 flex items-center gap-2 truncate";
+                    footer.className = "bg-orange-500 p-3 sm:p-4 text-white flex justify-between items-center flex-shrink-0";
+                    printBtn.setAttribute('onclick', "printFromPreviewModal('dukkan')");
+                } else {
+                    content.className = "bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[85vh] flex flex-col relative animate-pop-in border-t-8 border-blue-500 overflow-hidden";
+                    header.className = "bg-blue-50 p-3 sm:p-4 border-b border-blue-100 flex justify-between items-center flex-shrink-0";
+                    titleEl.innerHTML = "🏠 Ev Özeti";
+                    titleEl.className = "text-base sm:text-lg font-black text-blue-800 flex items-center gap-2 truncate";
+                    footer.className = "bg-blue-600 p-3 sm:p-4 text-white flex justify-between items-center flex-shrink-0";
+                    printBtn.setAttribute('onclick', "printFromPreviewModal('ev')");
+                }
+
+                // Ekrana Verileri Bas ve Modalı Göster
+                listEl.innerHTML = itemsHtml;
+                totalEl.innerHTML = total.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+                modal.classList.remove('hidden');
+            };
+
+            window.closeDebtPreviewModal = function () {
+                document.getElementById('debtPreviewModal').classList.add('hidden');
+            };
+
+            // Modal içindeki Yazdır Butonuna Tıklanınca...
+            window.printFromPreviewModal = function (category) {
+                closeDebtPreviewModal(); // Önce pop-up'ı kapat
+                // Zaten var olan kusursuz yazıcı motorunu kategoriye göre ateşle
+                const secim = category === 'dukkan' ? '1' : '2';
+                window.executePrint(secim);
+            };
         };
 
         // --- 💳 BORÇ YÖNETİMİ İŞLEM FONKSİYONLARI ---
