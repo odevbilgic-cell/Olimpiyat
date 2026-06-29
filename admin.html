@@ -1120,6 +1120,9 @@
 
         function setFirebaseRefs(menuType) {
             currentMenuType = menuType;
+            // YENİ: Seçili olan menü tipini de hafızaya kaydet
+            localStorage.setItem('active_olimpiyat_menu_type', menuType);
+
             if (menuType === 'in_place') {
                 productsRef = database.ref(inPlaceProductsPath);
                 campaignsRef = database.ref(inPlaceCampaignsPath);
@@ -1140,7 +1143,6 @@
             const activeTab = document.querySelector('.tab-button.active');
             if (activeTab) {
                 const activeId = activeTab.id;
-                // EKRANI TAMAMEN YENİDEN ÇİZ (Başlıkların değişmesi için bu şart)
                 if (activeId === 'showProducts') renderProductsModule();
                 else if (activeId === 'showSorting') renderSortingModule();
                 else if (activeId === 'showCampaigns') renderCampaignModule();
@@ -1148,6 +1150,8 @@
                 else if (activeId === 'showBulkUpdate') renderBulkUpdateModule();
                 else if (activeId === 'showStats') renderStatsModule();
                 else if (activeId === 'showDebtCalculator') renderDebtCalculatorModule();
+                else if (activeId === 'showGlobalDateUpdate') renderGlobalDateModule(); // YENİ EKLENDİ
+                else if (activeId === 'showLabels') renderLabelModule(); // YENİ EKLENDİ
             } else {
                 renderProductsModule();
             }
@@ -1244,6 +1248,8 @@
             tabButtons.forEach(btn => btn.classList.remove('active'));
             const targetBtn = document.getElementById(buttonId);
             if (targetBtn) targetBtn.classList.add('active');
+            // YENİ: Aktif sekmeyi tarayıcı hafızasına kaydet
+            localStorage.setItem('active_olimpiyat_tab', buttonId);
         }
 
         function loadModule(htmlContent) {
@@ -3405,8 +3411,17 @@
             submitLoginBtn.addEventListener('click', handleAdminLogin);
             [usernameInput, passwordInput].forEach(i => i.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAdminLogin(); }));
 
-            renderProductsModule();
-            setFirebaseRefs('in_place');
+            // 🧠 YENİ: HAFIZADAN ESKİ SEKME VE MENÜ TÜRÜNÜ YÜKLEME
+            const savedTabId = localStorage.getItem('active_olimpiyat_tab') || 'showProducts';
+            const savedMenuType = localStorage.getItem('active_olimpiyat_menu_type') || 'in_place';
+
+            // Önce sol menü butonunun görselini aktif yapıyoruz
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.getElementById(savedTabId);
+            if (targetBtn) targetBtn.classList.add('active');
+
+            // Arkasından veritabanını çağırıyoruz (Bu fonksiyon otomatik olarak doğru sayfayı da render edecek)
+            setFirebaseRefs(savedMenuType);
 
             showProductsBtn.addEventListener('click', renderProductsModule);
             showSortingBtn.addEventListener('click', renderSortingModule);
