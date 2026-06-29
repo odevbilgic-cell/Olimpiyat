@@ -626,40 +626,9 @@
 
         @media print {
 
-            /* Tüm gereksiz panelleri ve modalları gizle */
+            /* 1. Ekrandaki gereksiz her şeyi gizle */
             body>* {
                 display: none !important;
-            }
-
-            body>.flex {
-                display: flex !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
-            .w-full.md\:w-64 {
-                display: none !important;
-            }
-
-            /* Sol menüyü gizle */
-
-            /* Sadece ana içeriği göster ve tam genişlik yap */
-            main {
-                padding: 0 !important;
-                margin: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                display: block !important;
-                overflow: visible !important;
-            }
-
-            #contentContainer {
-                padding: 0 !important;
-                margin: 0 !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                display: block !important;
             }
 
             #adminLoginOverlay,
@@ -674,19 +643,83 @@
                 display: none !important;
             }
 
-            /* Menü ve Etiket kağıdı kuralları aynı kalacak */
+            /* 2. SADECE Ana İçerik Çerçevesini göster (min-h-screen class'ına sahip div) */
+            body>div.min-h-screen.bg-gray-50 {
+                display: flex !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* 3. Sol Menüyü gizle (Yukarıdaki div'in içindeki ilk eleman) */
+            body>div.min-h-screen.bg-gray-50>div:first-child {
+                display: none !important;
+            }
+
+            /* 4. Sağ Tarafı (Ana Alanı) Tam Ekran Yap */
+            main {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+            }
+
+            #contentContainer {
+                display: block !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* 5. Beyaz kutuları, gölgeleri ve kaydırma çubuklarını sıfırla ki kağıt ekranın tam sol üstüne otursun */
+            #contentContainer>div {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                background: transparent !important;
+                min-height: 0 !important;
+            }
+
+            .overflow-x-auto,
+            .overflow-y-auto,
+            .overflow-hidden {
+                overflow: visible !important;
+                padding-bottom: 0 !important;
+            }
+
+            /* 6. A4 Fiyat Listesi Ayarları */
             .a4-menu-page {
-                margin: 0 auto !important;
+                margin-top: 5mm;
+                margin: 0 !important;
                 box-shadow: none !important;
                 background-color: #000000 !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
-                width: 200mm;
-                height: 287mm;
+                width: 200mm !important;
+                height: 280mm !important;
+            }
+
+            /* 7. İçecek Listesi Ayarları */
+            .drink-menu-page {
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* 8. Etiket Sayfaları Ayarları */
+            #labelPagesContainer {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .a4-label-page {
-                margin: 0 auto !important;
+                display: flex !important;
+                margin: 0 !important;
                 box-shadow: none !important;
                 background-color: #ffffff !important;
                 page-break-after: always !important;
@@ -694,6 +727,8 @@
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+
+           
         }
     </style>
 </head>
@@ -941,82 +976,7 @@
     </div>
 
 
-    <div id="printModuleArea" class="hidden fixed inset-0 flex flex-row h-screen overflow-hidden bg-[#1a1a1a] z-50">
 
-        <div id="printSidebar"
-            class="print-sidebar bg-black border-r border-yellow-600 flex flex-col relative z-20 flex-shrink-0">
-            <div class="p-4 border-b border-gray-800 flex justify-between items-center">
-                <h3 class="text-white font-black text-sm tracking-wider uppercase">Baskı Türü</h3>
-                <button id="togglePrintSidebarBtn"
-                    class="text-gray-400 hover:text-white transition font-black">◀</button>
-            </div>
-            <div class="flex flex-col gap-2 p-3">
-                <button id="btnA4Menu"
-                    class="print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95">📄
-                    Fiyat Listesi (A4)</button>
-                <button id="btnDrinkMenu"
-                    class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">🥤
-                    İçecek Listesi</button>
-                <button id="btnLabelPrint"
-                    class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">🏷️
-                    Dev Etiketler</button>
-                <button id="btnQRPrint"
-                    class="print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95">📱
-                    QR Etiketi</button>
-            </div>
-        </div>
-
-        <button id="expandPrintSidebarBtn"
-            class="hidden absolute left-0 top-1/2 transform -translate-y-1/2 bg-yellow-500 text-black p-3 rounded-r-xl font-black z-30 shadow-md hover:bg-yellow-400">▶</button>
-
-        <div class="flex-1 flex flex-col h-full overflow-hidden relative">
-
-            <div
-                class="p-3 sm:p-4 bg-black border-b border-yellow-600 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3 no-print z-10 flex-shrink-0">
-                <button onclick="closePrintModule()"
-                    class="w-full sm:w-auto bg-gray-800 text-gray-300 hover:text-white px-4 py-2.5 rounded-xl font-bold transition text-sm text-center">⬅
-                    Panele Dön</button>
-                <button onclick="window.print()"
-                    class="w-full sm:w-auto bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">
-                    <span>🖨️</span> Ekrandakini Yazdır
-                </button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto flex justify-center py-8">
-
-
-
-
-
-                <div id="qrPreviewContainer" class="hidden w-full max-w-4xl px-4 flex flex-col items-center">
-                    <div
-                        class="w-full bg-gray-900 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl border border-gray-700 no-print flex flex-col gap-4">
-                        <h3 class="text-white font-black text-lg text-center border-b border-gray-700 pb-2">Hangi QR
-                            Dispanser Şablonu Gösterilecek?</h3>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <button onclick="loadQRPdf('genis')"
-                                class="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">🔲
-                                Geniş Dispanser</button>
-                            <button onclick="loadQRPdf('uckenarli')"
-                                class="bg-gradient-to-br from-teal-600 to-teal-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">📐
-                                Üç Kenarlı Dispanser</button>
-                            <button onclick="loadQRPdf('dar')"
-                                class="bg-gradient-to-br from-cyan-600 to-cyan-800 text-white py-3 rounded-xl font-black text-xs sm:text-sm shadow-md hover:scale-[1.02] transition">▯
-                                Dar Dispanser</button>
-                        </div>
-                    </div>
-
-                    <div id="qrPdfViewer"
-                        class="w-full flex flex-col items-center justify-center overflow-visible pb-10">
-                        <span class="text-gray-500 text-sm italic mt-10 no-print">Yukarıdan bir dispanser türü
-                            seçtiğinizde A4 önizlemesi burada belirecektir.</span>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
 
     <!-- Yazdırma Seçim Modalı -->
     <div id="printSelectionModal"
@@ -2038,21 +1998,53 @@
             `);
         }
 
-        window.executeQRPrint = function () {
-            if (!currentPdfUrl) { alert("Lütfen önce bir PDF seçin."); return; }
-            if (currentPdfUrl.startsWith('http')) {
-                alert("Ustam, Google Drive dosyaları güvenlik gereği direkt yazdırılamaz. Dosya yeni sekmede açılacak, oradaki yazdır (🖨️) ikonuna basabilirsin.");
-                window.open(currentPdfUrl, '_blank');
+        // --- 📱 QR ETİKETİ DİSPANSER MOTORU ---
+        window.currentPdfUrl = ""; // Hangi PDF'in açık olduğunu sistemin hafızasında tutar
+
+        window.loadQRPdf = function(type) {
+            const viewer = document.getElementById('qrPdfViewer');
+            if (!viewer) return;
+
+            // Tıklanır tıklanmaz anlık bir "Yükleniyor" hissi verelim
+            viewer.innerHTML = '<div class="text-orange-500 font-black animate-pulse py-10">⏳ Şablon Yükleniyor...</div>';
+
+            // Seçime göre URL belirle
+            if (type === 'genis') {
+                window.currentPdfUrl = "https://drive.google.com/file/d/1GliAaoE0G8vloctRyC6IZJK3BwBRwoMn/preview";
+            } else if (type === 'uckenarli') {
+                window.currentPdfUrl = "uc_kenarli_dispanser.pdf"; 
+            } else if (type === 'dar') {
+                window.currentPdfUrl = "dar_dispanser.pdf";
+            }
+
+            // Gözü yormaması için çok hafif bir gecikmeyle (300ms) iFrame'i ekrana bas
+            setTimeout(() => {
+                viewer.innerHTML = `<iframe src="${window.currentPdfUrl}" class="w-full h-[60vh] md:h-[75vh] rounded-2xl shadow-2xl border-4 border-gray-800 bg-white" allow="autoplay"></iframe>`;
+            }, 300);
+        };
+
+        window.executeQRPrint = function() {
+            if (!window.currentPdfUrl) { 
+                alert("Lütfen yazdırmadan önce yukarıdan bir dispanser türü (Geniş, Dar vb.) seçin."); 
+                return; 
+            }
+            
+            // Eğer Google Drive linkiyse yeni sekmede aç (Çünkü Google, sitelerin içinden direkt yazıcı tetiklemeyi güvenlik sebebiyle engeller)
+            if (window.currentPdfUrl.startsWith('http')) {
+                alert("Ustam, Google Drive dosyaları güvenlik gereği sistem içinden direkt yazdırılamaz. Dosya şimdi yeni sekmede açılacak, açılan sayfadaki yazdır (🖨️) ikonuna basabilirsin.");
+                window.open(window.currentPdfUrl, '_blank');
             } else {
+                // Eğer yerel PDF dosyasıysa (dar_dispanser.pdf gibi) arka planda görünmez bir iFrame açıp direkt yazıcıyı ateşle
                 const hideFrame = document.createElement('iframe');
                 hideFrame.style.display = 'none';
-                hideFrame.src = currentPdfUrl;
+                hideFrame.src = window.currentPdfUrl;
                 document.body.appendChild(hideFrame);
+                
                 hideFrame.onload = function () {
                     setTimeout(() => {
                         hideFrame.contentWindow.focus();
                         hideFrame.contentWindow.print();
-                    }, 500);
+                    }, 500); // Sayfanın tam renderlanması için yarım saniye bekle
                 };
             }
         };
