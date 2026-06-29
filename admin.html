@@ -205,8 +205,8 @@
 
         .a4-menu-page {
             background-color: #000000;
-            width: 200mm;
-            height: 280mm;
+            width: 200;
+            height: 287mm;
             padding: 7mm 8mm;
             border: 3mm solid #ffcc00;
             position: relative;
@@ -809,23 +809,31 @@
                     Borç Hesapla</button>
                 <div class="flex flex-col w-auto md:w-full flex-shrink-0">
                     <button id="togglePrintMenuBtn"
-                        class="text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center justify-between w-full gap-2">
+                        class="text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center justify-between w-full gap-2 relative z-40">
                         <div class="flex items-center gap-1"><span>🖨️</span> Baskı Listesi</div>
                         <span id="printMenuArrow" class="transition-transform duration-300 text-[10px]">▼</span>
                     </button>
+
+                    <div id="printMenuMobileOverlay"
+                        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] md:hidden"></div>
+
                     <div id="printSubMenu"
-                        class="hidden flex-col gap-1 md:pl-4 pl-2 py-1 mt-1 bg-black/20 rounded-lg w-full">
+                        class="hidden fixed bottom-0 left-0 right-0 p-5 pb-8 bg-gray-900 rounded-t-3xl z-[100] shadow-2xl border-t border-gray-700 md:static md:p-0 md:pb-1 md:mt-1 md:bg-black/20 md:rounded-lg md:w-full md:border-none md:shadow-none flex-col gap-3 md:gap-1 md:pl-4 animate-pop-in md:animate-none">
+                        <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-1 md:hidden"></div>
+                        <h3 class="text-white text-center font-black text-sm mb-2 md:hidden">Hangi Listeyi
+                            Yazdıracaksınız?</h3>
+
                         <button id="showPrintA4"
-                            class="tab-button text-left px-2 py-1.5 rounded-lg hover:bg-white/10 transition text-[10px] sm:text-xs font-bold whitespace-nowrap flex items-center gap-1">📄
+                            class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">📄
                             A4 Fiyat Listesi</button>
                         <button id="showPrintDrink"
-                            class="tab-button text-left px-2 py-1.5 rounded-lg hover:bg-white/10 transition text-[10px] sm:text-xs font-bold whitespace-nowrap flex items-center gap-1">🥤
+                            class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">🥤
                             İçecek Listesi</button>
                         <button id="showPrintLabel"
-                            class="tab-button text-left px-2 py-1.5 rounded-lg hover:bg-white/10 transition text-[10px] sm:text-xs font-bold whitespace-nowrap flex items-center gap-1">🏷️
+                            class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">🏷️
                             Dev Etiketler</button>
                         <button id="showPrintQR"
-                            class="tab-button text-left px-2 py-1.5 rounded-lg hover:bg-white/10 transition text-[10px] sm:text-xs font-bold whitespace-nowrap flex items-center gap-1">📱
+                            class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">📱
                             QR Etiketi</button>
                     </div>
                 </div>
@@ -976,10 +984,10 @@
 
             <div class="flex-1 overflow-y-auto flex justify-center py-8">
 
-                
 
 
-               
+
+
                 <div id="qrPreviewContainer" class="hidden w-full max-w-4xl px-4 flex flex-col items-center">
                     <div
                         class="w-full bg-gray-900 rounded-2xl p-4 sm:p-6 mb-6 shadow-xl border border-gray-700 no-print flex flex-col gap-4">
@@ -3503,13 +3511,47 @@
             const submitLoginBtn = document.getElementById('submitPanelLoginBtn');
             const rememberMeCheckbox = document.getElementById('rememberMe'); // YENİ: Beni Hatırla Kutucuğu
 
-            // Baskı Listesi Açılır Menü Motoru
+            // --- BASKI LİSTESİ AKILLI AÇILIR MENÜ MOTORU ---
             document.getElementById('togglePrintMenuBtn').addEventListener('click', function () {
                 const subMenu = document.getElementById('printSubMenu');
                 const arrow = document.getElementById('printMenuArrow');
-                subMenu.classList.toggle('hidden');
-                subMenu.classList.toggle('flex');
-                arrow.style.transform = subMenu.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+                const overlay = document.getElementById('printMenuMobileOverlay');
+
+                const isHidden = subMenu.classList.contains('hidden');
+
+                if (isHidden) {
+                    subMenu.classList.remove('hidden');
+                    subMenu.classList.add('flex');
+                    overlay.classList.remove('hidden'); // Arka planı karart
+                    arrow.style.transform = 'rotate(180deg)';
+                } else {
+                    subMenu.classList.add('hidden');
+                    subMenu.classList.remove('flex');
+                    overlay.classList.add('hidden'); // Karartmayı kaldır
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            });
+
+            // Arka plandaki karanlık bölgeye (Overlay) tıklanınca menüyü kapatma
+            document.getElementById('printMenuMobileOverlay').addEventListener('click', function () {
+                document.getElementById('printSubMenu').classList.add('hidden');
+                document.getElementById('printSubMenu').classList.remove('flex');
+                document.getElementById('printMenuMobileOverlay').classList.add('hidden');
+                document.getElementById('printMenuArrow').style.transform = 'rotate(0deg)';
+            });
+
+            // Mobilde herhangi bir baskı seçeneğine tıklandığında alt menüyü otomatik kapat
+            const printTabs = ['showPrintA4', 'showPrintDrink', 'showPrintLabel', 'showPrintQR'];
+            printTabs.forEach(id => {
+                document.getElementById(id).addEventListener('click', () => {
+                    // Sadece mobildeyken kapat (Masaüstünde alt menü açık kalmaya devam edebilir)
+                    if (window.innerWidth < 768) {
+                        document.getElementById('printSubMenu').classList.add('hidden');
+                        document.getElementById('printSubMenu').classList.remove('flex');
+                        document.getElementById('printMenuMobileOverlay').classList.add('hidden');
+                        document.getElementById('printMenuArrow').style.transform = 'rotate(0deg)';
+                    }
+                });
             });
 
             // Alt Sekmeleri Tıklama Bağlantıları
