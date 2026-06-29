@@ -14,6 +14,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -507,7 +508,7 @@
                 margin-bottom: -110mm !important;
             }
 
-            
+
         }
 
         /* 4. Standart Telefonlar (Max 480px) */
@@ -527,9 +528,9 @@
                 transform: scale(0.97) !important;
                 transform-origin: top center !important;
                 margin-bottom: -150mm !important;
-                
+
             }
-          
+
 
             /* iPhone ekranında üst butonların parmakla kolay basılması için tam genişlikte alt alta dizilmesi */
             #printModuleArea .sticky,
@@ -723,8 +724,8 @@
                         class="bg-orange-500 text-white px-2.5 py-1.5 rounded-md text-[11px] font-black shadow-sm flex items-center gap-1 active:scale-95 transition whitespace-nowrap">
                         🍽️ Yerinde
                     </button>
-                    <a href="index.html"
-                        class="px-2.5 py-1.5 bg-red-600 rounded-md text-[11px] font-black shadow-sm whitespace-nowrap active:scale-95 transition">Çıkış</a>
+                    <button id="mobileLogoutBtn"
+                        class="px-2.5 py-1.5 bg-red-600 rounded-md text-[11px] font-black shadow-sm whitespace-nowrap active:scale-95 transition cursor-pointer">Çıkış</button>
                 </div>
             </div>
 
@@ -770,9 +771,9 @@
                     Ortak Tarih</button>
             </div>
 
-            <a href="index.html"
-                class="hidden md:block mt-auto p-2 bg-red-600 text-center rounded-lg text-sm font-bold hover:bg-red-700 shadow-md transition">Güvenli
-                Çıkış Yap</a>
+            <button id="desktopLogoutBtn"
+                class="hidden md:block mt-auto p-2 w-full bg-red-600 text-white text-center rounded-lg text-sm font-bold hover:bg-red-700 shadow-md transition cursor-pointer">Güvenli
+                Çıkış Yap</button>
         </div>
 
         <main class="flex-1 h-full overflow-y-auto p-3 sm:p-6 md:p-8 w-full relative scrollbar-none">
@@ -1454,32 +1455,35 @@
             setActiveTab('showSorting');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh]">
-                    <div class="flex-shrink-0">
-                        <h2 class="text-2xl font-black text-gray-800 mb-2 flex items-center gap-1">⬆️ ${menuTitle} Sıralama Ayarı</h2>
-                        <p class="mb-4 text-xs sm:text-sm text-gray-500">Ürünleri sürükleyip bırakarak menüdeki dizilimlerini parmağınızla ayarlayabilirsiniz.</p>
-                        
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sıralanacak Kategori Seçin</label>
-                        <select id="sortCategory" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-semibold bg-gray-50 outline-none focus:border-orange-500 mb-4">
-                            <option value="">-- Kategori Seçiniz --</option>
-                            <option value="Tümü">Tümü (Tüm Ürünler)</option> ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                        </select>
-                    </div>
+        <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh]">
+            <div class="flex-shrink-0">
+                <h2 class="text-2xl font-black text-gray-800 mb-2 flex items-center gap-1">⬆️ ${menuTitle} Sıralama Ayarı</h2>
+                <p class="mb-4 text-xs sm:text-sm text-gray-500">Ürünlerin yanındaki <b>(☰)</b> ikonundan tutup sürükleyerek dizilimlerini parmağınızla ayarlayabilirsiniz.</p>
+                
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Sıralanacak Kategori Seçin</label>
+                <select id="sortCategory" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-semibold bg-gray-50 outline-none focus:border-orange-500 mb-4">
+                    <option value="Tümü" selected>Tümü (Tüm Ürünler)</option> 
+                    ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                </select>
+            </div>
 
-                    <ul id="sortableList" class="flex flex-col gap-2 p-2 border border-dashed rounded-xl bg-gray-50/50 flex-1 overflow-y-auto pr-2">
-                        <li class="text-gray-400 text-center text-xs sm:text-sm py-6">Lütfen yukarıdan bir kategori seçiniz.</li>
-                    </ul>
-                    
-                    <div class="flex-shrink-0 mt-2">
-                        <button id="saveSorting" class="mt-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-3 rounded-xl text-sm sm:text-base font-bold shadow-md active:scale-95 transition w-full hidden">Yeni Sıralamayı Kaydet</button>
-                        <p id="sortingStatus" class="mt-2 text-center text-xs font-bold hidden"></p>
-                    </div>
-                </div>
-            `);
+            <ul id="sortableList" class="flex flex-col gap-2 p-2 border border-dashed rounded-xl bg-gray-50/50 flex-1 overflow-y-auto pr-2">
+                <li class="text-gray-400 text-center text-xs sm:text-sm py-6">Ürünler yükleniyor...</li>
+            </ul>
+            
+            <div class="flex-shrink-0 mt-2">
+                <button id="saveSorting" class="mt-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-4 py-3 rounded-xl text-sm sm:text-base font-bold shadow-md active:scale-95 transition w-full hidden">Yeni Sıralamayı Kaydet</button>
+                <p id="sortingStatus" class="mt-2 text-center text-xs font-bold hidden"></p>
+            </div>
+        </div>
+    `);
 
             const sortCategorySelect = document.getElementById('sortCategory');
             sortCategorySelect.addEventListener('change', (e) => loadSortableList(e.target.value));
             document.getElementById('saveSorting').addEventListener('click', saveSortingOrder);
+
+            // YENİ: Ekran açılır açılmaz varsayılan olarak tümünü listele
+            loadSortableList('Tümü');
         }
 
         function loadSortableList(category) {
@@ -1491,7 +1495,7 @@
             listEl.innerHTML = '';
 
             if (!category || products.length === 0) {
-                listEl.innerHTML = `<li class="text-gray-400 text-center text-xs sm:text-sm py-6">${products.length === 0 ? 'Veriler yükleniyor...' : 'Lütfen yukarıdan bir kategori seçiniz.'}</li>`;
+                listEl.innerHTML = `<li class="text-gray-400 text-center text-xs sm:text-sm py-6">${products.length === 0 ? 'Veriler yükleniyor...' : 'Kategori boş.'}</li>`;
                 return;
             }
 
@@ -1505,12 +1509,16 @@
 
             filteredAndSorted.forEach((p) => {
                 const item = document.createElement('li');
-                item.className = 'sortable-item flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border border-gray-100 text-sm sm:text-base font-medium';
+                item.className = 'sortable-item flex justify-between items-center bg-white p-2 rounded-xl shadow-sm border border-gray-100 text-sm sm:text-base font-medium';
                 item.dataset.id = p.key;
+                // YENİ: Mobilde parmağın rahat basması için ikonu büyüttük, p-2 verdik ve "drag-handle" class'ı atadık.
                 item.innerHTML = `
-                    <div class="flex items-center gap-2"><span class="text-gray-400 text-lg">☰</span><span class="text-gray-800">${p.name}</span></div>
-                    <span class="text-orange-600 font-bold">${p.price} ₺</span>
-                `;
+            <div class="flex items-center gap-1">
+                <span class="drag-handle text-gray-400 text-xl p-2 cursor-grab active:cursor-grabbing select-none" style="touch-action: none;">☰</span>
+                <span class="text-gray-800">${p.name}</span>
+            </div>
+            <span class="text-orange-600 font-bold pr-2">${p.price} ₺</span>
+        `;
                 listEl.appendChild(item);
             });
 
@@ -1518,7 +1526,10 @@
 
             Sortable.create(listEl, {
                 animation: 150,
+                handle: '.drag-handle', // YENİ: Sadece "drag-handle" class'ına sahip ikondan tutulunca sürükler
                 ghostClass: 'sortable-ghost',
+                delay: 50, // YENİ: Mobilde çok hafif bir gecikme kaydırma ile sürüklemeyi ayırt etmeyi kolaylaştırır
+                delayOnTouchOnly: true, // YENİ: Bu gecikmeyi sadece telefonlarda (dokunmatikte) uygula
                 onEnd: function () {
                     statusEl.textContent = 'Sıralama değiştirildi. Kaydetmeyi unutmayın!';
                     statusEl.className = 'mt-3 text-center text-xs font-bold text-red-600';
@@ -2180,22 +2191,36 @@
                 const hourLabels = [];
                 const hourTodayValues = [];
                 const hourYesterdayValues = [];
+                const hourTodayDetails = []; // YENİ: Dakika detaylarını tutacak dizi
+                const hourYesterdayDetails = []; // YENİ: Dakika detaylarını tutacak dizi
 
                 for (let i = 0; i <= 23; i++) {
                     hourLabels.push(i.toString().padStart(2, '0') + ':00');
                     hourTodayValues.push(0);
                     hourYesterdayValues.push(0);
+                    hourTodayDetails.push([]); // Her saat için boş bir detay sepeti aç
+                    hourYesterdayDetails.push([]);
                 }
 
                 Object.keys(todayData).forEach(key => {
                     const hour = parseInt(key.split(':')[0]);
-                    if (!isNaN(hour) && hour >= 0 && hour <= 23) hourTodayValues[hour] += todayData[key];
+                    if (!isNaN(hour) && hour >= 0 && hour <= 23) {
+                        hourTodayValues[hour] += todayData[key];
+                        // O dakikayı listeye ekle (Örn: "14:35 (2 kişi)")
+                        hourTodayDetails[hour].push(`${key} (${todayData[key]} kişi)`);
+                    }
                 });
 
                 Object.keys(yesterdayData).forEach(key => {
                     const hour = parseInt(key.split(':')[0]);
-                    if (!isNaN(hour) && hour >= 0 && hour <= 23) hourYesterdayValues[hour] += yesterdayData[key];
+                    if (!isNaN(hour) && hour >= 0 && hour <= 23) {
+                        hourYesterdayValues[hour] += yesterdayData[key];
+                        // O dakikayı listeye ekle
+                        hourYesterdayDetails[hour].push(`${key} (${yesterdayData[key]} kişi)`);
+                    }
                 });
+
+                // BÜTÜN GERÇEK VERİLERLE HTML ŞABLONUNU OLUŞTUR VE ANİMASYONLA BAS
 
 
                 // BÜTÜN GERÇEK VERİLERLE HTML ŞABLONUNU OLUŞTUR VE ANİMASYONLA BAS
@@ -2313,7 +2338,13 @@
 
                 // Gerçek Çizim Motorunu Çalıştır
                 initDashboardCharts({
-                    hourly: { labels: hourLabels, today: hourTodayValues, yesterday: hourYesterdayValues },
+                    hourly: {
+                        labels: hourLabels,
+                        today: hourTodayValues,
+                        yesterday: hourYesterdayValues,
+                        todayDetails: hourTodayDetails, // YENİ EKLENDİ
+                        yesterdayDetails: hourYesterdayDetails // YENİ EKLENDİ
+                    },
                     category: { labels: catLabels, data: catValues }
                 });
 
@@ -2335,6 +2366,7 @@
                         {
                             label: 'Bugün',
                             data: data.hourly.today,
+                            customDetails: data.hourly.todayDetails, // YENİ: Dakikaları grafiğe gömdük
                             borderColor: '#ea580c',
                             backgroundColor: 'rgba(234, 88, 12, 0.1)',
                             borderWidth: 3,
@@ -2346,6 +2378,7 @@
                         {
                             label: 'Dün (Aynı Saatlerde)',
                             data: data.hourly.yesterday,
+                            customDetails: data.hourly.yesterdayDetails, // YENİ: Dakikaları grafiğe gömdük
                             borderColor: '#9ca3af',
                             borderWidth: 2,
                             borderDash: [5, 5],
@@ -2367,11 +2400,35 @@
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { weight: 'bold' } } },
-                        tooltip: { backgroundColor: 'rgba(0,0,0,0.8)', titleFont: { size: 13 }, bodyFont: { size: 12 }, padding: 10 }
+                        // YENİ: Tooltip ayarlarını çok daha zengin bir hale getirdik
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.85)',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            callbacks: {
+                                // Üst başlığı "14:00" yerine "14:00 - 14:59 Arası" yaptık
+                                title: function (context) {
+                                    const hourNumber = context[0].label.split(':')[0];
+                                    return `${hourNumber}:00 - ${hourNumber}:59 Arası`;
+                                },
+                                label: function (context) {
+                                    return `${context.dataset.label}: ${context.raw} Kişi`;
+                                },
+                                // Altına dakikaları alt alta ekliyoruz
+                                afterLabel: function (context) {
+                                    const details = context.dataset.customDetails[context.dataIndex];
+                                    if (details && details.length > 0) {
+                                        return ['------------------', 'Giriş Dakikaları:', ...details.map(d => '  ⏱️ ' + d)];
+                                    }
+                                    return null; // O saatte giriş yoksa ekstra yazı gösterme
+                                }
+                            }
+                        }
                     },
                     scales: {
                         y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f3f4f6' }, ticks: { stepSize: 1 } },
-                        x: { grid: { display: false }, ticks: { maxTicksLimit: 12 } } // 24 saatin hepsi sıkışmasın diye max 12 etiket gösterir
+                        x: { grid: { display: false }, ticks: { maxTicksLimit: 12 } }
                     }
                 }
             });
@@ -2422,11 +2479,11 @@
             }
 
             // 3. Sağ-Sol Oklu Sürgülü Slider Menüsü
-           if (ekstreKeys.length > 0) {
+            if (ekstreKeys.length > 0) {
                 const currentIndex = ekstreKeys.indexOf(selectedEkstreKey);
                 const prevKey = currentIndex > 0 ? ekstreKeys[currentIndex - 1] : null;
                 const nextKey = currentIndex < ekstreKeys.length - 1 ? ekstreKeys[currentIndex + 1] : null;
-                
+
                 // YENİ: Ekstre tarihini (YYYY-MM) alıp bir önceki ayın adını bulma motoru
                 let displayTitle = selectedEkstreKey;
                 if (selectedEkstreKey && selectedEkstreKey.includes('-')) {
@@ -2434,7 +2491,7 @@
                     let [y, m] = selectedEkstreKey.split('-');
                     let yearNum = parseInt(y);
                     let monthNum = parseInt(m);
-                    
+
                     monthNum -= 1; // Bir önceki aya git
                     if (monthNum === 0) { // Eğer Ocak ayındaysak Aralık'a ve bir önceki yıla geç
                         monthNum = 12;
@@ -2462,7 +2519,7 @@
                         </button>
                     </div>
                 `;
-            
+
             } else {
                 buttonsHtml = `<div class="w-full text-center text-xs font-bold text-gray-400 p-3 border border-dashed rounded-xl mt-1">Henüz çekilmiş ekstre yok. Node.js servisiyle çekim yapın.</div>`;
             }
@@ -2848,7 +2905,7 @@
                 let [y, m] = selectedEkstreKey.split('-');
                 let yearNum = parseInt(y);
                 let monthNum = parseInt(m);
-                
+
                 monthNum -= 1;
                 if (monthNum === 0) {
                     monthNum = 12;
@@ -2860,7 +2917,7 @@
             Object.values(data.items || {}).forEach(item => {
                 const price = parseFloat(item.amount).toLocaleString('tr-TR', { minimumFractionDigits: 2 });
                 let cleanName = item.desc.replace(/^\d+[-]/, '').trim();
-                
+
                 const rowHtml = `
                     <div style="margin-bottom:8px; border-bottom:1px dashed #000; padding-bottom:4px;">
                         <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:bold; color:#000;">
@@ -3204,23 +3261,28 @@
                 loginOverlay.classList.add('hidden');
             }
 
+            // 🔒 1. FIREBASE GERÇEK GÜVENLİ GİRİŞ MOTORU
             function handleAdminLogin() {
-                if (usernameInput.value.trim() === 'Olimpiyat' && passwordInput.value === 'Olimpiyatkoko34.') {
-                    loginError.classList.add('hidden');
+                const email = usernameInput.value.trim(); // Artık "Olimpiyat" yerine e-posta yazacaksın
+                const pass = passwordInput.value;
 
-                    // YENİ: Beni hatırla seçiliyse kalıcıya, değilse geçici hafızaya kaydet
-                    if (rememberMeCheckbox && rememberMeCheckbox.checked) {
-                        localStorage.setItem('olimpiyat_admin_logged_in', 'true');
-                    } else {
-                        sessionStorage.setItem('olimpiyat_admin_logged_in', 'true');
-                    }
+                firebase.auth().signInWithEmailAndPassword(email, pass)
+                    .then((userCredential) => {
+                        loginError.classList.add('hidden');
 
-                    loginOverlay.classList.add('hidden');
-                } else {
-                    loginError.classList.remove('hidden');
-                    passwordInput.value = '';
-                    passwordInput.focus();
-                }
+                        if (rememberMeCheckbox && rememberMeCheckbox.checked) {
+                            localStorage.setItem('olimpiyat_admin_logged_in', 'true');
+                        } else {
+                            sessionStorage.setItem('olimpiyat_admin_logged_in', 'true');
+                        }
+                        loginOverlay.classList.add('hidden');
+                    })
+                    .catch((error) => {
+                        loginError.textContent = "❌ E-posta veya şifre hatalı!";
+                        loginError.classList.remove('hidden');
+                        passwordInput.value = '';
+                        passwordInput.focus();
+                    });
             }
 
             submitLoginBtn.addEventListener('click', handleAdminLogin);
@@ -3251,20 +3313,27 @@
             closeEditProductModal.addEventListener('click', () => editProductModal.classList.add('hidden'));
 
             uploadEditImageBtn.addEventListener('click', (e) => { e.preventDefault(); openCloudinaryWidget(editImageURLInput, editImagePreview); });
-
-            // DÜZELTME 2: Tüm çıkış butonlarını bulup sayfadan atmadan giriş ekranını getiren sistem
-            const logoutBtns = document.querySelectorAll('a[href="index.html"]');
-            logoutBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault(); // Sayfa yenilemesini/yönlendirmesini durdurur
-                    sessionStorage.removeItem('olimpiyat_admin_logged_in');
-                    localStorage.removeItem('olimpiyat_admin_logged_in');
-
-                    // Giriş panelini geri getir ve şifreyi temizle
-                    document.getElementById('adminLoginOverlay').classList.remove('hidden');
-                    document.getElementById('panelPassword').value = '';
+            // 🔒 2. FIREBASE GÜVENLİ ÇIKIŞ MOTORU
+            function performLogout(e) {
+                e.preventDefault();
+                sessionStorage.removeItem('olimpiyat_admin_logged_in');
+                localStorage.removeItem('olimpiyat_admin_logged_in');
+                firebase.auth().signOut().then(() => {
+                    window.location.reload(); // Şifre ekranına geri atar
                 });
-            });
+            }
+
+            // Çıkış butonlarını HTML'den seçiyoruz
+            const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+            const desktopLogoutBtn = document.getElementById('desktopLogoutBtn');
+
+            // Butonlar sayfada varsa, tıklama olayına çıkış fonksiyonunu bağlıyoruz
+            if (mobileLogoutBtn) {
+                mobileLogoutBtn.addEventListener('click', performLogout);
+            }
+            if (desktopLogoutBtn) {
+                desktopLogoutBtn.addEventListener('click', performLogout);
+            }
 
             saveEditProductButton.addEventListener('click', async () => {
                 const productKey = document.getElementById('editProductKey').value;
