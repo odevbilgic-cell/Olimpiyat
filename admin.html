@@ -2258,13 +2258,21 @@
                 </div>
             `);
 
-            try {
-                // Bugünü ve Dünü hesapla (YYYY-MM-DD formatında)
+           try {
+                // DOĞRU YEREL SAAT HESAPLAMASI (Türkiye Saatine Uyumlu)
+                const getLocalYYYYMMDD = (date) => {
+                    const y = date.getFullYear();
+                    const m = String(date.getMonth() + 1).padStart(2, '0');
+                    const d = String(date.getDate()).padStart(2, '0');
+                    return `${y}-${m}-${d}`;
+                };
+                
                 const today = new Date();
-                const todayStr = today.toISOString().slice(0, 10);
+                const todayStr = getLocalYYYYMMDD(today);
+                
                 const yesterday = new Date(today);
                 yesterday.setDate(yesterday.getDate() - 1);
-                const yesterdayStr = yesterday.toISOString().slice(0, 10);
+                const yesterdayStr = getLocalYYYYMMDD(yesterday);
 
                 // Firebase'den 4 farklı veri kümesini aynı anda (paralel) çek!
                 const [snapToday, snapYesterday, snapCategory, snapProducts] = await Promise.all([
