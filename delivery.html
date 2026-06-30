@@ -853,9 +853,19 @@
             return productsArray;
         }
 
-        // YENİLENEN: Dakikasına kadar ziyaretçi girişini kaydeden motor
+       // YENİLENEN: Dakikasına kadar ziyaretçi girişini kaydeden KUSURSUZ motor (UTC Hatası Giderildi)
         function trackVisitor() {
-            const todayStr = new Date().toISOString().slice(0, 10);
+            // DOĞRU YEREL SAAT HESAPLAMASI (Türkiye Saatine Uyumlu)
+            const getLocalYYYYMMDD = (date) => {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const d = String(date.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            };
+
+            const now = new Date();
+            // Artık toISOString() yok! Cihazın yerel saatine göre tarihi çekeriz.
+            const todayStr = getLocalYYYYMMDD(now); 
             
             // 1. Eski Günlük Toplam Sayaç
             const counterRef = visitorsRef.child(todayStr);
@@ -863,8 +873,7 @@
                 return (currentCount || 0) + 1;
             });
 
-            // 2. YENİ: Dakika Bazında Gerçek Ziyaretçi Sayacı
-            const now = new Date();
+            // 2. Dakika Bazında Gerçek Ziyaretçi Sayacı
             const currentHour = String(now.getHours()).padStart(2, '0');
             const currentMinute = String(now.getMinutes()).padStart(2, '0');
             const exactTime = currentHour + ':' + currentMinute; // Örn: "14:26"
@@ -872,7 +881,7 @@
             // Kullanıcı yerinde menüye mi girdi, paket servise mi?
             const activeMenu = window.location.href.includes('delivery') ? 'delivery' : 'in_place';
             
-            // Firebase'de tam olarak "14:26" hücresini +1 artırır
+            // Firebase'de tam o saatin içine +1 yazar
             database.ref('visitors_hourly/' + activeMenu + '/' + todayStr + '/' + exactTime)
                 .set(firebase.database.ServerValue.increment(1));
         }
