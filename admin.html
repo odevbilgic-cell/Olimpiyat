@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yönetici Paneli | Olimpiyat Kokoreç</title>
 
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <link rel="shortcut icon" href="/favicon.png">
+    <link rel="icon" type="image/jpeg" href="/logo.jpg">
+    <link rel="shortcut icon" href="/logo.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 
 
@@ -435,120 +435,57 @@
             width: 200px;
         }
 
-        /* --- MOBİL EKRANLAR İÇİN A4 ÖNİZLEME UYUMU (Baskıyı Etkilemez) --- */
+       /* --- KUSURSUZ MOBİL A4 ÖNİZLEME (iPhone & Android) --- */
+        
+        /* 1. Tarayıcının A4 kağıdını yanlardan ezmesini kesinlikle engelle */
+        .a4-menu-page, .a4-label-page {
+            flex-shrink: 0 !important;
+            min-width: 200mm !important;
+            max-width: 200mm !important;
+            box-sizing: border-box !important;
+            overflow: visible !important;
+        }
+
+        /* 2. Tabletler ve Geniş Ekranlar */
         @media screen and (max-width: 768px) {
-
-            .a4-menu-page,
-            .a4-label-page {
-                margin: 0px;
-                zoom: 60%;
-                /* Telefon ekranında A4'ü %45 oranında küçültür */
-                transform-origin: top center;
-                margin-bottom: -180mm !important;
-                /* Küçülmeden dolayı altta kalan ölü boşluğu siler */
-            }
-
-            #logoAna {
-                justify-content: center;
-                align-items: center;
-                vertical-align: middle;
-                margin: auto;
-                width: 150px;
-            }
-
-        }
-
-
-
-        @media screen and (max-width: 480px) {
-            .a4-label-page {
-                transform: scale(0.45);
-                /* Daha küçük telefonlar için %40 */
-                margin-bottom: -160mm !important;
-
-            }
-
-            .a4-menu-page {
-                zoom: 50%;
-                /* Daha küçük telefonlar için %40 */
-                margin-bottom: -160mm !important;
-            }
-        }
-
-
-        /* --- MOBİL & IPHONE 13 ÖZEL OPTİMİZASYONLARI (Kusursuz WebKit/Safari Görünümü) --- */
-
-        /* 1. iPhone Çentik (Notch) ve Alt Kaydırma Çizgisi (Home Indicator) Uyumu */
-        .sticky.top-0 {
-            padding-top: max(0.75rem, env(safe-area-inset-top)) !important;
-        }
-
-        /* 2. Tüm Modaller İçin İyileştirmeler - iOS klavye açılınca taşmayı önleme */
-        .animate-pop-in {
-            /* Ekranın altı ve üstündeki ölü alanları hesaba katarak boyutu sınırlandırır */
-            max-height: calc(100vh - env(safe-area-inset-bottom) - env(safe-area-inset-top) - 2rem) !important;
-            overflow-y: auto !important;
-            overscroll-behavior: contain;
-            /* İçe doğru kaydırmada arkaplanın kaymasını engeller */
-        }
-
-        /* 3. Genel Tablet ve Geniş Telefonlar (Max 768px) */
-        @media screen and (max-width: 768px) {
-            #logoAna {
-                width: 140px;
-                margin: auto;
-            }
-
-            .a4-menu-page,
-            .a4-label-page {
-                /* Safari'nin sevmediği 'zoom' yerine 'transform: scale' kullanıyoruz */
-                transform: scale(0.50) !important;
+            #logoAna { width: 140px; margin: auto; }
+            .a4-menu-page, .a4-label-page {
+                transform: scale(0.60) !important;
                 transform-origin: top center !important;
-                margin-top: 0 !important;
                 margin-bottom: -110mm !important;
             }
-
-
         }
 
-        /* 4. Standart Telefonlar (Max 480px) */
+        /* 3. Standart Telefonlar (iPhone 11, 12, Pro Max vb.) */
         @media screen and (max-width: 480px) {
-            .a4-label-page {
-                transform: scale(0.52) !important;
+            .a4-menu-page, .a4-label-page {
+                transform: scale(0.48) !important;
                 transform-origin: top center !important;
-                margin-bottom: -135mm !important;
+                margin-bottom: -140mm !important;
+                margin-top: 10px !important;
             }
         }
 
-        /* 5. iPhone 13, 13 Pro, 14 ve Benzeri Cihazlar (Tam 390px viewport) */
+        /* 4. iPhone 13, 13 Pro, 14 ve Dar Ekranlı Cihazlar (390px - 395px) */
         @media screen and (max-width: 395px) {
-
-            .a4-menu-page,
-            .a4-label-page {
-                transform: scale(0.97) !important;
+            .a4-menu-page, .a4-label-page {
+                transform: scale(0.43) !important; /* A4'ü telefon ekranına kusursuz oturtur */
                 transform-origin: top center !important;
-                margin-bottom: -150mm !important;
-
+                margin-bottom: -160mm !important; /* Küçülmeden kalan ölü boşluğu yok eder */
             }
-
-
-            /* iPhone ekranında üst butonların parmakla kolay basılması için tam genişlikte alt alta dizilmesi */
-            #printModuleArea .sticky,
-            #labelPrintArea .sticky {
+            
+            /* iPhone Buton ve Sol Menü Daraltma Uyumlulukları */
+            #printModuleArea .sticky, #labelPrintArea .sticky {
                 flex-direction: column !important;
                 gap: 8px !important;
                 padding-bottom: 12px !important;
             }
-
-            #printModuleArea .sticky button,
-            #labelPrintArea .sticky button {
+            #printModuleArea .sticky button, #labelPrintArea .sticky button {
                 width: 100% !important;
                 padding: 14px !important;
                 font-size: 9px !important;
                 justify-content: center !important;
             }
-
-            /* Sol menü ikonlarının ve metinlerin iPhone ekranına tam oturması için daraltılması */
             .tab-button {
                 padding: 8px 10px !important;
                 font-size: 12px !important;
