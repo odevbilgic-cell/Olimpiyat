@@ -435,16 +435,45 @@
             width: 200px;
         }
 
-       /* --- KUSURSUZ MOBİL A4 ÖNİZLEME (iPhone & Android) --- */
+      /* --- KUSURSUZ MOBİL A4 ÖNİZLEME (iPhone & Android) --- */
         
-        /* 1. Tarayıcının A4 kağıdını yanlardan ezmesini kesinlikle engelle */
-        .a4-menu-page, .a4-label-page {
+        /* 1. Tarayıcıların "mm" hesabını şaşırmaması için KESİN PİKSEL değerleri veriyoruz. A4 (96 DPI) = 794px x 1123px */
+        .a4-menu-page {
             flex-shrink: 0 !important;
-            min-width: 200mm !important;
-            max-width: 200mm !important;
+            width: 756px !important; /* 200mm karşılığı */
+            height: 1084px !important; /* 287mm karşılığı */
             box-sizing: border-box !important;
-            overflow: visible !important;
+            overflow: hidden !important;
         }
+
+        .a4-label-page {
+            flex-shrink: 0 !important;
+            width: 794px !important; /* 210mm (Tam A4 Genişliği) */
+            height: 1123px !important; /* 297mm (Tam A4 Yüksekliği) */
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+            background-color: white !important;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important; 
+            border: 1px solid #e5e7eb !important; 
+            margin: 0 auto 40px auto !important; 
+            /* ALTIN VURUŞ: Oranın bozulmasını, kağıdın sündürülmesini İMKANSIZ hale getirir */
+            aspect-ratio: 1 / 1.414 !important; 
+        }
+
+        /* Konteynerin taşmaları gizlemesi ve merkeze kilitlemesi */
+        #a4PreviewContainer, #labelPagesContainer {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+
+        /* Orijinal Dev Yazı Boyutları Sabit Kalmalı */
+        .price-text-3 { font-size: 260px !important; letter-spacing: -8px !important; white-space: nowrap !important; }
+        .currency-text-3 { font-size: 130px !important; }
+        .price-text-2 { font-size: 320px !important; letter-spacing: -12px !important; white-space: nowrap !important; }
+        .currency-text-2 { font-size: 170px !important; }
 
         /* 2. Tabletler ve Geniş Ekranlar */
         @media screen and (max-width: 768px) {
@@ -452,26 +481,34 @@
             .a4-menu-page, .a4-label-page {
                 transform: scale(0.60) !important;
                 transform-origin: top center !important;
-                margin-bottom: -110mm !important;
+                /* 1123px'in %40'ı yok oldu (Matematiksel boşluk kesimi) */
+                margin-bottom: -440px !important; 
             }
         }
 
-        /* 3. Standart Telefonlar (iPhone 11, 12, Pro Max vb.) */
+        /* 3. Standart Telefonlar (iPhone 11, 12 vb.) */
         @media screen and (max-width: 480px) {
             .a4-menu-page, .a4-label-page {
                 transform: scale(0.48) !important;
                 transform-origin: top center !important;
-                margin-bottom: -140mm !important;
+                /* 1123px'in %52'si yok oldu */
+                margin-bottom: -580px !important; 
                 margin-top: 10px !important;
             }
         }
 
         /* 4. iPhone 13, 13 Pro, 14 ve Dar Ekranlı Cihazlar (390px - 395px) */
         @media screen and (max-width: 395px) {
-            .a4-menu-page, .a4-label-page {
-                transform: scale(0.43) !important; /* A4'ü telefon ekranına kusursuz oturtur */
+            .a4-menu-page {
+                transform: scale(0.43) !important;
                 transform-origin: top center !important;
-                margin-bottom: -160mm !important; /* Küçülmeden kalan ölü boşluğu yok eder */
+                margin-bottom: -610px !important;
+            }
+            .a4-label-page {
+                transform: scale(0.42) !important; 
+                transform-origin: top center !important;
+                /* 1123px'in %58'i (650 pikseli) buharlaştı, hayalet boşluk tam dipten makaslandı! */
+                margin-bottom: -650px !important; 
             }
             
             /* iPhone Buton ve Sol Menü Daraltma Uyumlulukları */
@@ -666,6 +703,49 @@
             }
 
            
+        }
+
+        /* --- 📱 DEV ETİKETLER İÇİN İPHONE YAZI KAYMA ÇÖZÜMÜ --- */
+        @media screen and (max-width: 768px) {
+            /* Etiketteki Zoom (Scale) olayını iptal edip, kağıdı telefon ekranına esnetiyoruz */
+            .a4-label-page {
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                height: 141vw !important; /* Kusursuz A4 Dikey Oranı */
+                transform: none !important; 
+                margin: 0 auto 20px auto !important;
+            }
+
+            /* Yazıların alt satıra düşmesini KESİNLİKLE yasaklıyoruz */
+            .label-split-2, .label-split-3 {
+                overflow: hidden !important;
+                width: 100% !important;
+            }
+
+            /* 3'lü Etiket Rakamları (Ekrana sığması için küçültüldü) */
+            .price-text-3 {
+                font-size: 130px !important; 
+                letter-spacing: -4px !important;
+                white-space: nowrap !important; 
+            }
+            .currency-text-3 { font-size: 65px !important; }
+
+            /* 2'li Etiket Rakamları (Ekrana sığması için küçültüldü) */
+            .price-text-2 {
+                font-size: 160px !important; 
+                letter-spacing: -6px !important;
+                white-space: nowrap !important;
+            }
+            .currency-text-2 { font-size: 80px !important; }
+        }
+
+        /* Dar Ekranlı Telefonlar (iPhone 13, 11 vb. - 400px altı) */
+        @media screen and (max-width: 400px) {
+            .price-text-3 { font-size: 105px !important; letter-spacing: -2px !important; }
+            .currency-text-3 { font-size: 55px !important; }
+            .price-text-2 { font-size: 135px !important; letter-spacing: -4px !important; }
+            .currency-text-2 { font-size: 65px !important; }
         }
     </style>
 </head>
@@ -1839,7 +1919,7 @@
                         <h2 class="text-xl font-black text-gray-800">📄 A4 Fiyat Listesi</h2>
                         <button onclick="window.print()" class="bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">🖨️ Yazdır</button>
                     </div>
-                    <div class="flex justify-center w-full overflow-x-auto pb-8">
+                    <div class="flex justify-center w-full overflow-hidden pb-8">
                         <div class="a4-menu-page">
                             <div class="menu-top-row">
                                 <div class="top-left">Tüm vergiler dahildir.</div>
