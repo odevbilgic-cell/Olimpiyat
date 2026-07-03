@@ -435,33 +435,38 @@
             width: 200px;
         }
 
-      /* --- KUSURSUZ MOBİL A4 ÖNİZLEME (iPhone & Android) --- */
-        
+        /* --- KUSURSUZ MOBİL A4 ÖNİZLEME (iPhone & Android) --- */
+
         /* 1. Tarayıcıların "mm" hesabını şaşırmaması için KESİN PİKSEL değerleri veriyoruz. A4 (96 DPI) = 794px x 1123px */
         .a4-menu-page {
             flex-shrink: 0 !important;
-            width: 756px !important; /* 200mm karşılığı */
-            height: 1084px !important; /* 287mm karşılığı */
+            width: 756px !important;
+            /* 200mm karşılığı */
+            height: 1084px !important;
+            /* 287mm karşılığı */
             box-sizing: border-box !important;
             overflow: hidden !important;
         }
 
         .a4-label-page {
             flex-shrink: 0 !important;
-            width: 794px !important; /* 210mm (Tam A4 Genişliği) */
-            height: 1123px !important; /* 297mm (Tam A4 Yüksekliği) */
+            width: 794px !important;
+            /* 210mm (Tam A4 Genişliği) */
+            height: 1123px !important;
+            /* 297mm (Tam A4 Yüksekliği) */
             box-sizing: border-box !important;
             overflow: hidden !important;
             background-color: white !important;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important; 
-            border: 1px solid #e5e7eb !important; 
-            margin: 0 auto 40px auto !important; 
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid #e5e7eb !important;
+            margin: 0 auto 40px auto !important;
             /* ALTIN VURUŞ: Oranın bozulmasını, kağıdın sündürülmesini İMKANSIZ hale getirir */
-            aspect-ratio: 1 / 1.414 !important; 
+            aspect-ratio: 1 / 1.414 !important;
         }
 
         /* Konteynerin taşmaları gizlemesi ve merkeze kilitlemesi */
-        #a4PreviewContainer, #labelPagesContainer {
+        #a4PreviewContainer,
+        #labelPagesContainer {
             overflow-x: hidden !important;
             width: 100% !important;
             display: flex !important;
@@ -470,29 +475,51 @@
         }
 
         /* Orijinal Dev Yazı Boyutları Sabit Kalmalı */
-        .price-text-3 { font-size: 260px !important; letter-spacing: -8px !important; white-space: nowrap !important; }
-        .currency-text-3 { font-size: 130px !important; }
-        .price-text-2 { font-size: 320px !important; letter-spacing: -12px !important; white-space: nowrap !important; }
-        .currency-text-2 { font-size: 170px !important; }
+        .price-text-3 {
+            font-size: 260px !important;
+            letter-spacing: -8px !important;
+            white-space: nowrap !important;
+        }
+
+        .currency-text-3 {
+            font-size: 130px !important;
+        }
+
+        .price-text-2 {
+            font-size: 320px !important;
+            letter-spacing: -12px !important;
+            white-space: nowrap !important;
+        }
+
+        .currency-text-2 {
+            font-size: 170px !important;
+        }
 
         /* 2. Tabletler ve Geniş Ekranlar */
         @media screen and (max-width: 768px) {
-            #logoAna { width: 140px; margin: auto; }
-            .a4-menu-page, .a4-label-page {
+            #logoAna {
+                width: 140px;
+                margin: auto;
+            }
+
+            .a4-menu-page,
+            .a4-label-page {
                 transform: scale(0.60) !important;
                 transform-origin: top center !important;
                 /* 1123px'in %40'ı yok oldu (Matematiksel boşluk kesimi) */
-                margin-bottom: -440px !important; 
+                margin-bottom: -440px !important;
             }
         }
 
         /* 3. Standart Telefonlar (iPhone 11, 12 vb.) */
         @media screen and (max-width: 480px) {
-            .a4-menu-page, .a4-label-page {
+
+            .a4-menu-page,
+            .a4-label-page {
                 transform: scale(0.48) !important;
                 transform-origin: top center !important;
                 /* 1123px'in %52'si yok oldu */
-                margin-bottom: -580px !important; 
+                margin-bottom: -580px !important;
                 margin-top: 10px !important;
             }
         }
@@ -504,25 +531,30 @@
                 transform-origin: top center !important;
                 margin-bottom: -610px !important;
             }
+
             .a4-label-page {
-                transform: scale(0.42) !important; 
+                transform: scale(0.42) !important;
                 transform-origin: top center !important;
                 /* 1123px'in %58'i (650 pikseli) buharlaştı, hayalet boşluk tam dipten makaslandı! */
-                margin-bottom: -650px !important; 
+                margin-bottom: -650px !important;
             }
-            
+
             /* iPhone Buton ve Sol Menü Daraltma Uyumlulukları */
-            #printModuleArea .sticky, #labelPrintArea .sticky {
+            #printModuleArea .sticky,
+            #labelPrintArea .sticky {
                 flex-direction: column !important;
                 gap: 8px !important;
                 padding-bottom: 12px !important;
             }
-            #printModuleArea .sticky button, #labelPrintArea .sticky button {
+
+            #printModuleArea .sticky button,
+            #labelPrintArea .sticky button {
                 width: 100% !important;
                 padding: 14px !important;
                 font-size: 9px !important;
                 justify-content: center !important;
             }
+
             .tab-button {
                 padding: 8px 10px !important;
                 font-size: 12px !important;
@@ -702,50 +734,72 @@
                 print-color-adjust: exact;
             }
 
-           
+
         }
 
         /* --- 📱 DEV ETİKETLER İÇİN İPHONE YAZI KAYMA ÇÖZÜMÜ --- */
         @media screen and (max-width: 768px) {
+
             /* Etiketteki Zoom (Scale) olayını iptal edip, kağıdı telefon ekranına esnetiyoruz */
             .a4-label-page {
                 width: 100% !important;
                 min-width: 100% !important;
                 max-width: 100% !important;
-                height: 141vw !important; /* Kusursuz A4 Dikey Oranı */
-                transform: none !important; 
+                height: 141vw !important;
+                /* Kusursuz A4 Dikey Oranı */
+                transform: none !important;
                 margin: 0 auto 20px auto !important;
             }
 
             /* Yazıların alt satıra düşmesini KESİNLİKLE yasaklıyoruz */
-            .label-split-2, .label-split-3 {
+            .label-split-2,
+            .label-split-3 {
                 overflow: hidden !important;
                 width: 100% !important;
             }
 
             /* 3'lü Etiket Rakamları (Ekrana sığması için küçültüldü) */
             .price-text-3 {
-                font-size: 130px !important; 
+                font-size: 130px !important;
                 letter-spacing: -4px !important;
-                white-space: nowrap !important; 
+                white-space: nowrap !important;
             }
-            .currency-text-3 { font-size: 65px !important; }
+
+            .currency-text-3 {
+                font-size: 65px !important;
+            }
 
             /* 2'li Etiket Rakamları (Ekrana sığması için küçültüldü) */
             .price-text-2 {
-                font-size: 160px !important; 
+                font-size: 160px !important;
                 letter-spacing: -6px !important;
                 white-space: nowrap !important;
             }
-            .currency-text-2 { font-size: 80px !important; }
+
+            .currency-text-2 {
+                font-size: 80px !important;
+            }
         }
 
         /* Dar Ekranlı Telefonlar (iPhone 13, 11 vb. - 400px altı) */
         @media screen and (max-width: 400px) {
-            .price-text-3 { font-size: 105px !important; letter-spacing: -2px !important; }
-            .currency-text-3 { font-size: 55px !important; }
-            .price-text-2 { font-size: 135px !important; letter-spacing: -4px !important; }
-            .currency-text-2 { font-size: 65px !important; }
+            .price-text-3 {
+                font-size: 105px !important;
+                letter-spacing: -2px !important;
+            }
+
+            .currency-text-3 {
+                font-size: 55px !important;
+            }
+
+            .price-text-2 {
+                font-size: 135px !important;
+                letter-spacing: -4px !important;
+            }
+
+            .currency-text-2 {
+                font-size: 65px !important;
+            }
         }
     </style>
 </head>
@@ -2018,7 +2072,7 @@
         // --- 📱 QR ETİKETİ DİSPANSER MOTORU ---
         window.currentPdfUrl = ""; // Hangi PDF'in açık olduğunu sistemin hafızasında tutar
 
-        window.loadQRPdf = function(type) {
+        window.loadQRPdf = function (type) {
             const viewer = document.getElementById('qrPdfViewer');
             if (!viewer) return;
 
@@ -2029,7 +2083,7 @@
             if (type === 'genis') {
                 window.currentPdfUrl = "https://drive.google.com/file/d/1GliAaoE0G8vloctRyC6IZJK3BwBRwoMn/preview";
             } else if (type === 'uckenarli') {
-                window.currentPdfUrl = "uc_kenarli_dispanser.pdf"; 
+                window.currentPdfUrl = "uc_kenarli_dispanser.pdf";
             } else if (type === 'dar') {
                 window.currentPdfUrl = "dar_dispanser.pdf";
             }
@@ -2040,12 +2094,12 @@
             }, 300);
         };
 
-        window.executeQRPrint = function() {
-            if (!window.currentPdfUrl) { 
-                alert("Lütfen yazdırmadan önce yukarıdan bir dispanser türü (Geniş, Dar vb.) seçin."); 
-                return; 
+        window.executeQRPrint = function () {
+            if (!window.currentPdfUrl) {
+                alert("Lütfen yazdırmadan önce yukarıdan bir dispanser türü (Geniş, Dar vb.) seçin.");
+                return;
             }
-            
+
             // Eğer Google Drive linkiyse yeni sekmede aç (Çünkü Google, sitelerin içinden direkt yazıcı tetiklemeyi güvenlik sebebiyle engeller)
             if (window.currentPdfUrl.startsWith('http')) {
                 alert("Ustam, Google Drive dosyaları güvenlik gereği sistem içinden direkt yazdırılamaz. Dosya şimdi yeni sekmede açılacak, açılan sayfadaki yazdır (🖨️) ikonuna basabilirsin.");
@@ -2056,7 +2110,7 @@
                 hideFrame.style.display = 'none';
                 hideFrame.src = window.currentPdfUrl;
                 document.body.appendChild(hideFrame);
-                
+
                 hideFrame.onload = function () {
                     setTimeout(() => {
                         hideFrame.contentWindow.focus();
@@ -2258,7 +2312,7 @@
                 </div>
             `);
 
-           try {
+            try {
                 // DOĞRU YEREL SAAT HESAPLAMASI (Türkiye Saatine Uyumlu)
                 const getLocalYYYYMMDD = (date) => {
                     const y = date.getFullYear();
@@ -2266,10 +2320,10 @@
                     const d = String(date.getDate()).padStart(2, '0');
                     return `${y}-${m}-${d}`;
                 };
-                
+
                 const today = new Date();
                 const todayStr = getLocalYYYYMMDD(today);
-                
+
                 const yesterday = new Date(today);
                 yesterday.setDate(yesterday.getDate() - 1);
                 const yesterdayStr = getLocalYYYYMMDD(yesterday);
@@ -2615,21 +2669,45 @@
             });
         }
 
+        // --- 🏦 BANKACILIK UYGULAMASI SAYAÇ ANİMASYON MOTORU ---
+        window.animateCurrency = function (elementId, endValue, duration) {
+            const obj = document.getElementById(elementId);
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Giderek yavaşlayan (ease-out) pürüzsüz akış formülü
+                const easeProgress = 1 - Math.pow(1 - progress, 4);
+                const currentVal = easeProgress * endValue;
+                obj.innerHTML = currentVal.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    obj.innerHTML = endValue.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+            };
+            window.requestAnimationFrame(step);
+        };
+
         // --- 💳 AKILLI BORÇ & EKSTRE YÖNETİM MODÜLÜ (GÜNCELLENMİŞ) ---
         let selectedEkstreKey = null;
 
+        // --- 💳 AKILLI BORÇ YÖNETİMİ ANA MODÜLÜ ---
         // --- 💳 AKILLI BORÇ YÖNETİMİ ANA MODÜLÜ ---
         // --- 💳 AKILLI BORÇ YÖNETİMİ ANA MODÜLÜ ---
         window.renderDebtCalculatorModule = function () {
             setActiveTab('showDebtCalculator');
 
             // 1. Ekstreleri "Eskiden Yeniye" sıralıyoruz ki sağ ok ileri, sol ok geri gitsin
-            const ekstreKeys = Object.keys(allEkstreData).sort((a, b) => a.localeCompare(b));
+            const ekstreKeys = Object.keys(allEkstreData || {}).sort((a, b) => a.localeCompare(b));
 
             // 2. Eğer ilk kez açılıyorsa her zaman EN YENİ (son sıradaki) ayı otomatik seç
             if (!selectedEkstreKey && ekstreKeys.length > 0) {
                 selectedEkstreKey = ekstreKeys[ekstreKeys.length - 1];
             }
+
+            let buttonsHtml = '';
 
             // 3. Sağ-Sol Oklu Sürgülü Slider Menüsü
             if (ekstreKeys.length > 0) {
@@ -2651,7 +2729,7 @@
                         yearNum -= 1;
                     }
                     displayTitle = `${aylarTR[monthNum]} ${yearNum} Harcamaları`;
-                } else if (allEkstreData[selectedEkstreKey].title) {
+                } else if (allEkstreData[selectedEkstreKey] && allEkstreData[selectedEkstreKey].title) {
                     displayTitle = allEkstreData[selectedEkstreKey].title;
                 }
 
@@ -2675,10 +2753,11 @@
 
             } else {
                 buttonsHtml = `<div class="w-full text-center text-xs font-bold text-gray-400 p-3 border border-dashed rounded-xl mt-1">Henüz çekilmiş ekstre yok. Node.js servisiyle çekim yapın.</div>`;
-            }
+            } // FAZLADAN OLAN SÜSLÜ PARANTEZ BURADAN SİLİNDİ!
 
             let dukkanItemsHtml = ''; let evItemsHtml = '';
             let dukkanTotal = 0; let evTotal = 0;
+            let dIdx = 0; let eIdx = 0; // Animasyon gecikmeleri için sayaçlar
 
             if (selectedEkstreKey && allEkstreData[selectedEkstreKey] && allEkstreData[selectedEkstreKey].items) {
                 const itemsObj = allEkstreData[selectedEkstreKey].items;
@@ -2692,25 +2771,16 @@
                 itemsArray.sort((a, b) => {
                     const parseDateString = (dateStr, timeStr) => {
                         if (!dateStr) return 0;
-
-                        // Tarihi parçala (Örn: 31/05/2026 veya 31/05/26)
                         let [d, m, y] = dateStr.split('/');
-                        if (y && y.length === 2) y = '20' + y; // Eğer yıl "26" şeklinde kısa yazılmışsa "2026" yap
-
+                        if (y && y.length === 2) y = '20' + y;
                         let hr = 0, min = 0;
-
-                        // Eğer geçerli bir saat varsa onu da hesaba kat (Örn: Manuel eklendiyse)
                         if (timeStr && timeStr.includes(':') && !isNaN(parseInt(timeStr.split(':')[0]))) {
                             let parts = timeStr.split(':');
                             hr = parseInt(parts[0]);
                             min = parseInt(parts[1]);
                         }
-
-                        // Zaman damgasına (timestamp) çevir
                         return new Date(y, m - 1, d, hr, min).getTime();
                     };
-
-                    // b'den a'yı çıkararak "Azalan" (En yeni tarih en üstte) sıralaması yapıyoruz
                     return parseDateString(b.date, b.time) - parseDateString(a.date, a.time);
                 });
 
@@ -2722,7 +2792,7 @@
                     if (item.category === 'dukkan') {
                         dukkanTotal += parseFloat(item.amount);
                         dukkanItemsHtml += `
-                    <div class="flex items-center justify-between px-2.5 bg-orange-50 border border-orange-100 rounded-lg shadow-sm hover:shadow transition group h-16 flex-shrink-0">
+                    <div class="flex items-center justify-between px-2.5 bg-orange-50 border border-orange-100 rounded-lg shadow-sm hover:shadow transition group h-16 flex-shrink-0" style="opacity: 0; animation: popIn 0.4s ease-out ${dIdx * 0.05}s forwards;">
                         <div class="flex flex-col w-3/5 pr-2">
                             <span class="text-[13px] font-black text-gray-800 truncate block" title="${item.desc}">${item.desc}</span>
                             <span class="text-[9px] font-bold text-gray-400 block mt-0.5">${item.date || ''} ${item.time && item.time !== '--:--' ? item.time : ''}</span>
@@ -2734,10 +2804,11 @@
                         </div>
                     </div>
                 `;
+                        dIdx++;
                     } else {
                         evTotal += parseFloat(item.amount);
                         evItemsHtml += `
-                    <div class="flex items-center justify-between px-2.5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm hover:shadow transition group h-16 flex-shrink-0">
+                    <div class="flex items-center justify-between px-2.5 bg-blue-50 border border-blue-100 rounded-lg shadow-sm hover:shadow transition group h-16 flex-shrink-0" style="opacity: 0; animation: popIn 0.4s ease-out ${eIdx * 0.05}s forwards;">
                         <div class="flex items-center gap-1.5 flex-shrink-0">
                             <button onclick="moveEkstreItem('${selectedEkstreKey}', '${itemKey}', 'dukkan')" class="w-7 h-7 bg-white border border-gray-200 rounded-md text-gray-500 hover:bg-orange-50 hover:text-orange-600 font-bold shadow-sm transition flex items-center justify-center" title="Dükkana Taşı">◀</button>
                             <span class="text-xs font-black text-blue-600 whitespace-nowrap w-16 cursor-default">${amountStr} ₺</span>
@@ -2749,6 +2820,7 @@
                         </div>
                     </div>
                 `;
+                        eIdx++;
                     }
                 });
             }
@@ -2796,7 +2868,7 @@
                     </div>
                     <div class="bg-orange-500 p-3 text-white flex justify-between items-center flex-shrink-0 cursor-default">
                         <span class="text-xs font-bold uppercase">Dükkan Yekün</span>
-                        <span class="text-lg font-black">${dukkanTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                        <span class="text-lg font-black"><span id="animDukkanTotal">0,00</span> ₺</span>
                     </div>
                 </div>
 
@@ -2809,7 +2881,7 @@
                         ${evItemsHtml || '<div class="text-center text-xs text-gray-400 my-4 font-bold">Ev harcaması bulunmuyor.</div>'}
                     </div>
                     <div class="bg-blue-600 p-3 text-white flex justify-between items-center flex-shrink-0 cursor-default">
-                        <span class="text-lg font-black">${evTotal.toLocaleString('tr-TR', { minimumFractionDigits: 2 })} ₺</span>
+                        <span class="text-lg font-black"><span id="animEvTotal">0,00</span> ₺</span>
                         <span class="text-xs font-bold uppercase">Ev Yekün</span>
                     </div>
                 </div>
@@ -2819,7 +2891,7 @@
             <div class="bg-gray-900 rounded-xl p-4 flex justify-between items-center shadow-lg mt-auto flex-shrink-0 sticky bottom-2 md:bottom-4 z-20 cursor-default">
                 <span class="text-gray-400 font-bold text-xs uppercase tracking-widest">Aylık Kredi Kartı Toplamı</span>
                 <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-black text-yellow-400">${genelToplam.toLocaleString('tr-TR', { minimumFractionDigits: 2 })}</span>
+                    <span id="animGenelTotal" class="text-3xl font-black text-yellow-400">0,00</span>
                     <span class="text-xl font-bold text-yellow-400">₺</span>
                 </div>
             </div>
@@ -2882,6 +2954,13 @@
                 </div>
             </div>
     `);
+
+            // YENİ: Ekrana kodlar basıldıktan hemen sonra Banka Sayacı Animasyonlarını tetikle
+            setTimeout(() => {
+                window.animateCurrency('animDukkanTotal', dukkanTotal, 1200); // 1.2 saniyede döner
+                window.animateCurrency('animEvTotal', evTotal, 1200);         // 1.2 saniyede döner
+                window.animateCurrency('animGenelTotal', genelToplam, 1800);  // 1.8 saniyede ağır ve premium döner
+            }, 50);
 
             const btn = document.getElementById('triggerNodeJsFetchBtn');
             if (btn) {
