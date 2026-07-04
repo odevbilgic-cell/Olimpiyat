@@ -306,7 +306,7 @@
             </div>
         </div>
 
-        <div id="menuContainer" class="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4"></div>
+        <div id="menuContainer" class="flex flex-col gap-6 scroll-mt-24 pb-20"></div>
 
         <div id="contactSection" class="hidden text-center mt-6 bg-white rounded-xl shadow p-6 max-w-lg mx-auto">
             <h2 id="contactTitle" class="text-2xl font-bold text-orange-600 mb-3">İletişim</h2>
@@ -328,6 +328,14 @@
                     id="modalImageContainer">
                     <img id="modalImage"
                         class="w-full h-full object-cover opacity-95 transition-all duration-500 rounded-xl">
+
+                    <!-- YENİ: MENÜLER İÇİN GÖRSEL İÇİ FİYAT KUTUCUĞU -->
+                    <div id="modalMenuPriceBox" class="hidden absolute z-30 flex items-center justify-center"
+                        style="bottom: 12%; left: 5%; width: 28%; height: 18%;">
+                        <span id="modalMenuPriceText"
+                            class="font-black text-red-600 text-2xl sm:text-3xl drop-shadow-md tracking-tighter"
+                            style="font-family: 'Arial Black', Impact, sans-serif;"></span>
+                    </div>
 
                     <img id="modalComboDrinkImage"
                         class="hidden w-0 h-24 sm:h-28 object-cover transition-all duration-500 rounded-full border-4 border-white bg-white shadow-xl filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
@@ -1014,8 +1022,6 @@
 
         // Kategori çevirileri
         const categoryTranslations = {
-            'Tümü': 'All',
-            'Menüler': 'Menus',
             'Kokoreç': 'Kokoreç',
             'Tavuk Kokoreç': 'Chicken Kokoreç',
             'Tavuk Döner': 'Chicken Döner',
@@ -1026,8 +1032,9 @@
             'Midye': 'Mussel',
             'Yan Lezzetler': 'Side Dishes',
             'Tost': 'Toast',
-            'İçecekler': 'Drinks',
-            'İletişim': 'Contact'
+            'Menüler': 'Menus',
+            'İçecekler': 'Drinks'
+
         };
         let categoriesTR = Object.keys(categoryTranslations);
         let categoriesEN = Object.values(categoryTranslations);
@@ -1260,8 +1267,8 @@
 
             const now = new Date();
             // Artık toISOString() yok! Cihazın yerel saatine göre tarihi çekeriz.
-            const todayStr = getLocalYYYYMMDD(now); 
-            
+            const todayStr = getLocalYYYYMMDD(now);
+
             // 1. Eski Günlük Toplam Sayaç
             const counterRef = visitorsRef.child(todayStr);
             counterRef.transaction(currentCount => {
@@ -1272,10 +1279,10 @@
             const currentHour = String(now.getHours()).padStart(2, '0');
             const currentMinute = String(now.getMinutes()).padStart(2, '0');
             const exactTime = currentHour + ':' + currentMinute; // Örn: "14:26"
-            
+
             // Kullanıcı yerinde menüye mi girdi, paket servise mi?
             const activeMenu = window.location.href.includes('delivery') ? 'delivery' : 'in_place';
-            
+
             // Firebase'de tam o saatin içine +1 yazar
             database.ref('visitors_hourly/' + activeMenu + '/' + todayStr + '/' + exactTime)
                 .set(firebase.database.ServerValue.increment(1));
@@ -1326,259 +1333,249 @@
         }
 
 
-        function renderMenu(category = 'Tümü') {
+        // --- 🚀 UYGULAMA TİPİ KAYDIRMALI MENÜ MOTORU ---
+        function renderMenu() {
             menuContainer.innerHTML = '';
 
             if (products.length === 0) {
-                menuContainer.innerHTML = '<div class="col-span-full text-center p-10 text-gray-400">Menü yükleniyor...</div>';
+                menuContainer.innerHTML = '<div class="text-center p-10 text-gray-400 font-bold w-full">Menü yükleniyor...</div>';
+                return;
             }
 
-            const filtered = category === 'Tümü' ? products.filter(p => p.category != 'İletişim') : products.filter(p => p.category === category);
+            // Sadece içinde ürün olan kategorileri ekrana basacağız
+            categoriesTR.forEach((catTR, index) => {
+                const catProducts = products.filter(p => p.category === catTR && p.isArchived !== true);
 
-            filtered.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg shadow-sm p-2 flex flex-col h-full hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1 cursor-pointer';
+                if (catProducts.length === 0) return; // Bu kategoride ürün yoksa atla
 
-                const name = language === 'TR' ? p.name : p.nameEN || p.name;
-                const desc = language === 'TR' ? p.desc : p.descEN || p.desc || '';
-                const priceUpdateText = formatRelativeDate(p.lastUpdated);
-                const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
-                const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
-                // --- ROZET VE FİYAT ALANI İNDİRİM AYARI ---
-                let badgeHtml = '';
-                let priceHtml = `<span class='text-orange-600 font-black text-[13px] sm:text-base'>${p.price} ₺</span>`;
+                const catEN = categoriesEN[index];
+                const displayTitle = language === 'TR' ? catTR : catEN;
 
-                if (p.discountPrice !== undefined && p.discountPrice !== null && p.discountPrice !== "") {
-                    const discountPercent = Math.round(((p.price - p.discountPrice) / p.price) * 100);
-                    // İndirimli Ürün Rozeti
-                    badgeHtml = `<span class="absolute top-3 left-3 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-md z-10">% İNDİRİM (-%${discountPercent})</span>`;
-                    // Üstü çizili eski fiyat ve yeni fiyat yan yana
-                    priceHtml = `
-                <div class="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5">
-                    <span class='text-red-600 font-black text-[13px] sm:text-base'>${p.discountPrice} ₺</span>
-                    <span class='text-gray-400 line-through text-[10px] sm:text-xs font-medium'>${p.price} ₺</span>
-                </div>
-            `;
-                }
+                // Kategori için dev bir kapsayıcı (Section) oluştur
+                const section = document.createElement('section');
+                section.id = 'category-' + index;
+                section.className = 'menu-category-section pt-4 scroll-mt-[100px]'; // Scroll hizasını navbarın altında tutar
 
-                card.innerHTML = `
-            ${badgeHtml}
-            <div class="relative overflow-hidden rounded-md mb-2">
-                <img src='${imageUrl}' 
-                     alt='${name}' 
-                     onerror="this.src='${fallbackImage}'"
-                     class='w-full h-24 sm:h-32 object-cover transition-transform duration-500 hover:scale-110'>
-            </div>
-            <h3 class='font-bold text-[12px] sm:text-sm leading-tight mb-1 line-clamp-2 h-8'>${name}</h3>
-            <p class='text-gray-500 text-[10px] sm:text-xs mb-2 flex-grow line-clamp-2'>${desc}</p>
-            <div class="mt-auto pt-2 border-t border-gray-50 flex items-center justify-between">
-                ${priceHtml}
-                <span class='text-[8px] sm:text-[9px] text-gray-400 italic'>${priceUpdateText}</span>
-            </div>
-        `;
+                // Kategori Başlığı
+                section.innerHTML = `<h2 class="text-xl sm:text-2xl font-black text-gray-800 border-b-2 border-orange-200 pb-2 mb-3 px-1">${displayTitle}</h2>`;
 
-                // Karta tıklandığında açılacak akıllı ve kesin kısıtlamalı eşlikçi motoru
-                card.addEventListener('click', () => {
-                    document.getElementById('modalImage').src = imageUrl;
-                    document.getElementById('modalTitle').textContent = name;
-                    document.getElementById('modalDesc').textContent = desc;
-                    document.getElementById('modalPrice').textContent = (p.discountPrice || p.price) + " ₺";
+                // Ürünlerin içine dolacağı Grid Alanı
+                const gridDiv = document.createElement('div');
+                gridDiv.className = 'grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4';
 
-                    const crossSection = document.getElementById('modalCrossSellSection');
-                    const sugContainer = document.getElementById('modalSuggestionsContainer');
-                    sugContainer.innerHTML = '';
+                // Ürün Kartlarını Basma
+                catProducts.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-lg shadow-sm p-2 flex flex-col h-full hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1 cursor-pointer';
 
-                    // KURAL 1: Eğer tıklanan ürün zaten bir içecek ise, eşlikçi alanını tamamen gizle
-                    if (p.category === 'İçecekler') {
-                        crossSection.classList.add('hidden');
+                    const name = language === 'TR' ? p.name : p.nameEN || p.name;
+                    const desc = language === 'TR' ? p.desc : p.descEN || p.desc || '';
+                    const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
+                    const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
+
+                    let badgeHtml = '';
+                    let priceHtml = `<span class='text-orange-600 font-black text-[13px] sm:text-base'>${p.price} ₺</span>`;
+
+                    if (p.discountPrice) {
+                        const discountPercent = Math.round(((p.price - p.discountPrice) / p.price) * 100);
+                        badgeHtml = `<span class="absolute top-3 left-3 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-md z-10">% İNDİRİM (-%${discountPercent})</span>`;
+                        priceHtml = `
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5">
+                                <span class='text-red-600 font-black text-[13px] sm:text-base'>${p.discountPrice} ₺</span>
+                                <span class='text-gray-400 line-through text-[10px] sm:text-xs font-medium'>${p.price} ₺</span>
+                            </div>
+                        `;
+                    }
+
+                    // --- YENİ: KATEGORİYE GÖRE AKILLI GÖRSEL STİLİ MOTORU ---
+                    let imageStyleClass = "";
+                    let imageOverlayHtml = ""; // YENİ: Görselin üzerine basılacak fiyat kutusu
+
+                    if (p.category === 'İçecekler' || p.category === 'Menüler') {
+                        // İçecek ve Menüler için kibar oturtma (contain) ve hafif zoom
+                        imageStyleClass = "w-full h-24 sm:h-32 object-contain p-1 transition-transform duration-500 hover:scale-105";
                     } else {
-                        crossSection.classList.remove('hidden');
+                        // Diğer tüm yemekler için iştah açıcı tam doldurma (cover) ve derin zoom
+                        imageStyleClass = "w-full h-24 sm:h-32 object-cover transition-transform duration-500 hover:scale-110";
+                    }
 
-                        // KURAL 2: Tüm içecekleri filtrele (Büyük litrelik boyları kesinlikle eliyoruz)
-                        const allDrinks = products.filter(prod =>
-                            prod.category === 'İçecekler' &&
-                            !prod.name.toLowerCase().includes('1 lt') &&
-                            !prod.name.toLowerCase().includes('litre') &&
-                            !prod.name.toLowerCase().includes('litrelik')
-                        );
+                    // EĞER KATEGORİ "Menüler" İSE BEYAZ KUTUNUN İÇİNE FİYATI YAZDIR
+                    if (p.category === 'Menüler') {
+                        const finalPrice = p.discountPrice || p.price;
+                        // Yazının fontu ve konumu kutucuğa tam oturacak şekilde ayarlandı
+                        imageOverlayHtml = `
+                            <div class="absolute z-20 flex items-center justify-center pointer-events-none" style="bottom: 8%; left: 5%; width: 28%; height: 22%;">
+                                <span class="font-black text-red-600 text-[12px] sm:text-[14px] drop-shadow-sm tracking-tighter" style="font-family: 'Arial Black', Impact, sans-serif;">
+                                    ${finalPrice} <span class="text-[9px] sm:text-[10px]">₺</span>
+                                </span>
+                            </div>
+                        `;
+                    }
 
-                        let recommendedDrinks = [];
+                    card.innerHTML = `
+                        ${badgeHtml}
+                        <div class="relative overflow-hidden rounded-md mb-2">
+                            <img src='${imageUrl}' onerror="this.src='${fallbackImage}'" class='${imageStyleClass}'>
+                            ${imageOverlayHtml}
+                        </div>
+                        <h3 class='font-bold text-[12px] sm:text-sm leading-tight mb-1 line-clamp-2 h-8'>${name}</h3>
+                        <p class='text-gray-500 text-[10px] sm:text-xs mb-2 flex-grow line-clamp-2'>${desc}</p>
+                        <div class="mt-auto pt-2 border-t border-gray-50 flex items-center justify-between">
+                            ${priceHtml}
+                            <span class="text-orange-500 font-black text-sm">＋</span>
+                        </div>
+                    `;
 
-                        // KURAL 3: Ürün çorba ise SADECE SU öner, başka hiçbir şey getirme
-                        if (p.category === 'Çorba' || p.name.toLowerCase().includes('çorba')) {
-                            recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('su') && !d.name.toLowerCase().includes('soda') && !d.name.toLowerCase().includes('meyve'));
+                    // Tıklama Olayı (Birlikte İyi Gider Modalı)
+                    card.addEventListener('click', () => {
+                        // Modal mantığı aynı kalacak...
+                        document.getElementById('modalImage').src = imageUrl;
+                        document.getElementById('modalTitle').textContent = name;
+                        document.getElementById('modalDesc').textContent = desc;
+                        document.getElementById('modalPrice').textContent = (p.discountPrice || p.price) + " ₺";
+
+                        // --- YENİ: GÖRSEL İÇİ FİYAT KUTUCUĞU (SADECE MENÜLER İÇİN) ---
+                        const menuPriceBox = document.getElementById('modalMenuPriceBox');
+                        if (menuPriceBox) {
+                            if (p.category === 'Menüler') {
+                                const finalPrice = p.discountPrice || p.price;
+                                document.getElementById('modalMenuPriceText').innerHTML = finalPrice + " <span class='text-lg'>₺</span>";
+                                menuPriceBox.classList.remove('hidden');
+                            } else {
+                                // Eğer Menü kategorisi değilse kutucuğu tamamen gizle
+                                menuPriceBox.classList.add('hidden');
+                            }
                         }
-                        // KURAL 4: Kokoreç, Ciğer, Köfte veya Menüler için ŞALGAM ve SADECE AÇIK AYRAN (Kapalı kesinlikle elenir)
-                        else if (['Kokoreç', 'Tavuk Kokoreç', 'Köfte', 'Ciğer', 'Menüler'].includes(p.category)) {
-                            recommendedDrinks = allDrinks.filter(d =>
-                                (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) ||
-                                d.name.toLowerCase().includes('şalgam')
-                            );
-                        }
-                        // KURAL 5: Hamburger, Patso, Tavuk Döner için Kola, Fanta, Sprite veya Ice Tea önceliği
-                        else if (['Hamburger', 'Patso', 'Tavuk Döner'].includes(p.category) || p.name.toLowerCase().includes('burger') || p.name.toLowerCase().includes('patso')) {
-                            recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('kutu') || d.name.toLowerCase().includes('açık ayran') || d.name.toLowerCase().includes('gazoz') || d.name.toLowerCase().includes('şişe'));
-                        }
-                        // KURAL 6: Tost için öncelikli Çay, SADECE AÇIK AYRAN veya Kola
-                        else if (p.category === 'Tost') {
-                            recommendedDrinks = allDrinks.filter(d =>
-                                d.name.toLowerCase().includes('çay') ||
-                                (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) ||
-                                d.name.toLowerCase().includes('kutu')
-                            );
-                        }
 
-                        // KURAL 7: Eğer yukarıdaki özel filtrelerden sonuç çıkmazsa, genel listeden de kapalı ayranları tamamen filtreleyerek seç
-                        if (recommendedDrinks.length === 0) {
-                            recommendedDrinks = allDrinks.filter(d => !d.name.toLowerCase().includes('ayran') || d.name.toLowerCase().includes('açık'));
-                        }
+                        const crossSection = document.getElementById('modalCrossSellSection');
+                        const sugContainer = document.getElementById('modalSuggestionsContainer');
+                        sugContainer.innerHTML = '';
 
-                        // KURAL 8: Karıştır ve maksimum 2, minimum 1 içecek olacak şekilde sınırla
-                        recommendedDrinks = recommendedDrinks.sort(() => Math.random() - 0.5).slice(0, 2);
-
-                        if (recommendedDrinks.length === 0) {
+                        if (p.category === 'İçecekler') {
                             crossSection.classList.add('hidden');
                         } else {
-                            // İçecek kartlarını basan ve animasyonu tetikleyen ana motor
-                            // İçecek kartlarını basan ve animasyonu tetikleyen ana motor
-                            // İçecek kartlarını basan ve dairesel uçuşu yöneten ana motor
-                            recommendedDrinks.forEach(d => {
-                                const dName = language === 'TR' ? d.name : d.nameEN || d.name;
-                                const dPrice = d.discountPrice || d.price;
-                                const dImg = d.image || 'https://via.placeholder.com/100?text=Olimpiyat';
+                            crossSection.classList.remove('hidden');
+                            const allDrinks = products.filter(prod => prod.category === 'İçecekler' && !prod.name.toLowerCase().includes('1 lt') && !prod.name.toLowerCase().includes('litre'));
+                            let recommendedDrinks = [];
 
-                                const miniCard = document.createElement('div');
-                                miniCard.className = "flex items-center gap-2 bg-white border border-gray-100 rounded-xl p-1.5 min-w-[150px] max-w-[150px] flex-shrink-0 relative cursor-pointer transition-all duration-200 hover:bg-orange-50 shadow-sm";
-                                miniCard.innerHTML = `
-                                <img src="${dImg}" class="w-10 h-10 object-cover rounded-full border border-gray-100 bg-white flex-shrink-0 select-none pointer-events-none">
-                                <div class="text-left min-w-0 flex-1 pointer-events-none">
-                                    <h5 class="font-bold text-[10px] text-gray-800 truncate leading-tight">${dName}</h5>
-                                    <p class="text-red-600 font-black text-[11px] mt-0.5">${dPrice} ₺</p>
-                                </div>
-                                <span class="combo-status text-gray-400 text-sm pr-1 font-black select-none">+</span>
-                            `;
+                            if (p.category === 'Çorba' || p.name.toLowerCase().includes('çorba')) {
+                                recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('su') && !d.name.toLowerCase().includes('soda'));
+                            } else if (['Kokoreç', 'Tavuk Kokoreç', 'Köfte', 'Ciğer', 'Menüler'].includes(p.category)) {
+                                recommendedDrinks = allDrinks.filter(d => (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) || d.name.toLowerCase().includes('şalgam'));
+                            } else if (['Hamburger', 'Patso', 'Tavuk Döner'].includes(p.category)) {
+                                recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('kutu') || d.name.toLowerCase().includes('açık ayran') || d.name.toLowerCase().includes('gazoz'));
+                            } else if (p.category === 'Tost') {
+                                recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('çay') || (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) || d.name.toLowerCase().includes('kutu'));
+                            }
 
-                                // İçecek Rozetine Tıklanınca Çalışacak Uçuş Algoritması:
-                                miniCard.addEventListener('click', (e) => {
-                                    e.stopPropagation();
-                                    if (miniCard.classList.contains('combo-applied')) return;
-                                    miniCard.classList.add('combo-applied');
+                            if (recommendedDrinks.length === 0) {
+                                recommendedDrinks = allDrinks.filter(d => !d.name.toLowerCase().includes('ayran') || d.name.toLowerCase().includes('açık'));
+                            }
 
-                                    const drinkImgEl = miniCard.querySelector('img');
-                                    const startRect = drinkImgEl.getBoundingClientRect();
+                            recommendedDrinks = recommendedDrinks.sort(() => Math.random() - 0.5).slice(0, 2);
 
-                                    const targetImgEl = document.getElementById('modalComboDrinkImage');
-                                    targetImgEl.src = dImg;
-                                    targetImgEl.classList.remove('hidden');
+                            if (recommendedDrinks.length === 0) {
+                                crossSection.classList.add('hidden');
+                            } else {
+                                recommendedDrinks.forEach(d => {
+                                    const dName = language === 'TR' ? d.name : d.nameEN || d.name;
+                                    const dPrice = d.discountPrice || d.price;
+                                    const dImg = d.image || fallbackImage;
 
-                                    // Ana yemek hafif küçülür, yanına tam yuvarlak içecek rozeti yerleşir
-                                    document.getElementById('modalImage').className = "w-0.7 h-full object-cover opacity-95 transition-all duration-500 rounded-2xl shadow-md";
-                                    targetImgEl.className = "w-24 h-24 sm:w-28 sm:h-28 -ml-8 object-cover transition-all duration-500 rounded-full border-4 border-white bg-white shadow-xl filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]";
+                                    const miniCard = document.createElement('div');
+                                    miniCard.className = "flex items-center gap-2 bg-white border border-gray-100 rounded-xl p-1.5 min-w-[150px] max-w-[150px] flex-shrink-0 relative cursor-pointer hover:bg-orange-50 transition";
+                                    miniCard.innerHTML = `
+                                        <img src="${dImg}" class="w-10 h-10 object-cover rounded-full border border-gray-100">
+                                        <div class="text-left min-w-0 flex-1">
+                                            <h5 class="font-bold text-[10px] text-gray-800 truncate">${dName}</h5>
+                                            <p class="text-red-600 font-black text-[11px]">${dPrice} ₺</p>
+                                        </div>
+                                        <span class="combo-status text-gray-400 font-black">+</span>
+                                    `;
 
-                                    // Uçan dairesel klon (Flyer) oluşturuluyor
-                                    const flyer = document.createElement('img');
-                                    flyer.src = dImg;
-                                    flyer.className = 'flying-drink-clone';
-                                    flyer.style.top = startRect.top + 'px';
-                                    flyer.style.left = startRect.left + 'px';
-                                    flyer.style.width = startRect.width + 'px';
-                                    flyer.style.height = startRect.height + 'px';
-                                    document.body.appendChild(flyer);
+                                    miniCard.addEventListener('click', (e) => {
+                                        e.stopPropagation();
+                                        if (miniCard.classList.contains('combo-applied')) return;
+                                        miniCard.classList.add('combo-applied');
 
-                                    // Hedef yuvaya doğru süzülme hareketi
-                                    setTimeout(() => {
-                                        const endRect = targetImgEl.getBoundingClientRect();
-                                        flyer.style.top = endRect.top + 'px';
-                                        flyer.style.left = endRect.left + 'px';
-                                        flyer.style.width = endRect.width + 'px';
-                                        flyer.style.height = endRect.height + 'px';
-                                        flyer.style.transform = 'scale(1.05) rotate(360deg)'; // Hafif dönerek büyüme hissi
-                                        flyer.style.opacity = '1';
-                                    }, 30);
-
-                                    // Süzülme bittiği an (880ms) şovu tamamla
-                                    setTimeout(() => {
-                                        flyer.remove(); // Klonu ekrandan temizle
-
-                                        // Fiyatı anlık olarak topla ve güncelle
                                         const mainPrice = parseFloat(p.discountPrice || p.price);
-                                        const drinkPrice = parseFloat(dPrice);
-                                        document.getElementById('modalPrice').textContent = (mainPrice + drinkPrice) + " ₺";
-
-                                        // YENİ EKLENEN SATIR: Ürün başlığını "Ana Yemek + İçecek" şeklinde günceller
+                                        document.getElementById('modalPrice').textContent = (mainPrice + parseFloat(dPrice)) + " ₺";
                                         document.getElementById('modalTitle').textContent = name + " + " + dName;
-
-                                        // Hardal sarısı şeridi fırlat
-                                        const banner = document.getElementById('comboUpgradeBanner');
-                                        if (banner) {
-                                            banner.style.transform = 'translateY(0)';
-                                            banner.style.opacity = '1';
-                                        }
-
-                                        // Buton ikonunu onayla
                                         miniCard.querySelector('.combo-status').textContent = '✓';
-                                        miniCard.querySelector('.combo-status').className = 'combo-status text-green-600 font-black text-xs pr-1';
-                                        miniCard.className = "flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl p-1.5 min-w-[150px] max-w-[150px] flex-shrink-0 relative shadow-inner";
-                                    }, 880);
+                                        miniCard.classList.add('bg-green-50', 'border-green-200');
+                                    });
+
+                                    sugContainer.appendChild(miniCard);
                                 });
-
-                                sugContainer.appendChild(miniCard);
-                            });
-
-
-
+                            }
                         }
-                    }
 
-                    // Tıklama istatistik kaydı alanı (Mevcut altyapınız)
-                    const activeMenu = window.location.href.includes('delivery') ? 'delivery' : 'in_place';
-                    if (firebase.database) {
-                        firebase.database().ref('stats/product_clicks/' + activeMenu + '/' + p.key).set(firebase.database.ServerValue.increment(1));
-                    }
+                        // Firebase İstatistik Tıklaması
+                        if (firebase.database) firebase.database().ref('stats/product_clicks/in_place/' + p.key).set(firebase.database.ServerValue.increment(1));
+                        document.getElementById('imageModal').classList.remove('hidden');
+                    });
 
-                    document.getElementById('imageModal').classList.remove('hidden');
+                    gridDiv.appendChild(card);
                 });
 
-
-                menuContainer.appendChild(card);
+                section.appendChild(gridDiv);
+                menuContainer.appendChild(section);
             });
+
+            // İletişim Bilgilerini En Alta Sabit Olarak Bas
+            const contactDiv = document.createElement('div');
+            contactDiv.className = "text-center mt-12 mb-10 bg-white rounded-xl shadow-inner p-6 max-w-lg mx-auto border-2 border-dashed border-orange-200";
+            contactDiv.innerHTML = `
+                <h2 class="text-2xl font-black text-orange-600 mb-3">${language === 'TR' ? 'Bize Ulaşın' : 'Contact Us'}</h2>
+                <p class="mb-3 text-sm font-bold text-gray-700">📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul</p>
+                <p class="mt-2">📞 <a href="tel:02163357920" class="text-orange-600 font-black text-xl hover:underline">0216 335 79 20</a></p>
+            `;
+            menuContainer.appendChild(contactDiv);
+
+            // Sayfa yüklendiğinde veya dil değiştiğinde ilk sekmeyi aktif yap
+            setTimeout(() => {
+                const firstTab = document.querySelector('.tabBtn');
+                if (firstTab) firstTab.classList.add('active-tab');
+            }, 50);
         }
 
         function createCategoryTabs() {
             const tabButtonsContainer = document.getElementById('categoryTabs');
             tabButtonsContainer.innerHTML = '';
-            const categoriesToIterate = categoriesTR;
 
-            categoriesToIterate.forEach((catTR, index) => {
+            categoriesTR.forEach((catTR, index) => {
+                // Sadece içinde ürün olan kategorileri navbar'a ekle (Boşları gizle)
+                const hasProducts = products.some(p => p.category === catTR && p.isArchived !== true);
+                if (!hasProducts) return;
+
                 let btn = document.createElement('button');
                 const catName = language === 'TR' ? catTR : categoriesEN[index];
 
-                btn.className = 'tabBtn px-3 py-1 rounded whitespace-nowrap transition-colors duration-150 hover:bg-orange-200';
-                btn.dataset.category = catTR;
+                // Tasarım: Oval hatlar, kalın font ve yumuşak geçiş
+                btn.className = 'tabBtn px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-300 font-black text-gray-500 hover:text-orange-600 hover:bg-orange-50 border border-transparent';
+                btn.dataset.targetId = 'category-' + index;
                 btn.textContent = catName;
 
-                if (catTR === 'Tümü') {
-                    btn.classList.add('active-tab');
-                }
-
                 btn.addEventListener('click', () => {
-                    document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active-tab'));
-                    btn.classList.add('active-tab');
-                    const categoryKey = btn.dataset.category;
-
-                    // YENİ EKLENEN SATIR: Yerinde menü kategori tıklamasını 'in_place' altına kaydeder
-                    database.ref('stats/category_clicks/in_place/' + categoryKey).set(firebase.database.ServerValue.increment(1));
-
-                    if (categoryKey === 'İletişim') {
-                        menuContainer.innerHTML = '';
-                        campaignSliderSection.parentElement.classList.add('hidden');
-                        contactSection.classList.remove('hidden');
-                    } else {
-                        contactSection.classList.add('hidden');
-                        renderCampaignSlider();
-                        renderDiscountSection();
-                        renderMenu(categoryKey);
+                    // Kaydırma (Smooth Scroll)
+                    const targetSection = document.getElementById(btn.dataset.targetId);
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
+
+                    // Butonu aktif yap ve hizala
+                    document.querySelectorAll('.tabBtn').forEach(b => {
+                        b.classList.remove('active-tab');
+                        b.classList.replace('text-white', 'text-gray-500');
+                    });
+                    btn.classList.add('active-tab');
+                    btn.classList.replace('text-gray-500', 'text-white');
+
+                    // Tıklanan buton ekranın tam ortasına gelsin (Getir stili)
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+                    // Firebase'e kategori istatistiğini yolla
+                    database.ref('stats/category_clicks/in_place/' + catTR).set(firebase.database.ServerValue.increment(1));
                 });
                 tabButtonsContainer.appendChild(btn);
             });
@@ -1589,36 +1586,31 @@
             const langEN = document.getElementById('langEN');
             const contactTitle = document.getElementById('contactTitle');
             const contactAddress = document.getElementById('contactAddress');
-            const baslik2 = document.getElementById('bas')
+            const baslik2 = document.getElementById('bas');
 
+            // Dil Çevirileri
             if (language === 'TR') {
-                baslik2.innerHTML = '&nbsp Lezzet <br> Menüleri'
+                baslik2.innerHTML = '&nbsp Lezzet <br> Menüleri';
                 langTR.style.fontWeight = 'bold';
                 langEN.style.fontWeight = 'normal';
-                contactTitle.textContent = 'İletişim';
-                contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
+                if (contactTitle) contactTitle.textContent = 'İletişim';
+                if (contactAddress) contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
             } else {
-                baslik2.innerHTML = '&nbsp Our <br> Menu'
+                baslik2.innerHTML = '&nbsp Our <br> Menu';
                 langTR.style.fontWeight = 'normal';
                 langEN.style.fontWeight = 'bold';
-                contactTitle.textContent = 'Contact';
-                contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - Istanbul (Turkey)';
+                if (contactTitle) contactTitle.textContent = 'Contact';
+                if (contactAddress) contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - Istanbul (Turkey)';
             }
+
+            // --- YENİ EKRAN YÜKLEME MOTORU ---
+            // Tümü veya İletişim gibi ekstra kontroller silindi çünkü 
+            // yeni renderMenu() her şeyi baştan sona eksiksiz çiziyor.
 
             createCategoryTabs();
-            const activeTab = document.querySelector('.tabBtn.active-tab');
-            const activeCategoryKey = activeTab ? activeTab.dataset.category : 'Tümü';
-
-            if (activeCategoryKey === 'İletişim') {
-                menuContainer.innerHTML = '';
-                campaignSliderSection.parentElement.classList.add('hidden');
-                contactSection.classList.remove('hidden');
-            } else {
-                contactSection.classList.add('hidden');
-                renderCampaignSlider();
-                renderDiscountSection(); // İndirim vitrinini güncelle/tetikle
-                renderMenu(activeCategoryKey);
-            }
+            renderCampaignSlider();
+            renderDiscountSection();
+            renderMenu();
         }
 
         // --- YORUM MODALI MANTIĞI ---
@@ -2669,7 +2661,126 @@
             "Ciğerin faydaları saymakla bitmez; bağışıklığı güçlendirir, cildi yeniler, en önemlisi de insanı çok mutlu eder.",
             "Bir ısırık sıcak hamburger, soğuk ve yorucu bir günün tüm stresini saniyeler içinde unutturabilir.",
             "Yarım ekmek dönerinizin son lokmasını kimseye vermemek, en doğal hakkınızdır.",
-            "Olimpiyat Kokoreç ailesi olarak, bu ekranı okurken yüzünüzde oluşan gülümsemenin yemeğinize ekstra lezzet katacağına inanıyoruz!"
+            "Olimpiyat Kokoreç ailesi olarak, bu ekranı okurken yüzünüzde oluşan gülümsemenin yemeğinize ekstra lezzet katacağına inanıyoruz!",
+
+            // --- 🌌 UZAY VE EVREN ---
+            `Venüs gezegeninde bir gün, bir yıldan daha uzundur. Kendi etrafında o kadar yavaş döner ki, Güneş'in etrafındaki turunu daha çabuk tamamlar!`,
+            `Güneş sistemindeki toplam kütlenin %99.8'i tek başına Güneş'e aittir. Geriye kalan küçücük %0.2'lik kısım ise dünyamız ve diğer tüm gezegenlerdir.`,
+            `Uzayda ağlamak imkansızdır. Yerçekimi olmadığı için gözyaşlarınız yanaklarınızdan süzülemez, sadece gözünüzün etrafında birikir.`,
+            `Jüpiter ve Satürn gezegenlerinde kelimenin tam anlamıyla 'elmas yağmurları' yağar. Atmosferdeki karbon, şimşeklerle birleşerek elmasa dönüşür.`,
+            `Evrendeki yıldızların sayısı, Dünya üzerindeki tüm plajlarda ve çöllerde bulunan kum tanelerinin toplamından çok daha fazladır.`,
+            `Eğer Güneş bir kum tanesi kadar küçültülseydi, Dünya ona en yakın yıldız olan Alpha Centauri'ye ulaşmak için 10 kilometre uzakta olurdu.`,
+            `Ay'da rüzgar veya su olmadığı için, Apollo astronotlarının Ay yüzeyine bıraktığı ayak izleri milyonlarca yıl boyunca orada kalacak.`,
+            `Güneş ışığının Dünya'ya ulaşması yaklaşık 8 dakika 20 saniye sürer. Yani şu an gördüğümüz Güneş, aslında onun 8 dakika önceki halidir.`,
+            `Uluslararası Uzay İstasyonu (ISS), Dünya'nın etrafını saatte 28.000 kilometre hızla döner. Oradaki astronotlar günde 16 kez gün doğumu izlerler.`,
+            `Samanyolu Galaksisi'nin merkezinde saniyede yüzlerce kilometre hızla dönen, Güneş'ten milyonlarca kat büyük devasa bir kara delik bulunur.`,
+            `Dünya o kadar pürüzsüzdür ki, eğer Dünya'yı bir bilardo topu boyutuna kadar küçültebilseydik, bilardo topundan daha kusursuz bir yüzeye sahip olurdu.`,
+            `Kozmik bir koku: Uzay yürüyüşünden dönen astronotların kıyafetleri barut, sıcak metal ve yanık et gibi kokar.`,
+
+            // --- 🧬 İNSAN VÜCUDU VE PSİKOLOJİ ---
+            `İnsan DNA'sı ile bir muzun DNA'sı %50 oranında birbirinin aynısıdır. Bizi bir meyveden ayıran şey sadece genetik dizilimin farklı okunmasıdır.`,
+            `Mideniz her iki haftada bir kendi iç astarını yenilemek zorundadır. Aksi takdirde mideniz kendi salgıladığı asitle kendini sindirirdi.`,
+            `İnsan burnu 1 trilyondan fazla farklı kokuyu ayırt edebilir. Koku hafızamız, beynimizde duyguları yöneten bölüme doğrudan bağlıdır.`,
+            `Damarlarımızın toplam uzunluğu yaklaşık 100.000 kilometredir. Eğer uç uca eklenseydi, Dünya'nın etrafını iki buçuk kez dolanabilirdi.`,
+            `Sabahları uyandığınızda, akşam yattığınız boyunuza göre yaklaşık 1 santimetre daha uzunsunuzdur. Gün içindeki yerçekimi omurganızı hafifçe sıkıştırır.`,
+            `Beynimiz uyku sırasında, uyanık ve televizyon izlerken olduğundan çok daha aktiftir. Günün tüm anılarını gece boyunca organize eder.`,
+            `Hapşırdığınız an, kalbiniz de dahil olmak üzere vücudunuzdaki tüm fonksiyonlar milisaniyelik bir süre için tamamen durur.`,
+            `İnsan kemiği, aynı ağırlıktaki çelikten yaklaşık 5 kat daha güçlüdür. Bir küp şeker büyüklüğündeki kemik parçası 8 tona kadar ağırlık taşıyabilir.`,
+            `Hayatımız boyunca ortalama olarak ürettiğimiz tükürük miktarı, iki büyük yüzme havuzunu ağzına kadar doldurmaya yeterlidir.`,
+            `İnsan gözü tam 10 milyon farklı renk tonunu ayırt edebilir. Ancak beynimiz bu renklerin sadece çok küçük bir kısmını isimlendirebilir.`,
+            `Sağ elini kullanan insanlar, sol elini kullananlara göre yiyeceklerini ağızlarının sağ tarafında çiğnemeye çok daha eğilimlidir.`,
+            `Gülümsemek için 17 kasa ihtiyaç duyarken, kaş çatmak için 43 kasa ihtiyacımız vardır. Mutlu olmak fiziksel olarak da daha kolaydır!`,
+            `İnsan beyni acı hissetmez. Beynin kendisinde ağrı reseptörleri yoktur; bu yüzden beyin ameliyatları hasta uyanıkken bile yapılabilir.`,
+
+            // --- 🌍 DOĞA VE HAYVANLAR KÜLTÜRÜ ---
+            `Ahtapotların üç adet kalbi ve dokuz adet beyni vardır. Ayrıca kanları kırmızı değil, içindeki bakır nedeniyle mavidir.`,
+            `Bir zürafanın dili o kadar uzundur ki (yaklaşık 50 cm), kendi kulaklarının içini diliyle temizleyebilir.`,
+            `Karıncalar asla uyumazlar. Onun yerine gün içinde her biri birer dakikalık yüzlerce mikro-dinlenme molası verirler.`,
+            `Yunuslar uyurken beyinlerinin sadece yarısını kapatırlar ve bir gözleri her zaman açık kalır. Böylece hem boğulmaz hem de tehlikeleri sezerler.`,
+            `Bir çita, hiç su içmeden haftalarca hayatta kalabilir. Su ihtiyacının neredeyse tamamını yediği avlardan karşılar.`,
+            `Bal arıları bir kilo bal yapabilmek için yaklaşık 4 milyon çiçeği ziyaret etmek ve Dünya'nın etrafında 3 tur atmaya eşdeğer yol uçmak zorundadır.`,
+            `Su aygırlarının sütü pembe renklidir. Bu pembe sıvı aynı zamanda onları Güneş'in yakıcı etkisinden koruyan doğal bir güneş kremidir.`,
+            `İneklerin en iyi arkadaşları vardır. Eğer en yakın arkadaşı olarak gördüğü diğer inekten ayrılırsa stres seviyeleri anında yükselir.`,
+            `Kelebeklerin tat alma duyuları ayaklarındadır. Bir çiçeğin özünün lezzetli olup olmadığını sadece üzerine basarak anlarlar.`,
+            `Deniz atları (Hippocampus) erkek hamileliği yaşayan tek canlı türüdür. Yavruları erkek deniz atı taşır ve doğurur.`,
+            `Dünyadaki tüm karıncaların toplam ağırlığı, dünyadaki tüm insanların toplam ağırlığına neredeyse eşittir.`,
+            `Kargalar, tıpkı insanlar gibi kendi aralarında tarım yaparlar; yaprak bitlerini yetiştirir ve onların tatlı salgılarıyla beslenirler.`,
+            `Kaplanlar o kadar hızlıdır ki, 0'dan 100 kilometre hıza sadece 3 saniyede, dünyanın en iyi spor arabalarından bile daha çabuk çıkarlar.`,
+            `Kutup ayılarının tüyleri aslında beyaz değil, şeffaftır. Derileri ise Güneş ışığını daha iyi çekebilmek için simsiyahtır.`,
+
+            // --- 🏛️ TARİH, COĞRAFYA VE GENEL KÜLTÜR ---
+            `Kleopatra aslında Mısırlı değil, Yunan kökenliydi. Ancak Mısır dilini ve kültürünü öğrenerek tahta geçmiş ilk Ptolemaios hanedanı üyesiydi.`,
+            `Antik Roma'da flamingoların dili büyük bir lüks ve statü göstergesi sayılırdı, sadece en zengin senatörlerin ziyafetlerinde servis edilirdi.`,
+            `Eyfel Kulesi, yaz aylarında sıcaklığın etkisiyle demirin genleşmesinden dolayı kış aylarına göre 15 santimetreye kadar daha uzun olabilir.`,
+            `Büyük Piramitler inşa edilirken Dünya üzerinde hala yünlü mamutlar yaşamaktaydı. Mamutların nesli piramitler bittikten 1000 yıl sonra tükendi.`,
+            `Çin Seddi uzaydan çıplak gözle görülmez. Bu sadece yaygın bir efsanedir; uzaydan görülebilen tek insan yapımı şeyler gece yanan şehir ışıklarıdır.`,
+            `Oksijenin Dünya'ya gelmesini sağlayan şey ağaçlar değil, okyanuslardaki mikroskobik bitki türü olan fitoplanktonlardır. Oksijenin %70'ini onlar üretir.`,
+            `Dünyanın en kısa savaşı 1896 yılında İngiltere ve Zanzibar arasında yaşanmıştır. Savaş sadece 38 dakika sürmüş ve Zanzibar teslim olmuştur.`,
+            `Kaju fıstığı aslında bir fıstık türü değildir, kaju elması adı verilen kırmızı bir meyvenin en ucunda yetişen bir tohumdur.`,
+            `İskambil kağıtlarındaki kupa papazı (kralı), bıyığı olmayan tek papazdır. Orijinal çizimlerdeki bir matbaa hatası yüzünden yüzyıllardır bıyıksız basılmaktadır.`,
+            `Sahte gülümsemeyle gerçek gülümsemeyi gözlerin etrafındaki kaslar ele verir. Gerçek bir gülümsemede göz kenarlarında mutlaka kırışıklıklar oluşur.`,
+            `'WiFi' kelimesinin aslında hiçbir uzun açılımı yoktur. Sadece 'Hi-Fi' kelimesine uyumlu ve akılda kalıcı olsun diye uydurulmuş ticari bir terimdir.`,
+            `İlk alarm saati sadece sabah saat 04:00'te çalacak şekilde tasarlanmıştı. Başka bir saate ayarlamak teknik olarak imkansızdı.`,
+            `Avustralya'da o kadar çok kumsal vardır ki, her gün yeni bir kumsalı ziyaret etseniz hepsini bitirmeniz tam 27 yılınızı alır.`,
+            `Rusya'nın yüzölçümü o kadar büyüktür ki, cüce gezegen Plüton'un toplam yüzey alanından daha geniş bir toprak parçasına sahiptir.`,
+
+            // --- 🧪 İLGİNÇ BİLİM VE TEKNOLOJİ ---
+            `Suyun aynı anda hem kaynayıp hem de donabildiği bir sıcaklık ve basınç noktası vardır. Bilimde buna 'Üçlü Nokta' adı verilir.`,
+            `Eğer elinize aldığınız bir kağıt parçasını tam 42 kez ikiye katlayabilseydiniz, kağıdın kalınlığı Dünya'dan Ay'a kadar ulaşırdı.`,
+            `Cam aslında tamamen katı bir madde değildir; bilimsel olarak çok ama çok yavaş akan, son derece yoğun 'amorf' bir sıvıdır.`,
+            `Dünya üzerindeki tüm insanların akıllı telefonları aynı anda şarj edilseydi, harcanan elektrik enerjisi devasa bir şehri ancak 1 saat aydınlatabilirdi.`,
+            `Altın yeryüzünde oluşmaz. Evrendeki tüm altınlar, milyarlarca yıl önce patlayan devasa yıldızların (Süpernovaların) çekirdeğinde oluşup Dünya'ya saçılmıştır.`,
+            `Çakmaktaşının icadı kibritten çok daha öncedir. Modern sürtmeli kibritler, çakmaktan tam 3 yıl sonra, 1826'da bulunmuştur.`,
+            `Sıcak su, soğuk suya göre daha hızlı donar. Bilim dünyasında 'Mpemba Etkisi' olarak bilinen bu garip olayın sırrı hala tam olarak çözülememiştir.`,
+            `Helikopter böcekleri saniyede 30 kez kanat çırparak havada asılı kalabilir ve hatta geriye doğru uçabilen tek böcek türüdür.`,
+            `Barkod okuyucular siyah çizgileri okumazlar. Cihazdan çıkan lazer, siyah çizgilerin arasındaki beyaz boşlukların yansımasını okuyarak veriyi çözer.`,
+            `Dünya üzerindeki toplam internet verisinin fiziksel ağırlığı (elektronların ağırlığı) hesaplandığında, yaklaşık olarak 50 gram (bir çilek ağırlığı) tutmaktadır.`,
+
+            // --- 🍔 LEZZET, GIDA VE GASTRONOMİ KÜLTÜRÜ ---
+            `Bal, Dünya üzerinde asla bozulmayan tek doğal gıdadır. Mısır firavunlarının mezarlarında bulunan 3000 yıllık bal bile bugün hala yenilebilir durumdadır.`,
+            `Fıstık ezmesinin içindeki yüksek karbon oranından dolayı, bilim insanları yüksek basınç uygulayarak fıstık ezmesinden gerçek elmas üretmeyi başarmışlardır.`,
+            `Elmaların %25'i havadan oluşur. Bir elmayı su dolu bir kaba bıraktığınızda batmamasının ve yüzmesinin tek sebebi budur.`,
+            `Ketçap, 1830'lu yıllarda Amerika'da ilaç olarak satılıyordu. Doktorlar reçetelere 'hazımsızlık ve mide ağrısı için ketçap' yazıyordu.`,
+            `Limonlarda, çileklerden çok daha fazla doğal şeker bulunur. Sadece limondaki yüksek sitrik asit, bu şeker tadını almamızı tamamen engeller.`,
+            `Dünyanın en pahalı kahvesi olan Kopi Luwak, Endonezya'da yaşayan bir tür misk kedisinin kahve çekirdeklerini yiyip sindirmeden dışkılamasıyla elde edilir.`,
+            `Çikolata yapımında kullanılan kakaonun paraya dönüştüğü zamanlar olmuştur. Antik Mayalar ve Aztekler kakao çekirdeklerini resmi para birimi olarak kullanırlardı.`,
+            `Havuçlar aslında her zaman turuncu değildi. 17. yüzyıla kadar havuçlar mor, sarı ve beyaz renkteydi; turuncu havuç Hollandalı çiftçilerin melezlemesiyle oluştu.`,
+            `Hindistan cevizi suyunun kimyasal yapısı insan kan plazmasına o kadar benzer ki, İkinci Dünya Savaşı'nda acil durumlarda serum yerine damardan verilmiştir.`,
+            `Beyaz çikolata aslında gerçek çikolata değildir. İçinde kakao tozu bulunmaz, sadece kakao yağı, süt tozu ve şekerden yapılır.`,
+            `Patatesler sadece toprakta değil, uzayda da yetişebilir! NASA 1995 yılında uzay mekiği Columbia'da yerçekimsiz ortamda ilk patatesi yetiştirmiştir.`,
+            `Dünyanın en eski peynir tarifi, M.Ö. 1615 yılına ait bir Çin mezarında bulunmuştur. İnsanlar binlerce yıldır peynir sevdalısıdır.`,
+            `Tarihteki ilk çorba, hipopotam etinden yapılmıştır. M.Ö. 6000 yıllarına dayanan bu tarif, günümüz sıcak başlangıçlarının atasıdır.`,
+            `Dünyada en çok satılan tüketim ürünü sudur. Suyun hemen ardından ikinci sırada ise tüm dünyayı kafeine bağlayan kahve gelir.`,
+            `Muz aslında bir 'dut' (berry) türüdür, çilek ise bilimsel olarak bir dut türü değildir. Doğa bazen sınıflandırmalarda çok garip olabilir.`,
+            `Ketçabın akış hızı fiziksel olarak ölçülmüştür. Standart bir cam şişeden dökülen ketçap, yılda maksimum 45 kilometre hızla akar.`,
+            `İnsan doğduğunda tatlıya duyarlı olarak dünyaya gelir. Tuz, ekşi ve acı gibi tatları sevmek tamamen sonradan öğrenilmiş bir kültürdür.`,
+            `Sushi aslında çiğ balık anlamına gelmez. 'Ekşi pirinç' anlamına gelir ve orijinalinde eti taze tutmak için kullanılan fermente bir pirinç yatağıydı.`,
+
+            // --- 💡 HAYATIN İÇİNDEN MİNİ AYRINTILAR ---
+            `Gülümseyerek konuşmak, sesinizin karşı tarafa daha pozitif ve güvenilir gitmesini sağlar. Telefonla konuşurken bile gülümsediğiniz fark edilir.`,
+            `Sivrisineklerin koku alma duyusu o kadar gelişmiştir ki, insan nefesindeki karbondioksiti 50 metre uzaktan algılayıp hedefe kilitlenebilirler.`,
+            `İngilizce'deki 'Alphabet' (Alfabe) kelimesi, Yunan alfabesinin ilk iki harfi olan 'Alpha' ve 'Beta'nın birleşmesinden oluşmuştur.`,
+            `Ortalama bir bulutun ağırlığı 500 ton civarındadır. Bu kadar ağır olmasına rağmen su damlacıklarının çok küçük olması havada asılı kalmasını sağlar.`,
+            `Küçükken hepimizin duyduğu 'Kulağına deniz kabuğu dayarsan okyanusu duyarsın' efsanesi yanlıştır. Duyduğunuz ses, kendi damarlarınızdaki kanın yankısıdır.`,
+            `Sakız çiğnemek, soğan doğrarken gözlerinizin yaşarmasını büyük ölçüde engeller. Çiğneme hareketi ağızdan nefes almanızı sağlayarak gazı gözlerden uzak tutar.`,
+            `Açlık hissettiğinizde mideniz aslında küçülmez. Midenizin hacmi aynı kalır, sadece kasılarak beyne 'içerisi boşaldı' sinyali yollamaya başlar.`,
+            `Eğer Dünya'nın merkezinden diğer tarafına doğru bir tünel açıp içine atlasaydınız, diğer taraftan çıkmanız tam 42 dakika 12 saniye sürerdi.`,
+            `Esnemek o kadar bulaşıcıdır ki, sadece 'esnemek' kelimesini okumak bile şu an beyninize esneme refleksini göndermiş olabilir!`,
+            `Kalbiniz her gün vücudunuza kan pompalamak için o kadar büyük bir enerji üretir ki, bu enerjiyle ortalama bir kamyonet 30 kilometre yol gidebilir.`,
+            `Dünya yüzeyinde her saniye ortalama 100 farklı yere yıldırım düşer. Atmosferimizin bu bitmek bilmeyen elektrik şovu hiç durmaz.`,
+            `Şu an bu yazıyı okurken, vücudunuz saniyede 25 milyon yeni hücre üretiyor ve bir o kadar eski hücreyi yok ediyor.`,
+
+            // --- 🎯 OLİMPİYAT KOKOREÇ & SOKAK LEZZETLERİ (GİZLİ MARKA ALGISI) ---
+            `Uzmanlara göre, yemek beklerken geçen süreyi ilginç bilgiler okuyarak geçirmek, yemeğin damaktaki lezzet algısını %15 artırıyor!`,
+            `Köz ateşinde pişen etlerin dumanı, lezzet moleküllerini havaya taşıyarak tat alma tomurcuklarınızı siz daha ilk ısırığı almadan uyarır.`,
+            `Yemeği kağıttan veya paketten sıcak sıcak elinizle yemek, çatal bıçakla yemeye göre beyni psikolojik olarak çok daha fazla tatmin eder.`,
+            `Baharatlı ve acı lezzetler (örneğin acılı bir kokoreç), beynin 'Endorfin' yani mutluluk hormonu salgılamasını tetikleyen en hızlı doğal yoldur.`,
+            `Sokak lezzetleri kültürünün dünya tarihindeki ilk temsilcileri, Antik Roma'da köşebaşlarında sıcak et ve ekmek satan seyyar arabalardı.`,
+            `Mide kazınması (guruldama) sesi, aslında midenin boş olduğunda kendini temizleme mekanizmasıdır. Ancak Olimpiyat lezzetleriyle anında susturulabilir!`,
+            `İyi bir yemeğin hafızası asla silinmez. Beynimizdeki koku ve tat alma bölümleri, nostaljiyi ve mutluluğu saklayan bölgeyle doğrudan bağlantılıdır.`,
+            `Şu an telefonunuzda veya ekranınızda yemeğinizin siparişini verirken, beyniniz çoktan o yemeğin kokusunu ve tadını hayal ederek sindirime başladı bile!`,
+            `Lezzet tomurcuklarımızın ömrü sadece 14 gündür. Yani aslında her iki haftada bir ağzınızda tamamen yeni bir tat alma sistemiyle lezzetleri keşfedersiniz.`,
+            `Sarı, kırmızı ve turuncu renkleri iştahı, heyecanı ve metabolizmayı hızlandırır. Sitemizin tasarımının bu renklerden oluşması kesinlikle bir tesadüf değildir!`
         ];
 
 
@@ -2711,299 +2822,12 @@
             el.insertBefore(endQuote, cursor);
         }
 
-        
-        async function fetchWorldMeal() {
-            try {
-                // 1. Ücretsiz TheMealDB API'den rastgele yemek çek
-                const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
-                const data = await res.json();
-                const meal = data.meals[0];
-
-                const area = meal.strArea !== "Unknown" ? meal.strArea : "Dünya";
-                const name = meal.strMeal;
-                const img = meal.strMealThumb;
-
-                // 2. Yemeğin adını Türkçe Wikipedia'da arat (KÖKTEN ÇÖZÜM)
-                let wikiDescription = "";
-                try {
-                    // Eski "snippet" (kaynakça çeken) arama yerine, makalenin direkt en üstündeki "GİRİŞ TANIMINI" (extracts) çeken kod:
-                    const wikiUrl = `https://tr.wikipedia.org/w/api.php?action=query&prop=extracts&exsentences=2&exlimit=1&explaintext=1&format=json&origin=*&generator=search&gsrsearch=${encodeURIComponent(name)}&gsrlimit=1`;
-                    const wikiRes = await fetch(wikiUrl);
-                    const wikiData = await wikiRes.json();
-
-                    if (wikiData.query && wikiData.query.pages) {
-                        const pages = wikiData.query.pages;
-                        const pageId = Object.keys(pages)[0];
-                        const extract = pages[pageId].extract;
-
-                        // Eğer ansiklopedik bir tanım bulduysa ve saçma sapan kaynakça işaretleri içermiyorsa al
-                        if (extract && extract.length > 15 && !extract.includes("ISBN") && !extract.includes("http")) {
-                            wikiDescription = extract.replace(/\n/g, " ").trim(); // Satır atlamalarını temizle
-                        }
-                    }
-                } catch (wikiError) {
-                    console.log("Wikipedia anlaşılamadı, esnaf cümlelerine geçiliyor.");
-                }
-
-                let message = "";
-
-                // 3. EĞER WIKIPEDIA'DA TERTEMİZ BİR TANIM BULUNDUYSA: Sadece 2. Cümleyi Çek!
-                if (wikiDescription.length > 10) {
-                    // Metni noktalardan (ve ardından gelen boşluktan) bölerek cümlelere ayır
-                    let sentences = wikiDescription.split('. ');
-                    
-                    // Eğer metinde en az 2 cümle varsa 2. cümleyi (index 1) al, yoksa mecbur ilkini al
-                    let targetSentence = sentences.length > 1 ? sentences[1] : sentences[0];
-                    
-                    // Temizlik işlemleri: Başındaki sonundaki boşlukları ve en sondaki noktayı al (Cümle "diye tanımlanıyor." ile biteceği için)
-                    targetSentence = targetSentence.trim();
-                    if (targetSentence.endsWith('.')) {
-                        targetSentence = targetSentence.slice(0, -1);
-                    }
-
-                    // Cümle 160 karakterden uzunsa kibarca kes ki ekranı yormasın
-                    let shortWiki = targetSentence.length > 300 ? targetSentence.substring(0, 300) + "..." : targetSentence;
-
-                    // Müşteriye yansıyacak o şık daktilo metni
-                    message = `'${name}'; ${shortWiki}.`;
-                }
-                // 4. EĞER WIKIPEDIA'DA YOKSA (Veya dipnota takıldıysa): Daha önceki o efsanevi esnaf laflarından birini patlat!
-                else {
-                    // DİKKAT: Buraya senin o kopyaladığın devasa 200'lük cümle havuzunu koymalısın. Örnek olarak birkaç tane bıraktım.
-                    const challengeMessages = [
-                        // --- KOKOREÇ TEMALI (1-30) ---
-                        `${area} mutfağında bugün haritada bile zor bulacağınız '${name}' yemeğini yiyorlarmış... Boşverin ustam, hiçbir sos közde ağır ağır pişen kokorecin dumanıyla yarışamaz!`,
-                        `${area} taraflarında '${name}' diye bir şeyler atıştırıyorlarmış... Bıraksınlar bu işleri, yaprak gibi açılmış ateşte terleyen tavuk dönerimizin yerini tutar mı hiç? Siparişiniz yolda!`,
-                        `Şu gördüğünüz '${name}', ${area} mutfağının incisiymiş... Görünüşe aldanmayın, bol baharatlı ve limonlu bir midye dolmanın verdiği mutluluğun yanından bile geçemez!`,
-                        `${area} mutfağının en fiyakalı yemeği '${name}' diyorlar... Valla bizim sıcacık ekmek arası ciğerimizin samimiyeti bunlara bin basar. Ustalarımız siparişinizi hazırlıyor!`,
-                        `Millet ${area} lokantalarında '${name}' yiyerek gurmelik taslıyor... Halbuki bilmezler ki en büyük gurmelik, Olimpiyat'ta yenilen o dumanı tüten sokak lezzetleridir!`,
-                        `Yabancılar ${area} taraflarında '${name}' ile doymaya çalışadursun... Bizim bol kekikli, acılı kokorecimizin ilk ısırığındaki hazzı asla bilemeyecekler. Beklediğinize değecek!`,
-                        `Dünya mutfağından '${name}'... ${area} halkı seviyor olabilir ama bizim pamuk gibi ekmeğe basılmış ıslak hamburgerimizin verdiği o gece yarısı mutluluğunu veremez!`,
-                        `Bugün ${area} lüks restoranlarında '${name}' pişiyormuş. Onlar tabakları cımbızla süslerken, bizim usta satırla kokoreç kıyıyor! Asıl şov masanıza gelmek üzere.`,
-                        `${area} insanı '${name}' yerken muhtemelen bizim buz gibi açık ayranımızın ve acılı kokorecimizin uyumundan habersizler. Onlar adına üzgünüz!`,
-                        `Şu '${name}' dedikleri ${area} porsiyonlarını mikroskopla ararsın. Olimpiyat'ta çeyrek ekmek bile adamı ayağa kaldırır!`,
-                        `Diyorlar ki ${area} sokaklarında '${name}' meşhurmuş. Bizim buraların meşhuru belli; ateşte nar gibi kızarmış, baharatı tam kıvamında bir yarım kokoreç!`,
-                        `Eminiz ki ${area} aşçıları '${name}' için çok uğraşmıştır ama bizim kuzu alevinde yavaş yavaş dönen kokorecin karizması bir başka be ustam!`,
-                        `${area} şefleri '${name}' tarifini sır gibi saklıyormuş. Bizim sırrımız saklı değil; bol malzeme, gerçek ateş ve usta eli!`,
-                        `Uzaklarda '${name}' yeniyor, ${area} halkı tok yattığını sanıyor. Halbuki gece yarısı yenilen o çıtır kokorecin verdiği tokluk bambaşkadır.`,
-                        `Şimdi ${area}'da olup '${name}' yemek vardı demek isterdik ama yalan olur. Biz buradayız, kokorecin tam merkezinde!`,
-                        `Biliyor musunuz, ${area} restoranlarında '${name}' yerken sessiz konuşulurmuş. Bizim burada lezzetten sessiz kalınır!`,
-                        `${area} mutfağında '${name}' yaparken çok afili isimler kullanıyorlar. Biz kısaca 'Ustam çek oradan bir yarım' diyoruz, iş bitiyor.`,
-                        `Bu '${name}' denen yemeği ${area} kralları yermiş zamanında. Bizim Olimpiyat'ta ise her müşterimiz kraldır!`,
-                        `Şu an ${area} sınırları içinde '${name}' yiyen biri, sizin birazdan yiyeceğiniz bol kimyonlu kokoreci görse elindekini usulca masaya bırakırdı.`,
-                        `Adamlar ${area} mutfağında '${name}' diye bir icat yapmışlar. Güzeldir elbet ama bizim çıtır ekmeğe damlayan kokoreç yağı dünya mirası sayılmalı!`,
-                        `Gerçek lezzet ${area} taraflarında '${name}' ile aranmaz. Gerçek lezzet buram buram köz kokan tezgahımızın hemen arkasındadır.`,
-                        `Eğer ${area} halkı bir kez bizim baharatlı kokoreci tatsaydı, inanın '${name}' yemeğini menülerinden tamamen kaldırırlardı.`,
-                        `Onlar ${area} sokaklarında '${name}' ile hava atsınlar. Sizin siparişiniz mangaldan yeni indi, birazdan masanızda!`,
-                        `Şu '${name}' ${area} diyetlerine çok uygunmuş. Biz diyet yapmıyoruz ustam, biz lezzetin hakkını veriyoruz!`,
-                        `Bu '${name}' yemeği ${area} tarafında romantik akşamların menüsüymüş. Bizim için en büyük romantizm ekmek arası kokorece sıkılan bir kaç damla limondur.`,
-                        `${area} şefleri '${name}' yaparken gramaj hesaplar. Bizim usta eli boldur, ekmeğin içini lezzetle doldurur!`,
-                        `Dünya haritasında ${area}'yı bulmak zordur ama lezzetin haritasında Olimpiyat Kokoreç tam merkezdedir! '${name}' de neymiş?`,
-                        `Şu '${name}' yemeğini ${area} şefleri haftalarca marine ediyormuş. Bizim ateşimiz ve baharatımız o işi saniyeler içinde hallediyor!`,
-                        `Bizim kokorecin o ilk ısırığındaki 'çıt' sesi, ${area} mutfağının tüm '${name}' tariflerine bedeldir!`,
-                        `Siparişiniz hazırlanırken şu '${name}' yemeğine bir bakın. Sonra ${area} halkı için ufak bir saygı duruşunda bulunup Olimpiyat lezzetine odaklanın!`,
-
-                        // --- TAVUK DÖNER TEMALI (31-60) ---
-                        `Bugün ${area} menüsünde '${name}' varmış. Bizim dükkanda ise yaprak gibi açılmış, özel sosuyla demlenmiş efsane tavuk döner var!`,
-                        `${area} sınırlarında '${name}' çok tüketiliyormuş. İddia ediyoruz, bizim dürüm tavuk dönerin içine giren turşu bile daha lezzetlidir!`,
-                        `Onlar '${name}' yiyerek ${area} kültürünü yaşatıyor. Biz de bol malzemeli, kaşarı erimiş dönerimizle sokak kültürünü zirveye taşıyoruz!`,
-                        `Bir porsiyon '${name}' için ${area} restoranlarında aylar öncesinden sıra alınıyormuş. Olimpiyat'ta lezzet bekletmez, anında masanızda!`,
-                        `Şu '${name}' ${area} taraflarında çok hafif bir lezzetmiş. Bizim pilavüstü döner de hafiftir, sadece birazcık akılları baştan alır!`,
-                        `${area} aşçıları '${name}' pişerken başından ayrılmazmış. Bizim döner ateş karşısında usul usul dönerken zaten kendi şovunu yapıyor.`,
-                        `Biliyor muydunuz? ${area} halkı '${name}' yerken su içermiş. Bizim tavuk dönerin yanında buz gibi köpüklü ayran olmadan o iş olmaz!`,
-                        `Diyorlar ki '${name}' yiyen ${area} insanı çok mutlu oluyormuş. Tombik pide arası dönerimizi ısırıp da yüzü asık olan tek bir müşteri görmedik daha!`,
-                        `Bu '${name}' denen ${area} yemeğini bıçakla kesmek zormuş. Bizim usta döneri öyle bir keser ki, yaprak gibi dökülür!`,
-                        `${area} sokaklarında '${name}' kokusu yayılırmış. Buradaki kızarmış tavuk döner ve baharat kokusu bütün mahalleyi ayağa kaldırır!`,
-                        `Şimdi ${area} uçağına binip '${name}' yemeye gitmeye gerek yok. Dünyanın en iyi tavuk döneri zaten burnunuzun dibinde hazırlanıyor.`,
-                        `Onlar ${area} şeflerinin elinden '${name}' yesin. Siz birazdan özel sosla ıslatılmış, sıcacık dürüm dönerin keyfine varacaksınız.`,
-                        `Bu '${name}' yemeği ${area} elitlerinin favorisiymiş. Olimpiyat'ın tavuk döneri ise 7'den 70'e herkesin tartışmasız şampiyonudur!`,
-                        `Şu '${name}' yemeğine ${area} mutfağında çok sos konmazmış. Bizim dürümün içindeki sos, dönerin ruhudur be ustam!`,
-                        `Dışarıda hava nasıl olursa olsun, ${area} insanı '${name}' yermiş. Bizde ise her havanın ilacı sıcak bir tombik dönerdir!`,
-                        `Eminim ${area} diyetisyenleri '${name}' yemeğini çok öneriyordur. Bizim tavuk dönerimiz ise ruhun en büyük ilacıdır!`,
-                        `Bir porsiyon '${name}' ile doyduğunu iddia eden ${area} insanı, Olimpiyat'ın bol malzemeli yarım ekmek dönerini görse şok geçirirdi.`,
-                        `Adamlar ${area} topraklarında '${name}' ile övünüyor. Biz ise her gün bu ateşte terleyen tavuk dönerimizle efsaneler yazıyoruz!`,
-                        `Şu '${name}' denen ${area} yemeği tabağa konduğunda soğurmuş. Bizim döner dürüm, son lokmasına kadar o ateşi içinde saklar!`,
-                        `Bazen ${area} şefleri '${name}' için günlerce hazırlık yaparmış. Bizim marinasyon sırrımızla dönerimiz her saniye efsaneye dönüşüyor.`,
-                        `Eğer ${area} şefleri tavuk dönerimizi tatsaydı, emin olun '${name}' tariflerini çöpe atıp dükkana gelir bizden bayilik isterlerdi!`,
-                        `Şimdi ${area}'da '${name}' yiyenler düşünsün. Siz birazdan patatesi, turşusu, sosu tam kararında bir efsane yiyeceksiniz.`,
-                        `Bu '${name}' yemeği ${area} tarafında çatalla yenirmiş. Bizim döneri iki elle sıkıca kavrayıp o ilk ısırığı almak işin raconudur!`,
-                        `Dünya ${area} mutfağının '${name}' yemeğini konuşuyor olabilir ama bizim mahalle sadece usta'nın döner bıçağının sesini dinler.`,
-                        `Birazdan masanıza gelecek olan tavuk döner, ${area} mutfağının '${name}' yemeğini lezzetiyle teknik nakavt yapacak. Hazır mısınız?`,
-                        `Onların ${area}'da yediği '${name}' karın doyurur. Bizim dürüm dönerimiz ise hem karnı hem kalbi doyurur!`,
-                        `Şu '${name}' yemeği ${area} taraflarında çok renkli sunulurmuş. Bizim dönerin o altın sarısı rengi dünyadaki bütün tabaklardan daha iştah açıcıdır.`,
-                        `Ne '${name}', ne de başka bir ${area} yemeği... Buz gibi ayranla eşleşmiş bir tavuk dönerin dünyada bir rakibi daha icat edilmedi.`,
-                        `Bu '${name}' yemeğinin tarifinde ${area} sırları varmış. Bizim sırrımız falan yok; bol malzeme, temiz işçilik, efsane lezzet!`,
-                        `Siparişiniz hazırlanırken ${area} mutfağının '${name}' yemeğine bir bakın... Ve şükredin ki Olimpiyat Kokoreç'tesiniz!`,
-
-                        // --- MİDYE DOLMA TEMALI (61-85) ---
-                        `${area} kıyılarında '${name}' diye deniz ürünü yiyorlarmış. Onlar deniz ürünü görmemiş! Üstüne taze limon sıkılmış midye dolmamız onlara ders verir.`,
-                        `Şu '${name}', ${area} lüks restoranlarında servis edilirmiş. Bizim midyeler sokakların lüksüdür, kabuğunu kaşık yapıp yemesi ayrı bir olaydır!`,
-                        `Adamlar ${area}'da '${name}' yapıp üstüne sos döküyormuş. Bir midye dolmanın içindeki o efsane pirinç ve kuş üzümü dengesi hiçbir sosa ihtiyaç duymaz.`,
-                        `Biliyor musunuz, ${area} insanı '${name}' ile doyuyormuş. Bizde midye dolma ile doymak yoktur, "10 tane daha ver usta" diyene kadar yenir!`,
-                        `Bu '${name}' denen ${area} yemeği masada saatlerce bekleyebilirmiş. Bizim midyeler tezgaha düştüğü an tükenir, bekleme yapmaz!`,
-                        `Millet ${area} sahillerinde '${name}' yiyerek tatil yapıyor. Olimpiyat'ta arka arkaya atılan 20 midye dolma zaten başlı başına bir tatildir!`,
-                        `Diyorlar ki '${name}' ${area} taraflarında denizden taze çıkıyormuş. Bizim midyeler denizin kalbinden gelir, baharatıyla efsaneleşir.`,
-                        `Şu '${name}' yemeğinde ${area} şefleri çok limon kullanmazmış. Biz midyeye o limonu öyle bir sıkarız ki, lezzet patlaması yaşanır!`,
-                        `Eğer ${area} halkı Olimpiyat'ın sıcak midyesini tatsaydı, inanın bana '${name}' porsiyonlarını anında iade ederlerdi.`,
-                        `Onların '${name}' yemeği tabağı kirletir. Bizim midyede bulaşık çıkmaz, kendi kabuğu kendi tabağıdır, pratikliğin zirvesidir!`,
-                        `Bu '${name}' ${area} sokaklarında meşhurmuş. Bizim midye tezgahımızın başındaki o samimi sohbeti dünyanın hiçbir sokağında bulamazsınız.`,
-                        `Şimdi ${area}'da '${name}' yemek mi, yoksa bol acılı, baharatlı, taze limonlu midye dolmalarımızı gömmek mi? Cevap çok basit!`,
-                        `Bir porsiyon '${name}' yemek ${area} kültüründe bir saat sürermiş. Bizim midye şovunda saniyeler içinde kabuklardan dağ oluşur!`,
-                        `O meşhur ${area} mutfağının '${name}' yemeği karın doyurur. Midye dolma ise bir tutkudur, karın toksa bile yenir!`,
-                        `Şu '${name}' yemeği için ${area} restoranlarına gitmeye gerek yok. En taze deniz kokusu ve en iyi baharat dengesi şu an sizin için hazırlanıyor.`,
-                        `Adamlar ${area} topraklarında '${name}' ile hava atıyorlar. Bizim midye dolmamızın içindeki tarçın ve çam fıstığı uyumu onlara gastronomi dersi verir.`,
-                        `Midyeyi açarsın, limonu sıkarsın, ağzına atarsın... Bu üçlü komboyu ${area} mutfağının '${name}' tariflerinden daha çok seviyoruz!`,
-                        `Bu '${name}' yemeğini ${area} şefleri havyarla süslermiş. Bizim midyenin süse ihtiyacı yoktur, sade ve kusursuz bir lezzettir.`,
-                        `Onlar ${area} mekanlarında '${name}' yiye dursun. Siz şu an Türkiye'nin en taze ve en iyi baharatlı midyesini bekliyorsunuz.`,
-                        `Şu '${name}' denen ${area} yemeğine bir bakın. Sonra derin bir nefes alın ve Olimpiyat'ın midye tezgahından gelecek o taze iyot kokusunu bekleyin.`,
-                        `Eğer ${area} aşçıları bizim midyenin iç harcını görselerdi, muhtemelen '${name}' yapmayı bırakıp pirinç ıslamaya başlarlardı!`,
-                        `Bazen ${area} insanı '${name}' yerken 'acaba daha ne yiyebilirim' diye düşünürmüş. Bizde midye bittiğinde tek bir soru sorulur: 'Kaç tane oldu usta?'`,
-                        `Bu '${name}' yemeği ${area} diyet listelerinde varmış. Midye dolmanın kalorisi sayılmaz ustam, o ruhun besinidir!`,
-                        `Midyeci ustasının el hızını, ${area} şeflerinin '${name}' hazırlama hızıyla kıyaslamayın bile; ustamız ışık hızında açar!`,
-                        `Şimdi arkanıza yaslanın, ${area} mutfağının '${name}' menüsünü unutup Olimpiyat midyesinin o efsanevi lezzet yolculuğuna hazırlanın.`,
-
-                        // --- ISLAK HAMBURGER & HAMBURGER TEMALI (86-110) ---
-                        `Amerika'da falan hamburgeri kuru kuru yerlermiş, ${area} taraflarında da '${name}' modaymış. Oysa buharla demlenmiş salçalı ıslak hamburgerin şifası başkadır!`,
-                        `Şu gördüğünüz '${name}' ${area} sokaklarında çok satarmış. Bizim pamuk gibi ıslak hamburgerimiz gece yarısı açlıklarının tek şampiyonudur!`,
-                        `Onlar ${area} kafelerinde '${name}' ile çay içiyor olabilir. Biz buz gibi yayık ayran ve ıslak hamburger ikilisiyle tabuları yıkıyoruz!`,
-                        `Bu '${name}' denen ${area} yemeğini bıçakla kibarca keserlermiş. Islak hamburger elle yenir, parmaklarda kalan o özel sos yalanır ustam!`,
-                        `Adamlar ${area} mutfağında '${name}' yaparken sosu yanına koyuyor. Bizim ıslak hamburger ekmeği sosla yıkanır, buharla demlenir!`,
-                        `Dünya ${area} mutfağının '${name}' yemeğini tartışsın dursun. Biz bir oturuşta kaç tane ıslak hamburger yenebileceğini tartışıyoruz!`,
-                        `Şu '${name}' ${area} taraflarında lüks sayılıyormuş. Bizim hamburgerimizin o karamelize soğanlı ve bol peynirli hali lüksün vücut bulmuş halidir.`,
-                        `Eğer ${area} şefleri bizim ıslak hamburger kutusundaki o sarımsaklı buharı koklasaydı, '${name}' menülerini komple değiştirirlerdi.`,
-                        `Bir tane '${name}' ile ${area} insanı hemen doyarmış. Islak hamburger öyle mi? İki tane yetmez, üçüncü her zaman göz kırpar!`,
-                        `Diyorlar ki '${name}' yemeği ${area} bölgesinin en iyisiymiş. Hamburger köftemizin o ev yapımı dokusunu tatmadan konuşmasınlar deriz.`,
-                        `Şimdi ${area} uçağına binip '${name}' yemeye gerek yok. Orijinal sokak kültürünün en iyi hamburgeri şu an ızgaradan çıkmak üzere.`,
-                        `Bu '${name}' denen ${area} yemeğine çok baharat katarlarmış. Islak hamburgerin sırrı ise tamamen o hafif sarımsaklı, tatlı-tuzlu domates sosundadır.`,
-                        `Biliyor musunuz, ${area} gençleri '${name}' yiyerek büyürmüş. Bizim gençler ıslak hamburger tezgahının önünde gece sohbetleriyle büyür!`,
-                        `Şu '${name}' tabağına ${area} mutfağında yeşillik koyarlarmış. Islak hamburger sadeliğin gücüdür; ekmek, köfte ve efsane sos! Başka hiçbir şeye ihtiyaç duymaz.`,
-                        `Onlar ${area} mekanlarında '${name}' diye şekil yapsınlar. Bizim o altın sarısı hamburger ekmeğimizin yumuşaklığı her türlü şekli bozar!`,
-                        `Eğer ${area} diyetisyenleri ıslak hamburgerin insana verdiği mutluluğu bilseydi, '${name}' yerine reçetelerine bunu yazarlardı.`,
-                        `Şu '${name}' yemeğinin ${area} tarafında bir tarihi varmış. Islak hamburgerin tarihi ise gecenin en güzel saatlerinde sokak lambaları altında yazılır!`,
-                        `Bu '${name}' yemeğini ${area} aşçıları hazırlarken eldiven takarmış. Islak hamburger sıcak sıcak, o kağıdından tutularak büyük bir tutkuyla yenir.`,
-                        `Bir ısırık '${name}' alıp '${area} lezzeti' diyorlar. Bizim cheeseburgerin eriyen peynirini görseler kelimelerini geri alırlar!`,
-                        `Onlar ${area} topraklarında '${name}' ile doymaya çalışsın. Siz birazdan Olimpiyat'ın o meşhur buharlı burger efsanesiyle tanışacaksınız.`,
-                        `Şimdi ${area}'da '${name}' yiyenler düşünsün. Sizin siparişiniz o meşhur kutunun içinde demleniyor, sıcak sıcak geliyor!`,
-                        `Bu '${name}' yemeği ${area} kültüründe zengin işiymiş. Islak hamburger herkesin yemeğidir, sokağın tartışmasız ve en samimi kralıdır.`,
-                        `Millet ${area} lokantalarında '${name}' siparişini 40 dakika beklermiş. Bizim usta hamburgeri şipşak çeker, açlık krizini anında çözer!`,
-                        `Şu '${name}' dedikleri ${area} tabağı göze hitap edermiş. Bizim burgerler ise direkt mideye ve kalbe hitap eder!`,
-                        `Siparişiniz yolda! ${area} mutfağının '${name}' yemeği birazdan masanıza gelecek olan o efsane burgerin yanında sönük bir yıldız gibi kalacak.`,
-
-                        // --- CİĞER TEMALI (111-135) ---
-                        `Bugün ${area} taraflarında '${name}' diye bir şeyler geveliyorlarmış... Bırakın onları, sumaklı soğanla harmanlanmış yaprak ciğerimizin samimiyeti dünyalara bedel!`,
-                        `${area} şefleri '${name}' tarifine sos uydurmaya çalışsın. Bizim ciğerimizin kendi yağı ve pul biberi dünyadaki bütün soslara kafa tutar!`,
-                        `Şu gördüğünüz '${name}', ${area} ziyafet sofralarının incisiymiş. Yarım ekmek arası pamuk gibi ciğerin verdiği o muazzam ziyafeti henüz tatmamışlar demek ki.`,
-                        `Adamlar ${area} mutfağında '${name}' yaparken etin özünü kaybediyormuş. Olimpiyat'ta ciğer ustalıkla mühürlenir, içi sulu ve lokum gibi kalır!`,
-                        `Millet ${area} mekanlarında '${name}' yiyerek demir vitamini alıyoruz sanıyor. Gerçek enerji ve güç, mangaldan taze inmiş porsiyon ciğerdedir!`,
-                        `Biliyor musunuz, ${area} insanı '${name}' yerken yanına limon istemezmiş. Ciğere şöyle bolca limon sıkıp yemenin verdiği ferahlığı bir bilseler...`,
-                        `Bu '${name}' denen ${area} yemeğini çatalla yerlermiş. Ciğer dediğin sıcak somun ekmeğin içine çekilir, maydanozla sarılıp koca bir ısırıkla yenir!`,
-                        `Diyorlar ki '${name}' yiyen ${area} gurmeleri çok seçiciymiş. Bizim ciğer tezgahına gelseler o gurmelik falan kalmaz, saniyeler içinde ekmek biter!`,
-                        `Şu '${name}' ${area} taraflarında çok hafif bulunuyormuş. Bizim Arnavut ciğerinin küp küp lokmalık o hafif ve eşsiz dokusunu görseler akılları durur.`,
-                        `Eğer ${area} şefleri bizim ustanın ciğer doğrama hızını görselerdi, '${name}' tabaklarını mutfakta bırakıp çıraklığa başlarlardı.`,
-                        `Onlar ${area} topraklarında '${name}' ile övünedursun. Bizim bol baharatlı, nar gibi kızarmış ciğer şişlerimiz sokak lezzetlerinin şahıdır!`,
-                        `Bir porsiyon '${name}' ile ${area} insanı saatlerce idare edermiş. Ciğerin o efsane tadı damakta kaldıkça 'ustam yarım daha çek' dememek imkansızdır.`,
-                        `Şu '${name}' yemeğinde ${area} aşçıları garnitür kullanmazmış. Sumaklı, kırmızı toz biberli, soğanlı yatağı olmayan bir ciğer düşünülemez!`,
-                        `Dünya mutfağından '${name}'... ${area} halkı bayılıyor olabilir ama ciğerin ateşte cızırdayan o ilk sesini duyduklarında fikirleri kesin değişir.`,
-                        `Bu '${name}' yemeği ${area} elitlerinin favorisiymiş. Ciğer ise hem esnafın, hem patronun, hem de ağzının tadını bilen herkesin ortak aşkıdır!`,
-                        `Şimdi ${area} uçağına binip '${name}' aramayın. Yeryüzündeki en iyi marinasyona sahip, taptaze ciğer birazdan masanızı şenlendirecek.`,
-                        `Bazen ${area} restoranlarında '${name}' masaya soğuk gelirmiş. Olimpiyat'ta ciğer ateşten ekmeğe saniyeler içinde uçar, dumanı üstünde tüter!`,
-                        `Onlar ${area} şeflerinin elinden '${name}' yesin. Siz birazdan baharatın ve etin en mükemmel uyumunu yakalamış ciğerin keyfine varacaksınız.`,
-                        `Şu '${name}' yemeği ${area} diyetlerine giriyormuş. Ciğer de diyete uygundur ustam, bolca protein ve saf mutluluk içerir!`,
-                        `Eğer ${area} halkı bir kere bizim ciğerin tadına baksaydı, inanın '${name}' kelimesini sözlüklerinden tamamen silerlerdi.`,
-                        `Bu '${name}' denen ${area} yemeğine çok para ödüyorlarmış. Gerçek zenginlik, sıcacık ekmeğin içindeki bol porsiyonlu Olimpiyat ciğeridir.`,
-                        `Birazdan masanıza gelecek olan ciğer, ${area} mutfağının en güvendiği '${name}' yemeğini bile lezzetiyle unutturacak kapasitede.`,
-                        `Şu '${name}' yemeği ${area} taraflarında haftada bir yenirmiş. Bizim ciğer o kadar hafiftir ki, sabah öğle akşam yesen yine de bıkmazsın!`,
-                        `Ne '${name}', ne de başka bir ${area} spesiyali... Buz gibi ayran ve acı biber turşusu eşliğinde yenen ciğerin dünyada rakibi yoktur.`,
-                        `Siparişiniz hazırlanırken ${area} mutfağının '${name}' şovunu izleyin, sonra gerçek şovun mangalda nasıl yapıldığını görmek için tabağınıza bakın!`,
-
-                        // --- KÖFTE TEMALI (136-160) ---
-                        `${area} mutfağında bugün '${name}' diye bir köfte çeşidi deniyorlarmış... Valla bizim kuzu ve dana döşünden çekilmiş anne usulü köftemizin yanından bile geçemez!`,
-                        `Bugün ${area} taraflarında '${name}' tabağına dünya para veriyorlarmış. Bizim içi sulu sulu, dışı ızgara izli porsiyon köftemizin bereketi onlara ders olur!`,
-                        `Şu gördüğünüz '${name}', ${area} şeflerinin imza yemeğiymiş. Bizim usta köfteyi öyle bir yoğurur ki, baharatı ve etin kendi suyuyla efsane bir imza atar!`,
-                        `Adamlar ${area} lokantalarında '${name}' köftesini soslara boğuyormuş. Gerçek köfteye sos konmaz, eti kaliteliyse sadece biraz kimyonla kendi şovunu yapar!`,
-                        `Millet ${area} mekanlarında '${name}' yiyerek köfte yediğini sanıyor. Sokak kültürünün o meşhur tükürük köftesi lezzetini bilmedikleri ne kadar belli!`,
-                        `Biliyor musunuz, ${area} insanı '${name}' yerken ekmek yemezmiş. Oysa köftenin mangal suyuna banılmış yarım somun ekmeğin lezzeti bir başkadır be ustam!`,
-                        `Bu '${name}' denen ${area} yemeğini çok sıkı yoğururlarmış. Olimpiyat'ta köfte harcı incitilmeden, sadece etin dokusunu koruyacak şekilde kararında yoğrulur.`,
-                        `Diyorlar ki '${name}' yiyen ${area} gurmeleri çok mutluymuş. Bizim közlenmiş biber ve domatesle servis edilen köftemizi yeseler sevinçten ağlarlardı.`,
-                        `Şu '${name}' ${area} taraflarında tavada yapılıyormuş. Köfte dediğin ızgaranın o döküm demirinde pişip is kokusunu içine çekecek!`,
-                        `Eğer ${area} aşçıları bizim köfte reçetemizi bilseydi, '${name}' üretmeyi bırakıp Olimpiyat Kokoreç'e köfte sarmaya gelirlerdi.`,
-                        `Onlar ${area} topraklarında '${name}' ile şekil yapsın. Üç çeyrek ekmek arası bol soğanlı ve piyazlı köftemiz sokakların tartışmasız en şekil lezzetidir!`,
-                        `Bir porsiyon '${name}' ile ${area} insanı hemen kalkarmış masadan. Bizim köftelerin o iştah açıcı kokusu masadan kalkmayı imkansız kılar.`,
-                        `Şu '${name}' yemeğinde ${area} şefleri baharat kullanmazmış. Köftenin ruhu karabiber, kimyon ve ustanın gizli el ayarında gizlidir!`,
-                        `Dünya mutfağından '${name}'... ${area} halkı çok seviyor olabilir ama köfte ızgaraya atıldığındaki o cızırtıyı duymadan lezzetten bahsetmesinler.`,
-                        `Bu '${name}' yemeği ${area} elit mekanlarında satılırmış. Bizim ekmek arası köftemiz statü tanımaz, herkesin ortak ve en samimi lezzetidir!`,
-                        `Şimdi ${area} sokaklarında '${name}' aramayın. Yeryüzündeki en iyi dinlendirilmiş, mangal ateşinde pişmiş köfte şu an tabağınıza doğru yola çıktı.`,
-                        `Bazen ${area} restoranlarında '${name}' fazla pişip kururmuş. Olimpiyat'ta köfte tam kıvamında, içi hafif ıslak ve pembe kalarak servis edilir.`,
-                        `Onlar ${area} şeflerinin fırınından '${name}' yesin. Siz birazdan kömür ateşinde mühürlenmiş o muazzam sokak köftesinin keyfine varacaksınız.`,
-                        `Şu '${name}' yemeği ${area} diyet listelerindeymiş. Köfte de yüksek protein kaynağıdır, üstelik diyet bozduracak kadar da efsanedir!`,
-                        `Eğer ${area} halkı bir kere bizim piyazlı köftemizin tadına baksaydı, emin olun '${name}' kelimesini duyduklarında yollarını değiştirirlerdi.`,
-                        `Bu '${name}' denen ${area} yemeğine soslu ekmek banılmazmış. Bizim köftenin altındaki yağlı pideyi veya ıslak ekmeği yemek asıl ustalıktır!`,
-                        `Birazdan masanıza gelecek olan porsiyon köfte, ${area} mutfağının en iddialı '${name}' yemeğini bile unutturacak kadar şahsiyetli bir lezzettir.`,
-                        `Şu '${name}' yemeği ${area} taraflarında çok hafif bulunuyormuş. Bizim köfte o kadar özeldir ki, midede değil sadece akılda ağırlık yapar!`,
-                        `Ne '${name}', ne de başka bir ${area} spesiyali... Yanında buz gibi cam şişe kola ile yenen ekmek arası köftenin dünyada bir rakibi yoktur.`,
-                        `Siparişiniz hazırlanırken ${area} mutfağının '${name}' yemeğini aklınızdan çıkarın, çünkü mangaldan gelen bu köfte kokusu zaten başka bir şey düşünmenize izin vermeyecek!`,
-
-                        // --- PATSO, SUCUK EKMEK VE TOST TEMALI (161-185) ---
-                        `${area} lokantalarında kahvaltı diye '${name}' yiyorlarmış... Sanayi kültürünün şahı, yarım ekmek bol salçalı kaşarlı tostumuzun o uzayan peynirini görmemişler!`,
-                        `Bugün ${area} taraflarında '${name}' atıştırıp öğünü geçiştiriyorlarmış. Bizim bol sosisli ve ketçap mayonezli patsomuzu görseler geçiştirmek değil ziyafet çekerlerdi!`,
-                        `Şu gördüğünüz '${name}', ${area} şeflerinin fast food'uymuş. Bizim mangalda cızırdayan efsanevi sucuk ekmeğimiz varken fast food falan hikaye kalır!`,
-                        `Adamlar ${area} mutfağında '${name}' yaparken patatesleri fırınlıyormuş. Patso dediğin, patatesin kızgın yağda altın sarısı çıtırlaştığı o destansı ekmek arası sanatıdır!`,
-                        `Millet ${area} kafelerinde '${name}' yiyerek enerji alıyoruz sanıyor. Gerçek enerji, içine ekstra tavuk sote veya sosis atılmış duble patsodadır!`,
-                        `Biliyor musunuz, ${area} insanı '${name}' yerken yanında çay içmezmiş. Bizim çıtır çıtır karışık tostumuzun yanında ince belli sıcak bir çay olmazsa gün aydınlanmaz!`,
-                        `Bu '${name}' denen ${area} yemeğinde et azmış. Olimpiyat'ın sucuk ekmeğinde dilimler öyle boldur ki, ekmek sucuktan kapanmaz!`,
-                        `Diyorlar ki '${name}' yiyen ${area} gençleri çok enerjikmiş. Bizim gecenin köründe gömülen sosisli patsomuz gençliğin tam olarak enerji kaynağıdır!`,
-                        `Şu '${name}' ${area} taraflarında çok popülermiş. Bizim patso ise sadece bir yiyecek değil, öğrenciliğin, gençliğin ve sokak kültürünün manifestosudur!`,
-                        `Eğer ${area} şefleri bizim sucuk ekmek yaparken ekmeğe bastırdığımız o mangal yağını görselerdi, '${name}' tabaklarını utançla saklarlardı.`,
-                        `Onlar ${area} sokaklarında '${name}' ile kahvaltı yapsın. Yarım ekmek kaşarlı sucuklu tostumuz sabahların ve gecelerin tartışmasız yıldızıdır!`,
-                        `Bir porsiyon '${name}' ile ${area} insanı hemen doyarmış. Bizim patsonun içindeki o çıtır patatesler yendikçe yedirir, doyma hissini iptal eder.`,
-                        `Şu '${name}' yemeğinde ${area} şefleri hafif baharat kullanırmış. Sucuğun içindeki o özel çemen, sarımsak ve baharat dengesi dünyalara bedeldir be ustam!`,
-                        `Dünya mutfağından '${name}'... ${area} halkı çok övüyor olabilir ama sucuk mangala düştüğünde yayılan o iştah açıcı kokuya hiçbir yemek rakip olamaz.`,
-                        `Bu '${name}' yemeği ${area} elit mekanlarında 5 dakikada yenirmiş. Bizim tostumuz pres makinesinden çıtır çıtır çıkar, keyifle ve yavaşça tadına varılarak yenir!`,
-                        `Şimdi ${area} kafelerinde '${name}' aramayın. Yeryüzünün en çıtır patatesleriyle doldurulmuş, sosu bol patsonuz ustamızın ellerinden çıkmak üzere.`,
-                        `Bazen ${area} restoranlarında '${name}' masaya soğuk gelirmiş. Olimpiyat'ta tost ekmeği makineden çıktığı an dumanı tüte tüte önünüze gelir.`,
-                        `Onlar ${area} şeflerinin elinden '${name}' yesin. Siz birazdan kaliteli sucuğun mangal ateşiyle birleştiği o efsane sokak klasiğini midenize indireceksiniz.`,
-                        `Şu '${name}' yemeği ${area} diyet listelerindeymiş. Patsonun kalorisi sorulmaz ustam, o mutluluk endeksinin tavan yaptığı yerdir!`,
-                        `Eğer ${area} halkı bir kere bizim bol malzemeli Amerikanlı patsomuzu tatsaydı, emin olun '${name}' kelimesini unutup menüye 'Patso' eklerlerdi.`,
-                        `Bu '${name}' denen ${area} yemeğine peynir yakışmazmış. Bizim kaşarlı tostumuzun içindeki o erimiş, sünmüş kaşar gastronomi dünyasında ders olarak okutulmalı.`,
-                        `Birazdan masanıza gelecek olan sucuk ekmek, ${area} mutfağının en iddialı '${name}' atıştırmalığını bile lezzetiyle paramparça edecek!`,
-                        `Şu '${name}' yemeği ${area} taraflarında ketçapsız yenirmiş. Sosisli patsonun üstüne sıkılan o ketçap mayonez çizgileri bir şaheserdir, es geçilemez!`,
-                        `Ne '${name}', ne de başka bir ${area} lüks atıştırmalığı... Gece yarısı yenilen bol sosisli, turşulu patsonun o çıtır çıtır sesi dünyadaki tüm lüksleri unutturur.`,
-                        `Siparişiniz hazırlanırken ${area} mutfağının '${name}' yemeğini aklınızdan çıkarın, birazdan pres makinesinden çıkacak o çıtır tost sesi size her şeyi unutturacak!`,
-
-                        // --- GENEL ESNAF KÜLTÜRÜ VE OLİMPİYAT RUHU TEMALI (186-200) ---
-                        `${area} mutfağında bugün '${name}' porsiyonları küçülmüş diyorlar... Boşverin onları, Olimpiyat Kokoreç'te porsiyonlar hep göz doyurur, mide şenlendirir!`,
-                        `Bugün ${area} taraflarında '${name}' yemekleri robotlara yaptırıyorlarmış. Bizim dükkanda yemeğin tuzu, ustanın o meşhur bilek hareketindedir!`,
-                        `Şu gördüğünüz '${name}', ${area} şeflerinin çok gizli tarifiymiş. Bizim sırrımız yok; taze ürün, köz ateşi, buz gibi şalgam ve bol bol samimiyet!`,
-                        `Adamlar ${area} mutfağında '${name}' için rezervasyonla müşteri alıyormuş. Olimpiyat'ta rezervasyona gerek yok, kapımız ve ateşimiz her daim açık!`,
-                        `Millet ${area} lokantalarında '${name}' yerken sessiz sessiz oturuyormuş. Bizde yemeği beklerken çay içilir, muhabbet edilir, usta ile şakalaşılır!`,
-                        `Biliyor musunuz, ${area} insanı '${name}' yerken hesabı ince ince böler hesaplarmış. Bizim esnaflıkta bereket vardır, lezzet ucuza yenir!`,
-                        `Bu '${name}' denen ${area} yemeği Instagram'a atmalık yapılıyormuş. Bizim yemekler direkt mideye atmalık ustam, şovumuz lezzetimizdir!`,
-                        `Diyorlar ki '${name}' yiyen ${area} gurmeleri yemek bitince mendil kullanmazmış. Bizim dürümlerden damlayan yağları temizlemek için peçete şarttır!`,
-                        `Şu '${name}' ${area} taraflarında çok popülermiş ama bizim şalgam suyu ve açık ayran kültürümüze sahip olmadıkları için hep bir yanları eksik kalacak.`,
-                        `Eğer ${area} aşçıları bizim Olimpiyat Kokoreç'in mutfağını görselerdi, '${name}' tabaklarını bırakıp 'Bize de bir porsiyon çek usta' derlerdi.`,
-                        `Onlar ${area} topraklarında '${name}' ile hava atsın. Bizim masalarda oturan her müşteri, birazdan yiyeceği sokak lezzetiyle günün asıl kralıdır!`,
-                        `Bir porsiyon '${name}' yiyip kalkan ${area} insanı, bizim buradaki o dostane 'Afiyet olsun, yine bekleriz' uğurlamasını duyamadığı için çok şanssız.`,
-                        `Şu '${name}' yemeğinde ${area} şefleri baharat miktarını gramla ölçermiş. Bizim usta baharatı göz kararı ve yürekten atar, lezzet de oradan gelir!`,
-                        `Dünya mutfağından '${name}'... ${area} halkı seviyor olabilir ama bizim dükkandaki o çay bardağı şıkırtısı ve ızgara cızırtısı dünyadaki en güzel müziktir.`,
-                        `Şimdi arkanıza yaslanın, ${area} mutfağının '${name}' yemeğini unutun. Gerçek bir Olimpiyat şampiyonu gibi sokak lezzetlerimizin tadını çıkarma vakti geldi!`
-                    ];
 
 
 
 
-                    const randomMsgIndex = Math.floor(Math.random() * challengeMessages.length);
-                    message = challengeMessages[randomMsgIndex];
-                }
 
-                return { type: 'meal', text: message, img: img };
-            } catch (e) {
-                return null; // Eğer API komple çökerse ekran bozulmasın, Trivia API'ye dönsün
-            }
-        }
-
-
-
-        // Akıllı Döngü Sistemi
+        // Akıllı Döngü Sistemi (Sadece Kendi Bilgilerimiz)
         async function startTriviaLoop() {
             const triviaEl = document.getElementById('triviaText');
             const imgEl = document.getElementById('mealImage');
@@ -3014,57 +2838,35 @@
                 triviaEl.style.opacity = '1';
                 triviaEl.style.transition = 'none';
 
-                // %50 Şansla Dünya Mutfağı, %50 Şansla Kendi Bilgi Listen çıksın
-                const showMealChallenge = Math.random() > 0.5;
-                let contentToType = "";
+                // Sabit "Biliyor muydunuz?" Başlığı
+                titleEl.textContent = "Biliyor muydunuz? 🧠";
+                titleEl.className = "text-orange-600 font-black text-lg mb-2 transition-colors duration-300";
 
-                if (showMealChallenge) {
-                    const mealData = await fetchWorldMeal();
-                    if (mealData) {
-                        // Dünya Mutfağı Konseptine Geç
-                        titleEl.textContent = "Dünya Mutfağında Bugün 🌍";
-                        titleEl.className = "text-blue-600 font-black text-lg mb-2 transition-colors duration-300";
-
-                        imgEl.src = mealData.img;
-                        imgEl.classList.remove('hidden');
-                        setTimeout(() => { imgEl.style.opacity = '1'; }, 50); // Resmi yavaşça aydınlat
-
-                        contentToType = mealData.text;
-                    } else {
-                        // İnternet anlık koptuysa kendi bilgilerimizden (Trivia) devam et
-                        setupNormalTrivia(titleEl, imgEl);
-                        contentToType = foodFacts[currentTriviaIndex];
-                        currentTriviaIndex = (currentTriviaIndex + 1) % foodFacts.length;
-                    }
-                } else {
-                    // Normal "Biliyor muydunuz?" Konseptine Geç
-                    setupNormalTrivia(titleEl, imgEl);
-                    contentToType = foodFacts[currentTriviaIndex];
-                    currentTriviaIndex = (currentTriviaIndex + 1) % foodFacts.length; // Sıradakine geç
+                // Varsa önceki resimleri tamamen gizle
+                if (imgEl) {
+                    imgEl.style.opacity = '0';
+                    imgEl.classList.add('hidden');
                 }
+
+                // Listeden sıradaki cümleyi al ve sayacı ilerlet
+                let contentToType = foodFacts[currentTriviaIndex];
+                currentTriviaIndex = (currentTriviaIndex + 1) % foodFacts.length;
 
                 // Seçilen yazıyı daktiloyla bas
                 await typeWriterEffect(contentToType, 'triviaText');
 
-                // Okunması için 8.5 saniye bekle
+                // Müşterinin okuması için 8.5 saniye bekle
                 await sleep(8500);
 
-                // Eski yazıyı (ve varsa resmi) yavaşça karartarak sil
+                // Eski yazıyı yavaşça karartarak sil (Yeni cümleye geçiş efekti)
                 triviaEl.style.transition = 'opacity 0.5s ease-out';
                 triviaEl.style.opacity = '0';
-                imgEl.style.opacity = '0';
 
                 await sleep(500); // Kararmanın bitmesini bekle
-                imgEl.classList.add('hidden'); // Resmi tamamen kaldır ki yer kaplamasın
             }
         }
 
-        // Kendi Biliyor muydunuz listemizi ayarlayan ufak yardımcı fonksiyon
-        function setupNormalTrivia(titleEl, imgEl) {
-            titleEl.textContent = "Biliyor muydunuz? 🧠";
-            titleEl.className = "text-orange-600 font-black text-lg mb-2 transition-colors duration-300";
-            imgEl.style.opacity = '0';
-        }
+
 
         function initTrivia() {
             // İlk açılışta müşteriye hep aynı bilgi denk gelmesin diye listeyi rastgele bir noktadan başlat
@@ -3075,6 +2877,61 @@
         // Müşteri sayfaya girdiği an motorları ateşle
         document.addEventListener('DOMContentLoaded', () => {
             initTrivia();
+        });
+
+        // --- 🕵️ AKILLI SCROLLSPY (EKRANIN ÜSTÜNE YAPIŞANI BULAN MOTOR) ---
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.menu-category-section');
+            const navButtons = document.querySelectorAll('.tabBtn');
+            let currentActiveId = '';
+
+            // Navbar'ın hemen altını temsil eden görünmez bir "Okuma Çizgisi" (Yaklaşık 140px)
+            // Kategori başlığı bu çizgiyi geçtiği an aktif sayılacak.
+            const scrollPosition = window.scrollY + 140;
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+
+                // Eğer sayfa kaydırması bu bölümün üst sınırını geçtiyse
+                if (scrollPosition >= sectionTop) {
+                    currentActiveId = section.id;
+                }
+            });
+
+            // Eğer sayfanın en tepesindeysek ve hiçbirini geçmediyse, zorla ilkini seç
+            if (!currentActiveId && sections.length > 0) {
+                currentActiveId = sections[0].id;
+            }
+
+            // İstisna: Sayfanın en dibine vurulduğunda son kategoriyi kesin aktif bırak
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
+                if (sections.length > 0) {
+                    currentActiveId = sections[sections.length - 1].id;
+                }
+            }
+
+            // Bulunan şampiyon kategoriyi navbar'da işaretle ve ortala
+            if (currentActiveId) {
+                navButtons.forEach(btn => {
+                    if (btn.dataset.targetId === currentActiveId) {
+                        if (!btn.classList.contains('active-tab')) {
+
+                            // Diğer tüm butonların aktifliğini al
+                            document.querySelectorAll('.tabBtn').forEach(b => {
+                                b.classList.remove('active-tab');
+                                b.classList.replace('text-white', 'text-gray-500');
+                            });
+
+                            // Yeni şampiyonu işaretle
+                            btn.classList.add('active-tab');
+                            btn.classList.replace('text-gray-500', 'text-white');
+
+                            // O butonu yumuşakça navbar'ın ortasına kaydır
+                            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        }
+                    }
+                });
+            }
         });
     </script>
 </body>
