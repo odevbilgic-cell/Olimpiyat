@@ -357,7 +357,7 @@
         <div class="bg-white rounded-xl shadow mb-4 p-0">
             <section id="campaignSlider"></section>
         </div>
-        <div id="menuContainer" class="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4"></div>
+        <div id="menuContainer" class="flex flex-col gap-6 scroll-mt-24 pb-20"></div>
         <div id="contactSection" class="hidden text-center mt-6 bg-white rounded-xl shadow p-6 max-w-lg mx-auto">
             <h2 id="contactTitle" class="text-2xl font-bold text-red-600 mb-3">İletişim</h2>
             <p id="contactAddress" class="mb-3">📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul</p>
@@ -370,6 +370,13 @@
             
             <div class="relative h-56 sm:h-64 flex-shrink-0 bg-red-600">
                 <img id="modalImage" class="w-full h-full object-cover opacity-95">
+                 <!-- YENİ: MENÜLER İÇİN GÖRSEL İÇİ FİYAT KUTUCUĞU -->
+                    <div id="modalMenuPriceBox" class="hidden absolute z-30 flex items-center justify-center"
+                        style="bottom: 5%; left: 2%; width: 28%; height: 18%;">
+                        <span id="modalMenuPriceText"
+                            class="font-black text-red-600 text-2xl sm:text-3xl drop-shadow-md tracking-tighter"
+                            style="font-family: 'Arial Black', Impact, sans-serif;"></span>
+                    </div>
                 <button class="absolute top-4 right-4 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/80 transition font-black text-sm shadow-md z-10">✖</button>
                 <div class="absolute bottom-0 left-0 w-full h-0 bg-gradient-to-t from-white to-transparent"></div>
             </div>
@@ -689,9 +696,9 @@
         let targetPlatformUrl = "";
 
         const categoryTranslations = {
-            'Tümü': 'All', 'Menüler': 'Menus', 'Kokoreç': 'Kokoreç', 'Tavuk Kokoreç': 'Chicken Kokoreç',
+            'Kokoreç': 'Kokoreç', 'Tavuk Kokoreç': 'Chicken Kokoreç',
             'Tavuk Döner': 'Chicken Döner', 'Patso': 'Patso', 'Köfte': 'Meatballs', 'Ciğer': 'Liver',
-            'Hamburger': 'Hamburger', 'Midye': 'Mussel', 'Yan Lezzetler': 'Side Dishes', 'Tost': 'Toast', 'İçecekler': 'Drinks', 'İletişim': 'Contact'
+            'Hamburger': 'Hamburger', 'Midye': 'Mussel', 'Yan Lezzetler': 'Side Dishes', 'Tost': 'Toast', 'Menüler': 'Menus', 'İçecekler': 'Drinks'
         };
         let categoriesTR = Object.keys(categoryTranslations);
         let categoriesEN = Object.values(categoryTranslations);
@@ -908,193 +915,325 @@
             });
         }
 
-        function renderMenu(category = 'Tümü') {
+        // --- 🚀 UYGULAMA TİPİ KAYDIRMALI MENÜ MOTORU (PAKET SERVİS) ---
+        function renderMenu() {
             menuContainer.innerHTML = '';
 
             if (products.length === 0) {
-                menuContainer.innerHTML = '<div class="col-span-full text-center p-10 text-gray-400">Menü yükleniyor...</div>';
+                menuContainer.innerHTML = '<div class="text-center p-10 text-gray-400 font-bold w-full">Menü yükleniyor...</div>';
+                return;
             }
 
-            const filtered = category === 'Tümü' ? products.filter(p => p.category != 'İletişim') : products.filter(p => p.category === category);
+            // Sadece içinde ürün olan kategorileri ekrana basacağız
+            categoriesTR.forEach((catTR, index) => {
+                const catProducts = products.filter(p => p.category === catTR && p.isArchived !== true);
+                if (catProducts.length === 0) return; // Bu kategoride ürün yoksa atla
 
-            filtered.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-lg shadow-sm p-2 flex flex-col h-full hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1 cursor-pointer';
+                const catEN = categoriesEN[index];
+                const displayTitle = language === 'TR' ? catTR : catEN;
 
-                const name = language === 'TR' ? p.name : p.nameEN || p.name;
-                const desc = language === 'TR' ? p.desc : p.descEN || p.desc || '';
-                const priceUpdateText = formatRelativeDate(p.lastUpdated);
-                const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
-                const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
+                // Kategori için dev bir kapsayıcı (Section) oluştur
+                const section = document.createElement('section');
+                section.id = 'category-' + index;
+                section.className = 'menu-category-section pt-4 scroll-mt-[100px]'; // Scroll hizasını navbarın altında tutar
+                
+                // Kategori Başlığı (Paket servise uygun Kırmızı Çizgi)
+                section.innerHTML = `<h2 class="text-xl sm:text-2xl font-black text-gray-800 border-b-2 border-red-200 pb-2 mb-3 px-1">${displayTitle}</h2>`;
 
-                card.innerHTML = `
-      <div class="relative overflow-hidden rounded-md mb-2">
-        <img src='${imageUrl}' 
-             alt='${name}' 
-             onerror="this.src='${fallbackImage}'"
-             class='w-full h-24 sm:h-32 object-cover transition-transform duration-500 hover:scale-110'>
-      </div>
-      <h3 class='font-bold text-[12px] sm:text-sm leading-tight mb-1 line-clamp-2 h-8'>${name}</h3>
-      <p class='text-gray-500 text-[10px] sm:text-xs mb-2 flex-grow line-clamp-2'>${desc}</p>
-      <div class="mt-auto pt-2 border-t border-gray-50 flex items-center justify-between">
-        <span class='text-orange-600 font-black text-[13px] sm:text-base'>${p.price} ₺</span>
-        <span class='text-[8px] sm:text-[9px] text-gray-400 italic'>${priceUpdateText}</span>
-      </div>
-    `;
+                // Ürünlerin içine dolacağı Grid Alanı
+                const gridDiv = document.createElement('div');
+                gridDiv.className = 'grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4';
 
-                // Karta tıklandığında açılacak akıllı ve kesin kısıtlamalı eşlikçi motoru
-                card.addEventListener('click', () => {
-                    document.getElementById('modalImage').src = imageUrl;
-                    document.getElementById('modalTitle').textContent = name;
-                    document.getElementById('modalDesc').textContent = desc;
-                    document.getElementById('modalPrice').textContent = (p.discountPrice || p.price) + " ₺";
+                // Ürün Kartlarını Basma
+                catProducts.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-lg shadow-sm p-2 flex flex-col h-full hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1 cursor-pointer';
 
-                    const crossSection = document.getElementById('modalCrossSellSection');
-                    const sugContainer = document.getElementById('modalSuggestionsContainer');
-                    sugContainer.innerHTML = '';
+                    const name = language === 'TR' ? p.name : p.nameEN || p.name;
+                    const desc = language === 'TR' ? p.desc : p.descEN || p.desc || '';
+                    const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
+                    const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
+                    
+                    let badgeHtml = '';
+                    let priceHtml = `<span class='text-red-600 font-black text-[13px] sm:text-base'>${p.price} ₺</span>`;
 
-                    // KURAL 1: Eğer tıklanan ürün zaten bir içecek ise, eşlikçi alanını tamamen gizle
-                    if (p.category === 'İçecekler') {
-                        crossSection.classList.add('hidden');
+                    if (p.discountPrice) {
+                        const discountPercent = Math.round(((p.price - p.discountPrice) / p.price) * 100);
+                        badgeHtml = `<span class="absolute top-3 left-3 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-md z-10">% İNDİRİM (-%${discountPercent})</span>`;
+                        priceHtml = `
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5">
+                                <span class='text-red-600 font-black text-[13px] sm:text-base'>${p.discountPrice} ₺</span>
+                                <span class='text-gray-400 line-through text-[10px] sm:text-xs font-medium'>${p.price} ₺</span>
+                            </div>
+                        `;
+                    }
+
+                    // --- YENİ: KATEGORİYE GÖRE AKILLI GÖRSEL STİLİ MOTORU ---
+                    let imageStyleClass = "";
+                    let imageOverlayHtml = ""; // YENİ: Görselin üzerine basılacak fiyat kutusu
+
+                    if (p.category === 'İçecekler' || p.category === 'Menüler') {
+                        imageStyleClass = "w-full h-24 sm:h-32 object-contain p-1 transition-transform duration-500 hover:scale-105";
                     } else {
-                        crossSection.classList.remove('hidden');
+                        imageStyleClass = "w-full h-24 sm:h-32 object-cover transition-transform duration-500 hover:scale-110";
+                    }
 
-                        // KURAL 2: Tüm içecekleri filtrele (Büyük litrelik boyları kesinlikle eliyoruz)
-                        const allDrinks = products.filter(prod => 
-                            prod.category === 'İçecekler' && 
-                            !prod.name.toLowerCase().includes('1 lt') && 
-                            !prod.name.toLowerCase().includes('litre') && 
-                            !prod.name.toLowerCase().includes('litrelik')
-                        );
+                    // EĞER KATEGORİ "Menüler" İSE BEYAZ KUTUNUN İÇİNE FİYATI YAZDIR
+                    if (p.category === 'Menüler') {
+                        const finalPrice = p.discountPrice || p.price;
+                        imageOverlayHtml = `
+                            <div class="absolute z-20 flex items-center justify-center pointer-events-none" style="bottom: 8%; left: 5%; width: 28%; height: 22%;">
+                                <span class="font-black text-red-600 text-[12px] sm:text-[14px] drop-shadow-sm tracking-tighter" style="font-family: 'Arial Black', Impact, sans-serif;">
+                                    ${finalPrice} <span class="text-[9px] sm:text-[10px]">₺</span>
+                                </span>
+                            </div>
+                        `;
+                    }
 
-                        let recommendedDrinks = [];
+                    card.innerHTML = `
+                        ${badgeHtml}
+                        <div class="relative overflow-hidden rounded-md mb-2">
+                            <img src='${imageUrl}' onerror="this.src='${fallbackImage}'" class='${imageStyleClass}'>
+                            ${imageOverlayHtml}
+                        </div>
+                        <h3 class='font-bold text-[12px] sm:text-sm leading-tight mb-1 line-clamp-2 h-8'>${name}</h3>
+                        <p class='text-gray-500 text-[10px] sm:text-xs mb-2 flex-grow line-clamp-2'>${desc}</p>
+                        <div class="mt-auto pt-2 border-t border-gray-50 flex items-center justify-between">
+                            ${priceHtml}
+                            <span class="text-red-500 font-black text-sm">＋</span>
+                        </div>
+                    `;
 
-                        // KURAL 3: Ürün çorba ise SADECE SU öner, başka hiçbir şey getirme
-                        if (p.category === 'Çorba' || p.name.toLowerCase().includes('çorba')) {
-                            recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('su') && !d.name.toLowerCase().includes('soda') && !d.name.toLowerCase().includes('meyve'));
-                        } 
-                        // KURAL 4: Kokoreç, Ciğer, Köfte veya Menüler için ŞALGAM ve SADECE AÇIK AYRAN (Kapalı kesinlikle elenir)
-                        else if (['Kokoreç', 'Tavuk Kokoreç', 'Köfte', 'Ciğer', 'Menüler'].includes(p.category)) {
-                            recommendedDrinks = allDrinks.filter(d => 
-                                (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) || 
-                                d.name.toLowerCase().includes('şalgam')
-                            );
-                        } 
-                        // KURAL 5: Hamburger, Patso, Tavuk Döner için Kola, Fanta, Sprite veya Ice Tea önceliği
-                        else if (['Hamburger', 'Patso', 'Tavuk Döner'].includes(p.category) || p.name.toLowerCase().includes('burger') || p.name.toLowerCase().includes('patso')) {
-                            recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('kola') || d.name.toLowerCase().includes('fanta') || d.name.toLowerCase().includes('sprite') || d.name.toLowerCase().includes('tea') || d.name.toLowerCase().includes('gazoz'));
-                        } 
-                        // KURAL 6: Tost için öncelikli Çay, SADECE AÇIK AYRAN veya Kola
-                        else if (p.category === 'Tost') {
-                            recommendedDrinks = allDrinks.filter(d => 
-                                d.name.toLowerCase().includes('çay') || 
-                                (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) || 
-                                d.name.toLowerCase().includes('kola')
-                            );
+                    // Tıklama Olayı (Birlikte İyi Gider Modalı)
+                    card.addEventListener('click', () => {
+                        document.getElementById('modalImage').src = imageUrl;
+                        document.getElementById('modalTitle').textContent = name;
+                        document.getElementById('modalDesc').textContent = desc;
+                        document.getElementById('modalPrice').textContent = (p.discountPrice || p.price) + " ₺";
+
+                        // --- MENÜLER İÇİN MODAL FİYAT KUTUSU ---
+                        const menuPriceBox = document.getElementById('modalMenuPriceBox');
+                        if (menuPriceBox) {
+                            if (p.category === 'Menüler') {
+                                const finalPrice = p.discountPrice || p.price;
+                                document.getElementById('modalMenuPriceText').innerHTML = finalPrice + " <span class='text-lg'>₺</span>";
+                                menuPriceBox.classList.remove('hidden');
+                            } else {
+                                menuPriceBox.classList.add('hidden');
+                            }
                         }
 
-                        // KURAL 7: Eğer yukarıdaki özel filtrelerden sonuç çıkmazsa, genel listeden de kapalı ayranları tamamen filtreleyerek seç
-                        if (recommendedDrinks.length === 0) {
-                            recommendedDrinks = allDrinks.filter(d => !d.name.toLowerCase().includes('ayran') || d.name.toLowerCase().includes('açık'));
-                        }
+                        const crossSection = document.getElementById('modalCrossSellSection');
+                        const sugContainer = document.getElementById('modalSuggestionsContainer');
+                        sugContainer.innerHTML = '';
 
-                        // KURAL 8: Karıştır ve maksimum 2, minimum 1 içecek olacak şekilde sınırla
-                        recommendedDrinks = recommendedDrinks.sort(() => Math.random() - 0.5).slice(0, 2);
-
-                        if (recommendedDrinks.length === 0) {
+                        if (p.category === 'İçecekler') {
                             crossSection.classList.add('hidden');
                         } else {
-                            recommendedDrinks.forEach(d => {
-                                const dName = language === 'TR' ? d.name : d.nameEN || d.name;
-                                const dPrice = d.discountPrice || d.price;
-                                const dImg = d.image || 'https://via.placeholder.com/100?text=Olimpiyat';
+                            crossSection.classList.remove('hidden');
+                            const allDrinks = products.filter(prod => prod.category === 'İçecekler' && !prod.name.toLowerCase().includes('1 lt') && !prod.name.toLowerCase().includes('litre') && !prod.name.toLowerCase().includes('litrelik'));
+                            let recommendedDrinks = [];
 
-                                const miniCard = document.createElement('div');
-                                miniCard.className = "flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-xl p-1.5 min-w-[150px] max-w-[150px] flex-shrink-0 relative";
-                                miniCard.innerHTML = `
-                                    <img src="${dImg}" class="w-10 h-10 object-cover rounded-lg border bg-white flex-shrink-0">
-                                    <div class="text-left min-w-0 flex-1">
-                                        <h5 class="font-bold text-[10px] text-gray-800 truncate leading-tight">${dName}</h5>
-                                        <p class="text-red-600 font-black text-[11px] mt-0.5">${dPrice} ₺</p>
-                                    </div>
-                                    <span class="text-gray-300 text-xs pr-1 font-bold select-none">+</span>
-                                `;
-                                sugContainer.appendChild(miniCard);
-                            });
+                            if (p.category === 'Çorba' || p.name.toLowerCase().includes('çorba')) {
+                                recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('su') && !d.name.toLowerCase().includes('soda') && !d.name.toLowerCase().includes('meyve'));
+                            } else if (['Kokoreç', 'Tavuk Kokoreç', 'Köfte', 'Ciğer', 'Menüler'].includes(p.category)) {
+                                recommendedDrinks = allDrinks.filter(d => (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) || d.name.toLowerCase().includes('şalgam'));
+                            } else if (['Hamburger', 'Patso', 'Tavuk Döner'].includes(p.category) || p.name.toLowerCase().includes('burger') || p.name.toLowerCase().includes('patso')) {
+                                recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('kola') || d.name.toLowerCase().includes('fanta') || d.name.toLowerCase().includes('sprite') || d.name.toLowerCase().includes('tea') || d.name.toLowerCase().includes('gazoz'));
+                            } else if (p.category === 'Tost') {
+                                recommendedDrinks = allDrinks.filter(d => d.name.toLowerCase().includes('çay') || (d.name.toLowerCase().includes('ayran') && d.name.toLowerCase().includes('açık')) || d.name.toLowerCase().includes('kola'));
+                            }
+
+                            if (recommendedDrinks.length === 0) {
+                                recommendedDrinks = allDrinks.filter(d => !d.name.toLowerCase().includes('ayran') || d.name.toLowerCase().includes('açık'));
+                            }
+
+                            recommendedDrinks = recommendedDrinks.sort(() => Math.random() - 0.5).slice(0, 2);
+
+                            if (recommendedDrinks.length === 0) {
+                                crossSection.classList.add('hidden');
+                            } else {
+                                recommendedDrinks.forEach(d => {
+                                    const dName = language === 'TR' ? d.name : d.nameEN || d.name;
+                                    const dPrice = d.discountPrice || d.price;
+                                    const dImg = d.image || fallbackImage;
+
+                                    const miniCard = document.createElement('div');
+                                    miniCard.className = "flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-xl p-1.5 min-w-[150px] max-w-[150px] flex-shrink-0 relative cursor-pointer hover:bg-red-50 transition";
+                                    miniCard.innerHTML = `
+                                        <img src="${dImg}" class="w-10 h-10 object-cover rounded-full border border-gray-100">
+                                        <div class="text-left min-w-0 flex-1 pointer-events-none">
+                                            <h5 class="font-bold text-[10px] text-gray-800 truncate">${dName}</h5>
+                                            <p class="text-red-600 font-black text-[11px]">${dPrice} ₺</p>
+                                        </div>
+                                        <span class="combo-status text-gray-400 font-black pointer-events-none">+</span>
+                                    `;
+                                    
+                                    miniCard.addEventListener('click', (e) => {
+                                        e.stopPropagation();
+                                        if (miniCard.classList.contains('combo-applied')) return;
+                                        miniCard.classList.add('combo-applied');
+                                        
+                                        const mainPrice = parseFloat(p.discountPrice || p.price);
+                                        document.getElementById('modalPrice').textContent = (mainPrice + parseFloat(dPrice)) + " ₺";
+                                        document.getElementById('modalTitle').textContent = name + " + " + dName;
+                                        miniCard.querySelector('.combo-status').textContent = '✓';
+                                        miniCard.classList.add('bg-green-50', 'border-green-200');
+                                    });
+
+                                    sugContainer.appendChild(miniCard);
+                                });
+                            }
                         }
-                    }
 
-                    // Tıklama istatistik kaydı alanı (Mevcut altyapınız)
-                    const activeMenu = window.location.href.includes('delivery') ? 'delivery' : 'in_place';
-                    if (firebase.database) {
-                        firebase.database().ref('stats/product_clicks/' + activeMenu + '/' + p.key).set(firebase.database.ServerValue.increment(1));
-                    }
+                        // DİKKAT: Paket Servis olduğu için tıklamalar delivery veritabanına gider!
+                        if (firebase.database) firebase.database().ref('stats/product_clicks/delivery/' + p.key).set(firebase.database.ServerValue.increment(1));
+                        document.getElementById('imageModal').classList.remove('hidden');
+                    });
 
-                    document.getElementById('imageModal').classList.remove('hidden');
+                    gridDiv.appendChild(card);
                 });
-
-                menuContainer.appendChild(card);
+                
+                section.appendChild(gridDiv);
+                menuContainer.appendChild(section);
             });
+            
+            // İletişim Bilgilerini En Alta Sabit Olarak Bas
+            const contactDiv = document.createElement('div');
+            contactDiv.className = "text-center mt-12 mb-10 bg-white rounded-xl shadow-inner p-6 max-w-lg mx-auto border-2 border-dashed border-red-200";
+            contactDiv.innerHTML = `
+                <h2 class="text-2xl font-black text-red-600 mb-3">${language === 'TR' ? 'İletişim' : 'Contact Us'}</h2>
+                <p class="mb-3 text-sm font-bold text-gray-700">📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul</p>
+                <p class="mt-2">📞 <a href="tel:02163357920" class="text-red-600 font-black text-xl hover:underline">0216 335 79 20</a></p>
+            `;
+            menuContainer.appendChild(contactDiv);
+            
+            // Sayfa yüklendiğinde veya dil değiştiğinde ilk sekmeyi aktif yap
+            setTimeout(() => {
+                const firstTab = document.querySelector('.tabBtn');
+                if (firstTab) firstTab.classList.add('active-tab');
+            }, 50);
         }
 
         function createCategoryTabs() {
             const tabButtonsContainer = document.getElementById('categoryTabs');
             tabButtonsContainer.innerHTML = '';
-            const categoriesToIterate = categoriesTR;
 
-            categoriesToIterate.forEach((catTR, index) => {
+            categoriesTR.forEach((catTR, index) => {
+                const hasProducts = products.some(p => p.category === catTR && p.isArchived !== true);
+                if (!hasProducts) return;
+
                 let btn = document.createElement('button');
                 const catName = language === 'TR' ? catTR : categoriesEN[index];
-                btn.className = 'tabBtn px-3 py-1 rounded whitespace-nowrap transition-colors duration-150 hover:bg-red-200';
-                btn.dataset.category = catTR;
+
+                // Tasarım: Kırmızı temalı Paket Servis navbar butonu
+                btn.className = 'tabBtn px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-300 font-black text-gray-500 hover:text-red-600 hover:bg-red-50 border border-transparent';
+                btn.dataset.targetId = 'category-' + index;
                 btn.textContent = catName;
-                if (catTR === 'Tümü') btn.classList.add('active-tab');
 
                 btn.addEventListener('click', () => {
-                    document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active-tab'));
-                    btn.classList.add('active-tab');
-                    const categoryKey = btn.dataset.category;
-                    
-                    // YENİ EKLENEN KISIM: Kategori tıklamasını doğrudan 'delivery' havuzuna yaz
-                    database.ref('stats/category_clicks/delivery/' + categoryKey).set(firebase.database.ServerValue.increment(1));
-
-                    if (categoryKey === 'İletişim') {
-                        menuContainer.innerHTML = '';
-                        campaignSliderSection.parentElement.classList.add('hidden');
-                        contactSection.classList.remove('hidden');
-                    } else {
-                        contactSection.classList.add('hidden');
-                        renderCampaignSlider();
-                        renderMenu(categoryKey);
+                    // Smooth Scroll (Yumuşak Kaydırma)
+                    const targetSection = document.getElementById(btn.dataset.targetId);
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
+                    
+                    document.querySelectorAll('.tabBtn').forEach(b => {
+                        b.classList.remove('active-tab');
+                        b.classList.replace('text-white', 'text-gray-500');
+                    });
+                    btn.classList.add('active-tab');
+                    btn.classList.replace('text-gray-500', 'text-white');
+
+                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    
+                    // DİKKAT: Paket Servis kategori tıklaması!
+                    database.ref('stats/category_clicks/delivery/' + catTR).set(firebase.database.ServerValue.increment(1));
                 });
                 tabButtonsContainer.appendChild(btn);
+            });
+        }
+
+        // --- 🚀 YENİ: VİTRİN VE İNDİRİMLİ ÜRÜN İŞLEME SİSTEMİ (PAKET SERVİS TEMALI) ---
+        function renderDiscountSection() {
+            const globalDiscountSection = document.getElementById('globalDiscountSection');
+            const discountHorizontalScroll = document.getElementById('discountHorizontalScroll');
+            
+            if (!globalDiscountSection || !discountHorizontalScroll) return;
+
+            const discountProducts = products.filter(p => p.discountPrice !== undefined && p.discountPrice !== null && p.discountPrice !== "" && p.category !== 'İletişim' && p.isArchived !== true);
+
+            if (discountProducts.length === 0) {
+                globalDiscountSection.classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('discountSectionTitle').textContent = language === 'TR' ? "🔥 Günün İndirimli Lezzetleri 🔥" : "🔥 Today's Super Discounts 🔥";
+            globalDiscountSection.classList.remove('hidden');
+            discountHorizontalScroll.innerHTML = '';
+
+            const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
+
+            discountProducts.forEach(p => {
+                const name = language === 'TR' ? p.name : p.nameEN || p.name;
+                const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
+                const discountPercent = Math.round(((p.price - p.discountPrice) / p.price) * 100);
+
+                const item = document.createElement('div');
+                item.className = 'min-w-[150px] max-w-[150px] bg-white rounded-xl p-2 shadow-sm flex flex-col relative border border-red-200 cursor-pointer transform transition active:scale-95 flex-shrink-0 hover:bg-red-50';
+
+                item.innerHTML = `
+                    <span class="absolute top-1.5 left-1.5 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md z-10 shadow-sm animate-pulse">-%${discountPercent}</span>
+                    <img src="${imageUrl}" onerror="this.src='${fallbackImage}'" class="w-full h-20 object-cover rounded-lg mb-1.5">
+                    <h4 class="font-bold text-[11px] text-gray-800 leading-tight mb-1 line-clamp-1">${name}</h4>
+                    <div class="flex items-baseline gap-1.5 mt-auto">
+                        <span class="text-red-600 font-black text-sm">${p.discountPrice} ₺</span>
+                        <span class="text-gray-400 line-through text-[10px] font-medium">${p.price} ₺</span>
+                    </div>
+                `;
+
+                item.addEventListener('click', () => {
+                    document.getElementById('modalImage').src = imageUrl;
+                    document.getElementById('modalTitle').textContent = name;
+                    document.getElementById('modalDesc').textContent = language === 'TR' ? p.desc : p.descEN || p.desc || '';
+                    document.getElementById('modalPrice').textContent = p.discountPrice + " ₺";
+                    
+                    const menuPriceBox = document.getElementById('modalMenuPriceBox');
+                    if (menuPriceBox) {
+                        if (p.category === 'Menüler') {
+                            document.getElementById('modalMenuPriceText').innerHTML = p.discountPrice + " <span class='text-lg'>₺</span>";
+                            menuPriceBox.classList.remove('hidden');
+                        } else {
+                            menuPriceBox.classList.add('hidden');
+                        }
+                    }
+                    
+                    // İndirimli vitrinden tıklanınca eşlikçi alanını temizle ve aç
+                    const crossSection = document.getElementById('modalCrossSellSection');
+                    if(crossSection) crossSection.classList.add('hidden'); 
+                    
+                    document.getElementById('imageModal').classList.remove('hidden');
+                });
+                
+                discountHorizontalScroll.appendChild(item);
             });
         }
 
         function updateLanguageContent() {
             const langTR = document.getElementById('langTR');
             const langEN = document.getElementById('langEN');
-            const contactTitle = document.getElementById('contactTitle');
-            const contactAddress = document.getElementById('contactAddress');
 
             if (language === 'TR') {
                 langTR.style.fontWeight = 'bold'; langEN.style.fontWeight = 'normal';
-                contactTitle.textContent = 'İletişim';
-                contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
             } else {
                 langTR.style.fontWeight = 'normal'; langEN.style.fontWeight = 'bold';
-                contactTitle.textContent = 'Contact';
-                contactAddress.innerHTML = '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - Istanbul (Turkey)';
             }
+            
+            // Tüm gereksiz if/else gizlemeleri çöpe gitti
             createCategoryTabs();
-            const activeTab = document.querySelector('.tabBtn.active-tab');
-            const activeCategoryKey = activeTab ? activeTab.dataset.category : 'Tümü';
-            if (activeCategoryKey === 'İletişim') {
-                menuContainer.innerHTML = ''; campaignSliderSection.parentElement.classList.add('hidden'); contactSection.classList.remove('hidden');
-            } else {
-                contactSection.classList.add('hidden'); renderCampaignSlider(); renderMenu(activeCategoryKey);
-            }
+            renderCampaignSlider();
+            renderDiscountSection();
+            renderMenu();
         }
 
         // --- YORUM MODALI MANTIĞI ---
@@ -1501,6 +1640,49 @@
         // Oyunu Yeniden Başlatma Butonu
         document.getElementById('restartMatchupButton').addEventListener('click', startMatchupGame);
         document.getElementById('restartMatchupButton').textContent = language === 'TR' ? "🔄 Yeniden Kapıştır" : "🔄 Play Again";
+
+        // --- 🕵️ AKILLI SCROLLSPY (EKRANIN ÜSTÜNE YAPIŞANI BULAN MOTOR) ---
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.menu-category-section');
+            const navButtons = document.querySelectorAll('.tabBtn');
+            let currentActiveId = '';
+
+            // Okuma Çizgisi (Yaklaşık 140px)
+            const scrollPosition = window.scrollY + 140; 
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (scrollPosition >= sectionTop) {
+                    currentActiveId = section.id;
+                }
+            });
+
+            if (!currentActiveId && sections.length > 0) {
+                currentActiveId = sections[0].id;
+            }
+
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
+                if (sections.length > 0) {
+                    currentActiveId = sections[sections.length - 1].id;
+                }
+            }
+
+            if (currentActiveId) {
+                navButtons.forEach(btn => {
+                    if (btn.dataset.targetId === currentActiveId) {
+                        if (!btn.classList.contains('active-tab')) {
+                            document.querySelectorAll('.tabBtn').forEach(b => {
+                                b.classList.remove('active-tab');
+                                b.classList.replace('text-white', 'text-gray-500');
+                            });
+                            btn.classList.add('active-tab');
+                            btn.classList.replace('text-gray-500', 'text-white');
+                            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 
