@@ -860,8 +860,21 @@
             return productsArray;
         }
 
-       // YENİLENEN: Dakikasına kadar ziyaretçi girişini kaydeden KUSURSUZ motor (UTC Hatası Giderildi)
+       // --- 🕵️ YENİ: SPAM KORUMALI AKILLI ZİYARETÇİ MOTORU ---
         function trackVisitor() {
+            // Müşterinin tarayıcı hafızasına bakıyoruz. Son ziyaret zamanını alıyoruz.
+            const lastVisitTime = localStorage.getItem('olimpiyat_last_visit_time');
+            const nowTime = Date.now();
+            
+            // KURAL: Eğer son ziyaretten bu yana 1 saat (3.600.000 milisaniye) geçmediyse, 
+            // bu bir sayfayı yenileme (refresh) işlemidir. Sayacı artırmadan sessizce çık!
+            if (lastVisitTime && (nowTime - parseInt(lastVisitTime)) < 3600000) {
+                return; 
+            }
+            
+            // Eğer ilk defa giriyorsa veya üzerinden 1 saat geçtiyse, yeni zamanı hafızaya yaz.
+            localStorage.setItem('olimpiyat_last_visit_time', nowTime.toString());
+
             // DOĞRU YEREL SAAT HESAPLAMASI (Türkiye Saatine Uyumlu)
             const getLocalYYYYMMDD = (date) => {
                 const y = date.getFullYear();
@@ -871,7 +884,6 @@
             };
 
             const now = new Date();
-            // Artık toISOString() yok! Cihazın yerel saatine göre tarihi çekeriz.
             const todayStr = getLocalYYYYMMDD(now); 
             
             // 1. Eski Günlük Toplam Sayaç
@@ -883,7 +895,7 @@
             // 2. Dakika Bazında Gerçek Ziyaretçi Sayacı
             const currentHour = String(now.getHours()).padStart(2, '0');
             const currentMinute = String(now.getMinutes()).padStart(2, '0');
-            const exactTime = currentHour + ':' + currentMinute; // Örn: "14:26"
+            const exactTime = currentHour + ':' + currentMinute;
             
             // Kullanıcı yerinde menüye mi girdi, paket servise mi?
             const activeMenu = window.location.href.includes('delivery') ? 'delivery' : 'in_place';
