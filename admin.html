@@ -941,6 +941,10 @@
                         <button id="showPrintQR"
                             class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">📱
                             QR Etiketi</button>
+
+                        <button id="showPrintSticker"
+                            class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">📋
+                            Menü Etiketi</button>
                     </div>
                 </div>
                 <button id="showGlobalDateUpdate"
@@ -2067,6 +2071,225 @@
                     </div>
                 </div>
             `);
+        }
+
+        // --- 📋 TABELA FİYAT SÜTUNLARI (MİLİMETRİK KES-YAPIŞTIR) MOTORU ---
+        function renderPrintStickerModule() {
+            setActiveTab('showPrintSticker');
+            
+            // Arayüz ve Slider (Ayarlayıcı) HTML'ini bas
+            loadModule(`
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in min-h-[80vh] flex flex-col items-center">
+                    <div class="w-full flex justify-between items-center mb-6 no-print border-b border-gray-200 pb-4">
+                        <h2 class="text-xl font-black text-gray-800">📋 Tabela Fiyat Sütunları</h2>
+                        <button onclick="window.print()" class="bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">🖨️ Sayfayı Yazdır</button>
+                    </div>
+                    
+                    <div class="w-full max-w-4xl bg-gray-900 rounded-2xl p-4 sm:p-6 mb-8 shadow-xl border border-gray-700 no-print flex flex-col gap-6">
+                        
+                        <div>
+                            <h3 class="text-white font-black text-sm border-b border-gray-700 pb-2 mb-3 text-orange-400">Standart Kategori Ayarları</h3>
+                            <p class="text-[10px] text-gray-400 mb-3">Sistem verdiğiniz ölçülere (Patso 65mm, Hamburger 33mm vb.) göre otomatik ayarlandı. Sadece yazı fontunu ayarlamanız yeterli.</p>
+                            <div class="w-full max-w-sm">
+                                <label class="text-xs font-bold text-gray-300">A Size (Standart Yazı Büyüklüğü)</label>
+                                <input type="range" min="10" max="40" value="16" class="w-full accent-orange-500" oninput="document.documentElement.style.setProperty('--sticker-font', this.value + 'pt')">
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-white font-black text-sm border-b border-gray-700 pb-2 mb-3 text-red-400">Yuvarlak Menüler (Dev Alan) Ayarları</h3>
+                            <p class="text-[10px] text-gray-400 mb-3">Fotoğraftaki yuvarlak menü alanlarının beyaz kutucuklarına yapıştırılacak DEV puntolu fiyatlar içindir.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-2">
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs font-bold text-gray-300">↕️ Kutu Arası Boşluk (Milimetre)</label>
+                                    <input type="range" min="5" max="30" step="1" value="15" class="w-full accent-red-500" oninput="document.documentElement.style.setProperty('--sticker-menu-gap', this.value + 'mm'); document.getElementById('menuGapVal').textContent = this.value + ' mm';">
+                                    <span id="menuGapVal" class="text-[10px] text-gray-400 text-right">15 mm</span>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs font-bold text-gray-300">A Size (Dev Yazı Büyüklüğü)</label>
+                                    <input type="range" min="20" max="60" value="28" class="w-full accent-red-500" oninput="document.documentElement.style.setProperty('--sticker-font-large', this.value + 'pt')">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="stickerPagesContainer" class="w-full flex flex-col items-center pb-10 overflow-x-auto">
+                        <style>
+                            :root {
+                                --sticker-font: 16pt;
+                                --sticker-font-large: 28pt;
+                                --sticker-menu-gap: 15mm;
+                            }
+                            .sticker-a4 {
+                                width: 210mm;
+                                min-height: 297mm;
+                                background: white;
+                                padding: 10mm;
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 10mm;
+                                align-content: flex-start;
+                            }
+                            .sticker-column {
+                                width: 45mm;
+                                border: 1px dashed #ccc;
+                                padding: 5mm;
+                                display: flex;
+                                flex-direction: column;
+                            }
+                            .sticker-column-large {
+                                width: 60mm; /* Menüler için daha geniş sütun */
+                                border: 2px dashed #f87171;
+                                padding: 5mm;
+                                display: flex;
+                                flex-direction: column;
+                                background-color: #fff5f5; /* Fark edilsin diye çok hafif kırmızımsı zemin */
+                            }
+                            .sticker-col-title {
+                                font-size: 11px;
+                                font-weight: 900;
+                                color: #888;
+                                text-align: center;
+                                border-bottom: 2px solid #eee;
+                                padding-bottom: 5px;
+                                margin-bottom: 5mm;
+                                text-transform: uppercase;
+                            }
+                            .sticker-col-title-large {
+                                color: #dc2626;
+                                border-bottom: 2px solid #fca5a5;
+                            }
+                            .sticker-price-row {
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: center;
+                            }
+                            /* Normal Fiyatlar */
+                            .sticker-price-val {
+                                font-family: 'Arial Black', Impact, sans-serif;
+                                font-size: var(--sticker-font);
+                                font-weight: 900;
+                                color: #000;
+                                line-height: 1; 
+                                letter-spacing: -1px;
+                            }
+                            /* DEV Menü Fiyatları */
+                            .sticker-price-val-large {
+                                font-family: 'Arial Black', Impact, sans-serif;
+                                font-size: var(--sticker-font-large);
+                                font-weight: 900;
+                                color: #000;
+                                line-height: 1; 
+                                letter-spacing: -2px;
+                                margin-bottom: var(--sticker-menu-gap); /* Menülerde satır yüksekliği yerine alt boşluk kullanıyoruz */
+                            }
+                            @media print {
+                                .no-print { display: none !important; }
+                                body { background: white; }
+                                .sticker-column, .sticker-column-large { border: 1px solid #e5e5e5; background-color: white; }
+                            }
+                        </style>
+                        
+                        <div class="sticker-a4" id="stickerA4Sheet"></div>
+                    </div>
+                </div>
+            `);
+
+            // MİLİMETRİK ÖLÇÜLÜ STANDART KATEGORİLER
+            const physicalMenuBlocks = [
+                { title: "KOKOREÇ", totalHeight: 30, items: ["Yarım Ekmek Kokoreç", "Yarım Ekmek İzmir Kokoreç", "Üç Çeyrek Ekmek Kokoreç", "Porsiyon Kokoreç"] }, 
+                { title: "TAVUK KOKOREÇ", totalHeight: 13.5, items: ["Yarım Tavuk Kokoreç", "Üç Çeyrek Tavuk Kokoreç"] }, 
+                { title: "KÖFTE-CİĞER-SUCUK", totalHeight: 48, items: ["Yarım Ekmek Köfte", "Üç Çeyrek Ekmek Köfte", "Porsiyon Köfte", "Yarım Ekmek Ciğer", "Porsiyon Ciğer", "Yarım Ekmek Sucuk"] },
+                { title: "TAVUK DÖNER", totalHeight: 40, items: ["Yarım Ekmek Tavuk Döner", "Tombik Ekmek Tavuk Döner", "Dürüm Tavuk Döner", "Üç Çeyrek Ekmek Döner", "Pilav Üstü Tavuk Döner"] },
+                { title: "PATSO", totalHeight: 65, items: ["Sade Patso", "Sosisli Patso", "Tavuklu Patso", "Köfteli Patso", "Ciğerli Patso", "Kaşarlı Patso", "Amerikanlı Patso", "Porsiyon Patates"] },
+                { title: "İÇECEKLER", totalHeight: 74, items: ["Kutu İçecekler", "Şişe Kola", "Küçük Ayran", "Büyük Ayran", "Limonata (Büyük)", "Çamlıca Gazoz", "Sade Soda", "Limonlu Soda", "Şalgam Suyu"] },
+                { title: "HAMBURGER", totalHeight: 33, items: ["Hamburger", "Double Hamburger", "Cheeseburger", "Islak Hamburger"] },
+                { title: "SANDVİÇ-TOST", totalHeight: 34, items: ["Sosisli Sandviç", "Goralı Sandiviç", "Yarım Ekmek Kaşarlı Tost", "Yarım Ekmek Karışık Tost"] },
+                
+                // YENİ: YUVARLAKLAR İÇİN DEV SÜTUN (Sıra Senin İstediğin Gibi)
+                { 
+                    title: "MENÜLER VE DİĞER", 
+                    isLarge: true, 
+                    items: [
+                        "Tavuk Döner Menü", 
+                        "Porsiyon Midye", 
+                        "Günün Çorbası", 
+                        "Hamburger Menü",
+                        "Menü 1", "Menü 2", "Menü 3", "Menü 4", "Menü 5", 
+                        "Menü 6", "Menü 7", "Menü 8", "Menü 9", "Menü 10"
+                    ] 
+                }
+            ];
+
+            // Veritabanındaki fiyatları çek
+            const dbProductMap = {};
+            products.forEach(p => {
+                const cleanName = (p.name || "").toLocaleLowerCase('tr-TR').trim();
+                dbProductMap[cleanName] = p.discountPrice || p.price;
+            });
+
+            // "Menü 1", "Menü 2" gibi veritabanında tam adı yazılı olabilecek ürünler için zeka (Eğer farklı kaydettiysen buralardan çeker)
+            const menuAliases = {
+                "menü 1": "ıslak burger menü",
+                "menü 2": "sosisli menü",
+                "menü 3": "dürüm tavuk döner şişe kola", // Fotoğraftaki içeriklere göre tahmin
+                "menü 4": "pilav üstü tavuk döner çorba kola",
+                "menü 5": "tavuk dürüm menü", 
+                "menü 6": "tombik tavuk döner menü",
+                "menü 7": "yarım ekmek kokoreç midye",
+                "menü 8": "yarım ekmek döner menü",
+                "menü 9": "yarım ekmek köfte menü",
+                "menü 10": "yarım ekmek tavuk döner çorba"
+            };
+
+            const sheet = document.getElementById('stickerA4Sheet');
+            sheet.innerHTML = '';
+
+            // Sütunları ve satırları HTML'e dök
+            physicalMenuBlocks.forEach(block => {
+                // Eğer dev menü bloğu ise ona özel kırmızı çerçeveli geniş div açılır
+                const columnClass = block.isLarge ? "sticker-column-large" : "sticker-column";
+                const titleClass = block.isLarge ? "sticker-col-title sticker-col-title-large" : "sticker-col-title";
+
+                let colHtml = `<div class="${columnClass}">
+                    <div class="${titleClass}">${block.title}</div>`;
+
+                // Eğer normal blok ise senin verdiğin mm değerini ürün sayısına böleriz
+                let itemHeightMM = 0;
+                if (!block.isLarge && block.totalHeight) {
+                    itemHeightMM = (block.totalHeight / block.items.length).toFixed(2);
+                }
+
+                block.items.forEach(itemName => {
+                    let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
+                    if (productAliases[searchName]) searchName = productAliases[searchName];
+                    if (menuAliases[searchName]) searchName = menuAliases[searchName]; // Menü 1,2,3... alias kontrolü
+                    
+                    // Veritabanında ürün ismini bulmaya çalış. Bulamazsa 0 basar.
+                    let price = dbProductMap[searchName] || "0";
+                    
+                    if (block.isLarge) {
+                        // DEV MENÜLER: Sabit matematiksel yükseklik yok. Alt boşluk (gap) sliderından ayarlanacak.
+                        colHtml += `
+                            <div class="sticker-price-row">
+                                <div class="sticker-price-val-large">${price} <span style="font-size: 0.6em;">₺</span></div>
+                            </div>
+                        `;
+                    } else {
+                        // NORMAL MENÜLER: Senin verdiğin milimetre ölçülerine tam oturan kutular
+                        colHtml += `
+                            <div class="sticker-price-row" style="height: ${itemHeightMM}mm;">
+                                <div class="sticker-price-val">${price} <span style="font-size: 0.6em;">₺</span></div>
+                            </div>
+                        `;
+                    }
+                });
+
+                colHtml += `</div>`;
+                sheet.innerHTML += colHtml;
+            });
         }
 
         // --- 📱 QR ETİKETİ DİSPANSER MOTORU ---
@@ -3636,8 +3859,9 @@
                 document.getElementById('printMenuArrow').style.transform = 'rotate(0deg)';
             });
 
-            // Mobilde herhangi bir baskı seçeneğine tıklandığında alt menüyü otomatik kapat
-            const printTabs = ['showPrintA4', 'showPrintDrink', 'showPrintLabel', 'showPrintQR'];
+           
+           // Mobilde herhangi bir baskı seçeneğine tıklandığında alt menüyü otomatik kapat
+            const printTabs = ['showPrintA4', 'showPrintDrink', 'showPrintLabel', 'showPrintQR', 'showPrintSticker'];
             printTabs.forEach(id => {
                 document.getElementById(id).addEventListener('click', () => {
                     // Sadece mobildeyken kapat (Masaüstünde alt menü açık kalmaya devam edebilir)
@@ -3655,6 +3879,7 @@
             document.getElementById('showPrintDrink').addEventListener('click', renderPrintDrinkModule);
             document.getElementById('showPrintLabel').addEventListener('click', renderPrintLabelModule);
             document.getElementById('showPrintQR').addEventListener('click', renderPrintQRModule);
+            document.getElementById('showPrintSticker').addEventListener('click', renderPrintStickerModule);
 
             // YENİ: Sayfa yüklendiğinde hem geçici (session) hem kalıcı (local) hafızayı kontrol et
             if (sessionStorage.getItem('olimpiyat_admin_logged_in') === 'true' || localStorage.getItem('olimpiyat_admin_logged_in') === 'true') {
