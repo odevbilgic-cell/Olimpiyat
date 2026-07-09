@@ -2073,7 +2073,7 @@
             `);
         }
 
-        // --- 📋 TABELA FİYAT SÜTUNLARI (MİLİMETRİK KES-YAPIŞTIR) MOTORU ---
+// --- 📋 TABELA FİYAT SÜTUNLARI (MİLİMETRİK KES-YAPIŞTIR) MOTORU ---
         function renderPrintStickerModule() {
             setActiveTab('showPrintSticker');
 
@@ -2081,60 +2081,87 @@
             loadModule(`
         <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in min-h-[80vh] flex flex-col items-center">
             <div class="w-full flex justify-between items-center mb-6 no-print border-b border-gray-200 pb-4">
-                <h2 class="text-xl font-black text-gray-800">📋 Tabela Fiyat Sütunları</h2>
+                <h2 class="text-xl font-black text-gray-800">📋 Tabela Fiyat Sütunları (Çift Taraflı)</h2>
                 <button onclick="window.print()" class="bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">🖨️ Sayfayı Yazdır</button>
             </div>
             
             <div class="w-full max-w-4xl bg-gray-900 rounded-2xl p-4 sm:p-6 mb-8 shadow-xl border border-gray-700 no-print flex flex-col gap-6">
                 
-                <div>
-                    <h3 class="text-white font-black text-sm border-b border-gray-700 pb-2 mb-3 text-orange-400">Standart Kategori Ayarları</h3>
-                    <p class="text-[10px] text-gray-400 mb-3">Sistem verdiğiniz ölçülere göre otomatik ayarlandı. Sadece yazı fontunu ayarlamanız yeterli.</p>
-                    <div class="w-full max-w-sm">
-                        <label class="text-xs font-bold text-gray-300">A Size (Standart Yazı Büyüklüğü)</label>
-                        <input type="range" min="10" max="40" value="16" class="w-full accent-orange-500" oninput="document.documentElement.style.setProperty('--sticker-font', this.value + 'pt')">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-white font-black text-sm border-b border-gray-700 pb-2 mb-3 text-orange-400">1. Ön Yüz (Fiyat) Ayarları</h3>
+                        <p class="text-[10px] text-gray-400 mb-3">Fiyat etiketlerinin büyüklüğünü belirler.</p>
+                        <div class="flex flex-col gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-bold text-gray-300">Standart Fiyat Büyüklüğü</label>
+                                <input type="range" min="10" max="40" value="16" class="w-full accent-orange-500" oninput="document.documentElement.style.setProperty('--sticker-font', this.value + 'pt')">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-bold text-gray-300">Dev Menü Fiyat Büyüklüğü</label>
+                                <input type="range" min="20" max="60" value="28" class="w-full accent-red-500" oninput="document.documentElement.style.setProperty('--sticker-font-large', this.value + 'pt')">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-white font-black text-sm border-b border-gray-700 pb-2 mb-3 text-blue-400">2. Arka Yüz (İsim) Ayarları</h3>
+                        <p class="text-[10px] text-gray-400 mb-3">Arkadaki menü isimleri kutulara sığmazsa buradan küçültün.</p>
+                        <div class="flex flex-col gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-bold text-gray-300">Standart İsim Büyüklüğü</label>
+                                <input type="range" min="6" max="20" value="9" class="w-full accent-blue-500" oninput="document.documentElement.style.setProperty('--sticker-name-font', this.value + 'pt')">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="text-xs font-bold text-gray-300">Dev Menü İsim Büyüklüğü</label>
+                                <input type="range" min="8" max="30" value="12" class="w-full accent-blue-500" oninput="document.documentElement.style.setProperty('--sticker-name-font-large', this.value + 'pt')">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div>
-                    <h3 class="text-white font-black text-sm border-b border-gray-700 pb-2 mb-3 text-red-400">Yuvarlak Menüler (Dev Alan) Ayarları</h3>
-                    <p class="text-[10px] text-gray-400 mb-3">Ortadaki büyük yuvarlak menü alanları içindir.</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-2">
-                        <div class="flex flex-col gap-2">
-                            <label class="text-xs font-bold text-gray-300">↕️ Kutu Arası Boşluk (Milimetre)</label>
-                            <input type="range" min="5" max="30" step="1" value="15" class="w-full accent-red-500" oninput="document.documentElement.style.setProperty('--sticker-menu-gap', this.value + 'mm'); document.getElementById('menuGapVal').textContent = this.value + ' mm';">
-                            <span id="menuGapVal" class="text-[10px] text-gray-400 text-right">15 mm</span>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="text-xs font-bold text-gray-300">A Size (Dev Yazı Büyüklüğü)</label>
-                            <input type="range" min="20" max="60" value="28" class="w-full accent-red-500" oninput="document.documentElement.style.setProperty('--sticker-font-large', this.value + 'pt')">
+                <div class="mt-2 border-t border-gray-700 pt-4">
+                    <h3 class="text-white font-black text-sm mb-3 text-gray-300">Ortak Ayarlar (Dev Alan)</h3>
+                    <div class="flex flex-col gap-2 max-w-sm">
+                        <label class="text-xs font-bold text-gray-300">↕️ Yuvarlak Kutu Arası Boşluk (Milimetre)</label>
+                        <div class="flex items-center gap-3">
+                            <input type="range" min="5" max="30" step="1" value="15" class="w-full accent-gray-400" oninput="document.documentElement.style.setProperty('--sticker-menu-gap', this.value + 'mm'); document.getElementById('menuGapVal').textContent = this.value + ' mm';">
+                            <span id="menuGapVal" class="text-[10px] text-gray-400 w-12 font-bold">15 mm</span>
                         </div>
                     </div>
                 </div>
+
             </div>
 
-            <div id="stickerPagesContainer" class="w-full flex flex-col items-center pb-10 overflow-x-auto">
+            <div id="stickerPagesContainer" class="w-full flex flex-col items-center pb-10 overflow-x-auto gap-10">
                 <style>
                     :root {
                         --sticker-font: 16pt;
                         --sticker-font-large: 28pt;
                         --sticker-menu-gap: 15mm;
+                        /* ARKA YÜZ YAZI BOYUTLARI */
+                        --sticker-name-font: 6pt;
+                        --sticker-name-font-large: 8pt;
                     }
                     .sticker-a4 {
                         width: 210mm;
                         min-height: 297mm;
                         background: white;
-                        /* Çok sayıda kolonu A4'e sığdırmak için sayfa kenar boşluklarını 5mm'ye düşürdük */
                         padding: 5mm; 
                         display: flex;
                         justify-content: space-between; 
                         align-items: flex-start;
                         gap: 2mm;
+                        box-shadow: 0 0 10px rgba(0,0,0,0.1);
                     }
                     
+                    /* MÜKEMMEL ÇİFT TARAFLI HİZALAMA İÇİN AYNALAMA (MIRRORING) */
+                    .page-break { page-break-before: always; }
+                    .mirrored-page { transform: scaleX(-1); }
+                    .un-mirror-text { transform: scaleX(-1); }
+
                     /* --- 3'LÜ SİMETRİK YERLEŞİM BÖLGELERİ --- */
                     .side-zone {
-                        width: 55mm; /* İki adet 25mm kolon yan yana sığar */
+                        width: 55mm; 
                         display: flex;
                         flex-wrap: wrap;
                         gap: 4mm;
@@ -2143,10 +2170,10 @@
                     .center-zone {
                         flex: 1;
                         display: flex;
-                        flex-direction: row; /* İki dev kolonu yan yana dizmek için */
+                        flex-direction: row; 
                         justify-content: center;
                         align-items: flex-start;
-                        gap: 6mm; /* Dev kolonlar arası boşluk */
+                        gap: 6mm; 
                     }
 
                     /* --- KOLON AYARLARI --- */
@@ -2165,7 +2192,6 @@
                         padding: 0mm;
                         display: flex;
                         flex-direction: column;
-                        
                         height: fit-content; 
                         padding-bottom: 3mm;
                     }
@@ -2185,9 +2211,6 @@
                         border-bottom: 2px solid #fca5a5;
                         background-color: transparent;
                         margin-bottom: 7mm;
-                        
-                        
-                        
                     }
                     .sticker-price-row {
                         display: flex;
@@ -2195,7 +2218,8 @@
                         justify-content: center;
                         align-items: center;
                     }
-                    /* Normal Fiyatlar */
+                    
+                    /* ÖN YÜZ: Normal Fiyatlar */
                     .sticker-price-val {
                         font-family: 'Arial Black', Impact, sans-serif;
                         font-size: var(--sticker-font);
@@ -2204,7 +2228,7 @@
                         line-height: 1; 
                         letter-spacing: -1px;
                     }
-                    /* DEV Menü Fiyatları */
+                    /* ÖN YÜZ: DEV Menü Fiyatları */
                     .sticker-price-val-large {
                         font-family: 'Arial Black', Impact, sans-serif;
                         font-size: var(--sticker-font-large);
@@ -2214,19 +2238,50 @@
                         letter-spacing: -2px;
                         margin-bottom: var(--sticker-menu-gap); 
                     }
-                    /* Son menü fiyatında ekstra boşluk bırakma ki kutu sınırı uzamasın */
-                    .sticker-price-row:last-child .sticker-price-val-large {
+
+                    /* ARKA YÜZ: Normal İsimler */
+                    .sticker-name-val {
+                        font-family: 'Arial', sans-serif;
+                        font-size: var(--sticker-name-font);
+                        font-weight: 800;
+                        color: #000;
+                        line-height: 1.1; 
+                        text-align: center;
+                        word-wrap: break-word;
+                        width: 100%;
+                        padding: 0 1mm;
+                    }
+                    /* ARKA YÜZ: DEV Menü İsimleri */
+                    .sticker-name-val-large {
+                        font-family: 'Arial', sans-serif;
+                        font-size: var(--sticker-name-font-large);
+                        font-weight: 800;
+                        color: #000;
+                        line-height: 1.1; 
+                        text-align: center;
+                        word-wrap: break-word;
+                        width: 100%;
+                        padding: 0 1mm;
+                        margin-bottom: var(--sticker-menu-gap); 
+                    }
+
+                    /* Son menü boşluk silici */
+                    .sticker-price-row:last-child .sticker-price-val-large,
+                    .sticker-price-row:last-child .sticker-name-val-large {
                         margin-bottom: 0 !important;
                     }
 
                     @media print {
                         .no-print { display: none !important; }
                         body { background: white; }
+                        .sticker-a4 { box-shadow: none; border: none; }
                         .sticker-column, .sticker-column-large { border: 1px solid #e5e5e5; background-color: white; }
                     }
                 </style>
                 
-                <div class="sticker-a4" id="stickerA4Sheet"></div>
+                <div class="sticker-a4" id="stickerA4SheetFront"></div>
+
+                <div class="sticker-a4 page-break mirrored-page" id="stickerA4SheetBack"></div>
             </div>
         </div>
     `);
@@ -2241,16 +2296,12 @@
                 { title: "İÇECEKLER", totalHeight: 74, items: ["Kutu İçecekler", "Şişe Kola", "Küçük Ayran", "Büyük Ayran", "Limonata (Büyük)", "Çamlıca Gazoz", "Sade Soda", "Limonlu Soda", "Şalgam Suyu"] },
                 { title: "HAMBURGER", totalHeight: 33, items: ["Hamburger", "Double Hamburger", "Cheeseburger", "Islak Hamburger"] },
                 { title: "SANDVİÇ-TOST", totalHeight: 34, items: ["Sosisli Sandviç", "Goralı Sandiviç", "Yarım Ekmek Kaşarlı Tost", "Yarım Ekmek Karışık Tost"] },
-
-                // YUVARLAKLAR İÇİN DEV SÜTUN (Ortada 2 tane basılacak)
+                // YUVARLAKLAR İÇİN DEV SÜTUN
                 {
                     title: "MENÜLER VE DİĞER",
                     isLarge: true,
                     items: [
-                        "Yarım Ekmek Menü Ayranlı",
-                        "Porsiyon Midye",
-                        "Günün Çorbası",
-                        "Hamburger Menü",
+                        "Yarım Ekmek Menü Ayranlı", "Porsiyon Midye", "Günün Çorbası", "Hamburger Menü",
                         "Menü 1", "Menü 2", "Menü 3", "Menü 4", "Menü 5",
                         "Menü 6", "Menü 7", "Menü 8", "Menü 9", "Menü 10"
                     ]
@@ -2268,107 +2319,108 @@
             const menuAliases = {
                 "menü 1": "ıslak burger menü",
                 "menü 2": "sosisli menü",
-                "menü 3": ["dürüm tavuk döner", "şişe kola"], // BİRDEN FAZLA ÜRÜN İÇİN DİZİ KULLANDIK
+                "menü 3": ["dürüm tavuk döner", "şişe kola"],
                 "menü 4": "pilav üstü döner menü",
                 "menü 5": "tavuk dürüm menü",
                 "menü 6": "tombik tavuk döner menü",
                 "menü 7": "yarım ekmek kokoreç menü",
                 "menü 8": "yarım ekmek döner menü",
                 "menü 9": "yarım köfte menü",
-                "menü 10": "yarım ekmek döner menü (çorbalı)" // Eğer bu da toplanacaksa ["yarım ekmek döner", "çorba"] yapabilirsin
+                "menü 10": "yarım ekmek döner menü (çorbalı)" 
             };
 
-            // Verileri mantığa göre çokla ve ayır
             const normalBlocks = physicalMenuBlocks.filter(b => !b.isLarge);
             const largeBlocks = physicalMenuBlocks.filter(b => b.isLarge);
 
-            // Sağ ve Sol tarafa tüm standart kolonlar basılacak (Birebir kopya)
             const leftBlocks = [...normalBlocks];
             const rightBlocks = [...normalBlocks];
-
-            // Ortaya 2 tane DEV kolon basılacak (Birebir kopya)
             const centerBlocks = [...largeBlocks, ...largeBlocks];
 
-           const generateColumnHTML = (block) => {
-        const columnClass = block.isLarge ? "sticker-column-large" : "sticker-column";
-        const titleClass = block.isLarge ? "sticker-col-title sticker-col-title-large" : "sticker-col-title";
+            // HEM FİYAT HEM İSİM SAYFASI İÇİN ORTAK GENERATOR FONKSİYON
+            const generateColumnHTML = (block, isBackPage = false) => {
+                const columnClass = block.isLarge ? "sticker-column-large" : "sticker-column";
+                const titleClass = block.isLarge ? "sticker-col-title sticker-col-title-large" : "sticker-col-title";
 
-        let colHtml = `<div class="${columnClass}"><div class="${titleClass}">${block.title}</div>`;
-
-        let itemHeightMM = 0;
-        if (!block.isLarge && block.totalHeight) {
-            itemHeightMM = (block.totalHeight / block.items.length).toFixed(2);
-        }
-
-        block.items.forEach(itemName => {
-            let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
-            if (typeof productAliases !== 'undefined' && productAliases[searchName]) searchName = productAliases[searchName];
-            
-            let price = 0;
-
-            // --- YENİ ZEKİ FİYAT HESAPLAMA SİSTEMİ ---
-            if (menuAliases[searchName]) {
-                let aliasValue = menuAliases[searchName];
+                // Arka sayfa ise başlığı okunabilmesi için un-mirror yapıyoruz (ters çevirmeyi iptal ediyoruz)
+                const titleExtraClass = isBackPage ? "un-mirror-text" : "";
                 
-                if (Array.isArray(aliasValue)) {
-                    // Eğer Köşeli Parantez (Dizi) ise içindeki ürünlerin fiyatlarını TOPLA
-                    aliasValue.forEach(subItem => {
-                        let cleanSubItem = subItem.toLocaleLowerCase('tr-TR').trim();
-                        price += Number(dbProductMap[cleanSubItem] || 0);
-                    });
-                } else {
-                    // Tek bir isim yazıyorsa normal fiyatını çek
-                    let cleanAlias = aliasValue.toLocaleLowerCase('tr-TR').trim();
-                    price = Number(dbProductMap[cleanAlias] || 0);
+                let colHtml = `<div class="${columnClass}"><div class="${titleClass} ${titleExtraClass}">${block.title}</div>`;
+
+                let itemHeightMM = 0;
+                if (!block.isLarge && block.totalHeight) {
+                    itemHeightMM = (block.totalHeight / block.items.length).toFixed(2);
                 }
-            } else {
-                // Menü alias'ı değilse standart aramayı yap
-                price = Number(dbProductMap[searchName] || 0);
-            }
 
-            // Sıfırsa veya bulunamadıysa ekranda "0" gözüksün
-            if (price === 0) price = "0";
-            // -----------------------------------------
+                block.items.forEach(itemName => {
+                    if (isBackPage) {
+                        // --- ARKA YÜZ (SADECE İSİMLER YAZILACAK) ---
+                        if (block.isLarge) {
+                            colHtml += `
+                                <div class="sticker-price-row" style="height: 18mm;">
+                                    <div class="sticker-name-val-large un-mirror-text">${itemName}</div>
+                                </div>`;
+                        } else {
+                            colHtml += `
+                                <div class="sticker-price-row" style="height: ${itemHeightMM}mm;">
+                                    <div class="sticker-name-val un-mirror-text">${itemName}</div>
+                                </div>`;
+                        }
+                    } else {
+                        // --- ÖN YÜZ (FİYAT HESAPLAMA VE YAZDIRMA) ---
+                        let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
+                        if (typeof productAliases !== 'undefined' && productAliases[searchName]) searchName = productAliases[searchName];
+                        
+                        let price = 0;
+                        if (menuAliases[searchName]) {
+                            let aliasValue = menuAliases[searchName];
+                            if (Array.isArray(aliasValue)) {
+                                aliasValue.forEach(subItem => {
+                                    let cleanSubItem = subItem.toLocaleLowerCase('tr-TR').trim();
+                                    price += Number(dbProductMap[cleanSubItem] || 0);
+                                });
+                            } else {
+                                let cleanAlias = aliasValue.toLocaleLowerCase('tr-TR').trim();
+                                price = Number(dbProductMap[cleanAlias] || 0);
+                            }
+                        } else {
+                            price = Number(dbProductMap[searchName] || 0);
+                        }
+                        if (price === 0) price = "0";
 
-            if (block.isLarge) {
-                // Dev Menüler
-                colHtml += `
-                    <div class="sticker-price-row" style="height: 18mm;">
-                        <div class="sticker-price-val-large">${price} <span style="font-size: 0.6em; color:red;">₺</span></div>
-                    </div>
-                `;
-            } else {
-                // Standart kolonlar
-                colHtml += `
-                    <div class="sticker-price-row" style="height: ${itemHeightMM}mm;">
-                        <div class="sticker-price-val">${price} <span style="font-size: 0.6em;  color:red;">₺</span></div>
-                    </div>
-                `;
-            }
-        });
-        colHtml += `</div>`;
-        return colHtml;
-    };
+                        if (block.isLarge) {
+                            colHtml += `
+                                <div class="sticker-price-row" style="height: 18mm;">
+                                    <div class="sticker-price-val-large">${price} <span style="font-size: 0.6em; color:red;">₺</span></div>
+                                </div>`;
+                        } else {
+                            colHtml += `
+                                <div class="sticker-price-row" style="height: ${itemHeightMM}mm;">
+                                    <div class="sticker-price-val">${price} <span style="font-size: 0.6em; color:red;">₺</span></div>
+                                </div>`;
+                        }
+                    }
+                });
+                colHtml += `</div>`;
+                return colHtml;
+            };
 
-            // A4 Yüzeyini inşa et
-            const sheet = document.getElementById('stickerA4Sheet');
+            // Sayfa yaratıcı yardımcı fonksiyon
+            const buildSheetHTML = (isBackPage) => {
+                let html = `<div class="side-zone">`;
+                leftBlocks.forEach(b => html += generateColumnHTML(b, isBackPage));
+                html += `</div><div class="center-zone">`;
+                centerBlocks.forEach(b => html += generateColumnHTML(b, isBackPage));
+                html += `</div><div class="side-zone">`;
+                rightBlocks.forEach(b => html += generateColumnHTML(b, isBackPage));
+                html += `</div>`;
+                return html;
+            };
 
-            // Sol Bölge (Tamamı)
-            let finalHtml = `<div class="side-zone">`;
-            leftBlocks.forEach(b => finalHtml += generateColumnHTML(b));
-            finalHtml += `</div>`;
+            // 1. ÖN YÜZÜ OLUŞTUR (Fiyatlar)
+            document.getElementById('stickerA4SheetFront').innerHTML = buildSheetHTML(false);
 
-            // Orta Bölge (2 Adet Dev Kolon)
-            finalHtml += `<div class="center-zone">`;
-            centerBlocks.forEach(b => finalHtml += generateColumnHTML(b));
-            finalHtml += `</div>`;
-
-            // Sağ Bölge (Sol Bölgenin Aynısı)
-            finalHtml += `<div class="side-zone">`;
-            rightBlocks.forEach(b => finalHtml += generateColumnHTML(b));
-            finalHtml += `</div>`;
-
-            sheet.innerHTML = finalHtml;
+            // 2. ARKA YÜZÜ OLUŞTUR (İsimler)
+            document.getElementById('stickerA4SheetBack').innerHTML = buildSheetHTML(true);
         }
 
         // --- 📱 QR ETİKETİ DİSPANSER MOTORU ---
