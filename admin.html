@@ -2136,13 +2136,13 @@
                 <style>
                     :root {
                         --sticker-font: 16pt;
-                        --sticker-font-large: 28pt;
+                        --sticker-font-large: 24pt;
                         --sticker-menu-gap: 15mm;
                         /* ARKA YÜZ YAZI BOYUTLARI */
                         --sticker-name-font: 6pt;
                         --sticker-name-font-large: 8pt;
                     }
-                    .sticker-a4 {
+                   .sticker-a4 {
                         width: 210mm;
                         min-height: 297mm;
                         background: white;
@@ -2152,6 +2152,7 @@
                         align-items: flex-start;
                         gap: 2mm;
                         box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                        position: relative; /* ALT TARİHLER İÇİN BU SATIR EKLENDİ */
                     }
                     
                     /* MÜKEMMEL ÇİFT TARAFLI HİZALAMA İÇİN AYNALAMA (MIRRORING) */
@@ -2404,6 +2405,18 @@
                 return colHtml;
             };
 
+            // YENİ: Ortak tarihi bul ve formatla
+            let latestUpdate = 0;
+            if (typeof products !== 'undefined') {
+                products.forEach(p => {
+                    if (p.lastUpdated && p.lastUpdated > latestUpdate) {
+                        latestUpdate = p.lastUpdated;
+                    }
+                });
+            }
+            const dateObj = latestUpdate === 0 ? new Date() : new Date(latestUpdate);
+            const dateStr = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+
             // Sayfa yaratıcı yardımcı fonksiyon
             const buildSheetHTML = (isBackPage) => {
                 let html = `<div class="side-zone">`;
@@ -2413,6 +2426,15 @@
                 html += `</div><div class="side-zone">`;
                 rightBlocks.forEach(b => html += generateColumnHTML(b, isBackPage));
                 html += `</div>`;
+
+                // YENİ: Alt Köşelere Tarih Alanı Ekleme (Arka sayfa için yazılar düz okunsun diye aynalama koruması eklendi)
+                html += `
+                <div style="position: absolute; bottom: 5mm; left: 5mm; right: 5mm; display: flex; justify-content: space-between; font-size:15pt; font-weight: 800; color: black; text-transform: uppercase;">
+                    <span class="${isBackPage ? 'un-mirror-text' : ''}">${dateStr}</span>
+                    <span class="${isBackPage ? 'un-mirror-text' : ''}">${dateStr}</span>
+                </div>
+                `;
+                
                 return html;
             };
 
