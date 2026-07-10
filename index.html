@@ -1346,7 +1346,7 @@
         }
 
 
-        // --- 🚀 UYGULAMA TİPİ KAYDIRMALI MENÜ MOTORU ---
+       // --- 🚀 UYGULAMA TİPİ KAYDIRMALI MENÜ MOTORU ---
         function renderMenu() {
             menuContainer.innerHTML = '';
 
@@ -1441,7 +1441,6 @@
 
                     // Tıklama Olayı (Birlikte İyi Gider Modalı)
                     card.addEventListener('click', () => {
-                        // Modal mantığı aynı kalacak...
                         document.getElementById('modalImage').src = imageUrl;
                         document.getElementById('modalTitle').textContent = name;
                         document.getElementById('modalDesc').textContent = desc;
@@ -1532,6 +1531,41 @@
                 });
 
                 section.appendChild(gridDiv);
+
+                // 🎬 YENİ EKLENEN KISIM: TAVUK KOKOREÇ VİDEO ALANI
+                if (catTR === 'Tavuk Kokoreç') {
+                    const videoSection = document.createElement('div');
+                    videoSection.className = "mt-6 bg-gradient-to-br from-orange-100 via-white to-amber-50 rounded-2xl shadow-md border-2 border-orange-200 overflow-hidden flex flex-col sm:flex-row items-center gap-4 p-4 lg:p-6 mb-4 relative";
+                    
+                    videoSection.innerHTML = `
+                        <div class="w-full sm:w-1/2 relative rounded-xl overflow-hidden shadow-lg border-4 border-white flex-shrink-0 group bg-black">
+                            <video id="tavukKokoVideo" class="w-full h-48 sm:h-56 object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-300" 
+                                muted loop playsinline preload="metadata">
+                                <source src="video5947564565679054276.mp4" type="video/mp4">
+                                Tarayıcınız video etiketini desteklemiyor.
+                            </video>
+                            
+                            
+
+                            <button onclick="const v = document.getElementById('tavukKokoVideo'); v.muted = !v.muted; this.innerHTML = v.muted ? '🔇 Sesi Aç' : '🔊 Sesi Kapat';" 
+                                class="absolute bottom-3 right-3 bg-white/90 text-gray-800 text-[10px] font-bold px-3 py-1.5 rounded-lg backdrop-blur-md shadow-lg border border-gray-200 hover:bg-white transition-colors z-20">
+                                🔇 Sesi Aç
+                            </button>
+                        </div>
+                        
+                        <div class="w-full sm:w-1/2 flex flex-col justify-center text-center sm:text-left pt-2 sm:pt-0">
+                            <span class="text-3xl sm:text-4xl mb-2 drop-shadow-sm">🍗🔥</span>
+                            <h3 class="text-xl sm:text-2xl font-black text-gray-800 mb-2 tracking-tight">Tavuk Kokoreç Nedir?</h3>
+                            <p class="text-xs sm:text-sm text-gray-600 font-semibold leading-relaxed mb-4">
+                                Tavuk Döner domates ve biber ile kavrulup baharatla ekmekte servis edilir.  
+                                <span class="block mt-1 text-orange-600 font-bold">Tavuk etinin kokoreç formunda közle buluştuğu eşsiz sokak lezzeti.</span>
+                            </p>
+                        </div>
+                    `;
+                    
+                    section.appendChild(videoSection);
+                }
+
                 menuContainer.appendChild(section);
             });
 
@@ -1550,6 +1584,26 @@
                 const firstTab = document.querySelector('.tabBtn');
                 if (firstTab) firstTab.classList.add('active-tab');
             }, 50);
+
+            // 🎬 VİDEO İÇİN AKILLI GÖZLEMCİ (INTERSECTION OBSERVER) KURULUMU
+            setTimeout(() => {
+                const videoEl = document.getElementById('tavukKokoVideo');
+                if (videoEl) {
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                // Video ekrana (en az %50'si) girince otomatik oynat
+                                videoEl.play().catch(e => console.log("Tarayıcı otomatik oynatmaya izin vermedi: ", e));
+                            } else {
+                                // Ekrandan çıkınca durdur
+                                videoEl.pause();
+                            }
+                        });
+                    }, { threshold: 0.5 }); // Kartın %50'si ekrana girince tetikler
+                    
+                    observer.observe(videoEl);
+                }
+            }, 100);
         }
 
         function createCategoryTabs() {
