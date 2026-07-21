@@ -1404,8 +1404,9 @@
             } else { loginError.classList.remove('hidden'); }
         });
 
-       // --- GİRİŞ EKRANI VE GPS KONUM MOTORU (GÜÇLENDİRİLMİŞ) ---
-        let userFullAddress = "Konum tespiti yapılamadı.";
+      // --- GİRİŞ EKRANI VE GPS KONUM MOTORU (OTOMATİK TETİKLEMELİ) ---
+        let userFullAddress = "Konum izni bekleniyor veya tespit edilemedi.";
+        let isLocationFetched = false;
 
         function getAndSaveLocation() {
             const locLabel = document.getElementById('locLabel');
@@ -1414,47 +1415,42 @@
             if (!navigator.geolocation) {
                 userFullAddress = "Tarayıcınız konum özelliğini desteklemiyor.";
                 locLabel.innerText = "Konum Kapalı";
-                locText.innerHTML = `Erişim Yok <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
+                locText.innerHTML = `Erişim Yok`;
                 locText.classList.remove('animate-pulse');
                 return;
             }
 
-            // GPS'i daha güçlü kullanmak için ayarlar:
-            const geoOptions = {
-                enableHighAccuracy: true, // Yüksek hassasiyet (WIFI ve GPS antenini kullanır)
-                timeout: 10000, // 10 saniye bulmaya çalışır
-                maximumAge: 0 // Önbellekteki eski konumu değil, en taze konumu getirir
-            };
+            const geoOptions = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
 
+            // SAYFA YÜKLENDİĞİ GİBİ BURASI ÇALIŞIR VE İZİN İSTER
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
 
                 try {
-                    // ÇÖZÜM BURADA: Header yerine URL'in sonuna '&accept-language=tr' ekledik! (Güvenlik Duvarı Engellemez)
+                    // Türkçe Adres Çekimi
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=tr`);
-                    
                     if(!res.ok) throw new Error("Harita servisine ulaşılamadı.");
 
                     const data = await res.json();
                     const address = data.address || {};
                     
-                    // Akıllı mahalle/ilçe bulma
                     const mahalle = address.neighbourhood || address.suburb || address.village || address.quarter || "Bilinmiyor";
                     const ilce = address.town || address.county || address.city_district || address.city || "İstanbul";
                     
-                    userFullAddress = data.display_name || "Adres detayları haritada bulunamadı, ancak koordinatlarınız başarıyla çekildi.";
+                    userFullAddress = data.display_name || "Koordinat alındı ancak tam adres haritada bulunamadı.";
+                    isLocationFetched = true;
 
-                    // Üst Taraftaki Arayüzü Güncelle
+                    // Arayüzü Başarılı Şekilde Güncelle
                     locLabel.innerText = "Mevcut Konum";
+                    locLabel.className = "text-[10px] font-black text-white-300 leading-tight"; // Yeşil Yap
                     locText.innerHTML = `${mahalle}, ${ilce} <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
                     locText.classList.remove('animate-pulse');
 
-                    // 🚀 FIREBASE'E (ADMİN PANELİ İÇİN) KONUMU KAYDET
+                    // FIREBASE'E KAYDET (ADMİN PANELİNDE GÖRÜNÜR)
                     const todayStr = new Date().toISOString().slice(0,10);
                     const exactTime = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
                     
-                    // Veritabanı değişkeni tanımlıysa kaydı at
                     if (typeof database !== 'undefined') {
                         database.ref('visitor_locations/delivery/' + todayStr).push({
                             time: exactTime,
@@ -1465,60 +1461,52 @@
                             lon: lon
                         });
                     }
-
                 } catch (err) {
-                    console.error("Harita API Hatası:", err); // Geliştirici için konsola bas
-                    userFullAddress = "Sokak adınız harita servisinden çekilemedi ama GPS sinyaliniz alındı.";
+                    userFullAddress = "GPS sinyali alındı ama cadde/sokak ismi okunamadı.";
                     locLabel.innerText = "Konum Bulundu";
-                    locText.innerHTML = `Yakınlardasınız <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
+                    locText.innerHTML = `Yakınlardasınız`;
                     locText.classList.remove('animate-pulse');
                 }
             }, (err) => {
-                // HATA TESPİTİ (Kullanıcıya özel hata mesajı atıyoruz)
-                if(err.code === 1) userFullAddress = "Lütfen tarayıcınızdan veya telefon ayarlarınızdan 'Konum' iznine onay verin.";
-                else if (err.code === 2) userFullAddress = "Cihazınız konumunuzu algılayamıyor. Kapalı alanda olabilirsiniz.";
-                else if (err.code === 3) userFullAddress = "Konum bulma süresi aşıldı, sinyal zayıf.";
-                else userFullAddress = "Konum tespiti bilinmeyen bir sebeple başarısız oldu.";
+                // KULLANICI İZNİ REDDEDERSE BURASI ÇALIŞIR
+                if(err.code === 1) userFullAddress = "Konum izni reddedildi. Konumunuzu göremiyoruz.";
+                else if (err.code === 2) userFullAddress = "Cihazınız kapalı alanda konumunuzu algılayamıyor.";
+                else userFullAddress = "Konum tespiti başarısız oldu.";
 
-                locLabel.innerText = "Ev (Varsayılan)";
+                locLabel.innerText = "İzin Reddedildi";
+                locLabel.className = "text-[10px] font-medium opacity-90 leading-tight";
                 locText.innerHTML = `Yamanevler <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
                 locText.classList.remove('animate-pulse');
             }, geoOptions);
         }
 
-        // Sayfa yüklenince butonları canlandır ve konumu bul
         document.addEventListener('DOMContentLoaded', () => {
             const welcomeScreen = document.getElementById('welcomeScreenOverlay');
             const btnSanaGelsin = document.getElementById('btnSanaGelsinOverlay');
             const btnGelAl = document.getElementById('btnGelAlOverlay');
 
-            // 1. OTOMATİK KONUM ÇEKİMİNİ BAŞLAT
+            // 🚀 SAYFA YÜKLENİR YÜKLENMEZ OTOMATİK KONUM İZNİ İSTER
             getAndSaveLocation();
 
             if (welcomeScreen && btnSanaGelsin && btnGelAl) {
-                // SANA GELSİN
                 btnSanaGelsin.addEventListener('click', () => {
                     welcomeScreen.style.transform = 'translateY(-100%)';
                     setTimeout(() => welcomeScreen.classList.add('hidden'), 500); 
                 });
-
-                // GEL AL (index.html'e uçur)
                 btnGelAl.addEventListener('click', () => {
                     window.location.href = 'index.html';
                 });
             }
 
-            // 2. YENİ: KONUM BUTONUNA TIKLAYINCA ÖZEL POP-UP (MODAL) AÇILMASI
+            // ORAYA TIKLAYINCA ÇIKACAK POP-UP
             document.getElementById('btnLocationArea').addEventListener('click', () => {
                 document.getElementById('customModalAddressText').innerText = userFullAddress;
                 document.getElementById('locationDetailModal').classList.remove('hidden');
             });
             
-            // 3. YENİ: ŞUBELER BUTONUNA BASINCA GOOGLE MAPS YOL TARİFİ AÇILMASI
             const branchesBtn = document.getElementById('btnBranches');
             if (branchesBtn) {
                 branchesBtn.addEventListener('click', () => {
-                    // Müşteriyi doğrudan hedefe "Yol Tarifi (Directions)" moduyla gönderir:
                     const mapUrl = "https://www.google.com/maps/dir/?api=1&destination=Olimpiyat+Kokoreç,+Yamanevler,+Alemdağ+Cd.+No:159,+34768+Ümraniye/İstanbul";
                     window.open(mapUrl, '_blank');
                 });
