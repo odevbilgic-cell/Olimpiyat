@@ -1409,76 +1409,100 @@
         let isLocationFetched = false;
 
         function getAndSaveLocation() {
-            const locLabel = document.getElementById('locLabel');
-            const locText = document.getElementById('locText');
+    const locLabel = document.getElementById('locLabel');
+    const locText = document.getElementById('locText');
 
-            if (!navigator.geolocation) {
-                userFullAddress = "Tarayıcınız konum özelliğini desteklemiyor.";
-                locLabel.innerText = "Konum Kapalı";
-                locText.innerHTML = `Erişim Yok`;
-                locText.classList.remove('animate-pulse');
-                return;
-            }
+    // Saat dilimi ve formatı düzgün hesaplayan yardımcı fonksiyon
+    const getLocalYYYYMMDD = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
 
-            const geoOptions = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+    const todayStr = getLocalYYYYMMDD(new Date());
+    const exactTime = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
-            // SAYFA YÜKLENDİĞİ GİBİ BURASI ÇALIŞIR VE İZİN İSTER
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-
-                try {
-                    // Türkçe Adres Çekimi
-                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=tr`);
-                    if(!res.ok) throw new Error("Harita servisine ulaşılamadı.");
-
-                    const data = await res.json();
-                    const address = data.address || {};
-                    
-                    const mahalle = address.neighbourhood || address.suburb || address.village || address.quarter || "Bilinmiyor";
-                    const ilce = address.town || address.county || address.city_district || address.city || "İstanbul";
-                    
-                    userFullAddress = data.display_name || "Koordinat alındı ancak tam adres haritada bulunamadı.";
-                    isLocationFetched = true;
-
-                    // Arayüzü Başarılı Şekilde Güncelle
-                    locLabel.innerText = "Mevcut Konum";
-                    locLabel.className = "text-[10px] font-black text-white-300 leading-tight"; // Yeşil Yap
-                    locText.innerHTML = `${mahalle}, ${ilce} <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
-                    locText.classList.remove('animate-pulse');
-
-                    // FIREBASE'E KAYDET (ADMİN PANELİNDE GÖRÜNÜR)
-                    const todayStr = new Date().toISOString().slice(0,10);
-                    const exactTime = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-                    
-                    if (typeof database !== 'undefined') {
-                        database.ref('visitor_locations/delivery/' + todayStr).push({
-                            time: exactTime,
-                            mahalle: mahalle,
-                            ilce: ilce,
-                            fullAddress: userFullAddress,
-                            lat: lat,
-                            lon: lon
-                        });
-                    }
-                } catch (err) {
-                    userFullAddress = "GPS sinyali alındı ama cadde/sokak ismi okunamadı.";
-                    locLabel.innerText = "Konum Bulundu";
-                    locText.innerHTML = `Yakınlardasınız`;
-                    locText.classList.remove('animate-pulse');
-                }
-            }, (err) => {
-                // KULLANICI İZNİ REDDEDERSE BURASI ÇALIŞIR
-                if(err.code === 1) userFullAddress = "Konum izni reddedildi. Konumunuzu göremiyoruz.";
-                else if (err.code === 2) userFullAddress = "Cihazınız kapalı alanda konumunuzu algılayamıyor.";
-                else userFullAddress = "Konum tespiti başarısız oldu.";
-
-                locLabel.innerText = "İzin Reddedildi";
-                locLabel.className = "text-[10px] font-medium opacity-90 leading-tight";
-                locText.innerHTML = `Yamanevler <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
-                locText.classList.remove('animate-pulse');
-            }, geoOptions);
+    // YENİ: Firebase'e veri yazan fonksiyonu dışarı aldık ki her senaryoda çağırabilelim
+    const pushToFirebase = (mahalle, ilce, fullAddress, lat, lon) => {
+        if (typeof database !== 'undefined') {
+            database.ref('visitor_locations/delivery/' + todayStr).push({
+                time: exactTime,
+                mahalle: mahalle,
+                ilce: ilce,
+                fullAddress: fullAddress,
+                lat: lat,
+                lon: lon
+            });
         }
+    };
+
+    // 1. Tarayıcı konum desteklemiyorsa
+    if (!navigator.geolocation) {
+        userFullAddress = "Tarayıcı konum desteklemiyor.";
+        locLabel.innerText = "Konum Kapalı";
+        locText.innerHTML = `Erişim Yok`;
+        locText.classList.remove('animate-pulse');
+        
+        pushToFirebase("Bilinmiyor", "Bilinmiyor", userFullAddress, 0, 0);
+        return;
+    }
+
+    const geoOptions = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        
+        let mahalle = "Bilinmiyor";
+        let ilce = "Bilinmiyor";
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=tr`);
+            if(!res.ok) throw new Error("Harita servisine ulaşılamadı.");
+
+            const data = await res.json();
+            const address = data.address || {};
+            
+            mahalle = address.neighbourhood || address.suburb || address.village || address.quarter || "Bilinmiyor";
+            ilce = address.town || address.county || address.city_district || address.city || "İstanbul";
+            
+            userFullAddress = data.display_name || "Haritada tam adres bulunamadı.";
+
+            locLabel.innerText = "Mevcut Konum";
+            locLabel.className = "text-[10px] font-black text-green-300 leading-tight"; 
+            locText.innerHTML = `${mahalle}, ${ilce} <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
+            locText.classList.remove('animate-pulse');
+
+        } catch (err) {
+            // 2. Nominatim (Harita) API'si çökse bile koordinatları kaydet
+            userFullAddress = `Adres okunamadı. (Enlem: ${lat.toFixed(4)}, Boylam: ${lon.toFixed(4)})`;
+            locLabel.innerText = "Konum Bulundu";
+            locText.innerHTML = `Yakınlardasınız`;
+            locText.classList.remove('animate-pulse');
+        }
+
+        // Başarılı durumda Firebase'e raporla
+        pushToFirebase(mahalle, ilce, userFullAddress, lat, lon);
+
+    }, (err) => {
+        // 3. Kullanıcı izni reddederse veya zaman aşımı olursa (YENİ EKLENDİ)
+        let errReason = "Konum tespiti başarısız oldu.";
+        if(err.code === 1) errReason = "Kullanıcı konum iznini reddetti.";
+        else if (err.code === 2) errReason = "Cihaz kapalı alanda konum algılayamadı.";
+        
+        userFullAddress = errReason;
+
+        locLabel.innerText = "İzin Reddedildi";
+        locLabel.className = "text-[10px] font-medium opacity-90 leading-tight";
+        locText.innerHTML = `Erişim Yok <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
+        locText.classList.remove('animate-pulse');
+
+        // Kullanıcı reddetse dahi admin panelinde "İzin Reddedildi" şeklinde görebilmek için:
+        pushToFirebase("Gizli", "Gizli", userFullAddress, 0, 0);
+        
+    }, geoOptions);
+}
 
         document.addEventListener('DOMContentLoaded', () => {
             const welcomeScreen = document.getElementById('welcomeScreenOverlay');
