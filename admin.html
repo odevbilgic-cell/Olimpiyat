@@ -2704,12 +2704,13 @@
                 yesterday.setDate(yesterday.getDate() - 1);
                 const yesterdayStr = getLocalYYYYMMDD(yesterday);
 
-                // Firebase'den 4 farklı veri kümesini aynı anda (paralel) çek!
-                const [snapToday, snapYesterday, snapCategory, snapProducts] = await Promise.all([
+               // Firebase'den 5 farklı veri kümesini aynı anda (paralel) çek!
+                const [snapToday, snapYesterday, snapCategory, snapProducts, snapLocations] = await Promise.all([
                     database.ref(`visitors_hourly/${statsMenuType}/${todayStr}`).once('value'),
                     database.ref(`visitors_hourly/${statsMenuType}/${yesterdayStr}`).once('value'),
                     database.ref(`stats/category_clicks/${statsMenuType}`).once('value'),
-                    database.ref(`stats/product_clicks/${statsMenuType}`).once('value')
+                    database.ref(`stats/product_clicks/${statsMenuType}`).once('value'),
+                    database.ref(`visitor_locations/${statsMenuType}/${todayStr}`).once('value') // YENİ EKLENDİ
                 ]);
 
                 const todayData = snapToday.val() || {};
@@ -2803,8 +2804,38 @@
                     }
                 });
 
-                // BÜTÜN GERÇEK VERİLERLE HTML ŞABLONUNU OLUŞTUR VE ANİMASYONLA BAS
+                // 5. CANLI KONUM TAKİP BİLGİLERİ (ÇÖKME KORUMALI)
+                const locationsData = snapLocations.val() || {};
+                let locationsHtml = "";
+                const locArray = Object.keys(locationsData).map(k => locationsData[k]);
+                
+                // Güvenli Sıralama Motoru (Tarihi boş gelenler sistemi çökertmesin diye)
+                locArray.sort((a,b) => {
+                    const timeA = a.time || "";
+                    const timeB = b.time || "";
+                    return timeB.localeCompare(timeA);
+                });
 
+                if(locArray.length === 0) {
+                    locationsHtml = '<div class="text-center text-xs text-gray-400 py-4 font-bold">Bu kategori için henüz konum izni veren bir müşteri olmadı. (Paket Servis kanalında olduğunuza emin olun)</div>';
+                } else {
+                    locArray.forEach(loc => {
+                        const mahalleGosterim = loc.mahalle ? loc.mahalle : 'Bilinmiyor';
+                        const ilceGosterim = loc.ilce ? loc.ilce : 'Bilinmiyor';
+                        const adresGosterim = loc.fullAddress ? loc.fullAddress : 'Adres okunamadı';
+                        const zamanGosterim = loc.time ? loc.time : '--:--';
+
+                        locationsHtml += `
+                            <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl hover:bg-orange-50 transition">
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-black text-gray-800">${mahalleGosterim}, ${ilceGosterim}</span>
+                                    <span class="text-[10px] text-gray-500 font-medium truncate w-48 sm:w-64" title="${adresGosterim}">${adresGosterim}</span>
+                                </div>
+                                <span class="text-[11px] font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded-lg shrink-0">${zamanGosterim}</span>
+                            </div>
+                        `;
+                    });
+                }
 
                 // BÜTÜN GERÇEK VERİLERLE HTML ŞABLONUNU OLUŞTUR VE ANİMASYONLA BAS
                 const html = `
@@ -2907,6 +2938,18 @@
                                 </div>
                             </div>
 
+                            
+
+                        </div>
+
+                        <!-- 4. BÖLÜM: CANLI KONUM TAKİBİ -->
+                        <div class="anim-delay-5 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 mt-6">
+                            <h3 class="font-black text-gray-800 text-sm mb-4 flex items-center gap-2">
+                                <span class="animate-pulse">📍</span> Canlı Müşteri Konumları (Bugün)
+                            </h3>
+                            <div class="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-none" id="visitorLocationsList">
+                                ${locationsHtml}
+                            </div>
                         </div>
                     </div>
                 `;
