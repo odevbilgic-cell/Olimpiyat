@@ -1160,7 +1160,7 @@
 
         function setFirebaseRefs(menuType) {
             currentMenuType = menuType;
-            // YENİ: Seçili olan menü tipini de hafızaya kaydet
+            statsMenuType = menuType;
             localStorage.setItem('active_olimpiyat_menu_type', menuType);
 
             if (menuType === 'in_place') {
@@ -2073,7 +2073,7 @@
             `);
         }
 
-// --- 📋 TABELA FİYAT SÜTUNLARI (MİLİMETRİK KES-YAPIŞTIR) MOTORU ---
+        // --- 📋 TABELA FİYAT SÜTUNLARI (MİLİMETRİK KES-YAPIŞTIR) MOTORU ---
         function renderPrintStickerModule() {
             setActiveTab('showPrintSticker');
 
@@ -2327,7 +2327,7 @@
                 "menü 7": "yarım ekmek kokoreç menü",
                 "menü 8": "yarım ekmek döner menü",
                 "menü 9": "yarım köfte menü",
-                "menü 10": "yarım ekmek döner menü (çorbalı)" 
+                "menü 10": "yarım ekmek döner menü (çorbalı)"
             };
 
             const normalBlocks = physicalMenuBlocks.filter(b => !b.isLarge);
@@ -2344,7 +2344,7 @@
 
                 // Arka sayfa ise başlığı okunabilmesi için un-mirror yapıyoruz (ters çevirmeyi iptal ediyoruz)
                 const titleExtraClass = isBackPage ? "un-mirror-text" : "";
-                
+
                 let colHtml = `<div class="${columnClass}"><div class="${titleClass} ${titleExtraClass}">${block.title}</div>`;
 
                 let itemHeightMM = 0;
@@ -2370,7 +2370,7 @@
                         // --- ÖN YÜZ (FİYAT HESAPLAMA VE YAZDIRMA) ---
                         let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
                         if (typeof productAliases !== 'undefined' && productAliases[searchName]) searchName = productAliases[searchName];
-                        
+
                         let price = 0;
                         if (menuAliases[searchName]) {
                             let aliasValue = menuAliases[searchName];
@@ -2434,7 +2434,7 @@
                     <span class="${isBackPage ? 'un-mirror-text' : ''}">${dateStr}</span>
                 </div>
                 `;
-                
+
                 return html;
             };
 
@@ -2704,7 +2704,7 @@
                 yesterday.setDate(yesterday.getDate() - 1);
                 const yesterdayStr = getLocalYYYYMMDD(yesterday);
 
-               // Firebase'den 5 farklı veri kümesini aynı anda (paralel) çek!
+                // Firebase'den 5 farklı veri kümesini aynı anda (paralel) çek!
                 const [snapToday, snapYesterday, snapCategory, snapProducts, snapLocations] = await Promise.all([
                     database.ref(`visitors_hourly/${statsMenuType}/${todayStr}`).once('value'),
                     database.ref(`visitors_hourly/${statsMenuType}/${yesterdayStr}`).once('value'),
@@ -2808,15 +2808,15 @@
                 const locationsData = snapLocations.val() || {};
                 let locationsHtml = "";
                 const locArray = Object.keys(locationsData).map(k => locationsData[k]);
-                
+
                 // Güvenli Sıralama Motoru (Tarihi boş gelenler sistemi çökertmesin diye)
-                locArray.sort((a,b) => {
+                locArray.sort((a, b) => {
                     const timeA = a.time || "";
                     const timeB = b.time || "";
                     return timeB.localeCompare(timeA);
                 });
 
-                if(locArray.length === 0) {
+                if (locArray.length === 0) {
                     locationsHtml = '<div class="text-center text-xs text-gray-400 py-4 font-bold">Bu kategori için henüz konum izni veren bir müşteri olmadı. (Paket Servis kanalında olduğunuza emin olun)</div>';
                 } else {
                     locArray.forEach(loc => {
@@ -3883,7 +3883,7 @@
 
         function renderGlobalDateModule() {
             setActiveTab('showGlobalDateUpdate');
-            
+
             // 1. Veritabanındaki en güncel tarihi bul
             let latestUpdate = 0;
             if (typeof products !== 'undefined') {
@@ -3893,7 +3893,7 @@
                     }
                 });
             }
-            
+
             // 2. Eğer veritabanında daha önce kaydedilmiş bir tarih varsa onu, yoksa bugünü varsayılan yap
             let defaultDateStr;
             if (latestUpdate > 0) {
@@ -3933,8 +3933,8 @@
             if (!confirm("Tüm ürünlerin fiyat güncelleme tarihleri değiştirilecektir. Emin misiniz?")) return;
 
             try {
-                statusEl.textContent = '⏳ Güncelleniyor...'; 
-                statusEl.className = 'mt-3 text-center text-xs font-bold text-orange-600'; 
+                statusEl.textContent = '⏳ Güncelleniyor...';
+                statusEl.className = 'mt-3 text-center text-xs font-bold text-orange-600';
                 statusEl.classList.remove('hidden');
 
                 const inPlaceSnapshot = await database.ref(inPlaceProductsPath).once('value');
@@ -3947,14 +3947,14 @@
                 Object.keys(inPlaceData).forEach(k => { updates[`${inPlaceProductsPath}/${k}/lastUpdated`] = targetTimestamp; count++; });
                 Object.keys(deliveryData).forEach(k => { updates[`${deliveryProductsPath}/${k}/lastUpdated`] = targetTimestamp; count++; });
 
-                if (count === 0) { 
-                    statusEl.textContent = '❌ Ürün bulunamadı.'; 
-                    return; 
+                if (count === 0) {
+                    statusEl.textContent = '❌ Ürün bulunamadı.';
+                    return;
                 }
-                
+
                 // Atomik olarak tüm veritabanını güncelle
                 await database.ref().update(updates);
-                
+
                 // Uyarı ile başarılı olduğunu hissettir
                 setTimeout(() => {
                     alert("✅ Tüm menülerin tarihi başarıyla " + dateInput + " olarak güncellendi!");
@@ -3964,8 +3964,8 @@
                 statusEl.textContent = '✅ Tüm ürün tarihleri başarıyla güncellendi!';
                 statusEl.className = 'mt-3 text-center text-xs font-bold text-emerald-600';
 
-            } catch (error) { 
-                alert("Hata: " + error.message); 
+            } catch (error) {
+                alert("Hata: " + error.message);
             }
         }
 
@@ -4624,81 +4624,7 @@
             document.getElementById('labelPrintArea').classList.add('hidden');
         }
 
-        // --- 🖨️ BASKI MODÜLÜ SEKMELER, İÇECEK LİSTESİ VE QR MOTORU ---
 
-        const btnA4Menu = document.getElementById('btnA4Menu');
-        const btnDrinkMenu = document.getElementById('btnDrinkMenu');
-        const btnLabelPrint = document.getElementById('btnLabelPrint');
-        const btnQRPrint = document.getElementById('btnQRPrint'); // YENİ
-
-        const a4Container = document.getElementById('a4PreviewContainer');
-        const drinkContainer = document.getElementById('drinkMenuPreviewContainer');
-        const labelContainer = document.getElementById('labelPreviewContainer');
-        const qrContainer = document.getElementById('qrPreviewContainer'); // YENİ
-
-        const printSidebar = document.getElementById('printSidebar');
-        const togglePrintSidebarBtn = document.getElementById('togglePrintSidebarBtn');
-        const expandPrintSidebarBtn = document.getElementById('expandPrintSidebarBtn');
-
-        // Sol paneli kapat
-        togglePrintSidebarBtn.addEventListener('click', () => {
-            printSidebar.classList.add('collapsed');
-            expandPrintSidebarBtn.classList.remove('hidden');
-        });
-
-        // Sol paneli geri aç
-        expandPrintSidebarBtn.addEventListener('click', () => {
-            printSidebar.classList.remove('collapsed');
-            expandPrintSidebarBtn.classList.add('hidden');
-        });
-
-        // Tıklanan buton haricindekileri griye (pasife) çeviren temizlik motoru
-        function resetPrintTabButtons() {
-            [btnA4Menu, btnDrinkMenu, btnLabelPrint, btnQRPrint].forEach(btn => {
-                if (btn) btn.className = "print-tab-btn bg-gray-800 text-gray-300 font-bold py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 hover:bg-gray-700 transition active:scale-95";
-            });
-            if (a4Container) a4Container.classList.add('hidden');
-            if (drinkContainer) drinkContainer.classList.add('hidden');
-            if (labelContainer) labelContainer.classList.add('hidden');
-            if (qrContainer) qrContainer.classList.add('hidden');
-        }
-
-        // A4 Fiyat Listesine Geç
-        btnA4Menu.addEventListener('click', () => {
-            resetPrintTabButtons();
-            btnA4Menu.className = "print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95";
-            a4Container.classList.remove('hidden');
-        });
-
-        // Mini İçecek Listesine Geç
-        btnDrinkMenu.addEventListener('click', () => {
-            resetPrintTabButtons();
-            btnDrinkMenu.className = "print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95";
-            drinkContainer.classList.remove('hidden');
-            renderDrinkMenuPreview();
-        });
-
-        // Dev Etiketlere Geç
-        if (btnLabelPrint) {
-            btnLabelPrint.addEventListener('click', () => {
-                resetPrintTabButtons();
-                btnLabelPrint.className = "print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95";
-                labelContainer.classList.remove('hidden');
-                document.getElementById('labelPagesContainer').innerHTML = '<span class="text-gray-500 text-sm italic mt-10 no-print">Yukarıdan bir etiket türü seçtiğinizde önizlemeler burada belirecektir.</span>';
-            });
-        }
-
-        // YENİ: QR Etiketi Ekranına Geç
-        if (btnQRPrint) {
-            btnQRPrint.addEventListener('click', () => {
-                resetPrintTabButtons();
-                btnQRPrint.className = "print-tab-btn bg-yellow-500 text-black font-black py-3 px-3 rounded-xl text-xs sm:text-sm text-left flex items-center gap-2 shadow-md transition active:scale-95";
-                qrContainer.classList.remove('hidden');
-
-                // Ekrana girildiğinde PDF alanını sıfırla
-                document.getElementById('qrPdfViewer').innerHTML = '<span class="text-gray-400 font-bold">Yukarıdan bir dispanser türü seçin.</span>';
-            });
-        }
         // YENİ: Tıklanan Butona Göre İlgili PDF Dosyanı Tam Ekran Basan Fonksiyon
         let currentPdfUrl = ""; // Hangi PDF'in açık olduğunu aklında tutar
 
