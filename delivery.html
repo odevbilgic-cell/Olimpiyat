@@ -112,7 +112,7 @@
         /* Kırmızı */
 
         /* --- GÖRSEL ÜZERİNDEKİ FİYAT YAZISI --- */
-       .campaign-price-overlay {
+        .campaign-price-overlay {
             position: absolute;
             bottom: 6%;
             /* Görselin sol altındaki turuncu blob hizası */
@@ -124,10 +124,10 @@
             align-items: center;
             z-index: 6;
             letter-spacing: -4px;
-            -webkit-text-stroke: 1px black; 
+            -webkit-text-stroke: 1px black;
 
             /* Metin Stili */
-            color:  #fbcc25ff;
+            color: #fbcc25ff;
             font-family: 'Arial Black', 'Impact', sans-serif;
             font-size: clamp(2.7rem, 8vw, 5rem);
             font-weight: 900;
@@ -269,7 +269,7 @@
             font-weight: bolder;
         }
 
-         .tl {
+        .tl {
             font-size: 20px;
             position: relative;
             left: 3px;
@@ -323,9 +323,17 @@
 
         /* --- SOL ALT KÖŞE TAHMİNİ TESLİMAT ANİMASYONU --- */
         @keyframes slideInLeft {
-            0% { transform: translateX(-150%) rotate(-10deg); opacity: 0; }
-            100% { transform: translateX(0) rotate(0); opacity: 1; }
+            0% {
+                transform: translateX(-150%) rotate(-10deg);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateX(0) rotate(0);
+                opacity: 1;
+            }
         }
+
         .animate-slide-in-left {
             animation: slideInLeft 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
@@ -338,59 +346,83 @@
 
 <body class="text-gray-800">
 
-   <!-- 🚀 OLİMPİYAT KARŞILAMA EKRANI (Delivery.html'de ilk açılacak sayfa) -->
-    <div id="welcomeScreenOverlay" class="fixed inset-0 z-[9999] bg-[#f4f4f5] flex flex-col transition-transform duration-500 overflow-y-auto">
-        
+    <!-- 🚀 OLİMPİYAT KARŞILAMA EKRANI (Delivery.html'de ilk açılacak sayfa) -->
+    <div id="welcomeScreenOverlay"
+        class="fixed inset-0 z-[9999] bg-[#f4f4f5] flex flex-col transition-transform duration-500 overflow-y-auto">
+
         <!-- Üst Kırmızı Alan -->
         <div class="bg-[#e3000f] rounded-b-[2.5rem] pt-6 pb-16 px-5 text-white relative shadow-md">
-            
+
             <!-- 🌟 YENİ EKLENEN SOLA HİZALI LOGO ALANI -->
             <div class="w-full flex justify-center mb-5">
                 <!-- Kendi logonun ismini (logom.png vb.) buraya yazabilirsin. -->
-                <img src="file_00000000a4647246a61cf005bd316d6f.png" alt="Olimpiyat Logo" class="h-12 sm:h-12 object-contain drop-shadow-md">
+                <img src="file_00000000a4647246a61cf005bd316d6f.png" alt="Olimpiyat Logo"
+                    class="h-12 sm:h-12 object-contain drop-shadow-md">
             </div>
 
             <!-- Üst İkonlar ve Konum Alanı -->
             <div class="flex justify-between items-center">
                 <!-- Dinamik Konum Alanı -->
-                <div id="btnLocationArea" class="flex items-center gap-1.5 flex-1 justify-start cursor-pointer hover:opacity-80 transition" title="Konum Detayını Gör">
+                <div id="btnLocationArea"
+                    class="flex items-center gap-1.5 flex-1 justify-start cursor-pointer hover:opacity-80 transition"
+                    title="Konum Detayını Gör">
                     <!-- Konum İkonu -->
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                     </svg>
                     <div class="flex flex-col cursor-pointer">
-                        <span id="locLabel" class="text-[10px] font-medium opacity-90 leading-tight">Konum Aranıyor...</span>
-                        <span id="locText" class="text-sm font-bold flex items-center gap-1 leading-tight animate-pulse">Lütfen Bekleyin 
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                        <span id="locLabel" class="text-[10px] font-medium opacity-90 leading-tight">Konum
+                            Aranıyor...</span>
+                        <span id="locText"
+                            class="text-sm font-bold flex items-center gap-1 leading-tight animate-pulse">Lütfen
+                            Bekleyin
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                                stroke="currentColor" class="w-3 h-3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            </svg>
                         </span>
                     </div>
                 </div>
-                
+
                 <div class="flex items-center gap-4">
                     <!-- Kalp İkonu -->
-                    <svg onclick="alert('Favori lezzetler özelliği çok yakında!')" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 cursor-pointer hover:scale-110 transition">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    <svg onclick="alert('Favori lezzetler özelliği çok yakında!')" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                        class="w-6 h-6 cursor-pointer hover:scale-110 transition">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                     </svg>
                     <!-- Profil İkonu -->
-                    <svg onclick="alert('Müşteri profili yakında aktif olacak.')" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 cursor-pointer hover:scale-110 transition">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    <svg onclick="alert('Müşteri profili yakında aktif olacak.')" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                        class="w-6 h-6 cursor-pointer hover:scale-110 transition">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
                 </div>
             </div>
-            
+
             <div class="mt-8">
                 <h1 class="text-3xl font-black tracking-tight leading-tight">Çeşit çeşit lezzetler Burada!</h1>
                 <p class="text-sm font-medium mt-1.5 opacity-90 tracking-wide">Nasıl sipariş vermek istersin?</p>
             </div>
         </div>
-           
+
 
         <div class="px-5 -mt-10 grid grid-cols-2 gap-4 relative z-10">
             <!-- Sana Gelsin Kartı -->
-            <button id="btnSanaGelsinOverlay" class="bg-white rounded-[1.5rem] p-4 shadow-[0_10px_25px_rgba(0,0,0,0.1)] flex flex-col items-center text-center relative overflow-hidden transition transform active:scale-95 text-left pb-5 h-[195px] group border border-gray-100">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-[4rem] -z-10 -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-125"></div>
-                <img src="ChatGPT Image 23 Tem 2026 20_55_30.png" style="zoom: 1.8; margin-top: -15px; position: absolute;" class="w-24 h-24 object-contain mt-2 mb-auto drop-shadow-md z-10 group-hover:-translate-y-1 transition-transform" alt="Sana Gelsin">
+            <button id="btnSanaGelsinOverlay"
+                class="bg-white rounded-[1.5rem] p-4 shadow-[0_10px_25px_rgba(0,0,0,0.1)] flex flex-col items-center text-center relative overflow-hidden transition transform active:scale-95 text-left pb-5 h-[195px] group border border-gray-100">
+                <div
+                    class="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-[4rem] -z-10 -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-125">
+                </div>
+                <img src="ChatGPT Image 23 Tem 2026 20_55_30.png"
+                    style="zoom: 1.8; margin-top: -15px; position: absolute;"
+                    class="w-24 h-24 object-contain mt-2 mb-auto drop-shadow-md z-10 group-hover:-translate-y-1 transition-transform"
+                    alt="Sana Gelsin">
                 <div class="w-full text-left mt-auto">
                     <h3 class="text-[#e3000f] font-black text-[17px] leading-none tracking-tight">Paket Servis</h3>
                     <p class="text-gray-500 font-bold text-[11px] mt-1">Lezzet kapında!</p>
@@ -398,9 +430,15 @@
             </button>
 
             <!-- Gel Al Kartı -->
-            <button id="btnGelAlOverlay" class="bg-white rounded-[1.5rem] p-4 shadow-[0_10px_25px_rgba(0,0,0,0.1)] flex flex-col items-center text-center relative overflow-hidden transition transform active:scale-95 text-left pb-5 h-[195px] group border border-gray-100">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[4rem] -z-10 -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-125"></div>
-                <img src="ChatGPT Image 23 Tem 2026 20_56_33.png" style="zoom: 1.5; margin-top: -1px; position: absolute;" class="w-24 h-24 object-contain mt-2 mb-auto drop-shadow-md z-10 group-hover:-translate-y-1 transition-transform" alt="Gel Al">
+            <button id="btnGelAlOverlay"
+                class="bg-white rounded-[1.5rem] p-4 shadow-[0_10px_25px_rgba(0,0,0,0.1)] flex flex-col items-center text-center relative overflow-hidden transition transform active:scale-95 text-left pb-5 h-[195px] group border border-gray-100">
+                <div
+                    class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[4rem] -z-10 -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-125">
+                </div>
+                <img src="ChatGPT Image 23 Tem 2026 20_56_33.png"
+                    style="zoom: 1.5; margin-top: -1px; position: absolute;"
+                    class="w-24 h-24 object-contain mt-2 mb-auto drop-shadow-md z-10 group-hover:-translate-y-1 transition-transform"
+                    alt="Gel Al">
                 <div class="w-full text-left mt-auto">
                     <h3 class="text-blue-500 font-black text-[17px] leading-none tracking-tight">Gel Al</h3>
                     <p class="text-gray-500 font-bold text-[11px] mt-1">Restoran Menüsü</p>
@@ -410,37 +448,50 @@
 
         <!-- Alt Menüler (Şubeler ve Sipariş Hattı) -->
         <div class="px-5 mt-5 flex flex-col gap-3 pb-10">
-            
+
             <!-- Şubeler Butonu -->
-            <div id="btnBranches" class="bg-white rounded-2xl p-3 shadow-[0_4px_15px_rgba(0,0,0,0.05)] flex items-center gap-3 cursor-pointer active:scale-95 transition border border-gray-100 hover:bg-gray-50">
-                <div class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-xl border border-gray-100 shadow-sm">🏪</div>
+            <div id="btnBranches"
+                class="bg-white rounded-2xl p-3 shadow-[0_4px_15px_rgba(0,0,0,0.05)] flex items-center gap-3 cursor-pointer active:scale-95 transition border border-gray-100 hover:bg-gray-50">
+                <div
+                    class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-xl border border-gray-100 shadow-sm">
+                    🏪</div>
                 <div>
                     <h4 class="font-black text-[13px] text-gray-800 tracking-tight">Adresimiz</h4>
                     <p class="text-[10px] font-bold text-gray-400 mt-0.5">Yol tarifi al!</p>
                 </div>
                 <div class="ml-auto text-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                        stroke="currentColor" class="w-4 h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
                 </div>
             </div>
 
             <!-- Doğrudan Arama (Sipariş Hattı) Bannerı -->
-            <a href="tel:02163357920" class="w-full bg-red-50 rounded-2xl p-3 flex items-center justify-between shadow-[0_4px_15px_rgba(227,0,15,0.1)] border border-red-100 active:scale-95 transition group text-left decoration-0" style="text-decoration: none;">
+            <a href="tel:02163357920"
+                class="w-full bg-red-50 rounded-2xl p-3 flex items-center justify-between shadow-[0_4px_15px_rgba(227,0,15,0.1)] border border-red-100 active:scale-95 transition group text-left decoration-0"
+                style="text-decoration: none;">
                 <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 bg-[#e3000f] rounded-full flex items-center justify-center text-white text-xl shadow-md border-2 border-white group-hover:rotate-12 transition animate-pulse">📞</div>
+                    <div
+                        class="w-11 h-11 bg-[#e3000f] rounded-full flex items-center justify-center text-white text-xl shadow-md border-2 border-white group-hover:rotate-12 transition animate-pulse">
+                        📞</div>
                     <div class="text-left">
                         <h4 class="font-black text-[#e3000f] text-sm tracking-tight">Sipariş Hattı</h4>
                         <p class="text-[11px] font-black text-red-500 mt-0.5 tracking-wider">0216 335 79 20</p>
                     </div>
                 </div>
-                <div class="bg-[#e3000f] text-white px-4 py-2.5 rounded-xl text-xs font-black shadow-md tracking-wide group-hover:bg-red-700 transition">Sipariş Ver</div>
+                <div
+                    class="bg-[#e3000f] text-white px-4 py-2.5 rounded-xl text-xs font-black shadow-md tracking-wide group-hover:bg-red-700 transition">
+                    Sipariş Ver</div>
             </a>
-            
+
         </div>
     </div>
 
-   <div id="viewCountListener" style="display:none;"></div>
+    <div id="viewCountListener" style="display:none;"></div>
 
-    <header id="mainHeader" class="bg-red-600 text-white p-3 flex justify-between items-center sticky top-0 z-20 shadow-md">
+    <header id="mainHeader"
+        class="bg-red-600 text-white p-3 flex justify-between items-center sticky top-0 z-20 shadow-md">
         <img class="logo" src="logom.png" alt="logo">
         <h1 class="baslik">
             <p class="kucuk">&nbspPaket</p> <br> Servis
@@ -451,14 +502,17 @@
         </div>
     </header>
 
-    <nav id="categoryTabs" class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
+    <nav id="categoryTabs"
+        class="flex overflow-x-auto bg-white shadow p-2 space-x-2 text-sm font-semibold sticky top-16 z-10"></nav>
 
     <div class="ticker-container shadow-md">
         <div class="ticker-track">
             <div class="ticker-item">~YEMEK KARTLARI GEÇERLİDİR~</div>
-            <div class="ticker-item">| Pluxe Sodexo | Ederned | Ticket Restaurant | Multinet | Metropol | Setcard |</div>
+            <div class="ticker-item">| Pluxe Sodexo | Ederned | Ticket Restaurant | Multinet | Metropol | Setcard |
+            </div>
             <div class="ticker-item">~YEMEK KARTLARI GEÇERLİDİR~</div>
-            <div class="ticker-item">| Pluxe Sodexo | Ederned | Ticket Restaurant | Multinet | Metropol | Setcard |</div>
+            <div class="ticker-item">| Pluxe Sodexo | Ederned | Ticket Restaurant | Multinet | Metropol | Setcard |
+            </div>
         </div>
     </div>
 
@@ -469,44 +523,52 @@
         <div id="menuContainer" class="flex flex-col gap-6 scroll-mt-24 pb-20"></div>
         <div id="contactSection" class="hidden text-center mt-6 bg-white rounded-xl shadow p-6 max-w-lg mx-auto">
             <h2 id="contactTitle" class="text-2xl font-bold text-red-600 mb-3">İletişim</h2>
-            <p id="contactAddress" class="mb-3">📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul</p>
-            <p class="mt-2">📞 <a href="tel:02163357920" id="contactPhone" class="text-red-600 font-semibold text-lg hover:underline">0216 335 79 20</a></p>
+            <p id="contactAddress" class="mb-3">📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç
+                Ümraniye - İstanbul</p>
+            <p class="mt-2">📞 <a href="tel:02163357920" id="contactPhone"
+                    class="text-red-600 font-semibold text-lg hover:underline">0216 335 79 20</a></p>
         </div>
     </main>
 
-    <div id="imageModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-all duration-300">
-        <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl transform transition-all border-b-8 border-red-600 animate-pop-in max-h-[92vh] flex flex-col">
-            
+    <div id="imageModal"
+        class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4 transition-all duration-300">
+        <div
+            class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl transform transition-all border-b-8 border-red-600 animate-pop-in max-h-[92vh] flex flex-col">
+
             <div class="relative h-56 sm:h-64 flex-shrink-0 bg-red-600">
                 <img id="modalImage" class="w-full h-full object-cover opacity-95">
-                 <!-- YENİ: MENÜLER İÇİN GÖRSEL İÇİ FİYAT KUTUCUĞU -->
-                    <div id="modalMenuPriceBox" class="hidden absolute z-30 flex items-center justify-center"
-                        style="bottom: 5%; left: 2%; width: 28%; height: 18%;">
-                        <span id="modalMenuPriceText"
-                            class="font-black text-red-600 text-2xl sm:text-3xl drop-shadow-md tracking-tighter"
-                            style="font-family: 'Arial Black', Impact, sans-serif;"></span>
-                    </div>
-                <button class="absolute top-4 right-4 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/80 transition font-black text-sm shadow-md z-10">✖</button>
+                <!-- YENİ: MENÜLER İÇİN GÖRSEL İÇİ FİYAT KUTUCUĞU -->
+                <div id="modalMenuPriceBox" class="hidden absolute z-30 flex items-center justify-center"
+                    style="bottom: 5%; left: 2%; width: 28%; height: 18%;">
+                    <span id="modalMenuPriceText"
+                        class="font-black text-red-600 text-2xl sm:text-3xl drop-shadow-md tracking-tighter"
+                        style="font-family: 'Arial Black', Impact, sans-serif;"></span>
+                </div>
+                <button
+                    class="absolute top-4 right-4 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/80 transition font-black text-sm shadow-md z-10">✖</button>
                 <div class="absolute bottom-0 left-0 w-full h-0 bg-gradient-to-t from-white to-transparent"></div>
             </div>
 
             <div class="p-5 overflow-y-auto flex-grow space-y-4 scrollbar-none">
-                
+
                 <div class="flex justify-between items-start gap-4">
                     <h2 id="modalTitle" class="text-2xl font-black text-gray-900 leading-tight"></h2>
-                    <span id="modalPrice" class="bg-red-50 text-red-600 font-black text-base px-3 py-1.5 rounded-xl whitespace-nowrap border border-red-100 shadow-sm"></span>
+                    <span id="modalPrice"
+                        class="bg-red-50 text-red-600 font-black text-base px-3 py-1.5 rounded-xl whitespace-nowrap border border-red-100 shadow-sm"></span>
                 </div>
 
-                <p id="modalDesc" class="text-gray-500 text-xs sm:text-sm leading-relaxed border-b border-gray-100 pb-3"></p>
+                <p id="modalDesc"
+                    class="text-gray-500 text-xs sm:text-sm leading-relaxed border-b border-gray-100 pb-3"></p>
 
-                
+
 
                 <div id="modalCrossSellSection" class="pt-2 border-t border-gray-100">
-                    <h4 class="text-[11px] font-black uppercase tracking-wider text-gray-400 mb-2 flex items-center gap-1">
+                    <h4
+                        class="text-[11px] font-black uppercase tracking-wider text-gray-400 mb-2 flex items-center gap-1">
                         🥤 Birlikte Harika Gider
                     </h4>
                     <div id="modalSuggestionsContainer" class="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none">
-                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -517,22 +579,30 @@
         <div class="bg-white rounded-xl shadow-lg p-6 w-96 relative">
             <button id="closeAdminLogin" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">✖</button>
             <h2 class="text-xl font-bold mb-3 text-red-600">Yönetici Girişi (Paket)</h2>
-            <input id="passwordInput" type="password" placeholder="Şifreyi giriniz" class="border w-full p-2 rounded mb-3 focus:ring-red-500 focus:border-red-500" />
-            <button id="checkPassword" class="bg-red-500 text-white px-4 py-2 rounded w-full hover:bg-red-600 transition">Giriş Yap</button>
+            <input id="passwordInput" type="password" placeholder="Şifreyi giriniz"
+                class="border w-full p-2 rounded mb-3 focus:ring-red-500 focus:border-red-500" />
+            <button id="checkPassword"
+                class="bg-red-500 text-white px-4 py-2 rounded w-full hover:bg-red-600 transition">Giriş Yap</button>
             <p id="loginError" class="text-red-600 text-sm mt-2 hidden">Hatalı şifre!</p>
         </div>
     </div>
 
-    <div id="ratingModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[100] p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm relative text-center border-b-8 border-orange-500 animate-pop-in">
+    <div id="ratingModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[100] p-4">
+        <div
+            class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm relative text-center border-b-8 border-orange-500 animate-pop-in">
             <div class="flex flex-col items-center justify-center mb-4 select-none">
-                <div class="relative flex items-center justify-center bg-gradient-to-br from-red-600 to-amber-500 rounded-xl px-5 py-2.5 shadow-md border-b-4 border-amber-600 transform -rotate-1 tracking-wide">
+                <div
+                    class="relative flex items-center justify-center bg-gradient-to-br from-red-600 to-amber-500 rounded-xl px-5 py-2.5 shadow-md border-b-4 border-amber-600 transform -rotate-1 tracking-wide">
                     <span class="absolute -top-1.5 -left-1.5 text-yellow-300 text-base animate-pulse">✨</span>
                     <div class="text-center">
-                        <span class="block text-[9px] font-black uppercase text-yellow-300 tracking-[0.25em] drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Olimpiyat</span>
-                        <h2 class="text-xl font-extrabold text-white uppercase italic leading-none tracking-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.7)] flex items-center gap-1">
+                        <span
+                            class="block text-[9px] font-black uppercase text-yellow-300 tracking-[0.25em] drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Olimpiyat</span>
+                        <h2
+                            class="text-xl font-extrabold text-white uppercase italic leading-none tracking-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.7)] flex items-center gap-1">
                             <span>LEZZET</span>
-                            <span class="bg-white text-red-600 px-1 py-0.2 rounded text-base font-black not-italic rotate-3 shadow-sm">MENÜSÜ</span>
+                            <span
+                                class="bg-white text-red-600 px-1 py-0.2 rounded text-base font-black not-italic rotate-3 shadow-sm">MENÜSÜ</span>
                         </h2>
                     </div>
                 </div>
@@ -544,60 +614,82 @@
                 </div>
                 <h3 class="text-xl font-black text-gray-800 leading-tight mb-2">Lezzetimizi Beğendiniz mi?</h3>
                 <p class="text-sm text-gray-600 leading-relaxed px-2">
-                    Olimpiyat Kokoreç’teki deneyiminizden memnun kaldıysanız, bize Google’da <span class="font-extrabold text-orange-500">5 Yıldız</span> vererek lezzet ailemizi büyütebilir misiniz? 🌟
+                    Olimpiyat Kokoreç’teki deneyiminizden memnun kaldıysanız, bize Google’da <span
+                        class="font-extrabold text-orange-500">5 Yıldız</span> vererek lezzet ailemizi büyütebilir
+                    misiniz? 🌟
                 </p>
             </div>
 
             <div class="space-y-2 mt-5">
-                <a id="goToRatingLink" href="https://search.google.com/local/writereview?placeid=ChIJXXQYlvDIyhQReratRBFh_TY" target="_blank"
-                   class="relative overflow-hidden bg-gradient-to-r from-red-600 to-orange-500 text-white px-6 py-3.5 rounded-xl w-full font-black text-base flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-[1.02] active:scale-98 group cursor-pointer">
-                    <span class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
+                <a id="goToRatingLink"
+                    href="https://search.google.com/local/writereview?placeid=ChIJXXQYlvDIyhQReratRBFh_TY"
+                    target="_blank"
+                    class="relative overflow-hidden bg-gradient-to-r from-red-600 to-orange-500 text-white px-6 py-3.5 rounded-xl w-full font-black text-base flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-[1.02] active:scale-98 group cursor-pointer">
+                    <span
+                        class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
                     <span>HEMEN 5 YILDIZ VER</span>
                     <span class="text-lg group-hover:animate-bounce">⭐</span>
                 </a>
-                <button id="closeRatingModal" class="text-gray-400 font-bold mt-2 text-xs hover:text-gray-600 transition block w-full uppercase tracking-wider py-2">Hayır, teşekkürler</button>
+                <button id="closeRatingModal"
+                    class="text-gray-400 font-bold mt-2 text-xs hover:text-gray-600 transition block w-full uppercase tracking-wider py-2">Hayır,
+                    teşekkürler</button>
             </div>
         </div>
     </div>
 
     <button id="floatingWheelButton" title="Lezzet Arenası - Oyunları Oyna!"
         class="fixed bottom-[190px] right-5 w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-red-600 via-orange-500 to-amber-500 text-white flex flex-col justify-center items-center shadow-[0_4px_20px_rgba(239,68,68,0.5)] z-50 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-yellow-400 font-sans tracking-wide overflow-hidden group rotate-3 hover:rotate-0">
-        <span class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out-in"></span>
+        <span
+            class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out-in"></span>
         <span class="absolute top-1 right-1.5 text-[8px] animate-pulse">✨</span>
         <div class="relative flex items-center justify-center h-7 mt-1">
             <span class="text-2xl filter drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)] group-hover:animate-bounce">🏆</span>
         </div>
         <div class="text-[9px] font-black uppercase tracking-tighter leading-none mb-1 text-center select-none">
             <span class="block text-yellow-300 text-[8px] font-extrabold tracking-widest scale-90">ARENA</span>
-            <span class="bg-white text-red-600 px-1 py-0.5 rounded-[3px] font-black inline-block mt-0.5 shadow-sm text-[8px] scale-95">OYUN</span>
+            <span
+                class="bg-white text-red-600 px-1 py-0.5 rounded-[3px] font-black inline-block mt-0.5 shadow-sm text-[8px] scale-95">OYUN</span>
         </div>
     </button>
 
-    <div id="wheelModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-[110] p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md relative text-center max-h-[95vh] overflow-y-auto overflow-x-hidden">
-            <button id="closeWheelModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl font-bold">✖</button>
+    <div id="wheelModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-[110] p-4">
+        <div
+            class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md relative text-center max-h-[95vh] overflow-y-auto overflow-x-hidden">
+            <button id="closeWheelModal"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl font-bold">✖</button>
 
             <div id="gameSelectionScreen" class="py-4 flex flex-col items-center justify-center">
                 <div class="flex flex-col items-center justify-center my-3 select-none w-full">
-                    <div class="relative flex items-center justify-center bg-gradient-to-br from-red-600 to-amber-500 rounded-2xl px-6 py-3 shadow-lg border-b-4 border-amber-600 transform -rotate-1 tracking-wide">
+                    <div
+                        class="relative flex items-center justify-center bg-gradient-to-br from-red-600 to-amber-500 rounded-2xl px-6 py-3 shadow-lg border-b-4 border-amber-600 transform -rotate-1 tracking-wide">
                         <span class="absolute -top-2 -left-2 text-yellow-300 text-lg animate-ping">✨</span>
                         <div class="flex flex-col items-center justify-center text-center">
-                            <img src="file_00000000a4647246a61cf005bd316d6f.png" width="100" class="mx-auto object-contain" style="margin-bottom: -5px; z-index: 10;">
-                            <h2 class="text-2xl font-extrabold text-white uppercase italic leading-none tracking-tight drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)] flex items-center justify-center gap-1.5">
+                            <img src="file_00000000a4647246a61cf005bd316d6f.png" width="100"
+                                class="mx-auto object-contain" style="margin-bottom: -5px; z-index: 10;">
+                            <h2
+                                class="text-2xl font-extrabold text-white uppercase italic leading-none tracking-tight drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)] flex items-center justify-center gap-1.5">
                                 <span>LEZZET</span>
-                                <span class="bg-white text-red-600 px-1.5 py-0.5 rounded-md text-xl font-black not-italic rotate-3 shadow-sm inline-block">ARENASI</span>
+                                <span
+                                    class="bg-white text-red-600 px-1.5 py-0.5 rounded-md text-xl font-black not-italic rotate-3 shadow-sm inline-block">ARENASI</span>
                             </h2>
                         </div>
-                        <span class="absolute -bottom-1.5 -right-2 bg-yellow-400 text-gray-900 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow border border-white">Oyunlar</span>
+                        <span
+                            class="absolute -bottom-1.5 -right-2 bg-yellow-400 text-gray-900 text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider shadow border border-white">Oyunlar</span>
                     </div>
-                    <div class="w-24 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent mt-4 rounded-full"></div>
+                    <div
+                        class="w-24 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent mt-4 rounded-full">
+                    </div>
                 </div>
 
-                <h2 class="text-xl font-black text-orange-600 mb-1 mt-2 text-center w-full">Ne Yiyeceğinize Karar Veremediniz mi?</h2>
-                <p class="text-xs text-gray-500 mb-5 text-center w-full">Sizin için seçimi eğlenceli hale getirelim. Bir oyun seçin!</p>
+                <h2 class="text-xl font-black text-orange-600 mb-1 mt-2 text-center w-full">Ne Yiyeceğinize Karar
+                    Veremediniz mi?</h2>
+                <p class="text-xs text-gray-500 mb-5 text-center w-full">Sizin için seçimi eğlenceli hale getirelim. Bir
+                    oyun seçin!</p>
 
                 <div class="space-y-3 w-full">
-                    <button id="selectWheelGame" class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold shadow-md hover:opacity-90 transition transform hover:-translate-y-0.5">
+                    <button id="selectWheelGame"
+                        class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold shadow-md hover:opacity-90 transition transform hover:-translate-y-0.5">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl">🎡</span>
                             <div class="text-left">
@@ -608,7 +700,8 @@
                         <span class="text-xl">➔</span>
                     </button>
 
-                    <button id="selectMatchupGame" class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl font-bold shadow-md hover:opacity-90 transition transform hover:-translate-y-0.5">
+                    <button id="selectMatchupGame"
+                        class="w-full flex items-center justify-between p-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl font-bold shadow-md hover:opacity-90 transition transform hover:-translate-y-0.5">
                         <div class="flex items-center gap-3">
                             <span class="text-2xl">🔥</span>
                             <div class="text-left">
@@ -624,46 +717,63 @@
             <div id="wheelGameArea" class="hidden">
                 <div id="wheelHeaderGroup">
                     <h2 id="wheelTitle" class="text-2xl font-black text-orange-600 mb-1">Ne Yesem?</h2>
-                    <p id="wheelSubtitle" class="text-xs text-gray-500 mb-4">Parmağınla fırlat veya butona basarak lezzet çarkını çevir!</p>
+                    <p id="wheelSubtitle" class="text-xs text-gray-500 mb-4">Parmağınla fırlat veya butona basarak
+                        lezzet çarkını çevir!</p>
                 </div>
 
                 <div id="wheelWinnerHeaderGroup" class="hidden text-center pb-3 animate-pop-in">
                     <span class="text-5xl inline-block animate-bounce mb-1">🏆</span>
-                    <h3 id="wheelWinnerHeading" class="text-xl font-black text-green-600 leading-none uppercase tracking-wide">Günün Şanslı Lezzeti!</h3>
+                    <h3 id="wheelWinnerHeading"
+                        class="text-xl font-black text-green-600 leading-none uppercase tracking-wide">Günün Şanslı
+                        Lezzeti!</h3>
                 </div>
-                
-                <div id="wheelInteractiveArea" class="relative w-72 h-[340px] mx-auto mb-4 flex items-center justify-center overflow-hidden">
-                    <div id="wheelContainer" class="relative w-full h-full flex items-center justify-center overflow-hidden">
-                        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[25px] border-t-red-600 drop-shadow-md"></div>
+
+                <div id="wheelInteractiveArea"
+                    class="relative w-72 h-[340px] mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                    <div id="wheelContainer"
+                        class="relative w-full h-full flex items-center justify-center overflow-hidden">
+                        <div
+                            class="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[25px] border-t-red-600 drop-shadow-md">
+                        </div>
                         <canvas id="wheelCanvas" width="280" height="280" class="rounded-full shadow-md mt-4"></canvas>
-                        <button id="spinButton" class="absolute w-14 h-14 bg-red-600 text-white rounded-full font-black text-xs shadow-xl border-4 border-white flex items-center justify-center z-10 hover:bg-red-700 uppercase tracking-wider mt-4">ÇEVİR</button>
+                        <button id="spinButton"
+                            class="absolute w-14 h-14 bg-red-600 text-white rounded-full font-black text-xs shadow-xl border-4 border-white flex items-center justify-center z-10 hover:bg-red-700 uppercase tracking-wider mt-4">ÇEVİR</button>
                     </div>
 
-                    <div id="wheelBigResultCard" class="hidden absolute inset-0 w-full h-full rounded-2xl overflow-hidden bg-white border-2 border-green-500 shadow-2xl flex flex-col animate-pop-in">
+                    <div id="wheelBigResultCard"
+                        class="hidden absolute inset-0 w-full h-full rounded-2xl overflow-hidden bg-white border-2 border-green-500 shadow-2xl flex flex-col animate-pop-in">
                         <div class="relative w-full h-3/4 bg-gray-50 border-b border-gray-100">
                             <img id="wheelResultImage" class="w-full h-full object-contain">
-                            <span id="wheelResultPrice" class="absolute bottom-3 right-3 bg-green-600 text-white font-black text-base px-3 py-1 rounded-lg shadow-md whitespace-nowrap"></span>
+                            <span id="wheelResultPrice"
+                                class="absolute bottom-3 right-3 bg-green-600 text-white font-black text-base px-3 py-1 rounded-lg shadow-md whitespace-nowrap"></span>
                         </div>
-                        <div class="p-3 text-left bg-gradient-to-b from-green-50 to-white flex-grow flex flex-col justify-center">
-                            <h4 id="wheelResultTitle" class="font-black text-base text-gray-800 leading-tight mb-1"></h4>
+                        <div
+                            class="p-3 text-left bg-gradient-to-b from-green-50 to-white flex-grow flex flex-col justify-center">
+                            <h4 id="wheelResultTitle" class="font-black text-base text-gray-800 leading-tight mb-1">
+                            </h4>
                             <p id="wheelResultDesc" class="text-gray-500 text-xs line-clamp-2 leading-relaxed"></p>
                         </div>
                     </div>
                 </div>
-                <button id="reSpinButton" class="hidden mx-auto bg-gray-800 text-white font-bold text-xs px-4 py-2 rounded-full hover:bg-orange-600 transition duration-300">🔄 Başka Bir Şey Seç</button>
+                <button id="reSpinButton"
+                    class="hidden mx-auto bg-gray-800 text-white font-bold text-xs px-4 py-2 rounded-full hover:bg-orange-600 transition duration-300">🔄
+                    Başka Bir Şey Seç</button>
             </div>
 
             <div id="matchupGameArea" class="hidden">
                 <h2 class="text-2xl font-black text-red-600 mb-1">Bu mu? Şu mu?</h2>
                 <div class="w-full bg-gray-200 rounded-full h-1.5 mb-4">
-                    <div id="matchupProgress" class="bg-red-600 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    <div id="matchupProgress" class="bg-red-600 h-1.5 rounded-full transition-all duration-300"
+                        style="width: 0%"></div>
                 </div>
 
                 <div class="flex flex-col gap-6 my-4 relative">
-                    <div id="optionA" class="bg-white rounded-2xl overflow-hidden shadow-xl cursor-pointer transition transform active:scale-95 flex flex-col border border-gray-100">
+                    <div id="optionA"
+                        class="bg-white rounded-2xl overflow-hidden shadow-xl cursor-pointer transition transform active:scale-95 flex flex-col border border-gray-100">
                         <div class="relative h-48 w-full bg-gray-50 flex items-center justify-center">
                             <img id="imgA" class="w-full h-full object-contain">
-                            <span id="priceA" class="absolute bottom-3 right-3 bg-orange-100 text-orange-600 font-black text-sm px-3 py-1 rounded-lg shadow-sm"></span>
+                            <span id="priceA"
+                                class="absolute bottom-3 right-3 bg-orange-100 text-orange-600 font-black text-sm px-3 py-1 rounded-lg shadow-sm"></span>
                         </div>
                         <div class="p-4 text-left bg-gradient-to-b from-gray-50 to-white border-t border-gray-50">
                             <h3 id="titleA" class="font-black text-base text-gray-800 leading-tight"></h3>
@@ -672,16 +782,20 @@
                     </div>
 
                     <div class="flex items-center justify-center my-[-30px] z-10 select-none pointer-events-none">
-                        <div class="relative w-16 h-16 rounded-full bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 flex items-center justify-center border-4 border-white shadow-[0_0_25px_rgba(239,68,68,0.8)] animate-pulse">
+                        <div
+                            class="relative w-16 h-16 rounded-full bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 flex items-center justify-center border-4 border-white shadow-[0_0_25px_rgba(239,68,68,0.8)] animate-pulse">
                             <span class="absolute text-yellow-300 text-2xl opacity-40 animate-ping">⚡</span>
-                            <span class="text-white font-black italic text-xl tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">VS</span>
+                            <span
+                                class="text-white font-black italic text-xl tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">VS</span>
                         </div>
                     </div>
 
-                    <div id="optionB" class="bg-white rounded-2xl overflow-hidden shadow-xl cursor-pointer transition transform active:scale-95 flex flex-col border border-gray-100">
+                    <div id="optionB"
+                        class="bg-white rounded-2xl overflow-hidden shadow-xl cursor-pointer transition transform active:scale-95 flex flex-col border border-gray-100">
                         <div class="relative h-48 w-full bg-gray-50 flex items-center justify-center">
                             <img id="imgB" class="w-full h-full object-contain">
-                            <span id="priceB" class="absolute bottom-3 right-3 bg-orange-100 text-orange-600 font-black text-sm px-3 py-1 rounded-lg shadow-sm"></span>
+                            <span id="priceB"
+                                class="absolute bottom-3 right-3 bg-orange-100 text-orange-600 font-black text-sm px-3 py-1 rounded-lg shadow-sm"></span>
                         </div>
                         <div class="p-4 text-left bg-gradient-to-b from-gray-50 to-white border-t border-gray-50">
                             <h3 id="titleB" class="font-black text-base text-gray-800 leading-tight"></h3>
@@ -698,37 +812,50 @@
                     <div class="w-full h-48 bg-gray-50 flex items-center justify-center">
                         <img id="winnerMatchImage" class="w-full h-full object-contain">
                     </div>
-                    <div class="p-4 text-left bg-gradient-to-b from-green-50 to-white relative border-t border-gray-100">
+                    <div
+                        class="p-4 text-left bg-gradient-to-b from-green-50 to-white relative border-t border-gray-100">
                         <h4 id="winnerMatchTitle" class="font-black text-lg text-gray-800 mb-1"></h4>
                         <p id="winnerMatchDesc" class="text-gray-600 text-xs line-clamp-3 mb-2"></p>
                         <div class="flex justify-between items-center pt-2 border-t border-gray-100">
                             <span class="text-xs text-gray-400 italic">Şampiyon Seçim</span>
-                            <span id="winnerMatchPrice" class="bg-green-600 text-white font-black text-base px-3 py-1 rounded-lg"></span>
+                            <span id="winnerMatchPrice"
+                                class="bg-green-600 text-white font-black text-base px-3 py-1 rounded-lg"></span>
                         </div>
                     </div>
                 </div>
-                <button id="restartMatchupButton" class="bg-gray-800 text-white font-bold text-xs px-5 py-2.5 rounded-full hover:bg-red-600 transition duration-300">🔄 Yeniden Kapıştır</button>
+                <button id="restartMatchupButton"
+                    class="bg-gray-800 text-white font-bold text-xs px-5 py-2.5 rounded-full hover:bg-red-600 transition duration-300">🔄
+                    Yeniden Kapıştır</button>
             </div>
 
-            <button id="backToSelectionButton" class="hidden mt-4 text-xs text-gray-400 hover:text-gray-600 underline">⬅ Oyun Seçim Menüsüne Dön</button>
+            <button id="backToSelectionButton" class="hidden mt-4 text-xs text-gray-400 hover:text-gray-600 underline">⬅
+                Oyun Seçim Menüsüne Dön</button>
         </div>
     </div>
 
-    <div id="commissionModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[110]">
+    <div id="commissionModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[110]">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-sm relative text-center border-t-8 border-red-500">
             <h2 class="text-2xl font-bold mb-4 text-red-600">⚠️ UYARI!</h2>
             <p class="mb-6 text-gray-800 font-medium leading-relaxed">
-                Yemek sipariş platformlarında verilecek siparişlerde komisyon nedeniyle farklı fiyatlandırma olabilir.<br>
+                Yemek sipariş platformlarında verilecek siparişlerde komisyon nedeniyle farklı fiyatlandırma
+                olabilir.<br>
                 <span class="uyari">Mevcut fiyatlar için telefon ile sipariş verebilirsiniz.</span>
             </p>
-            <button id="confirmRedirect" class="bg-red-600 text-white px-6 py-3 rounded-xl w-full font-bold text-lg hover:bg-red-700 transition shadow-lg">Tamam, Devam Et</button>
-            <a href="tel:02163357920" class="bg-green-500 text-white px-6 py-3 rounded-xl w-full font-bold text-lg hover:bg-green-600 transition shadow-lg mt-3 flex items-center justify-center gap-2 decoration-0">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+            <button id="confirmRedirect"
+                class="bg-red-600 text-white px-6 py-3 rounded-xl w-full font-bold text-lg hover:bg-red-700 transition shadow-lg">Tamam,
+                Devam Et</button>
+            <a href="tel:02163357920"
+                class="bg-green-500 text-white px-6 py-3 rounded-xl w-full font-bold text-lg hover:bg-green-600 transition shadow-lg mt-3 flex items-center justify-center gap-2 decoration-0">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                 </svg>
                 Telefon ile Sipariş Ver
             </a>
-            <button id="cancelRedirect" class="text-gray-500 mt-4 text-sm hover:text-gray-800 transition block w-full">İptal</button>
+            <button id="cancelRedirect"
+                class="text-gray-500 mt-4 text-sm hover:text-gray-800 transition block w-full">İptal</button>
         </div>
     </div>
 
@@ -739,56 +866,70 @@
 
     <a id="floatingPhoneButton" href="tel:02163357920" title="Hemen Ara Sipariş Ver"
         class="fixed bottom-[190px] right-5 w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-red-600 via-orange-500 to-amber-500 text-white flex flex-col justify-center items-center shadow-[0_4px_20px_rgba(239,68,68,0.4)] z-50 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-yellow-400 font-sans tracking-wide overflow-hidden group rotate-6 hover:rotate-0">
-        <span class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out-in"></span>
+        <span
+            class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out-in"></span>
         <span class="absolute top-1 left-1.5 text-[8px] animate-pulse">✨</span>
         <div class="relative flex items-center justify-center h-7 mt-1">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
+                stroke="currentColor"
                 class="w-7 h-7 filter drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)] animate-[wiggle_1s_ease-in-out_infinite] group-hover:scale-110 transition-transform">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
             </svg>
         </div>
         <div class="text-[9px] font-black uppercase tracking-tighter leading-none mb-1 text-center select-none">
             <span class="block text-yellow-300 text-[8px] font-extrabold tracking-widest scale-90">HEMEN</span>
-            <span class="bg-white text-red-600 px-1 py-0.5 rounded-[3px] font-black inline-block mt-0.5 shadow-sm text-[8px] scale-95">ARA</span>
+            <span
+                class="bg-white text-red-600 px-1 py-0.5 rounded-[3px] font-black inline-block mt-0.5 shadow-sm text-[8px] scale-95">ARA</span>
         </div>
     </a>
 
     <button id="floatingRatingButton" title="Bizi Google'da Puanlayın"
         class="fixed bottom-[20px] right-5 w-[72px] h-[72px] rounded-2xl bg-gradient-to-br from-red-600 via-orange-500 to-amber-500 text-white flex flex-col justify-center items-center shadow-[0_4px_20px_rgba(245,158,11,0.4)] z-50 cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 border-2 border-yellow-400 font-sans tracking-wide overflow-hidden group -rotate-3 hover:rotate-0">
-        <span class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out-in"></span>
+        <span
+            class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out-in"></span>
         <span class="absolute top-1 left-1.5 text-[8px] animate-pulse">✨</span>
         <div class="relative flex items-center justify-center h-7 mt-1">
-            <span class="text-2xl filter drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)] group-hover:animate-spin-[spin_1s_ease-in-out_1]">⭐</span>
+            <span
+                class="text-2xl filter drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)] group-hover:animate-spin-[spin_1s_ease-in-out_1]">⭐</span>
         </div>
         <div class="text-[9px] font-black uppercase tracking-tighter leading-none mb-1 text-center select-none">
             <span class="block text-yellow-300 text-[8px] font-extrabold tracking-widest scale-90">GOOGLE</span>
-            <span class="bg-white text-orange-600 px-1 py-0.5 rounded-[3px] font-black inline-block mt-0.5 shadow-sm text-[8px] scale-95">5 YILDIZ</span>
+            <span
+                class="bg-white text-orange-600 px-1 py-0.5 rounded-[3px] font-black inline-block mt-0.5 shadow-sm text-[8px] scale-95">5
+                YILDIZ</span>
         </div>
     </button>
 
     <!-- 📍 ÖZEL KONUM DETAY POP-UP'I -->
-    <div id="locationDetailModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[10000] p-4 transition-opacity">
-        <div class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm relative text-center border-t-8 border-[#e3000f] animate-pop-in">
-            <button onclick="document.getElementById('locationDetailModal').classList.add('hidden')" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 transition font-bold">✖</button>
-            
+    <div id="locationDetailModal"
+        class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[10000] p-4 transition-opacity">
+        <div
+            class="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-sm relative text-center border-t-8 border-[#e3000f] animate-pop-in">
+            <button onclick="document.getElementById('locationDetailModal').classList.add('hidden')"
+                class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 transition font-bold">✖</button>
+
             <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
                 <span class="text-3xl drop-shadow-md">📍</span>
             </div>
-            
+
             <h2 class="text-xl font-black text-gray-800 mb-2">Mevcut Konumunuz</h2>
-            
-            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-[13px] font-semibold text-gray-600 leading-relaxed min-h-[60px] flex items-center justify-center text-center">
+
+            <div
+                class="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-[13px] font-semibold text-gray-600 leading-relaxed min-h-[60px] flex items-center justify-center text-center">
                 <span id="customModalAddressText">Konum tespit ediliyor...</span>
             </div>
-            
-            <button onclick="document.getElementById('locationDetailModal').classList.add('hidden')" class="w-full mt-5 bg-[#e3000f] text-white px-4 py-3.5 rounded-xl font-black shadow-md hover:bg-red-700 active:scale-95 transition">
+
+            <button onclick="document.getElementById('locationDetailModal').classList.add('hidden')"
+                class="w-full mt-5 bg-[#e3000f] text-white px-4 py-3.5 rounded-xl font-black shadow-md hover:bg-red-700 active:scale-95 transition">
                 Tamam, Anladım
             </button>
         </div>
     </div>
 
     <!-- 🛵 AKILLI TAHMİNİ TESLİMAT WIDGET'I (Sadece konum onaylanınca çıkar) -->
-    <div id="deliveryTimeWidget" class="hidden fixed bottom-6 left-5 z-[50] bg-white border-2 border-[#e3000f] rounded-2xl shadow-[0_10px_25px_rgba(227,0,15,0.3)] p-3 flex items-center gap-3 max-w-[240px]">
+    <div id="deliveryTimeWidget"
+        class="hidden fixed bottom-6 left-5 z-[50] bg-white border-2 border-[#e3000f] rounded-2xl shadow-[0_10px_25px_rgba(227,0,15,0.3)] p-3 flex items-center gap-3 max-w-[240px]">
         <div class="bg-red-50 p-2.5 rounded-full text-3xl shadow-inner animate-bounce">🛵</div>
         <div class="flex flex-col">
             <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-0.5">Sana Gelsin</span>
@@ -796,7 +937,8 @@
                 <!-- JS ile buraya dakika dolacak -->
             </span>
         </div>
-        <button onclick="document.getElementById('deliveryTimeWidget').classList.add('hidden')" class="absolute -top-2 -right-2 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full w-6 h-6 flex items-center justify-center text-xs font-black shadow-sm transition border border-gray-200">✖</button>
+        <button onclick="document.getElementById('deliveryTimeWidget').classList.add('hidden')"
+            class="absolute -top-2 -right-2 bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full w-6 h-6 flex items-center justify-center text-xs font-black shadow-sm transition border border-gray-200">✖</button>
     </div>
 
     <script>
@@ -987,9 +1129,9 @@
             const productsArray = [];
             dataSnapshot.forEach(childSnapshot => {
                 const product = childSnapshot.val();
-                
+
                 // 🛑 YENİ EKLENEN KİLİT: Eğer ürün rafa kaldırıldıysa, müşteri listesine HİÇ ALMA!
-                if (product.isArchived === true) return; 
+                if (product.isArchived === true) return;
 
                 product.key = childSnapshot.key;
                 product.lastUpdated = product.lastUpdated || Date.now();
@@ -1002,18 +1144,18 @@
             return productsArray;
         }
 
-       // --- 🕵️ YENİ: SPAM KORUMALI AKILLI ZİYARETÇİ MOTORU ---
+        // --- 🕵️ YENİ: SPAM KORUMALI AKILLI ZİYARETÇİ MOTORU ---
         function trackVisitor() {
             // Müşterinin tarayıcı hafızasına bakıyoruz. Son ziyaret zamanını alıyoruz.
             const lastVisitTime = localStorage.getItem('olimpiyat_last_visit_time');
             const nowTime = Date.now();
-            
+
             // KURAL: Eğer son ziyaretten bu yana 1 saat (3.600.000 milisaniye) geçmediyse, 
             // bu bir sayfayı yenileme (refresh) işlemidir. Sayacı artırmadan sessizce çık!
             if (lastVisitTime && (nowTime - parseInt(lastVisitTime)) < 3600000) {
-                return; 
+                return;
             }
-            
+
             // Eğer ilk defa giriyorsa veya üzerinden 1 saat geçtiyse, yeni zamanı hafızaya yaz.
             localStorage.setItem('olimpiyat_last_visit_time', nowTime.toString());
 
@@ -1026,8 +1168,8 @@
             };
 
             const now = new Date();
-            const todayStr = getLocalYYYYMMDD(now); 
-            
+            const todayStr = getLocalYYYYMMDD(now);
+
             // 1. Eski Günlük Toplam Sayaç
             const counterRef = visitorsRef.child(todayStr);
             counterRef.transaction(currentCount => {
@@ -1038,10 +1180,10 @@
             const currentHour = String(now.getHours()).padStart(2, '0');
             const currentMinute = String(now.getMinutes()).padStart(2, '0');
             const exactTime = currentHour + ':' + currentMinute;
-            
+
             // Kullanıcı yerinde menüye mi girdi, paket servise mi?
             const activeMenu = window.location.href.includes('delivery') ? 'delivery' : 'in_place';
-            
+
             // Firebase'de tam o saatin içine +1 yazar
             database.ref('visitors_hourly/' + activeMenu + '/' + todayStr + '/' + exactTime)
                 .set(firebase.database.ServerValue.increment(1));
@@ -1090,7 +1232,7 @@
                 const section = document.createElement('section');
                 section.id = 'category-' + index;
                 section.className = 'menu-category-section pt-4 scroll-mt-[100px]'; // Scroll hizasını navbarın altında tutar
-                
+
                 // Kategori Başlığı (Paket servise uygun Kırmızı Çizgi)
                 section.innerHTML = `<h2 class="text-xl sm:text-2xl font-black text-gray-800 border-b-2 border-red-200 pb-2 mb-3 px-1">${displayTitle}</h2>`;
 
@@ -1107,7 +1249,7 @@
                     const desc = language === 'TR' ? p.desc : p.descEN || p.desc || '';
                     const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
                     const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
-                    
+
                     let badgeHtml = '';
                     let priceHtml = `<span class='text-red-600 font-black text-[13px] sm:text-base'>${p.price} ₺</span>`;
 
@@ -1222,12 +1364,12 @@
                                         </div>
                                         <span class="combo-status text-gray-400 font-black pointer-events-none">+</span>
                                     `;
-                                    
+
                                     miniCard.addEventListener('click', (e) => {
                                         e.stopPropagation();
                                         if (miniCard.classList.contains('combo-applied')) return;
                                         miniCard.classList.add('combo-applied');
-                                        
+
                                         const mainPrice = parseFloat(p.discountPrice || p.price);
                                         document.getElementById('modalPrice').textContent = (mainPrice + parseFloat(dPrice)) + " ₺";
                                         document.getElementById('modalTitle').textContent = name + " + " + dName;
@@ -1247,11 +1389,11 @@
 
                     gridDiv.appendChild(card);
                 });
-                
+
                 section.appendChild(gridDiv);
                 menuContainer.appendChild(section);
             });
-            
+
             // İletişim Bilgilerini En Alta Sabit Olarak Bas
             const contactDiv = document.createElement('div');
             contactDiv.className = "text-center mt-12 mb-10 bg-white rounded-xl shadow-inner p-6 max-w-lg mx-auto border-2 border-dashed border-red-200";
@@ -1261,7 +1403,7 @@
                 <p class="mt-2">📞 <a href="tel:02163357920" class="text-red-600 font-black text-xl hover:underline">0216 335 79 20</a></p>
             `;
             menuContainer.appendChild(contactDiv);
-            
+
             // Sayfa yüklendiğinde veya dil değiştiğinde ilk sekmeyi aktif yap
             setTimeout(() => {
                 const firstTab = document.querySelector('.tabBtn');
@@ -1291,7 +1433,7 @@
                     if (targetSection) {
                         targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-                    
+
                     document.querySelectorAll('.tabBtn').forEach(b => {
                         b.classList.remove('active-tab');
                         b.classList.replace('text-white', 'text-gray-500');
@@ -1300,7 +1442,7 @@
                     btn.classList.replace('text-gray-500', 'text-white');
 
                     btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    
+
                     // DİKKAT: Paket Servis kategori tıklaması!
                     database.ref('stats/category_clicks/delivery/' + catTR).set(firebase.database.ServerValue.increment(1));
                 });
@@ -1312,7 +1454,7 @@
         function renderDiscountSection() {
             const globalDiscountSection = document.getElementById('globalDiscountSection');
             const discountHorizontalScroll = document.getElementById('discountHorizontalScroll');
-            
+
             if (!globalDiscountSection || !discountHorizontalScroll) return;
 
             const discountProducts = products.filter(p => p.discountPrice !== undefined && p.discountPrice !== null && p.discountPrice !== "" && p.category !== 'İletişim' && p.isArchived !== true);
@@ -1351,7 +1493,7 @@
                     document.getElementById('modalTitle').textContent = name;
                     document.getElementById('modalDesc').textContent = language === 'TR' ? p.desc : p.descEN || p.desc || '';
                     document.getElementById('modalPrice').textContent = p.discountPrice + " ₺";
-                    
+
                     const menuPriceBox = document.getElementById('modalMenuPriceBox');
                     if (menuPriceBox) {
                         if (p.category === 'Menüler') {
@@ -1361,14 +1503,14 @@
                             menuPriceBox.classList.add('hidden');
                         }
                     }
-                    
+
                     // İndirimli vitrinden tıklanınca eşlikçi alanını temizle ve aç
                     const crossSection = document.getElementById('modalCrossSellSection');
-                    if(crossSection) crossSection.classList.add('hidden'); 
-                    
+                    if (crossSection) crossSection.classList.add('hidden');
+
                     document.getElementById('imageModal').classList.remove('hidden');
                 });
-                
+
                 discountHorizontalScroll.appendChild(item);
             });
         }
@@ -1382,7 +1524,7 @@
             } else {
                 langTR.style.fontWeight = 'normal'; langEN.style.fontWeight = 'bold';
             }
-            
+
             // Tüm gereksiz if/else gizlemeleri çöpe gitti
             createCategoryTabs();
             renderCampaignSlider();
@@ -1434,21 +1576,21 @@
             } else { loginError.classList.remove('hidden'); }
         });
 
-     // --- 🛵 RESTORAN UZAKLIK VE TAHMİNİ TESLİMAT SÜRESİ HESAPLAYICI ---
+        // --- 🛵 RESTORAN UZAKLIK VE TAHMİNİ TESLİMAT SÜRESİ HESAPLAYICI ---
         function calculateDeliveryTime(userLat, userLon) {
             // Olimpiyat Kokoreç Yamanevler Koordinatları
-            const RESTAURANT_LAT = 41.0260; 
-            const RESTAURANT_LON = 29.1000; 
+            const RESTAURANT_LAT = 41.0260;
+            const RESTAURANT_LON = 29.1000;
 
             // Haversine Formülü (İki koordinat arası kilometre cinsinden mesafe)
-            const R = 6371; 
+            const R = 6371;
             const dLat = (RESTAURANT_LAT - userLat) * Math.PI / 180;
             const dLon = (RESTAURANT_LON - userLon) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(userLat * Math.PI / 180) * Math.cos(RESTAURANT_LAT * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const distanceKM = R * c; 
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(userLat * Math.PI / 180) * Math.cos(RESTAURANT_LAT * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distanceKM = R * c;
 
             // Süre Algoritması: 15 Dk Hazırlık + (Kilometre başı 5 Dk Yol/Trafik payı)
             const prepTime = 15;
@@ -1457,14 +1599,14 @@
 
             // Alt ve Üst Sınır Korumaları
             if (totalTime < 20) totalTime = 20; // Ne kadar yakın olursa olsun en az 20 dk diyelim
-            
+
             // Eğer mesafe çok uzaksa (Örn 60 dakikadan fazla sürüyorsa) özel metin döndür
-            if (totalTime > 60) return "45-60+"; 
-            
+            if (totalTime > 60) return "45-60+";
+
             return totalTime;
         }
 
-      // --- GİRİŞ EKRANI VE GPS KONUM MOTORU (OTOMATİK TETİKLEMELİ) ---
+        // --- GİRİŞ EKRANI VE GPS KONUM MOTORU (OTOMATİK TETİKLEMELİ) ---
         let userFullAddress = "Konum izni bekleniyor veya tespit edilemedi.";
         let isLocationFetched = false;
 
@@ -1482,8 +1624,21 @@
             const todayStr = getLocalYYYYMMDD(new Date());
             const exactTime = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
+            // YENİ: Firebase'e veri yazan fonksiyon (Ziyaretçi sayacı ile aynı SPAM KORUMASINA sahip)
             const pushToFirebase = (mahalle, ilce, fullAddress, lat, lon) => {
                 if (typeof database !== 'undefined') {
+                    // 🛑 SPAM KORUMASI: Ziyaretçi sayacındaki gibi 1 saat (3.600.000 ms) kuralı eklendi
+                    const lastLocPush = localStorage.getItem('olimpiyat_loc_push_time');
+                    const nowTime = Date.now();
+
+                    // Eğer son konum gönderiminden bu yana 1 saat geçmediyse Firebase'i şişirme, sessizce çık!
+                    if (lastLocPush && (nowTime - parseInt(lastLocPush)) < 3600000) {
+                        return;
+                    }
+
+                    // Onaydan geçtiyse (ilk girişse veya 1 saat dolduysa) yeni saati kaydet ve Firebase'e yaz
+                    localStorage.setItem('olimpiyat_loc_push_time', nowTime.toString());
+
                     database.ref('visitor_locations/delivery/' + todayStr).push({
                         time: exactTime,
                         mahalle: mahalle,
@@ -1500,7 +1655,7 @@
                 locLabel.innerText = "Konum Kapalı";
                 locText.innerHTML = `Erişim Yok`;
                 locText.classList.remove('animate-pulse');
-                
+
                 pushToFirebase("Bilinmiyor", "Bilinmiyor", userFullAddress, 0, 0);
                 return;
             }
@@ -1510,24 +1665,24 @@
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
-                
+
                 let mahalle = "Bilinmiyor";
                 let ilce = "Bilinmiyor";
 
                 try {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=tr`);
-                    if(!res.ok) throw new Error("Harita servisine ulaşılamadı.");
+                    if (!res.ok) throw new Error("Harita servisine ulaşılamadı.");
 
                     const data = await res.json();
                     const address = data.address || {};
-                    
+
                     mahalle = address.neighbourhood || address.suburb || address.village || address.quarter || "Bilinmiyor";
                     ilce = address.town || address.county || address.city_district || address.city || "İstanbul";
-                    
+
                     userFullAddress = data.display_name || "Haritada tam adres bulunamadı.";
 
                     locLabel.innerText = "Mevcut Konum";
-                    locLabel.className = "text-[10px] font-black text-green-300 leading-tight"; 
+                    locLabel.className = "text-[10px] font-black text-green-300 leading-tight";
                     locText.innerHTML = `${mahalle}, ${ilce} <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>`;
                     locText.classList.remove('animate-pulse');
 
@@ -1547,19 +1702,19 @@
                 if (widget && widgetText) {
                     const estTime = calculateDeliveryTime(lat, lon);
                     widgetText.innerHTML = `Şimdi sipariş ver,<br><span class="text-base text-[#e3000f] font-black">${estTime} dk</span> sonra kapında!`;
-                    
+
                     // Giriş ekranı (welcome overlay) kaybolurken arkadan çıksın diye hafif bir gecikme ekliyoruz
                     setTimeout(() => {
                         widget.classList.remove('hidden');
                         widget.classList.add('animate-slide-in-left');
-                    }, 1500); 
+                    }, 1500);
                 }
 
             }, (err) => {
                 let errReason = "Konum tespiti başarısız oldu.";
-                if(err.code === 1) errReason = "Kullanıcı konum iznini reddetti.";
+                if (err.code === 1) errReason = "Kullanıcı konum iznini reddetti.";
                 else if (err.code === 2) errReason = "Cihaz kapalı alanda konum algılayamadı.";
-                
+
                 userFullAddress = errReason;
 
                 locLabel.innerText = "İzin Reddedildi";
@@ -1568,7 +1723,7 @@
                 locText.classList.remove('animate-pulse');
 
                 pushToFirebase("Gizli", "Gizli", userFullAddress, 0, 0);
-                
+
             }, geoOptions);
         }
 
@@ -1583,7 +1738,7 @@
             if (welcomeScreen && btnSanaGelsin && btnGelAl) {
                 btnSanaGelsin.addEventListener('click', () => {
                     welcomeScreen.style.transform = 'translateY(-100%)';
-                    setTimeout(() => welcomeScreen.classList.add('hidden'), 500); 
+                    setTimeout(() => welcomeScreen.classList.add('hidden'), 500);
                 });
                 btnGelAl.addEventListener('click', () => {
                     window.location.href = 'index.html';
@@ -1595,7 +1750,7 @@
                 document.getElementById('customModalAddressText').innerText = userFullAddress;
                 document.getElementById('locationDetailModal').classList.remove('hidden');
             });
-            
+
             const branchesBtn = document.getElementById('btnBranches');
             if (branchesBtn) {
                 branchesBtn.addEventListener('click', () => {
@@ -1605,7 +1760,7 @@
             }
         });
 
-       
+
 
         document.addEventListener('DOMContentLoaded', () => {
             setupFirebaseListener();
@@ -1975,7 +2130,7 @@
             let currentActiveId = '';
 
             // Okuma Çizgisi (Yaklaşık 140px)
-            const scrollPosition = window.scrollY + 140; 
+            const scrollPosition = window.scrollY + 140;
 
             sections.forEach(section => {
                 const sectionTop = section.offsetTop;
@@ -2022,11 +2177,11 @@
                 btnSanaGelsin.addEventListener('click', () => {
                     // Ekranı yumuşak bir şekilde yukarı kaydır
                     welcomeScreen.style.transform = 'translateY(-100%)';
-                    
+
                     // Animasyon bitince HTML'den tamamen gizle (arkada tıklanmaları engellemesin diye)
                     setTimeout(() => {
                         welcomeScreen.classList.add('hidden');
-                    }, 500); 
+                    }, 500);
                 });
 
                 // GEL AL SEÇİMİ
