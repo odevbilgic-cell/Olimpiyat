@@ -9,7 +9,9 @@
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="shortcut icon" href="/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-
+    <!-- Leaflet.js Harita Kütüphanesi -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -2704,15 +2706,13 @@
                 yesterday.setDate(yesterday.getDate() - 1);
                 const yesterdayStr = getLocalYYYYMMDD(yesterday);
 
-                // Firebase'den 5 farklı veri kümesini aynı anda (paralel) çek!
-                const [snapToday, snapYesterday, snapCategory, snapProducts, snapLocations] = await Promise.all([
+                // Firebase'den istatistikleri çek! (Konumlar aşağıda anlık çekilecek)
+                const [snapToday, snapYesterday, snapCategory, snapProducts] = await Promise.all([
                     database.ref(`visitors_hourly/${statsMenuType}/${todayStr}`).once('value'),
                     database.ref(`visitors_hourly/${statsMenuType}/${yesterdayStr}`).once('value'),
                     database.ref(`stats/category_clicks/${statsMenuType}`).once('value'),
-                    database.ref(`stats/product_clicks/${statsMenuType}`).once('value'),
-                    database.ref(`visitor_locations/${statsMenuType}/${todayStr}`).once('value') // YENİ EKLENDİ
+                    database.ref(`stats/product_clicks/${statsMenuType}`).once('value')
                 ]);
-
                 const todayData = snapToday.val() || {};
                 const yesterdayData = snapYesterday.val() || {};
                 const categoryData = snapCategory.val() || {};
@@ -2804,38 +2804,7 @@
                     }
                 });
 
-                // 5. CANLI KONUM TAKİP BİLGİLERİ (ÇÖKME KORUMALI)
-                const locationsData = snapLocations.val() || {};
-                let locationsHtml = "";
-                const locArray = Object.keys(locationsData).map(k => locationsData[k]);
-
-                // Güvenli Sıralama Motoru (Tarihi boş gelenler sistemi çökertmesin diye)
-                locArray.sort((a, b) => {
-                    const timeA = a.time || "";
-                    const timeB = b.time || "";
-                    return timeB.localeCompare(timeA);
-                });
-
-                if (locArray.length === 0) {
-                    locationsHtml = '<div class="text-center text-xs text-gray-400 py-4 font-bold">Bu kategori için henüz konum izni veren bir müşteri olmadı. (Paket Servis kanalında olduğunuza emin olun)</div>';
-                } else {
-                    locArray.forEach(loc => {
-                        const mahalleGosterim = loc.mahalle ? loc.mahalle : 'Bilinmiyor';
-                        const ilceGosterim = loc.ilce ? loc.ilce : 'Bilinmiyor';
-                        const adresGosterim = loc.fullAddress ? loc.fullAddress : 'Adres okunamadı';
-                        const zamanGosterim = loc.time ? loc.time : '--:--';
-
-                        locationsHtml += `
-                            <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-xl hover:bg-orange-50 transition">
-                                <div class="flex flex-col">
-                                    <span class="text-xs font-black text-gray-800">${mahalleGosterim}, ${ilceGosterim}</span>
-                                    <span class="text-[10px] text-gray-500 font-medium truncate w-48 sm:w-64" title="${adresGosterim}">${adresGosterim}</span>
-                                </div>
-                                <span class="text-[11px] font-bold text-orange-600 bg-orange-100 px-2 py-1 rounded-lg shrink-0">${zamanGosterim}</span>
-                            </div>
-                        `;
-                    });
-                }
+               
 
                 // BÜTÜN GERÇEK VERİLERLE HTML ŞABLONUNU OLUŞTUR VE ANİMASYONLA BAS
                 const html = `
@@ -2942,19 +2911,161 @@
 
                         </div>
 
-                        <!-- 4. BÖLÜM: CANLI KONUM TAKİBİ -->
-                        <div class="anim-delay-5 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 mt-6">
-                            <h3 class="font-black text-gray-800 text-sm mb-4 flex items-center gap-2">
-                                <span class="animate-pulse">📍</span> Canlı Müşteri Konumları (Bugün)
-                            </h3>
-                            <div class="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-none" id="visitorLocationsList">
-                                ${locationsHtml}
+                       <!-- 4. BÖLÜM: CANLI KONUM HARİTASI VE TOP 5 MAHALLE -->
+                        <div class="anim-delay-5 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                            <!-- Harita Alanı (2 Kolon Kaplar) -->
+                            <div class="lg:col-span-2 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-black text-gray-800 text-sm flex items-center gap-2">
+                                        <span class="animate-pulse text-red-500">📍</span> Canlı Müşteri Haritası
+                                    </h3>
+                                    <div class="flex gap-3 text-[10px] font-bold bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
+                                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-500 inline-block shadow-sm"></span> Bugün</span>
+                                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block shadow-sm"></span> Dün</span>
+                                    </div>
+                                </div>
+                                <div id="customerMap" class="w-full h-[350px] rounded-xl border border-gray-200 z-0 shadow-inner"></div>
+                            </div>
+                            
+                            <!-- Top 5 Mahalle Alanı (1 Kolon Kaplar) -->
+                            <div class="bg-gradient-to-b from-gray-900 to-black p-4 sm:p-5 rounded-2xl shadow-lg border border-gray-800 text-white flex flex-col">
+                                <h3 class="font-black text-yellow-400 text-sm mb-4 flex items-center gap-2 border-b border-gray-700 pb-3">
+                                    <span class="text-lg animate-bounce">🏆</span> En Çok Sipariş Veren Mahalleler
+                                </h3>
+                                <div id="topNeighborhoodsList" class="flex flex-col gap-3 flex-1 overflow-y-auto pr-1 scrollbar-none">
+                                    <div class="text-center text-xs text-gray-400 animate-pulse mt-10 font-bold">Harita Verileri Yükleniyor...</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 `;
 
                 loadModule(html);
+
+                // HARİTA VE ANLIK VERİ İŞLEMLERİ BAŞLANGICI
+                setTimeout(() => {
+                    // 1. Haritayı Başlat (Daha önce başlatıldıysa temizle)
+                    let mapContainer = L.DomUtil.get('customerMap');
+                    if(mapContainer != null){
+                        mapContainer._leaflet_id = null;
+                    }
+                    
+                    // Harita Ümraniye Odaklı Başlar
+                    const map = L.map('customerMap').setView([41.026, 29.100], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap',
+                        maxZoom: 18
+                    }).addTo(map);
+
+                    // İkon renkleri (Bugün: Kırmızı, Dün: Mavi)
+                    const redIcon = new L.Icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+                    });
+
+                    const blueIcon = new L.Icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+                    });
+
+                    // Markerları tutacağımız grup (Her veri geldiğinde temizleyip yeniden basmak için)
+                    const markersLayer = L.layerGroup().addTo(map);
+
+                    // 2. Firebase'den Tüm Zamanların Konumlarını Anlık Dinle (.on)
+                    if(activeListeners.locations) {
+                        database.ref(`visitor_locations/${statsMenuType}`).off('value', activeListeners.locations);
+                    }
+
+                    activeListeners.locations = database.ref(`visitor_locations/${statsMenuType}`).on('value', (snapshot) => {
+                        const allLocData = snapshot.val() || {};
+                        markersLayer.clearLayers(); // Eski noktaları haritadan temizle
+                        
+                        let neighborhoodCounts = {};
+                        
+                        // Bugün ve Dün hesaplaması
+                        const getLocalYYYYMMDD = (date) => {
+                            const y = date.getFullYear();
+                            const m = String(date.getMonth() + 1).padStart(2, '0');
+                            const d = String(date.getDate()).padStart(2, '0');
+                            return `${y}-${m}-${d}`;
+                        };
+                        const todayStr = getLocalYYYYMMDD(new Date());
+                        const yesterday = new Date();
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        const yesterdayStr = getLocalYYYYMMDD(yesterday);
+
+                        let bounds = []; // Harita ekranını noktalara göre ortalamak için
+
+                        // Verileri döngüye sok (Tüm günler)
+                        Object.keys(allLocData).forEach(dateKey => {
+                            const dailyLocations = allLocData[dateKey];
+                            
+                            Object.keys(dailyLocations).forEach(pushId => {
+                                const loc = dailyLocations[pushId];
+                                
+                                // Mahalle sayacını artır (Tüm zamanlar için)
+                                const mahalleName = (loc.mahalle && loc.mahalle !== "Bilinmiyor" && loc.mahalle !== "Gizli") ? loc.mahalle : null;
+                                if(mahalleName) {
+                                    neighborhoodCounts[mahalleName] = (neighborhoodCounts[mahalleName] || 0) + 1;
+                                }
+
+                                // Haritaya SADECE Bugün ve Dün'ün markerlarını ekle
+                                if ((dateKey === todayStr || dateKey === yesterdayStr) && loc.lat && loc.lon && loc.lat !== 0) {
+                                    const isToday = dateKey === todayStr;
+                                    const markerIcon = isToday ? redIcon : blueIcon;
+                                    const dateLabel = isToday ? "Bugün" : "Dün";
+
+                                    const popupContent = `
+                                        <div class="text-center font-sans min-w-[180px]">
+                                            <div class="font-black text-sm text-gray-800 border-b pb-1 mb-1 truncate">${loc.mahalle || 'Bilinmiyor'} / ${loc.ilce || ''}</div>
+                                            <div class="text-[10px] text-gray-500 mb-2 leading-tight">${loc.fullAddress}</div>
+                                            <div class="text-xs font-bold text-white ${isToday ? 'bg-red-500' : 'bg-blue-500'} px-2 py-1 rounded inline-block shadow-sm">📅 ${dateLabel} - ⏰ ${loc.time || '--:--'}</div>
+                                        </div>
+                                    `;
+
+                                    const marker = L.marker([loc.lat, loc.lon], {icon: markerIcon})
+                                     .bindPopup(popupContent)
+                                     .addTo(markersLayer);
+                                     
+                                     bounds.push([loc.lat, loc.lon]);
+                                }
+                            });
+                        });
+
+                        // Eğer haritada nokta varsa, harita zoomunu o noktalara göre otomatik ayarla
+                        if(bounds.length > 0) {
+                            map.fitBounds(bounds, {padding: [30, 30], maxZoom: 15});
+                        }
+
+                        // 3. Top 5 Mahalle Hesaplama ve Ekrana Basma
+                        const sortedNeighborhoods = Object.keys(neighborhoodCounts)
+                            .map(name => ({ name: name, count: neighborhoodCounts[name] }))
+                            .sort((a, b) => b.count - a.count)
+                            .slice(0, 5);
+
+                        const topListEl = document.getElementById('topNeighborhoodsList');
+                        if(sortedNeighborhoods.length === 0) {
+                            topListEl.innerHTML = '<div class="text-center text-xs text-gray-400 py-4 font-bold border border-dashed border-gray-700 rounded-xl">Henüz sipariş/konum verisi oluşmadı.</div>';
+                        } else {
+                            topListEl.innerHTML = sortedNeighborhoods.map((n, index) => {
+                                const medals = ['🥇', '🥈', '🥉', '🔹', '🔹'];
+                                return `
+                                    <div class="flex items-center justify-between p-2.5 bg-gray-800 rounded-xl border border-gray-700 hover:bg-gray-700 transition transform hover:scale-[1.02]">
+                                        <div class="flex items-center gap-2 overflow-hidden pr-2">
+                                            <span class="text-lg drop-shadow-md">${medals[index]}</span>
+                                            <span class="font-bold text-xs sm:text-sm text-gray-200 truncate" title="${n.name}">${n.name}</span>
+                                        </div>
+                                        <span class="font-black text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2 py-1 rounded-lg text-xs whitespace-nowrap shadow-inner">
+                                            ${n.count} Kişi
+                                        </span>
+                                    </div>
+                                `;
+                            }).join('');
+                        }
+                    });
+                }, 150); // HTML render edildikten sonra Leaflet'in haritayı çizebilmesi için 150ms bekleme süresi
 
                 // Olay Dinleyicisini Bağla
                 document.getElementById('toggleStatsMenuBtn').addEventListener('click', () => {
