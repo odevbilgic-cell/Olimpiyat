@@ -366,6 +366,11 @@
             overflow: hidden;
         }
 
+        /* --- 🌟 YENİ: KARE VE ÇOK KALIN ETİKET FONTU --- */
+        @import url('https://fonts.googleapis.com/css2?family=Changa:wght@800&display=swap');
+        /* --- 🌟 YENİ: DOĞUŞTAN DAR VE DİK (SÜTUN) FONT --- */
+        @import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+
         /* 3'lü Bölünmüş Sayfa */
         .label-split-3 {
             height: 33.333%;
@@ -374,6 +379,7 @@
             justify-content: center;
             border-bottom: 3px dashed #cccccc;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
         .label-split-3:last-child {
@@ -381,21 +387,27 @@
         }
 
         .price-text-3 {
-            font-size: 260px;
-            /* Görseldeki devasa boyut */
-            font-weight: 900;
+            font-family: 'Anton', 'Impact', sans-serif;
+            /* Doğuştan dar ve dik font */
+            font-size: 300px;
+            /* Font dar olduğu için yüksekliği devasa artırabildik */
+            font-weight: normal;
+            /* Anton zaten doğuştan çok kalındır */
             color: #000000;
             line-height: 0.8;
-            letter-spacing: -8px;
+            letter-spacing: -14px;
+            /* Rakamlar arası doğal boşluk */
             display: flex;
             align-items: baseline;
+            margin: 0 auto;
         }
 
         .currency-text-3 {
+            font-family: 'Anton', 'Impact', sans-serif;
             font-size: 130px;
             color: #ff0000;
-            font-weight: 900;
-            margin-left: 5px;
+            margin-left: 8px;
+            display: inline-block;
         }
 
         /* 2'li Bölünmüş Özel Sayfa (Kokoreç & Döner İçin) */
@@ -406,6 +418,7 @@
             justify-content: center;
             border-bottom: 3px dashed #cccccc;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
         .label-split-2:last-child {
@@ -413,88 +426,24 @@
         }
 
         .price-text-2 {
-            font-size: 320px;
-            font-weight: 900;
+            font-family: 'Anton', 'Impact', sans-serif;
+            font-size: 450px;
+            /* İkili sayfada tavana kadar değecek dev boyut */
+            font-weight: normal;
             color: #000000;
             line-height: 0.8;
-            letter-spacing: -12px;
+            letter-spacing: -20px;
             display: flex;
             align-items: baseline;
+            margin: 0 auto;
         }
 
         .currency-text-2 {
-            font-size: 170px;
+            font-family: 'Anton', 'Impact', sans-serif;
+            font-size: 200px;
             color: #ff0000;
-            font-weight: 900;
-            margin-left: 5px;
-        }
-
-        #logoAna {
-            justify-content: center;
-            align-items: center;
-            vertical-align: middle;
-            margin: auto;
-            width: 200px;
-        }
-
-        /* --- KUSURSUZ MOBİL A4 ÖNİZLEME (iPhone & Android) --- */
-
-        /* 1. Tarayıcıların "mm" hesabını şaşırmaması için KESİN PİKSEL değerleri veriyoruz. A4 (96 DPI) = 794px x 1123px */
-        .a4-menu-page {
-            flex-shrink: 0 !important;
-            width: 756px !important;
-            /* 200mm karşılığı */
-            height: 1084px !important;
-            /* 287mm karşılığı */
-            box-sizing: border-box !important;
-            overflow: hidden !important;
-        }
-
-        .a4-label-page {
-            flex-shrink: 0 !important;
-            width: 794px !important;
-            /* 210mm (Tam A4 Genişliği) */
-            height: 1123px !important;
-            /* 297mm (Tam A4 Yüksekliği) */
-            box-sizing: border-box !important;
-            overflow: hidden !important;
-            background-color: white !important;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15) !important;
-            border: 1px solid #e5e7eb !important;
-            margin: 0 auto 40px auto !important;
-            /* ALTIN VURUŞ: Oranın bozulmasını, kağıdın sündürülmesini İMKANSIZ hale getirir */
-            aspect-ratio: 1 / 1.414 !important;
-        }
-
-        /* Konteynerin taşmaları gizlemesi ve merkeze kilitlemesi */
-        #a4PreviewContainer,
-        #labelPagesContainer {
-            overflow-x: hidden !important;
-            width: 100% !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-        }
-
-        /* Orijinal Dev Yazı Boyutları Sabit Kalmalı */
-        .price-text-3 {
-            font-size: 260px !important;
-            letter-spacing: -8px !important;
-            white-space: nowrap !important;
-        }
-
-        .currency-text-3 {
-            font-size: 130px !important;
-        }
-
-        .price-text-2 {
-            font-size: 320px !important;
-            letter-spacing: -12px !important;
-            white-space: nowrap !important;
-        }
-
-        .currency-text-2 {
-            font-size: 170px !important;
+            margin-left: 10px;
+            display: inline-block;
         }
 
         /* 2. Tabletler ve Geniş Ekranlar */
@@ -1319,6 +1268,27 @@
             widget.open();
         }
 
+        // --- 🚀 YENİ: OTOMATİK PAKET SERVİS FİYAT HESAPLAMA MOTORU ---
+        function getAutoDeliveryPrice(name, category, inPlacePrice) {
+            // KURAL 1: İçecekse paket servis fiyatını HİÇ ELLEME (Aynı kalsın)
+            if (category === 'İçecekler') return null; 
+
+            const lowerName = name.toLocaleLowerCase('tr-TR');
+            
+            // KURAL 2: İçinde "Tam Ekmek" geçiyorsa yerinde fiyatına +20 TL ekle
+            if (lowerName.includes('tam ekmek')) {
+                return inPlacePrice + 20;
+            }
+            
+            // KURAL 3: Midye (Adet) ise yerinde fiyatına +1 TL ekle
+            if (lowerName.includes('midye (adet)') || lowerName.includes('midye tane')) {
+                return inPlacePrice + 1;
+            }
+
+            // KURAL 4: Bunların haricindeki (Köfte, Yarım, Çeyrek vb.) tüm ürünlere +10 TL ekle
+            return inPlacePrice + 10;
+        }
+
         async function updateProductInFirebase(key, updates) { await productsRef.child(key).update(updates); }
         async function deleteProductFromFirebase(key) { await productsRef.child(key).remove(); }
         async function deleteCampaignUrl(key) { await campaignsRef.child(key).remove(); }
@@ -1635,36 +1605,28 @@
             setActiveTab('showCampaigns');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh] max-w-2xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh] max-w-3xl mx-auto relative">
                     <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 flex-shrink-0">🖼️ ${menuTitle} Kampanya Yönetimi</h2>
                     
                     <div class="flex-1 overflow-y-auto pr-2 pb-2">
-                        <div class="border-2 border-amber-100 p-4 mb-4 rounded-xl bg-amber-50/50">
-                            <h3 class="font-bold mb-2 text-orange-600 text-sm uppercase tracking-wider">Kampanya Toplu Fiyat Ayarı</h3>
-                            <p class="text-xs text-gray-500 mb-3">Gireceğiniz miktar mevcut tüm afiş fiyatlarının üzerine eklenecektir. İndirim için başına eksi (-) koyun.</p>
-                            <div class="flex gap-2">
-                                <input id="bulkCampaignAdjustmentValue" type="number" placeholder="Örn: 10 veya -20" class="border-2 border-gray-100 p-2 rounded-xl flex-1 text-sm outline-none font-bold focus:border-orange-500" />
-                                <button id="applyBulkCampaignAdjustmentBtn" class="bg-orange-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-orange-600 transition shadow-sm active:scale-95">Tüm Afişlere Uygula</button>
-                            </div>
+                        
+                        <div class="border p-3 sm:p-4 mb-5 rounded-2xl bg-orange-50/50 border-orange-200 flex flex-col sm:flex-row gap-3 sm:gap-4 shadow-sm">
+                            <button id="btnManualCampaign" class="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white p-4 rounded-xl font-black shadow-md hover:scale-[1.02] transition flex flex-col items-center justify-center gap-1 active:scale-95">
+                                <span class="text-2xl drop-shadow-sm">✍️</span>
+                                <span class="text-sm">Manuel Afiş Oluştur</span>
+                                <span class="text-[9px] font-medium opacity-80 mt-0.5">Kendi görselini ve fiyatını gir</span>
+                            </button>
+                            <button id="btnSelectProductCampaign" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 rounded-xl font-black shadow-md hover:scale-[1.02] transition flex flex-col items-center justify-center gap-1 active:scale-95">
+                                <span class="text-2xl drop-shadow-sm">🍔</span>
+                                <span class="text-sm">Menüden Ürün Seç</span>
+                                <span class="text-[9px] font-medium opacity-80 mt-0.5">Otomatik resim ve fiyat çeker</span>
+                            </button>
                         </div>
 
-                        <div class="border p-4 mb-4 rounded-lg bg-orange-50/50 border-orange-200">
-                            <h3 class="font-bold mb-3 text-orange-700 text-sm uppercase tracking-wider">Yeni Kampanya Kartı Ekle</h3>
-                            <div class="mb-3">
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">1. Afiş Görseli Seçin</label>
-                                <button id="uploadNewCampaignImageBtn" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-700 transition w-full shadow-sm">Görsel Yükle (Cloudinary)</button>
-                                <img id="newCampaignImagePreview" class="campaign-image-preview hidden" src="" alt="Önizleme">
-                                <input type="hidden" id="newCampaignImageURL" value="" />
-                            </div>
-                            <div class="mb-3">
-                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">2. Fiyat Girin (Blob/Kutucuk İçin)</label>
-                                <input id="newCampaignPriceInput" type="text" placeholder="Örn: 250 ₺" class="border-2 border-gray-100 p-2.5 rounded-xl w-full font-bold text-sm outline-none focus:border-orange-500" />
-                            </div>
-                            <button id="addCampaignUrlBtn" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-4 py-3 rounded-xl font-bold transition w-full shadow-md hidden">✅ Listeye Dahil Et</button>
-                        </div>
-
-                        <h3 class="font-bold text-lg mb-2 text-gray-800">Aktif Afişler (${campaignUrls.length} Adet)</h3>
-                        <p class="mb-2 text-xs text-gray-500">Sürükleyerek sırasını değiştirebilir, fiyatları kutulardan anlık düzenleyebilirsiniz.</p>
+                        <h3 class="font-bold text-lg mb-1 text-gray-800">Aktif Afişler (${campaignUrls.length} Adet)</h3>
+                        <p class="mb-3 text-xs text-orange-600 font-bold bg-orange-50 p-2 rounded-lg border border-orange-100 flex items-center gap-1">
+                            <span>💡</span> Afişe <b class="underline">basılı tutarak</b> menünüzdeki bir ürünle eşleştirebilirsiniz. Ürüne zam geldiğinde afiş fiyatı otomatik güncellenir!
+                        </p>
                         
                         <ul id="sortableCampaignList" class="flex flex-col gap-3.5 p-2 border border-dashed rounded-xl bg-gray-50/50 min-h-[50px]"></ul>
                     </div>
@@ -1675,12 +1637,69 @@
                         </button>
                         <p id="campaignSortingStatus" class="mt-2 text-center text-xs font-bold text-emerald-600 hidden"></p>
                     </div>
+
+                    <!-- 1. POP-UP: MANUEL AFİŞ EKLEME MODALI -->
+                    <div id="manualCampaignModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex justify-center items-center p-4">
+                        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md relative animate-pop-in border-t-8 border-orange-500">
+                            <button id="closeManualCampaignModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 font-bold text-lg">✖</button>
+                            <h2 class="text-xl font-black text-gray-800 mb-4 flex items-center gap-2"><span>✍️</span> Manuel Afiş Yükle</h2>
+                            
+                            <div class="mb-4">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">1. Afiş Görseli Seçin</label>
+                                <button id="uploadNewCampaignImageBtn" class="bg-blue-600 text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-blue-700 transition w-full shadow-sm">Görsel Yükle (Cloudinary)</button>
+                                <img id="newCampaignImagePreview" class="campaign-image-preview hidden mt-3" src="" alt="Önizleme">
+                                <input type="hidden" id="newCampaignImageURL" value="" />
+                            </div>
+                            
+                            <div class="mb-5">
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">2. Fiyat Girin (Kutucuk İçin)</label>
+                                <input id="newCampaignPriceInput" type="text" placeholder="Örn: 250" class="border-2 border-gray-100 p-3 rounded-xl w-full font-bold text-sm outline-none focus:border-orange-500" />
+                            </div>
+                            
+                            <button id="addCampaignUrlBtn" class="bg-gradient-to-r from-emerald-600 to-green-500 text-white px-4 py-3 rounded-xl font-bold transition w-full shadow-md hidden active:scale-95">✅ Listeye Dahil Et</button>
+                        </div>
+                    </div>
+
+                    <!-- 2. POP-UP: ÜRÜN SEÇME MODALI -->
+                    <div id="productCampaignModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex justify-center items-center p-4">
+                        <div class="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 w-full max-w-lg relative animate-pop-in border-t-8 border-blue-500 flex flex-col max-h-[90vh]">
+                            <button id="closeProductCampaignModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 font-bold text-lg z-10">✖</button>
+                            <h2 class="text-xl font-black text-gray-800 mb-1 flex items-center gap-2"><span>🍔</span> Ürünlerden Seç</h2>
+                            <p class="text-[11px] text-gray-500 mb-4">Afiş listesine eklemek istediğiniz ürünleri işaretleyin. Resim ve fiyat otomatik eklenecektir.</p>
+                            
+                            <div id="productCampaignList" class="overflow-y-auto flex-1 pr-2 space-y-2 scrollbar-none mb-4 bg-gray-50 p-2 border border-gray-100 rounded-xl"></div>
+                            
+                            <button id="publishSelectedProductsBtn" class="bg-blue-600 text-white px-4 py-3.5 rounded-xl font-black shadow-md hover:bg-blue-700 transition w-full active:scale-95">✅ Seçilenleri Yayınla</button>
+                        </div>
+                    </div>
+
+                    <!-- 🚀 3. POP-UP: BASILI TUTUNCA AÇILAN ÜRÜN EŞLEŞTİRME MODALI -->
+                    <div id="linkCampaignModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[120] flex justify-center items-center p-4">
+                        <div class="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 w-full max-w-md relative animate-pop-in border-t-8 border-purple-600 flex flex-col max-h-[85vh]">
+                            <button id="closeLinkCampaignModal" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 font-bold text-lg">✖</button>
+                            <h2 class="text-lg font-black text-purple-700 mb-1 flex items-center gap-2">🔗 Afişi Ürünle Eşleştir</h2>
+                            <p class="text-[11px] text-gray-500 mb-3">Bu afişi bağlamak istediğiniz ürünü seçin. Ürüne zam yapıldığında bu afişin fiyatı otomatik güncellenecektir.</p>
+                            
+                            <input type="hidden" id="targetCampaignKeyToLink" />
+                            
+                            <div id="linkProductOptionsList" class="overflow-y-auto flex-1 pr-1 space-y-2 scrollbar-none mb-4 bg-gray-50 p-2 border border-gray-200 rounded-xl"></div>
+                            
+                            <div class="flex gap-2">
+                                <button id="unlinkProductBtn" class="bg-red-100 text-red-600 border border-red-200 px-3 py-3 rounded-xl font-bold text-xs hover:bg-red-200 transition">Bağlantıyı Kaldır</button>
+                                <button id="saveLinkProductBtn" class="flex-1 bg-purple-600 text-white px-4 py-3 rounded-xl font-black shadow-md hover:bg-purple-700 transition active:scale-95 text-xs">🔗 Eşleştirmeyi Kaydet</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `);
 
+            const manualModal = document.getElementById('manualCampaignModal');
             const urlInput = document.getElementById('newCampaignImageURL');
             const previewImg = document.getElementById('newCampaignImagePreview');
             const addBtn = document.getElementById('addCampaignUrlBtn');
+
+            document.getElementById('btnManualCampaign').addEventListener('click', () => manualModal.classList.remove('hidden'));
+            document.getElementById('closeManualCampaignModal').addEventListener('click', () => manualModal.classList.add('hidden'));
 
             document.getElementById('uploadNewCampaignImageBtn').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1692,37 +1711,107 @@
             });
 
             addBtn.addEventListener('click', addCampaignUrl);
-            document.getElementById('saveAllCampaignChangesBtn').addEventListener('click', saveAllCampaignChanges);
 
-            // Yeni Eklenen Toplu Ayar Buton Dinleyicisi
-            document.getElementById('applyBulkCampaignAdjustmentBtn').addEventListener('click', applyBulkCampaignAdjustment);
+            const productModal = document.getElementById('productCampaignModal');
+            document.getElementById('btnSelectProductCampaign').addEventListener('click', () => {
+                renderProductSelectionForCampaign();
+                productModal.classList.remove('hidden');
+            });
+            document.getElementById('closeProductCampaignModal').addEventListener('click', () => productModal.classList.add('hidden'));
+            document.getElementById('publishSelectedProductsBtn').addEventListener('click', publishSelectedProductsToCampaigns);
+
+            // Eşleştirme Modalı Kapatma Olayları
+            document.getElementById('closeLinkCampaignModal').addEventListener('click', () => document.getElementById('linkCampaignModal').classList.add('hidden'));
+            document.getElementById('saveLinkProductBtn').addEventListener('click', saveCampaignProductLink);
+            document.getElementById('unlinkProductBtn').addEventListener('click', removeCampaignProductLink);
+
+            document.getElementById('saveAllCampaignChangesBtn').addEventListener('click', saveAllCampaignChanges);
 
             renderCampaignList();
         }
 
-        // Kampanya listesindeki tüm input alanlarına toplu zam/indirim yansıtır
-        function applyBulkCampaignAdjustment() {
-            const value = parseFloat(document.getElementById('bulkCampaignAdjustmentValue').value);
-            const statusEl = document.getElementById('campaignSortingStatus');
-            if (isNaN(value) || value === 0) { alert('Lütfen geçerli bir miktar giriniz.'); return; }
+        // --- YENİ EKLENEN YARDIMCI FONKSİYONLAR ---
+        
+        // Ürünleri Pop-up İçine Basar
+        function renderProductSelectionForCampaign() {
+            const listEl = document.getElementById('productCampaignList');
+            listEl.innerHTML = '';
+            
+            const sortedProducts = sortProductsByOrder([...products]);
+            const fallbackImg = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
 
-            const priceInputs = document.querySelectorAll('#sortableCampaignList .campaign-price-edit');
             let count = 0;
-
-            priceInputs.forEach(input => {
-                // Mevcut input değerindeki sayısal kısmı ayıkla (örn: "250 TL" -> 250)
-                let currentPrice = parseFloat(input.value.replace(/[^0-9.-]/g, '')) || 0;
-                let newPrice = Math.max(0, currentPrice + value);
-
-                // Yeni fiyatı formatıyla inputa yaz
-                input.value = newPrice;
+            sortedProducts.forEach(p => {
+                if(p.isArchived) return; // Gizli ürünleri kampanyaya sunma
+                
+                const pPrice = p.discountPrice || p.price;
+                const pImg = p.image && p.image.trim() !== '' ? p.image : fallbackImg;
+                
+                listEl.innerHTML += `
+                    <label class="flex items-center gap-3 p-2 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 transition w-full">
+                        <input type="checkbox" class="campaign-product-cb w-5 h-5 accent-blue-600 cursor-pointer" data-img="${pImg}" data-price="${pPrice}">
+                        <img src="${pImg}" class="w-12 h-12 object-cover rounded-md border border-gray-100">
+                        <div class="flex flex-col flex-1 overflow-hidden">
+                            <span class="text-xs font-bold text-gray-800 truncate">${p.name}</span>
+                            <span class="text-[10px] font-black text-orange-600">${pPrice} ₺</span>
+                        </div>
+                    </label>
+                `;
                 count++;
             });
 
-            statusEl.textContent = `Fiyatlar geçici olarak ${count} afiş için listeye yansıtıldı. Kalıcı olması için alttaki siyah butona basın.`;
-            statusEl.className = 'mt-2 text-center text-xs font-bold text-orange-600';
-            statusEl.classList.remove('hidden');
+            if (count === 0) {
+                listEl.innerHTML = '<div class="text-center text-gray-400 text-xs py-4 font-bold">Listelenecek aktif ürün bulunamadı.</div>';
+            }
         }
+
+        // Seçilen Ürünleri Veritabanına "Afiş" Olarak Yazar
+        async function publishSelectedProductsToCampaigns() {
+            const checkboxes = document.querySelectorAll('.campaign-product-cb:checked');
+            if(checkboxes.length === 0) {
+                alert("Lütfen afişe eklemek için en az bir ürün seçin."); 
+                return;
+            }
+
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
+            const targetCampaignsRef = database.ref(pathPrefix);
+            
+            // Mevcut sıranın en sonuna eklemek için maksimum order değerini bul
+            let maxOrder = campaignUrls.length > 0 ? Math.max(...campaignUrls.map(c => c.order === undefined ? 0 : c.order)) : 0;
+            
+            const promises = [];
+            checkboxes.forEach(cb => {
+                maxOrder++;
+                const url = cb.dataset.img;
+                const price = cb.dataset.price;
+                
+                // Firebase'e yeni kampanya verisini göm
+                promises.push(targetCampaignsRef.push({ 
+                    url: url, 
+                    price: price, 
+                    timestamp: Date.now(), 
+                    order: maxOrder 
+                }));
+            });
+
+            try {
+                // Seçilen butonun içine ufak bir yükleniyor efekti ver
+                const btn = document.getElementById('publishSelectedProductsBtn');
+                btn.innerHTML = "⏳ Ekleniyor...";
+                
+                await Promise.all(promises);
+                
+                alert(`${checkboxes.length} adet ürün başarıyla kampanya afişlerine eklendi!`);
+                document.getElementById('productCampaignModal').classList.add('hidden');
+                btn.innerHTML = "✅ Seçilenleri Yayınla";
+                
+                // Sistem firebase'i dinlediği için liste anında otomatik güncellenecektir
+            } catch(e) {
+                alert("Hata oluştu: " + e.message);
+            }
+        }
+
+       
 
         // TOPLU KAYDETME: Hem Sıralamayı Hem de Sihirbazla Değişen Tüm Fiyatları Tek Seferde Veritabanına İşler
         async function saveAllCampaignChanges() {
@@ -1798,9 +1887,19 @@
 
             sortedCampaigns.forEach((c) => {
                 const item = document.createElement('li');
-                item.className = 'sortable-item bg-white p-3 rounded-xl shadow-sm border border-gray-100';
+                item.className = 'sortable-item bg-white p-3 rounded-xl shadow-sm border border-gray-100 select-none transition hover:border-purple-300';
                 item.dataset.id = c.key;
                 const priceValue = c.price || "";
+
+                // Eğer ürünle eşleşmişse etiket rozeti göster
+                let linkedProductBadge = "";
+                if (c.linkedProductId) {
+                    const p = products.find(prod => prod.key === c.linkedProductId);
+                    if (p) {
+                        linkedProductBadge = `<span class="text-[9px] font-black bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full border border-purple-200 block truncate max-w-[150px]" title="${p.name}">🔗 ${p.name} (Otomatik)</span>`;
+                    }
+                }
+
                 item.innerHTML = `
                     <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                         <div class="flex items-center gap-3 flex-1">
@@ -1810,7 +1909,10 @@
                                 <button data-key="${c.key}" class="changeCampaignImgBtn text-[10px] bg-gray-100 hover:bg-gray-200 border rounded-lg px-2 py-1 font-bold text-gray-600 transition whitespace-nowrap">Resmi Değiştir</button>
                             </div>
                             <div class="flex-1 min-w-[100px]">
-                                <label class="text-[10px] font-bold text-gray-400 uppercase block mb-0.5">Afiş Fiyatı (₺)</label>
+                                <div class="flex items-center justify-between mb-0.5">
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase block">Afiş Fiyatı (₺)</label>
+                                    ${linkedProductBadge}
+                                </div>
                                 <input type="text" class="campaign-price-edit border p-1.5 rounded-lg w-full text-xs font-black text-orange-600 outline-none focus:border-orange-500" value="${priceValue}" placeholder="Fiyat Girin">
                             </div>
                         </div>
@@ -1819,6 +1921,27 @@
                         </div>
                     </div>
                 `;
+
+                // 🚀 BASILI TUTMA (LONG PRESS) OLAYI (Mobil + Masaüstü)
+                let pressTimer;
+                const startPress = (e) => {
+                    // Tıklanan eleman buton veya input ise uzun basmayı tetikleme
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+                    
+                    pressTimer = setTimeout(() => {
+                        openLinkCampaignModal(c.key);
+                    }, 650); // 0.65 saniye basılı tutulursa çalışır
+                };
+
+                const cancelPress = () => clearTimeout(pressTimer);
+
+                item.addEventListener('mousedown', startPress);
+                item.addEventListener('mouseup', cancelPress);
+                item.addEventListener('mouseleave', cancelPress);
+                item.addEventListener('touchstart', startPress, { passive: true });
+                item.addEventListener('touchend', cancelPress);
+                item.addEventListener('touchmove', cancelPress);
+
                 listEl.appendChild(item);
             });
 
@@ -1867,7 +1990,80 @@
             });
         }
 
-        async function addCampaignUrl() {
+        // 🚀 YENİ: BASILI TUTULAN AFİŞ İÇİN ÜRÜN SEÇİM MODALINI AÇAR
+        function openLinkCampaignModal(campaignKey) {
+            const modal = document.getElementById('linkCampaignModal');
+            const listEl = document.getElementById('linkProductOptionsList');
+            document.getElementById('targetCampaignKeyToLink').value = campaignKey;
+
+            const campaign = campaignUrls.find(c => c.key === campaignKey);
+            const currentLinkedId = campaign ? campaign.linkedProductId : null;
+
+            listEl.innerHTML = '';
+            const sortedProducts = sortProductsByOrder([...products]);
+
+            sortedProducts.forEach(p => {
+                if (p.isArchived) return;
+                const isChecked = p.key === currentLinkedId ? 'checked' : '';
+                const pPrice = p.discountPrice || p.price;
+
+                listEl.innerHTML += `
+                    <label class="flex items-center gap-3 p-2.5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-purple-50 transition w-full">
+                        <input type="radio" name="linkedProductRadio" value="${p.key}" data-price="${pPrice}" class="w-4 h-4 accent-purple-600 cursor-pointer" ${isChecked}>
+                        <img src="${p.image || 'https://via.placeholder.com/300x200'}" class="w-10 h-10 object-cover rounded-lg border border-gray-100 flex-shrink-0">
+                        <div class="flex flex-col flex-1 overflow-hidden">
+                            <span class="text-xs font-bold text-gray-800 truncate">${p.name}</span>
+                            <span class="text-[10px] font-black text-purple-600">${pPrice} ₺</span>
+                        </div>
+                    </label>
+                `;
+            });
+
+            modal.classList.remove('hidden');
+        }
+
+        // 🚀 YENİ: EŞLEŞTİRMEYİ VERİTABANINA KAYDEDER VE ANINDA FİYATI EŞİTLER
+        async function saveCampaignProductLink() {
+            const campaignKey = document.getElementById('targetCampaignKeyToLink').value;
+            const selectedRadio = document.querySelector('input[name="linkedProductRadio"]:checked');
+
+            if (!selectedRadio) {
+                alert("Lütfen eşleştirmek için bir ürün seçin.");
+                return;
+            }
+
+            const productId = selectedRadio.value;
+            const productPrice = selectedRadio.dataset.price;
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
+
+            try {
+                await database.ref(`${pathPrefix}/${campaignKey}`).update({
+                    linkedProductId: productId,
+                    price: productPrice
+                });
+
+                document.getElementById('linkCampaignModal').classList.add('hidden');
+                alert("Afiş ürünle başarıyla eşleştirildi! Ürüne zam yapıldığında afiş fiyatı otomatik güncellenecektir.");
+            } catch (err) {
+                alert("Hata: " + err.message);
+            }
+        }
+
+        // 🚀 YENİ: EŞLEŞTİRMEYİ KALDIRIR
+        async function removeCampaignProductLink() {
+            const campaignKey = document.getElementById('targetCampaignKeyToLink').value;
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
+
+            try {
+                await database.ref(`${pathPrefix}/${campaignKey}/linkedProductId`).remove();
+                document.getElementById('linkCampaignModal').classList.add('hidden');
+                alert("Afişin ürün bağlantısı kaldırıldı.");
+            } catch (err) {
+                alert("Hata: " + err.message);
+            }
+        }
+
+       async function addCampaignUrl() {
             const url = document.getElementById('newCampaignImageURL').value.trim();
             const price = document.getElementById('newCampaignPriceInput').value.trim();
             if (!url) { alert('Lütfen önce bir görsel yükleyin.'); return; }
@@ -1875,11 +2071,14 @@
             const maxOrder = campaignUrls.length > 0 ? Math.max(...campaignUrls.map(c => c.order === undefined ? 0 : c.order)) : 0;
             try {
                 await campaignsRef.push({ url: url, price: price, timestamp: Date.now(), order: maxOrder + 1 });
-                alert("Afiş başarıyla eklendi.");
+                alert("Manuel afiş başarıyla eklendi.");
                 document.getElementById('newCampaignImageURL').value = '';
                 document.getElementById('newCampaignPriceInput').value = '';
                 document.getElementById('newCampaignImagePreview').classList.add('hidden');
                 document.getElementById('addCampaignUrlBtn').classList.add('hidden');
+                
+                // YENİ: Başarıyla eklenince Modalı otomatik kapat
+                document.getElementById('manualCampaignModal').classList.add('hidden');
             } catch (error) { alert("Hata: " + error.message); }
         }
 
@@ -2224,7 +2423,7 @@
                     
                     /* ÖN YÜZ: Normal Fiyatlar */
                     .sticker-price-val {
-                        font-family: 'Arial Black', Impact, sans-serif;
+                         font-family: 'Montserrat', sans-serif; /* Resimdeki tok, geniş ve modern font */
                         font-size: var(--sticker-font);
                         font-weight: 900;
                         color: #000;
@@ -2635,9 +2834,17 @@
             const currentTime = Date.now();
             const statusEl = document.getElementById('bulkStatus');
             let changesMade = 0;
+            let autoSyncCount = 0; // Otomatik güncellenen paket servis ürünlerinin sayacı
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
 
             if (priceInputs.length === 0) return;
+
+            // 🔥 YENİ: Paket Servis Verilerini Bir Kere Çek (Eşleştirme için)
+            let deliveryData = {};
+            if (currentMenuType === 'in_place') {
+                const delSnap = await database.ref(deliveryProductsPath).once('value');
+                deliveryData = delSnap.val() || {};
+            }
 
             priceInputs.forEach((input, index) => {
                 const productKey = input.dataset.key;
@@ -2658,15 +2865,61 @@
                 if (currentPriceRounded !== newPriceRounded) { updates[`${pathPrefix}/${productKey}/price`] = newPriceRounded; changed = true; }
                 if (currentDiscountRounded !== newDiscountRounded) { updates[`${pathPrefix}/${productKey}/discountPrice`] = newDiscountRounded; changed = true; }
 
-                if (changed) { updates[`${pathPrefix}/${productKey}/lastUpdated`] = currentTime; changesMade++; }
+                if (changed) { 
+                    updates[`${pathPrefix}/${productKey}/lastUpdated`] = currentTime; 
+                    changesMade++; 
+
+                    // 🔥 YENİ: OTOMATİK PAKET SERVİS EŞİTLEMESİ (Sadece Yerinde Menüdeyiz ise)
+                    if (currentMenuType === 'in_place') {
+                        // Aynı isimdeki ürünü Paket Servis veritabanında bul
+                        let targetDelKey = null;
+                        for (let key in deliveryData) {
+                            if (deliveryData[key].name === currentProduct.name) {
+                                targetDelKey = key;
+                                break;
+                            }
+                        }
+
+                        if (targetDelKey) {
+                            // Normal Fiyatı Kurala Göre Hesapla ve Ekle
+                            if (currentPriceRounded !== newPriceRounded) {
+                                const newDelPrice = getAutoDeliveryPrice(currentProduct.name, currentProduct.category, newPriceRounded);
+                                if (newDelPrice !== null) { // Eğer null değilse (İçecek değilse) güncelle
+                                    updates[`${deliveryProductsPath}/${targetDelKey}/price`] = newDelPrice;
+                                    updates[`${deliveryProductsPath}/${targetDelKey}/lastUpdated`] = currentTime;
+                                    autoSyncCount++;
+                                }
+                            }
+                            
+                            // İndirimli Fiyatı Kurala Göre Hesapla ve Ekle (Varsa)
+                            if (currentDiscountRounded !== newDiscountRounded) {
+                                if (newDiscountRounded !== null) {
+                                    const newDelDiscount = getAutoDeliveryPrice(currentProduct.name, currentProduct.category, newDiscountRounded);
+                                    if (newDelDiscount !== null) {
+                                        updates[`${deliveryProductsPath}/${targetDelKey}/discountPrice`] = newDelDiscount;
+                                    }
+                                } else {
+                                    updates[`${deliveryProductsPath}/${targetDelKey}/discountPrice`] = null;
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
             if (changesMade === 0) { alert('Herhangi bir değişiklik bulunamadı.'); return; }
-            if (!confirm(`${changesMade} ürün güncellenecektir. Onaylıyor musunuz?`)) return;
+            
+            // Onay mesajını yapılan işleme göre dinamikleştir
+            let confirmMsg = `${changesMade} ürün güncellenecektir. Onaylıyor musunuz?`;
+            if (currentMenuType === 'in_place' && autoSyncCount > 0) {
+                confirmMsg = `Yerinde Menüde ${changesMade} ürünün fiyatı değişti. Ayrıca Paket Servis menüsüne ${autoSyncCount} adet fiyat kurallarınıza göre OTOMATİK YANSIYACAKTIR. Onaylıyor musunuz?`;
+            }
+
+            if (!confirm(confirmMsg)) return;
 
             try {
                 await database.ref().update(updates);
-                statusEl.textContent = 'Tüm fiyatlar ve indirim bilgileri başarıyla kaydedildi!';
+                statusEl.textContent = 'Tüm fiyatlar başarıyla kaydedildi!';
                 statusEl.className = 'mt-4 text-center text-xs font-bold text-emerald-600';
                 statusEl.classList.remove('hidden');
                 renderBulkPriceList(document.getElementById('bulkCategory').value);
@@ -2804,7 +3057,45 @@
                     }
                 });
 
-               
+
+
+                // YENİ: Sadece Paket Servis (delivery) seçiliyse Harita HTML'ini oluşturur.
+                let mapHtml = '';
+                if (statsMenuType === 'delivery') {
+                    mapHtml = `
+                        <!-- 4. BÖLÜM: CANLI KONUM HARİTASI VE TOP 5 MAHALLE (Sadece Paket Servise Özel) -->
+                        <div class="anim-delay-5 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                            <!-- Harita Alanı (2 Kolon Kaplar) -->
+                            <div class="lg:col-span-2 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100">
+                                <div class="flex flex-col xl:flex-row justify-between xl:items-center mb-4 gap-3">
+                                    <h3 class="font-black text-gray-800 text-sm flex items-center gap-2">
+                                        <span class="animate-pulse text-red-500">📍</span> Müşteri Haritası
+                                    </h3>
+                                    
+                                    <!-- YENİ: Zeki Zaman Filtreleme Butonları -->
+                                    <div class="flex flex-wrap gap-2 text-[10px] font-bold" id="mapFilterButtons">
+                                        <button data-filter="today" class="map-filter-btn bg-red-500 text-white px-3 py-1.5 rounded-lg shadow-sm border border-red-600 transition active:scale-95">Bugün</button>
+                                        <button data-filter="yesterday" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Dün</button>
+                                        <button data-filter="week" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Bu Hafta</button>
+                                        <button data-filter="month" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Bu Ay</button>
+                                        <button data-filter="all" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Tüm Zamanlar</button>
+                                    </div>
+                                </div>
+                                <div id="customerMap" class="w-full h-[350px] rounded-xl border border-gray-200 z-0 shadow-inner"></div>
+                            </div>
+                            
+                            <!-- Top 5 Mahalle Alanı (1 Kolon Kaplar) -->
+                            <div class="bg-gradient-to-b from-gray-900 to-black p-4 sm:p-5 rounded-2xl shadow-lg border border-gray-800 text-white flex flex-col">
+                                <h3 class="font-black text-yellow-400 text-sm mb-4 flex items-center gap-2 border-b border-gray-700 pb-3">
+                                    <span class="text-lg animate-bounce">🏆</span> En Çok Sipariş Verenler
+                                </h3>
+                                <div id="topNeighborhoodsList" class="flex flex-col gap-3 flex-1 overflow-y-auto pr-1 scrollbar-none">
+                                    <div class="text-center text-xs text-gray-400 animate-pulse mt-10 font-bold">Harita Verileri Yükleniyor...</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
 
                 // BÜTÜN GERÇEK VERİLERLE HTML ŞABLONUNU OLUŞTUR VE ANİMASYONLA BAS
                 const html = `
@@ -2866,7 +3157,7 @@
                             </div>
                         </div>
 
-                        <!-- 2. BÖLÜM: SAATLİK YOĞUNLUK GRAFİĞİ (GERÇEK DÜN VS BUGÜN) -->
+                        <!-- 2. BÖLÜM: SAATLİK YOĞUNLUK GRAFİĞİ -->
                         <div class="anim-delay-3 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
                             <h3 class="font-black text-gray-800 text-sm mb-4 flex items-center gap-2">
                                 <span class="animate-pulse">🕒</span> Saatlik Müşteri Yoğunluğu (Bugün vs Dün)
@@ -2907,166 +3198,160 @@
                                 </div>
                             </div>
 
-                            
-
                         </div>
 
-                       <!-- 4. BÖLÜM: CANLI KONUM HARİTASI VE TOP 5 MAHALLE -->
-                        <div class="anim-delay-5 grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-                            <!-- Harita Alanı (2 Kolon Kaplar) -->
-                            <div class="lg:col-span-2 bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="font-black text-gray-800 text-sm flex items-center gap-2">
-                                        <span class="animate-pulse text-red-500">📍</span> Canlı Müşteri Haritası
-                                    </h3>
-                                    <div class="flex gap-3 text-[10px] font-bold bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
-                                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-500 inline-block shadow-sm"></span> Bugün</span>
-                                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block shadow-sm"></span> Dün</span>
-                                    </div>
-                                </div>
-                                <div id="customerMap" class="w-full h-[350px] rounded-xl border border-gray-200 z-0 shadow-inner"></div>
-                            </div>
-                            
-                            <!-- Top 5 Mahalle Alanı (1 Kolon Kaplar) -->
-                            <div class="bg-gradient-to-b from-gray-900 to-black p-4 sm:p-5 rounded-2xl shadow-lg border border-gray-800 text-white flex flex-col">
-                                <h3 class="font-black text-yellow-400 text-sm mb-4 flex items-center gap-2 border-b border-gray-700 pb-3">
-                                    <span class="text-lg animate-bounce">🏆</span> En Çok Sipariş Veren Mahalleler
-                                </h3>
-                                <div id="topNeighborhoodsList" class="flex flex-col gap-3 flex-1 overflow-y-auto pr-1 scrollbar-none">
-                                    <div class="text-center text-xs text-gray-400 animate-pulse mt-10 font-bold">Harita Verileri Yükleniyor...</div>
-                                </div>
-                            </div>
-                        </div>
+                        ${mapHtml} <!-- DİKKAT: Yeni değişkeni buraya şırınga ettik -->
                     </div>
                 `;
 
                 loadModule(html);
 
                 // HARİTA VE ANLIK VERİ İŞLEMLERİ BAŞLANGICI
-                setTimeout(() => {
-                    // 1. Haritayı Başlat (Daha önce başlatıldıysa temizle)
-                    let mapContainer = L.DomUtil.get('customerMap');
-                    if(mapContainer != null){
-                        mapContainer._leaflet_id = null;
-                    }
-                    
-                    // Harita Ümraniye Odaklı Başlar
-                    const map = L.map('customerMap').setView([41.026, 29.100], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; OpenStreetMap',
-                        maxZoom: 18
-                    }).addTo(map);
+                let mapFilterType = 'today'; // Varsayılan açılış: Bugün
 
-                    // İkon renkleri (Bugün: Kırmızı, Dün: Mavi)
-                    const redIcon = new L.Icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-                    });
+                if (statsMenuType === 'delivery') {
+                    setTimeout(() => {
+                        let mapContainer = L.DomUtil.get('customerMap');
+                        if (mapContainer != null) {
+                            mapContainer._leaflet_id = null;
+                        }
 
-                    const blueIcon = new L.Icon({
-                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-                    });
+                        // Harita Ümraniye Odaklı Başlar
+                        const map = L.map('customerMap').setView([41.026, 29.100], 13);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; OpenStreetMap',
+                            maxZoom: 18
+                        }).addTo(map);
 
-                    // Markerları tutacağımız grup (Her veri geldiğinde temizleyip yeniden basmak için)
-                    const markersLayer = L.layerGroup().addTo(map);
-
-                    // 2. Firebase'den Tüm Zamanların Konumlarını Anlık Dinle (.on)
-                    if(activeListeners.locations) {
-                        database.ref(`visitor_locations/${statsMenuType}`).off('value', activeListeners.locations);
-                    }
-
-                    activeListeners.locations = database.ref(`visitor_locations/${statsMenuType}`).on('value', (snapshot) => {
-                        const allLocData = snapshot.val() || {};
-                        markersLayer.clearLayers(); // Eski noktaları haritadan temizle
-                        
-                        let neighborhoodCounts = {};
-                        
-                        // Bugün ve Dün hesaplaması
-                        const getLocalYYYYMMDD = (date) => {
-                            const y = date.getFullYear();
-                            const m = String(date.getMonth() + 1).padStart(2, '0');
-                            const d = String(date.getDate()).padStart(2, '0');
-                            return `${y}-${m}-${d}`;
-                        };
-                        const todayStr = getLocalYYYYMMDD(new Date());
-                        const yesterday = new Date();
-                        yesterday.setDate(yesterday.getDate() - 1);
-                        const yesterdayStr = getLocalYYYYMMDD(yesterday);
-
-                        let bounds = []; // Harita ekranını noktalara göre ortalamak için
-
-                        // Verileri döngüye sok (Tüm günler)
-                        Object.keys(allLocData).forEach(dateKey => {
-                            const dailyLocations = allLocData[dateKey];
-                            
-                            Object.keys(dailyLocations).forEach(pushId => {
-                                const loc = dailyLocations[pushId];
-                                
-                                // Mahalle sayacını artır (Tüm zamanlar için)
-                                const mahalleName = (loc.mahalle && loc.mahalle !== "Bilinmiyor" && loc.mahalle !== "Gizli") ? loc.mahalle : null;
-                                if(mahalleName) {
-                                    neighborhoodCounts[mahalleName] = (neighborhoodCounts[mahalleName] || 0) + 1;
-                                }
-
-                                // Haritaya SADECE Bugün ve Dün'ün markerlarını ekle
-                                if ((dateKey === todayStr || dateKey === yesterdayStr) && loc.lat && loc.lon && loc.lat !== 0) {
-                                    const isToday = dateKey === todayStr;
-                                    const markerIcon = isToday ? redIcon : blueIcon;
-                                    const dateLabel = isToday ? "Bugün" : "Dün";
-
-                                    const popupContent = `
-                                        <div class="text-center font-sans min-w-[180px]">
-                                            <div class="font-black text-sm text-gray-800 border-b pb-1 mb-1 truncate">${loc.mahalle || 'Bilinmiyor'} / ${loc.ilce || ''}</div>
-                                            <div class="text-[10px] text-gray-500 mb-2 leading-tight">${loc.fullAddress}</div>
-                                            <div class="text-xs font-bold text-white ${isToday ? 'bg-red-500' : 'bg-blue-500'} px-2 py-1 rounded inline-block shadow-sm">📅 ${dateLabel} - ⏰ ${loc.time || '--:--'}</div>
-                                        </div>
-                                    `;
-
-                                    const marker = L.marker([loc.lat, loc.lon], {icon: markerIcon})
-                                     .bindPopup(popupContent)
-                                     .addTo(markersLayer);
-                                     
-                                     bounds.push([loc.lat, loc.lon]);
-                                }
-                            });
+                        const redIcon = new L.Icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
                         });
 
-                        // Eğer haritada nokta varsa, harita zoomunu o noktalara göre otomatik ayarla
-                        if(bounds.length > 0) {
-                            map.fitBounds(bounds, {padding: [30, 30], maxZoom: 15});
+                        const markersLayer = L.layerGroup().addTo(map);
+
+                        if (activeListeners.locations) {
+                            database.ref(`visitor_locations/delivery`).off('value', activeListeners.locations);
                         }
 
-                        // 3. Top 5 Mahalle Hesaplama ve Ekrana Basma
-                        const sortedNeighborhoods = Object.keys(neighborhoodCounts)
-                            .map(name => ({ name: name, count: neighborhoodCounts[name] }))
-                            .sort((a, b) => b.count - a.count)
-                            .slice(0, 5);
+                        // Firebase'den veriyi dinle
+                        activeListeners.locations = database.ref(`visitor_locations/delivery`).on('value', (snapshot) => {
+                            const allLocData = snapshot.val() || {};
 
-                        const topListEl = document.getElementById('topNeighborhoodsList');
-                        if(sortedNeighborhoods.length === 0) {
-                            topListEl.innerHTML = '<div class="text-center text-xs text-gray-400 py-4 font-bold border border-dashed border-gray-700 rounded-xl">Henüz sipariş/konum verisi oluşmadı.</div>';
-                        } else {
-                            topListEl.innerHTML = sortedNeighborhoods.map((n, index) => {
-                                const medals = ['🥇', '🥈', '🥉', '🔹', '🔹'];
-                                return `
-                                    <div class="flex items-center justify-between p-2.5 bg-gray-800 rounded-xl border border-gray-700 hover:bg-gray-700 transition transform hover:scale-[1.02]">
-                                        <div class="flex items-center gap-2 overflow-hidden pr-2">
-                                            <span class="text-lg drop-shadow-md">${medals[index]}</span>
-                                            <span class="font-bold text-xs sm:text-sm text-gray-200 truncate" title="${n.name}">${n.name}</span>
-                                        </div>
-                                        <span class="font-black text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2 py-1 rounded-lg text-xs whitespace-nowrap shadow-inner">
-                                            ${n.count} Kişi
-                                        </span>
-                                    </div>
-                                `;
-                            }).join('');
-                        }
-                    });
-                }, 150); // HTML render edildikten sonra Leaflet'in haritayı çizebilmesi için 150ms bekleme süresi
+                            // Filtreleme yapıp haritayı çizen ana fonksiyon
+                            function updateMapDisplay() {
+                                markersLayer.clearLayers();
+                                let neighborhoodCounts = {};
+                                let bounds = [];
 
+                                // Bugünü milisaniye olarak gece 00:00'a sabitliyoruz
+                                const now = new Date();
+                                now.setHours(0, 0, 0, 0);
+
+                                Object.keys(allLocData).forEach(dateKey => {
+                                    const [y, m, d] = dateKey.split('-');
+                                    const entryDate = new Date(y, m - 1, d);
+                                    
+                                    // Kaç gün önce sipariş verildiğini hesapla
+                                    const timeDiff = now.getTime() - entryDate.getTime();
+                                    const daysAgo = Math.floor(timeDiff / (1000 * 3600 * 24));
+
+                                    // Butondan gelen emre göre filtrele
+                                    let include = false;
+                                    if (mapFilterType === 'today' && daysAgo === 0) include = true;
+                                    else if (mapFilterType === 'yesterday' && daysAgo === 1) include = true;
+                                    else if (mapFilterType === 'week' && daysAgo >= 0 && daysAgo <= 7) include = true;
+                                    else if (mapFilterType === 'month' && daysAgo >= 0 && daysAgo <= 30) include = true;
+                                    else if (mapFilterType === 'all') include = true;
+
+                                    if (include) {
+                                        const dailyLocations = allLocData[dateKey];
+                                        Object.keys(dailyLocations).forEach(pushId => {
+                                            const loc = dailyLocations[pushId];
+
+                                            const mahalleName = (loc.mahalle && loc.mahalle !== "Bilinmiyor" && loc.mahalle !== "Gizli") ? loc.mahalle : null;
+                                            if (mahalleName) {
+                                                neighborhoodCounts[mahalleName] = (neighborhoodCounts[mahalleName] || 0) + 1;
+                                            }
+
+                                            // Konum bas
+                                            if (loc.lat && loc.lon && loc.lat !== 0) {
+                                                const popupContent = `
+                                                    <div class="text-center font-sans min-w-[180px]">
+                                                        <div class="font-black text-sm text-gray-800 border-b pb-1 mb-1 truncate">${loc.mahalle || 'Bilinmiyor'} / ${loc.ilce || ''}</div>
+                                                        <div class="text-[10px] text-gray-500 mb-2 leading-tight">${loc.fullAddress}</div>
+                                                        <div class="text-xs font-bold text-white bg-red-500 px-2 py-1 rounded inline-block shadow-sm">📅 ${dateKey} - ⏰ ${loc.time || '--:--'}</div>
+                                                    </div>
+                                                `;
+                                                L.marker([loc.lat, loc.lon], { icon: redIcon })
+                                                    .bindPopup(popupContent)
+                                                    .addTo(markersLayer);
+
+                                                bounds.push([loc.lat, loc.lon]);
+                                            }
+                                        });
+                                    }
+                                });
+
+                                // Noktalara göre kamerayı uzaklaştır/yakınlaştır
+                                if (bounds.length > 0) {
+                                    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+                                }
+
+                                // Seçilen filtreye göre Top 5 mahalleyi sağa diz
+                                const sortedNeighborhoods = Object.keys(neighborhoodCounts)
+                                    .map(name => ({ name: name, count: neighborhoodCounts[name] }))
+                                    .sort((a, b) => b.count - a.count)
+                                    .slice(0, 5);
+
+                                const topListEl = document.getElementById('topNeighborhoodsList');
+                                if (sortedNeighborhoods.length === 0) {
+                                    topListEl.innerHTML = '<div class="text-center text-xs text-gray-400 py-4 font-bold border border-dashed border-gray-700 rounded-xl">Seçili zaman diliminde sipariş/konum verisi yok.</div>';
+                                } else {
+                                    topListEl.innerHTML = sortedNeighborhoods.map((n, index) => {
+                                        const medals = ['🥇', '🥈', '🥉', '🔹', '🔹'];
+                                        return `
+                                            <div class="flex items-center justify-between p-2.5 bg-gray-800 rounded-xl border border-gray-700 hover:bg-gray-700 transition transform hover:scale-[1.02]">
+                                                <div class="flex items-center gap-2 overflow-hidden pr-2">
+                                                    <span class="text-lg drop-shadow-md">${medals[index]}</span>
+                                                    <span class="font-bold text-xs sm:text-sm text-gray-200 truncate" title="${n.name}">${n.name}</span>
+                                                </div>
+                                                <span class="font-black text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2 py-1 rounded-lg text-xs whitespace-nowrap shadow-inner">
+                                                    ${n.count} Kişi
+                                                </span>
+                                            </div>
+                                        `;
+                                    }).join('');
+                                }
+                            }
+
+                            // Firebase verisi ilk geldiğinde varsayılan olarak "Bugün"ü çiz
+                            updateMapDisplay();
+
+                            // Butonlara Tıklama Olaylarını (Event Listeners) Bağla
+                            const filterBtns = document.querySelectorAll('.map-filter-btn');
+                            filterBtns.forEach(btn => {
+                                btn.addEventListener('click', (e) => {
+                                    // Bütün butonların kırmızılığını (aktifliğini) al
+                                    filterBtns.forEach(b => {
+                                        b.classList.remove('bg-red-500', 'text-white', 'border-red-600');
+                                        b.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+                                    });
+                                    
+                                    // Sadece tıklanan butonu kırmızı yap
+                                    const clicked = e.currentTarget;
+                                    clicked.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+                                    clicked.classList.add('bg-red-500', 'text-white', 'border-red-600');
+
+                                    // Motora yeni emri ver ve haritayı yeniden çizdir
+                                    mapFilterType = clicked.dataset.filter;
+                                    updateMapDisplay();
+                                });
+                            });
+                        });
+                    }, 150); // HTML render için bekleme süresi
+                }
                 // Olay Dinleyicisini Bağla
                 document.getElementById('toggleStatsMenuBtn').addEventListener('click', () => {
                     statsMenuType = statsMenuType === 'in_place' ? 'delivery' : 'in_place';
@@ -4130,12 +4415,14 @@
             activeListeners.products = productsRef.on('value', (s) => {
                 products = [];
                 s.forEach(c => { const p = c.val(); p.key = c.key; products.push(p); });
+                syncLinkedCampaignPrices(); // 🚀 Ürünler değiştiğinde kampanya fiyatlarını otomatik eşitle
                 refreshActiveModule();
             });
 
             activeListeners.campaigns = campaignsRef.on('value', (s) => {
                 campaignUrls = [];
                 s.forEach(c => { const camp = c.val(); camp.key = c.key; campaignUrls.push(camp); });
+                syncLinkedCampaignPrices(); // 🚀 Kampanyalar değiştiğinde otomatik eşitle
                 if (document.getElementById('sortableCampaignList')) renderCampaignList();
             });
 
@@ -4143,15 +4430,13 @@
                 campaignPriceText = s.val() || "";
             });
 
-            // Ekstre verilerini canlı dinle ve Eski Verileri Otomatik Sil
             activeListeners.ekstreler = ekstrelerRef.on('value', (s) => {
                 allEkstreData = s.val() || {};
 
                 const now = new Date();
                 const currentYear = now.getFullYear();
-                const currentMonth = now.getMonth() + 1; // 1 ile 12 arası
+                const currentMonth = now.getMonth() + 1;
 
-                // 1 Yılı (12 Ayı) Geçen Ekstreleri Otomatik Silme Algoritması
                 Object.keys(allEkstreData).forEach(key => {
                     const [yearStr, monthStr] = key.split('-');
                     const year = parseInt(yearStr);
@@ -4159,18 +4444,42 @@
 
                     const monthDiff = (currentYear - year) * 12 + (currentMonth - month);
 
-                    // Eğer ekstre 12 aydan daha eskiyse veritabanından tamamen uçur
                     if (monthDiff > 12) {
                         ekstrelerRef.child(key).remove();
-                        delete allEkstreData[key]; // Ekranda da gösterme
+                        delete allEkstreData[key];
                     }
                 });
 
-                // Eğer ekstre modülü açıksa ekranı yenile
                 if (document.getElementById('ekstreDashboardArea')) {
                     renderDebtCalculatorModule();
                 }
             });
+        }
+
+        // 🚀 YENİ: ÜRÜN ZAMLANDIĞINDA KAMPANYA FİYATINI OTOMATİK DEĞİŞTİREN MOTOR
+        function syncLinkedCampaignPrices() {
+            if (!campaignUrls.length || !products.length) return;
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
+            const updates = {};
+            let hasUpdate = false;
+
+            campaignUrls.forEach(camp => {
+                if (camp.linkedProductId) {
+                    const linkedProduct = products.find(p => p.key === camp.linkedProductId);
+                    if (linkedProduct) {
+                        // Ürünün indirimli fiyatı varsa onu, yoksa normal fiyatını al
+                        const targetPrice = String(linkedProduct.discountPrice || linkedProduct.price);
+                        if (String(camp.price) !== targetPrice) {
+                            updates[`${pathPrefix}/${camp.key}/price`] = targetPrice;
+                            hasUpdate = true;
+                        }
+                    }
+                }
+            });
+
+            if (hasUpdate) {
+                database.ref().update(updates);
+            }
         }
 
         // --- DOM HAZIR OLDUĞUNDA TETİKLE ---
@@ -4329,7 +4638,7 @@
                 const currentProduct = products.find(p => p.key === productKey);
                 const isPriceChanged = currentProduct && parseFloat(currentProduct.price.toFixed(2)) !== parseFloat(newPrice.toFixed(2));
 
-                const updates = {
+                const productUpdates = {
                     name: document.getElementById('editName').value.trim(),
                     nameEN: document.getElementById('editNameEN').value.trim(),
                     desc: document.getElementById('editDesc').value.trim(),
@@ -4340,11 +4649,46 @@
                     isArchived: document.getElementById('editIsArchived') ? document.getElementById('editIsArchived').checked : false // RAF DURUMU
                 };
 
-                if (isPriceChanged) updates.lastUpdated = Date.now();
-                else if (currentProduct) updates.lastUpdated = currentProduct.lastUpdated;
+                const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
+                let finalDbUpdates = {};
+
+                if (isPriceChanged) productUpdates.lastUpdated = Date.now();
+                else if (currentProduct) productUpdates.lastUpdated = currentProduct.lastUpdated;
+
+                // Ürünün kendi güncellemelerini hazırlıyoruz
+                for (let key in productUpdates) {
+                    finalDbUpdates[`${pathPrefix}/${productKey}/${key}`] = productUpdates[key];
+                }
+
+                // 🔥 YENİ: TEKLİ DÜZENLEMEDE DE OTOMATİK PAKET SERVİS EŞİTLEMESİ (Kural motoruyla)
+                if (currentMenuType === 'in_place' && isPriceChanged) {
+                    try {
+                        const delSnap = await database.ref(deliveryProductsPath).once('value');
+                        const deliveryData = delSnap.val() || {};
+                        let targetDelKey = null;
+
+                        for (let key in deliveryData) {
+                            if (deliveryData[key].name === productUpdates.name) {
+                                targetDelKey = key;
+                                break;
+                            }
+                        }
+
+                        if (targetDelKey) {
+                            const newDelPrice = getAutoDeliveryPrice(productUpdates.name, productUpdates.category, newPrice);
+                            if (newDelPrice !== null) { // İçecek değilse güncelle
+                                finalUpdates[`${deliveryProductsPath}/${targetDelKey}/price`] = newDelPrice;
+                                finalUpdates[`${deliveryProductsPath}/${targetDelKey}/lastUpdated`] = productUpdates.lastUpdated;
+                            }
+                        }
+                    } catch (err) {
+                        console.log("Paket servis senkronizasyon hatası:", err);
+                    }
+                }
 
                 try {
-                    await updateProductInFirebase(productKey, updates);
+                    // Tüm değişiklikleri (varsa paket servis dahil) tek seferde veritabanına yaz
+                    await database.ref().update(finalDbUpdates);
                     editProductModal.classList.add('hidden');
                     alert("Ürün başarıyla güncellendi.");
                 } catch (error) { alert("Hata: " + error.message); }
@@ -4537,7 +4881,7 @@
             });
         }
 
-        // --- 🏷️ DEV ETİKET YAZDIRMA MOTORU ---
+        // --- 🏷️ DEV ETİKET YAZDIRMA MOTORU (GÜNCELLENDİ) ---
 
         const labelLists = {
             outside: [
@@ -4577,16 +4921,16 @@
 
                     <div id="manualLabelSelectionArea" class="hidden border-2 border-gray-100 rounded-2xl p-3 sm:p-4 bg-gray-50">
                         <h3 class="font-black text-sm sm:text-base text-gray-800 mb-3">Yazdırılacak Ürünleri Seçin:</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-[40vh] overflow-y-auto mb-4 p-2" id="manualLabelCheckboxes"></div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-[40vh] overflow-y-auto mb-4 p-2 scrollbar-none" id="manualLabelCheckboxes"></div>
                         <button onclick="startManualLabelPrint()" class="w-full bg-orange-600 text-white font-black py-3 rounded-xl shadow-md hover:bg-orange-700 transition text-sm sm:text-base">Seçilenleri A4'e Çevir ve Yazdır</button>
+                    </div>
+
+                    <div id="labelPagesContainer" class="w-full flex flex-col items-center pb-10">
+                        <span class="text-gray-500 text-sm italic mt-10 no-print">Yukarıdan bir etiket türü seçtiğinizde önizlemeler burada belirecektir.</span>
                     </div>
                 </div>
             `);
-            document.getElementById('showLabels').addEventListener('click', renderLabelModule);
         }
-
-        // DOMContentLoaded İçindeki Listeners kısmına (showStatsBtn vs. altına) şunu eklemeyi unutma:
-        // document.getElementById('showLabels').addEventListener('click', renderLabelModule);
 
         function toggleManualLabelSelection() {
             const area = document.getElementById('manualLabelSelectionArea');
@@ -4596,43 +4940,78 @@
                 const boxContainer = document.getElementById('manualLabelCheckboxes');
                 boxContainer.innerHTML = '';
                 const sorted = sortProductsByOrder([...products]);
+
                 sorted.forEach(p => {
-                    boxContainer.innerHTML += `
-                        <label class="flex items-center gap-2 p-2 bg-white border rounded-lg cursor-pointer hover:bg-orange-50 transition">
-                            <input type="checkbox" value="${p.name}" class="manual-label-cb w-4 h-4 accent-orange-500">
-                            <span class="text-xs font-bold text-gray-700 truncate">${p.name}</span>
+                    // YENİ: Sadece Kokoreç ve Pilav için "Büyük" kutucuğu çıkar
+                    const lowerName = p.name.toLowerCase();
+                    const isTargetItem = (lowerName.includes("yarım") && lowerName.includes("kokoreç")) || lowerName.includes("pilav");
+
+                    let largeCheckboxHtml = isTargetItem ? `
+                        <label class="flex items-center gap-1 ml-auto text-[9px] text-red-600 bg-red-50 px-1.5 py-1 rounded border border-red-200 cursor-pointer hover:bg-red-100 transition">
+                            <input type="checkbox" class="manual-large-cb w-3 h-3 accent-red-600"> Büyük
                         </label>
+                    ` : '';
+
+                    boxContainer.innerHTML += `
+                        <div class="flex items-center gap-2 p-2 bg-white border rounded-lg hover:bg-orange-50 transition w-full">
+                            <label class="flex items-center gap-2 cursor-pointer flex-1 overflow-hidden">
+                                <input type="checkbox" value="${p.name}" class="manual-label-cb w-4 h-4 accent-orange-500">
+                                <span class="text-xs font-bold text-gray-700 truncate" title="${p.name}">${p.name}</span>
+                            </label>
+                            ${largeCheckboxHtml}
+                        </div>
                     `;
                 });
             }
         }
 
         function startManualLabelPrint() {
-            const checkboxes = document.querySelectorAll('.manual-label-cb:checked');
-            const selectedItems = Array.from(checkboxes).map(cb => cb.value);
+            const selectedItems = [];
+            const itemDivs = document.querySelectorAll('#manualLabelCheckboxes > div');
+
+            // Seçili ürünleri ve "Büyük" olup olmadıklarını yakala
+            itemDivs.forEach(div => {
+                const cb = div.querySelector('.manual-label-cb');
+                if (cb && cb.checked) {
+                    const largeCb = div.querySelector('.manual-large-cb');
+                    selectedItems.push({
+                        name: cb.value,
+                        isLarge: largeCb ? largeCb.checked : false
+                    });
+                }
+            });
+
             if (selectedItems.length === 0) { alert('Lütfen en az bir ürün seçin.'); return; }
             startLabelPrint('manual', selectedItems);
         }
 
         function startLabelPrint(type, manualItems = []) {
             currentPrintJob = 'label';
-            isLabelJobSpecial = (type === 'outside' || type === 'both');
+
+            // Yardımcı: Sabit listelerde büyük etiketlenecek kelimeler
+            function isSpecial(name) {
+                const lower = name.toLowerCase();
+                return lower.includes("yarım ekmek kokoreç") || lower.includes("pilavüstü tavuk döner") || lower.includes("pilav üstü tavuk döner") || lower.includes("pilav üstü döner");
+            }
 
             let requestedItems = [];
+
+            // Tüm istekleri akıllı Obje dizisine {name: "ürün", isLarge: true/false} çevir
             if (type === 'outside') {
-                requestedItems = [...labelLists.outside];
+                requestedItems = labelLists.outside.map(name => ({ name: name, isLarge: isSpecial(name) }));
             } else if (type === 'inside') {
-                requestedItems = [...labelLists.inside];
+                requestedItems = labelLists.inside.map(name => ({ name: name, isLarge: false }));
             } else if (type === 'both') {
-                // Set kullanmadan direkt uç uca ekliyoruz, böylece ortak ürünler silinmiyor!
-                requestedItems = [...labelLists.outside, ...labelLists.inside];
+                const outList = labelLists.outside.map(name => ({ name: name, isLarge: isSpecial(name) }));
+                const inList = labelLists.inside.map(name => ({ name: name, isLarge: false }));
+                requestedItems = [...outList, ...inList];
             } else if (type === 'manual') {
                 requestedItems = manualItems;
             }
 
             currentLabelRequest = requestedItems;
 
-            // Sözlükle eşleştirerek eksikleri bul
+            // Sözlükle eşleştirerek eksik fiyatları bul
             missingProductsGlobal = [];
             const dbProductMap = {};
             products.forEach(p => {
@@ -4640,12 +5019,12 @@
                 dbProductMap[cleanName] = true;
             });
 
-            requestedItems.forEach(itemName => {
+            requestedItems.forEach(itemObj => {
+                const itemName = itemObj.name;
                 let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
                 if (productAliases[searchName]) searchName = productAliases[searchName];
 
                 if (!dbProductMap[searchName] && !manualPricesGlobal[itemName]) {
-                    // Aynı eksik ürün 2 defa listelenmesin diye ufak bir kontrol:
                     if (!missingProductsGlobal.includes(itemName)) {
                         missingProductsGlobal.push(itemName);
                     }
@@ -4669,65 +5048,57 @@
                 dbProductMap[cleanName] = p.discountPrice || p.price;
             });
 
-            let itemsToProcess = [...currentLabelRequest];
             let specialItemsFound = [];
+            let normalItems = [];
 
-            // KURAL: SADECE dışarı listesinden gelen Yarım Kokoreç ve Pilavüstü Döner büyük (2'li) basılacak!
-            if (isLabelJobSpecial) {
-                const specialKeys = ["yarım ekmek kokoreç", "pilavüstü tavuk döner", "pilav üstü tavuk döner", "pilav üstü döner"];
+            // Obje listesini dönerek büyük/küçük boyutluları ayır
+            currentLabelRequest.forEach(itemObj => {
+                const itemName = itemObj.name;
+                const isLarge = itemObj.isLarge;
 
-                // Tüm aynı isimleri toplamak yerine, sadece İLK bulduğu (Dışarı listesinden gelen) ürünü koparır.
-                // Böylece arkadan gelen İçeri listesindeki adaşları 3'lü standart listede kalır.
-                specialKeys.forEach(sk => {
-                    const foundIndex = itemsToProcess.findIndex(item => item.toLocaleLowerCase('tr-TR').trim() === sk);
-                    if (foundIndex !== -1) {
-                        specialItemsFound.push(itemsToProcess.splice(foundIndex, 1)[0]);
-                    }
-                });
+                let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
+                if (productAliases[searchName]) searchName = productAliases[searchName];
+                let price = dbProductMap[searchName] || manualPricesGlobal[itemName] || "0";
 
-                if (specialItemsFound.length > 0) {
-                    // Bunlar 2'li dev sayfaya basılıyor
-                    const page = document.createElement('div');
-                    page.className = 'a4-label-page';
-
-                    specialItemsFound.forEach(itemName => {
-                        let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
-                        if (productAliases[searchName]) searchName = productAliases[searchName];
-                        let price = dbProductMap[searchName] || manualPricesGlobal[itemName] || "0";
-
-                        page.innerHTML += `
-                            <div class="label-split-2">
-                                <div class="price-text-2">${price}<span class="currency-text-2">₺</span></div>
-                            </div>
-                        `;
-                    });
-                    container.appendChild(page);
+                if (isLarge) {
+                    specialItemsFound.push({ name: itemName, price: price });
+                } else {
+                    normalItems.push({ name: itemName, price: price });
                 }
+            });
 
-
-            }
-
-            // Geri kalan tüm ürünler (içerinin kokoreci/döneri dahil) 3'lü eşit parçalara bölünecek
-            for (let i = 0; i < itemsToProcess.length; i += 3) {
-                const chunk = itemsToProcess.slice(i, i + 3);
+            // 1. Büyük (2'li) Etiketleri A4'e Bas
+            for (let i = 0; i < specialItemsFound.length; i += 2) {
+                const chunk = specialItemsFound.slice(i, i + 2);
                 const page = document.createElement('div');
                 page.className = 'a4-label-page';
 
-                chunk.forEach(itemName => {
-                    let searchName = itemName.toLocaleLowerCase('tr-TR').trim();
-                    if (productAliases[searchName]) searchName = productAliases[searchName];
-                    let price = dbProductMap[searchName] || manualPricesGlobal[itemName] || "0";
-
+                chunk.forEach(item => {
                     page.innerHTML += `
-                        <div class="label-split-3">
-                            <div class="price-text-3">${price}<span class="currency-text-3">₺</span></div>
+                        <div class="label-split-2">
+                            <div class="price-text-2">${item.price}<span class="currency-text-2">₺</span></div>
                         </div>
                     `;
                 });
                 container.appendChild(page);
             }
 
-            // Modülü Aç
+            // 2. Normal (3'lü) Etiketleri A4'e Bas
+            for (let i = 0; i < normalItems.length; i += 3) {
+                const chunk = normalItems.slice(i, i + 3);
+                const page = document.createElement('div');
+                page.className = 'a4-label-page';
+
+                chunk.forEach(item => {
+                    page.innerHTML += `
+                        <div class="label-split-3">
+                            <div class="price-text-3">${item.price}<span class="currency-text-3">₺</span></div>
+                        </div>
+                    `;
+                });
+                container.appendChild(page);
+            }
+
             document.getElementById('labelPrintArea').classList.remove('hidden');
         }
 
