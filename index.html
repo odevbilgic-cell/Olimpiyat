@@ -263,7 +263,7 @@
                     </button>
                     <button
                         class="lang-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 flex items-center gap-3 transition font-semibold"
-                        data-lang="AR" dir="rtl">
+                        data-lang="AR">
                         <span class="text-xl">🇸🇦</span> العربية
                     </button>
                     <button
@@ -1380,13 +1380,18 @@
                 // Yüzdelik İndirim Oranı Hesaplama
                 const discountPercent = Math.round(((p.price - p.discountPrice) / p.price) * 100);
 
+                // YENİ: Arapça ise sağa, diğerlerinde sola yasla
+                const isAr = language === 'AR';
+                const alignClass = isAr ? 'text-right' : 'text-left';
+                const dirAttr = isAr ? 'dir="rtl"' : 'dir="ltr"';
+
                 // YENİ: Dil Türkçe değilse orijinal ismi de ekle
-                let titleHtml = `<h4 class="font-bold text-[11px] text-gray-800 leading-tight mb-1 line-clamp-1">${name}</h4>`;
+                let titleHtml = `<h4 ${dirAttr} class="font-bold text-[11px] text-gray-800 leading-tight mb-1 line-clamp-1 ${alignClass}">${name}</h4>`;
                 if (language !== 'TR' && name !== p.name) {
                     titleHtml = `
-                        <div class="mb-1 flex flex-col w-full overflow-hidden">
+                        <div ${dirAttr} class="mb-1 flex flex-col w-full overflow-hidden ${alignClass}">
                             <h4 class="font-bold text-[11px] text-gray-800 leading-tight truncate">${name}</h4>
-                            <span class="text-[8.5px] text-gray-500 italic truncate">${p.name}</span>
+                            <span class="text-[10px] text-gray-700 font-semibold italic truncate">${p.name}</span>
                         </div>
                     `;
                 }
@@ -1451,11 +1456,16 @@
                     const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
                     const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
 
-                    // YENİ: Dil Türkçe değilse kart başlığına orijinal ismi de ekle (Daha belirgin)
-                    let cardTitleHtml = `<h3 class='font-bold text-[12px] sm:text-sm leading-tight mb-1 line-clamp-2 h-8'>${name}</h3>`;
+                   // YENİ: Arapça ise sağa, diğerlerinde sola yasla
+                    const isAr = language === 'AR';
+                    const alignClass = isAr ? 'text-right' : 'text-left';
+                    const dirAttr = isAr ? 'dir="rtl"' : 'dir="ltr"';
+
+                    // YENİ: Dil Türkçe değilse kart başlığına orijinal ismi de ekle
+                    let cardTitleHtml = `<h3 ${dirAttr} class='font-bold text-[12px] sm:text-sm leading-tight mb-1 line-clamp-2 h-8 ${alignClass}'>${name}</h3>`;
                     if (language !== 'TR' && name !== p.name) {
                         cardTitleHtml = `
-                            <div class="mb-1 h-8 flex flex-col justify-center overflow-hidden">
+                            <div ${dirAttr} class="mb-1 h-8 flex flex-col justify-center overflow-hidden ${alignClass}">
                                 <h3 class='font-bold text-[12px] sm:text-[13px] leading-tight truncate'>${name}</h3>
                                 <span class='text-[10px] sm:text-[11px] text-gray-600 font-semibold italic truncate'>${p.name}</span>
                             </div>
@@ -1508,7 +1518,7 @@
                             ${imageOverlayHtml}
                         </div>
                         ${cardTitleHtml}
-                        <p class='text-gray-500 text-[10px] sm:text-xs mb-2 flex-grow line-clamp-2'>${desc}</p>
+                        <p ${dirAttr} class='text-gray-500 text-[10px] sm:text-xs mb-2 flex-grow line-clamp-2 ${alignClass}'>${desc}</p>
                         <div class="mt-auto pt-2 border-t border-gray-50 flex items-center justify-between">
                             ${priceHtml}
                             <span class="text-orange-500 font-black text-sm">＋</span>
@@ -1519,14 +1529,30 @@
                     card.addEventListener('click', () => {
                        document.getElementById('modalImage').src = imageUrl;
                         
+                        const modalTitle = document.getElementById('modalTitle');
+                        const modalDesc = document.getElementById('modalDesc');
+
                         // YENİ: Modal Başlığında da Türkçe ismi göster
                         if (language !== 'TR' && name !== p.name) {
-                            document.getElementById('modalTitle').innerHTML = `${name} <br><span class="text-sm text-gray-400 font-medium italic block mt-1">${p.name}</span>`;
+                            modalTitle.innerHTML = `${name} <br><span class="text-sm sm:text-base text-gray-600 font-bold italic block mt-1">${p.name}</span>`;
                         } else {
-                            document.getElementById('modalTitle').textContent = name;
+                            modalTitle.textContent = name;
                         }
                         
-                        document.getElementById('modalDesc').textContent = desc;
+                        modalDesc.textContent = desc;
+
+                        // YENİ: Arapça ise pop-up metinlerini sağa yasla
+                        if (language === 'AR') {
+                            modalTitle.setAttribute('dir', 'rtl');
+                            modalTitle.classList.add('text-right', 'w-full');
+                            modalDesc.setAttribute('dir', 'rtl');
+                            modalDesc.classList.add('text-right', 'w-full');
+                        } else {
+                            modalTitle.setAttribute('dir', 'ltr');
+                            modalTitle.classList.remove('text-right', 'w-full');
+                            modalDesc.setAttribute('dir', 'ltr');
+                            modalDesc.classList.remove('text-right', 'w-full');
+                        }
                         document.getElementById('modalPrice').textContent = (p.discountPrice || p.price) + " ₺";
 
                         // --- YENİ: GÖRSEL İÇİ FİYAT KUTUCUĞU (SADECE MENÜLER İÇİN) ---
@@ -1578,12 +1604,12 @@
                                     const dPrice = d.discountPrice || d.price;
                                     const dImg = d.image || fallbackImage;
 
-                                    let miniTitleHtml = `<h5 class="font-bold text-[10px] text-gray-800 truncate">${dName}</h5>`;
+                                    let miniTitleHtml = `<h5 ${dirAttr} class="font-bold text-[10px] text-gray-800 truncate ${alignClass}">${dName}</h5>`;
                                     if (language !== 'TR' && dName !== d.name) {
                                         miniTitleHtml = `
-                                            <div class="flex flex-col overflow-hidden">
+                                            <div ${dirAttr} class="flex flex-col overflow-hidden ${alignClass}">
                                                 <h5 class="font-bold text-[10px] text-gray-800 truncate">${dName}</h5>
-                                                <span class="text-[8px] text-gray-400 italic truncate">${d.name}</span>
+                                                <span class="text-[9px] text-gray-700 font-semibold italic truncate">${d.name}</span>
                                             </div>
                                         `;
                                     }
@@ -1800,9 +1826,8 @@
             if (contactTitle) contactTitle.textContent = t.contactTitle;
             if (contactAddress) contactAddress.innerHTML = t.contactAddress;
 
-            // Body fontunu dile göre düzenle (Özellikle Arapça için sağdan sola hizalama)
-            document.body.dir = language === 'AR' ? 'rtl' : 'ltr';
-
+            // Tasarımı ve navbar'ı bozmamak için body her zaman LTR (soldan sağa) kalır
+            document.body.dir = 'ltr';
             // Ekranları Yeniden Çiz
             createCategoryTabs();
             renderCampaignSlider();
