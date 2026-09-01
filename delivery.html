@@ -472,15 +472,41 @@
 
     <div id="viewCountListener" style="display:none;"></div>
 
-    <header id="mainHeader"
-        class="bg-red-600 text-white p-3 flex justify-between items-center sticky top-0 z-20 shadow-md">
+    <header id="mainHeader" class="bg-red-600 text-white p-3 flex justify-between items-center sticky top-0 z-20 shadow-md">
         <img class="logo" src="logom.png" alt="logo">
         <h1 class="baslik">
             <p class="kucuk">&nbspPaket</p> <br> Servis
         </h1>
-        <div class="flex items-center gap-2">
-            <button id="langTR" class="bg-white text-red-600 px-2 py-1 rounded text-sm font-bold">TR</button>
-            <button id="langEN" class="bg-white text-red-600 px-2 py-1 rounded text-sm">EN</button>
+        <!-- YENİ MODERN DİL MENÜSÜ (Kırmızı Tema) -->
+        <div class="relative inline-block text-left z-50" id="languageDropdownContainer">
+            <button id="currentLangBtn"
+                class="flex items-center gap-2 bg-white text-gray-800 px-3 py-1.5 rounded-xl shadow-sm border-2 border-red-200 hover:bg-red-50 transition focus:outline-none font-bold text-sm">
+                <span id="currentLangFlag" class="text-lg">🇹🇷</span>
+                <span id="currentLangText" class="hidden sm:inline text-red-600">Türkçe</span>
+                <span class="text-[10px] text-gray-500">▼</span>
+            </button>
+
+            <!-- Açılır Liste İçeriği -->
+            <div id="languageDropdown"
+                class="hidden absolute right-0 mt-2 w-36 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden transform origin-top-right transition-all duration-200 opacity-0 scale-95">
+                <div class="py-1">
+                    <button class="lang-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 flex items-center gap-3 transition font-semibold" data-lang="TR">
+                        <span class="text-xl">🇹🇷</span> Türkçe
+                    </button>
+                    <button class="lang-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 flex items-center gap-3 transition font-semibold" data-lang="EN">
+                        <span class="text-xl">🇬🇧</span> English
+                    </button>
+                    <button class="lang-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 flex items-center gap-3 transition font-semibold" data-lang="AR">
+                        <span class="text-xl">🇸🇦</span> العربية
+                    </button>
+                    <button class="lang-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 flex items-center gap-3 transition font-semibold" data-lang="ZH">
+                        <span class="text-xl">🇨🇳</span> 中文
+                    </button>
+                    <button class="lang-option w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 flex items-center gap-3 transition font-semibold" data-lang="JA">
+                        <span class="text-xl">🇯🇵</span> 日本語
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -1020,12 +1046,29 @@
         let targetPlatformUrl = "";
 
         const categoryTranslations = {
-            'Kokoreç': 'Kokoreç', 'Tavuk Kokoreç': 'Chicken Kokoreç',
-            'Tavuk Döner': 'Chicken Döner', 'Patso': 'Patso', 'Köfte': 'Meatballs', 'Ciğer': 'Liver',
-            'Hamburger': 'Hamburger', 'Midye': 'Mussel', 'Yan Lezzetler': 'Side Dishes', 'Tost': 'Toast', 'Menüler': 'Menus', 'İçecekler': 'Drinks'
+            'TR': ['Kokoreç', 'Tavuk Kokoreç', 'Tavuk Döner', 'Patso', 'Köfte', 'Ciğer', 'Hamburger', 'Midye', 'Yan Lezzetler', 'Tost', 'Menüler', 'İçecekler'],
+            'EN': ['Kokoreç', 'Chicken Kokoreç', 'Chicken Döner', 'Patso', 'Meatballs', 'Liver', 'Hamburger', 'Mussel', 'Side Dishes', 'Toast', 'Menus', 'Drinks'],
+            'AR': ['كوكوريتش', 'كوكوريتش الدجاج', 'شاورما الدجاج', 'باتسو', 'كفتة', 'كبدة', 'همبرغر', 'بلح البحر', 'أطباق جانبية', 'توست', 'قوائم الطعام', 'مشروبات'],
+            'ZH': ['Kokoreç', '鸡肉 Kokoreç', '鸡肉旋转烤肉', 'Patso', '肉丸', '肝脏', '汉堡', '贻贝', '小菜', '吐司', '套餐', '饮料'],
+            'JA': ['ココレッチ', 'チキンココレッチ', 'チキンドネル', 'パトソ', 'ミートボール', 'レバー', 'ハンバーガー', 'ムール貝', 'サイドメニュー', 'トースト', 'メニュー', 'ドリンク']
         };
-        let categoriesTR = Object.keys(categoryTranslations);
-        let categoriesEN = Object.values(categoryTranslations);
+        let categoriesTR = categoryTranslations['TR'];
+
+        // Ürün isim/açıklamalarını dinamik çeken yardımcı fonksiyon
+        function getLocalizedValue(product, key) {
+            if (language === 'TR') return product[key];
+            // AR, ZH, JA yoksa EN'ye düş, EN yoksa orjinal TR'yi bas
+            return product[key + language] || product[key + 'EN'] || product[key] || '';
+        }
+
+        // GELİŞMİŞ UI ÇEVİRİ SÖZLÜĞÜ (Paket Servis İçin)
+        const uiTranslations = {
+            'TR': { contactTitle: 'İletişim', contactAddress: '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul' },
+            'EN': { contactTitle: 'Contact Us', contactAddress: '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Umraniye - Istanbul' },
+            'AR': { contactTitle: 'اتصال', contactAddress: '📍 محلة يامان إفلار. شارع عالم داغ رقم 159 D<br>أولمبيات كوكوريتش العمرانية - إسطنبول' },
+            'ZH': { contactTitle: '联系我们', contactAddress: '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Umraniye - 伊斯坦布尔' },
+            'JA': { contactTitle: '連絡先', contactAddress: '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Umraniye - イスタンブール' }
+        };
 
         function openPlatformModal(url) {
             targetPlatformUrl = url;
@@ -1281,8 +1324,8 @@
                 const catProducts = products.filter(p => p.category === catTR && p.isArchived !== true);
                 if (catProducts.length === 0) return; // Bu kategoride ürün yoksa atla
 
-                const catEN = categoriesEN[index];
-                const displayTitle = language === 'TR' ? catTR : catEN;
+                // YENİ: Başlığı seçili dilden dinamik olarak çek
+                const displayTitle = categoryTranslations[language][index] || catTR;
 
                 // Kategori için dev bir kapsayıcı (Section) oluştur
                 const section = document.createElement('section');
@@ -1297,14 +1340,30 @@
                 gridDiv.className = 'grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-4';
 
                 // Ürün Kartlarını Basma
+                // Ürün Kartlarını Basma
                 catProducts.forEach(p => {
                     const card = document.createElement('div');
                     card.className = 'bg-white rounded-lg shadow-sm p-2 flex flex-col h-full hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1 cursor-pointer';
 
-                    const name = language === 'TR' ? p.name : p.nameEN || p.name;
-                    const desc = language === 'TR' ? p.desc : p.descEN || p.desc || '';
+                    const name = getLocalizedValue(p, 'name');
+                    const desc = getLocalizedValue(p, 'desc');
                     const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
                     const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
+
+                    // Arapça ve Alt Başlık Ayarları
+                    const isAr = language === 'AR';
+                    const alignClass = isAr ? 'text-right' : 'text-left';
+                    const dirAttr = isAr ? 'dir="rtl"' : 'dir="ltr"';
+                    
+                    let cardTitleHtml = `<h3 ${dirAttr} class='font-bold text-[12px] sm:text-sm leading-tight mb-1 line-clamp-2 h-8 ${alignClass}'>${name}</h3>`;
+                    if (language !== 'TR' && name !== p.name) {
+                        cardTitleHtml = `
+                            <div ${dirAttr} class="mb-1 h-8 flex flex-col justify-center overflow-hidden ${alignClass}">
+                                <h3 class='font-bold text-[12px] sm:text-[13px] leading-tight truncate'>${name}</h3>
+                                <span class='text-[10px] sm:text-[11px] text-gray-600 font-semibold italic truncate'>${p.name}</span>
+                            </div>
+                        `;
+                    }
 
                     let badgeHtml = '';
                     let priceHtml = `<span class='text-red-600 font-black text-[13px] sm:text-base'>${p.price} ₺</span>`;
@@ -1320,9 +1379,8 @@
                         `;
                     }
 
-                    // --- YENİ: KATEGORİYE GÖRE AKILLI GÖRSEL STİLİ MOTORU ---
                     let imageStyleClass = "";
-                    let imageOverlayHtml = ""; // YENİ: Görselin üzerine basılacak fiyat kutusu
+                    let imageOverlayHtml = ""; 
 
                     if (p.category === 'İçecekler' || p.category === 'Menüler') {
                         imageStyleClass = "w-full h-24 sm:h-32 object-contain p-1 transition-transform duration-500 hover:scale-105";
@@ -1330,7 +1388,6 @@
                         imageStyleClass = "w-full h-24 sm:h-32 object-cover transition-transform duration-500 hover:scale-110";
                     }
 
-                    // EĞER KATEGORİ "Menüler" İSE BEYAZ KUTUNUN İÇİNE FİYATI YAZDIR
                     if (p.category === 'Menüler') {
                         const finalPrice = p.discountPrice || p.price;
                         imageOverlayHtml = `
@@ -1348,22 +1405,44 @@
                             <img src='${imageUrl}' onerror="this.src='${fallbackImage}'" class='${imageStyleClass}'>
                             ${imageOverlayHtml}
                         </div>
-                        <h3 class='font-bold text-[12px] sm:text-sm leading-tight mb-1 line-clamp-2 h-8'>${name}</h3>
-                        <p class='text-gray-500 text-[10px] sm:text-xs mb-2 flex-grow line-clamp-2'>${desc}</p>
-                        <div class="mt-auto pt-2 border-t border-gray-50 flex items-center justify-between">
+                        ${cardTitleHtml}
+                        <p ${dirAttr} class='text-gray-500 text-[10px] sm:text-xs mb-2 flex-grow line-clamp-2 ${alignClass}'>${desc}</p>
+                        <div class="mt-auto pt-2 border-t border-gray-50 flex items-center justify-between ${isAr ? 'flex-row-reverse' : ''}">
                             ${priceHtml}
                             <span class="text-red-500 font-black text-sm">＋</span>
                         </div>
                     `;
 
                     // Tıklama Olayı (Birlikte İyi Gider Modalı)
+                    // Tıklama Olayı (Birlikte İyi Gider Modalı)
                     card.addEventListener('click', () => {
                         document.getElementById('modalImage').src = imageUrl;
-                        document.getElementById('modalTitle').textContent = name;
-                        document.getElementById('modalDesc').textContent = desc;
+                        
+                        const modalTitle = document.getElementById('modalTitle');
+                        const modalDesc = document.getElementById('modalDesc');
+
+                        if (language !== 'TR' && name !== p.name) {
+                            modalTitle.innerHTML = `${name} <br><span class="text-sm sm:text-base text-gray-600 font-bold italic block mt-1">${p.name}</span>`;
+                        } else {
+                            modalTitle.textContent = name;
+                        }
+                        
+                        modalDesc.textContent = desc;
+
+                        if (language === 'AR') {
+                            modalTitle.setAttribute('dir', 'rtl');
+                            modalTitle.classList.add('text-right', 'w-full');
+                            modalDesc.setAttribute('dir', 'rtl');
+                            modalDesc.classList.add('text-right', 'w-full');
+                        } else {
+                            modalTitle.setAttribute('dir', 'ltr');
+                            modalTitle.classList.remove('text-right', 'w-full');
+                            modalDesc.setAttribute('dir', 'ltr');
+                            modalDesc.classList.remove('text-right', 'w-full');
+                        }
+
                         document.getElementById('modalPrice').textContent = (p.discountPrice || p.price) + " ₺";
 
-                        // --- MENÜLER İÇİN MODAL FİYAT KUTUSU ---
                         const menuPriceBox = document.getElementById('modalMenuPriceBox');
                         if (menuPriceBox) {
                             if (p.category === 'Menüler') {
@@ -1406,17 +1485,27 @@
                                 crossSection.classList.add('hidden');
                             } else {
                                 recommendedDrinks.forEach(d => {
-                                    const dName = language === 'TR' ? d.name : d.nameEN || d.name;
+                                    const dName = getLocalizedValue(d, 'name');
                                     const dPrice = d.discountPrice || d.price;
                                     const dImg = d.image || fallbackImage;
 
+                                    let miniTitleHtml = `<h5 ${dirAttr} class="font-bold text-[10px] text-gray-800 truncate ${alignClass}">${dName}</h5>`;
+                                    if (language !== 'TR' && dName !== d.name) {
+                                        miniTitleHtml = `
+                                            <div ${dirAttr} class="flex flex-col overflow-hidden ${alignClass}">
+                                                <h5 class="font-bold text-[10px] text-gray-800 truncate">${dName}</h5>
+                                                <span class="text-[9px] text-gray-700 font-semibold italic truncate">${d.name}</span>
+                                            </div>
+                                        `;
+                                    }
+
                                     const miniCard = document.createElement('div');
-                                    miniCard.className = "flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-xl p-1.5 min-w-[150px] max-w-[150px] flex-shrink-0 relative cursor-pointer hover:bg-red-50 transition";
+                                    miniCard.className = `flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-xl p-1.5 min-w-[150px] max-w-[150px] flex-shrink-0 relative cursor-pointer hover:bg-red-50 transition ${isAr ? 'flex-row-reverse' : ''}`;
                                     miniCard.innerHTML = `
                                         <img src="${dImg}" class="w-10 h-10 object-cover rounded-full border border-gray-100">
                                         <div class="text-left min-w-0 flex-1 pointer-events-none">
-                                            <h5 class="font-bold text-[10px] text-gray-800 truncate">${dName}</h5>
-                                            <p class="text-red-600 font-black text-[11px]">${dPrice} ₺</p>
+                                            ${miniTitleHtml}
+                                            <p ${dirAttr} class="text-red-600 font-black text-[11px] ${alignClass}">${dPrice} ₺</p>
                                         </div>
                                         <span class="combo-status text-gray-400 font-black pointer-events-none">+</span>
                                     `;
@@ -1428,7 +1517,13 @@
 
                                         const mainPrice = parseFloat(p.discountPrice || p.price);
                                         document.getElementById('modalPrice').textContent = (mainPrice + parseFloat(dPrice)) + " ₺";
-                                        document.getElementById('modalTitle').textContent = name + " + " + dName;
+                                        
+                                        if (language !== 'TR') {
+                                            modalTitle.innerHTML = `${name} + ${dName} <br><span class="text-sm sm:text-base text-gray-600 font-bold italic block mt-1">${p.name} + ${d.name}</span>`;
+                                        } else {
+                                            modalTitle.textContent = name + " + " + dName;
+                                        }
+                                        
                                         miniCard.querySelector('.combo-status').textContent = '✓';
                                         miniCard.classList.add('bg-green-50', 'border-green-200');
                                     });
@@ -1448,18 +1543,61 @@
 
                 section.appendChild(gridDiv);
 
-               // 🎬 YENİ EKLENEN KISIM: TAVUK KOKOREÇ VİDEO ALANI (ÇİFT DİL DESTEKLİ)
+               // 🎬 YENİ EKLENEN KISIM: TAVUK KOKOREÇ VİDEO ALANI (5 DİL DESTEKLİ)
                 if (catTR === 'Tavuk Kokoreç') {
                     const videoSection = document.createElement('div');
                     videoSection.className = "mt-6 bg-gradient-to-br from-red-50 via-white to-red-50 rounded-2xl shadow-md border-2 border-red-200 overflow-hidden flex flex-col sm:flex-row items-center gap-4 p-4 lg:p-6 mb-4 relative";
                     
-                    // --- DİL ÇEVİRİLERİ (TR / EN) ---
-                    const isTR = language === 'TR';
-                    const videoTitle = isTR ? "Tavuk Kokoreç Nedir?" : "What is Chicken Kokoreç?";
-                    const videoDesc1 = isTR ? "Tavuk Döner domates ve biber ile kavrulup baharatla ekmekte servis edilir." : "Chicken Döner roasted with tomatoes, peppers, and spices, served in bread.";
-                    const videoDesc2 = isTR ? "Tavuk etinin kokoreç formunda közle buluştuğu eşsiz sokak lezzeti." : "A unique street flavor where chicken meets the embers in kokoreç style.";
-                    const unmuteTxt = isTR ? "🔇 Sesi Aç" : "🔇 Unmute";
-                    const muteTxt = isTR ? "🔊 Sesi Kapat" : "🔊 Mute";
+                    // --- DİL ÇEVİRİLERİ (5 DİL) ---
+                    const videoTranslations = {
+                        'TR': {
+                            title: "Tavuk Kokoreç Nedir?",
+                            desc1: "Tavuk Döner domates ve biber ile kavrulup baharatla ekmekte servis edilir.",
+                            desc2: "Tavuk etinin kokoreç formunda közle buluştuğu eşsiz sokak lezzeti.",
+                            unmute: "🔇 Sesi Aç",
+                            mute: "🔊 Sesi Kapat"
+                        },
+                        'EN': {
+                            title: "What is Chicken Kokoreç?",
+                            desc1: "Chicken Döner roasted with tomatoes, peppers, and spices, served in bread.",
+                            desc2: "A unique street flavor where chicken meets the embers in kokoreç style.",
+                            unmute: "🔇 Unmute",
+                            mute: "🔊 Mute"
+                        },
+                        'AR': {
+                            title: "ما هو كوكوريتش الدجاج؟",
+                            desc1: "شاورما الدجاج المحمصة مع الطماطم والفلفل والبهارات، تقدم في الخبز.",
+                            desc2: "نكهة فريدة من نوعها تلتقي فيها الدجاج بالجمر على طريقة الكوكوريتش.",
+                            unmute: "🔇 تشغيل الصوت",
+                            mute: "🔊 كتم الصوت"
+                        },
+                        'ZH': {
+                            title: "什么是鸡肉 Kokoreç？",
+                            desc1: "烤鸡肉卷配西红柿、辣椒和香料，夹在面包中食用。",
+                            desc2: "鸡肉在余烬上烤制，具有独特的街头风味。",
+                            unmute: "🔇 取消静音",
+                            mute: "🔊 静音"
+                        },
+                        'JA': {
+                            title: "チキン Kokoreç とは？",
+                            desc1: "トマト、ピーマン、スパイスと一緒にローストされたチキンドネルをパンに挟んで。",
+                            desc2: "チキンと炭火が交わるユニークなストリートフレーバー。",
+                            unmute: "🔇 ミュート解除",
+                            mute: "🔊 ミュート"
+                        }
+                    };
+
+                    const vt = videoTranslations[language] || videoTranslations['TR'];
+                    const videoTitle = vt.title;
+                    const videoDesc1 = vt.desc1;
+                    const videoDesc2 = vt.desc2;
+                    const unmuteTxt = vt.unmute;
+                    const muteTxt = vt.mute;
+
+                    // Arapça için sağa yaslama özellikleri
+                    const isAr = language === 'AR';
+                    const alignClass = isAr ? 'text-right' : 'text-left';
+                    const dirAttr = isAr ? 'dir="rtl"' : 'dir="ltr"';
 
                     videoSection.innerHTML = `
                         <div class="w-full sm:w-1/2 relative rounded-xl overflow-hidden shadow-lg border-4 border-white flex-shrink-0 group bg-black">
@@ -1470,12 +1608,12 @@
                             
                             <!-- Ses butonu da dile göre değişiyor -->
                             <button onclick="const v = document.getElementById('tavukKokoVideo'); v.muted = !v.muted; this.innerHTML = v.muted ? '${unmuteTxt}' : '${muteTxt}';" 
-                                class="absolute bottom-3 right-3 bg-white/90 text-gray-800 text-[10px] font-bold px-3 py-1.5 rounded-lg backdrop-blur-md shadow-lg border border-gray-200 hover:bg-white transition-colors z-20">
+                                class="absolute bottom-3 right-3 bg-white/90 text-gray-800 text-[10px] font-bold px-3 py-1.5 rounded-lg backdrop-blur-md shadow-lg border border-gray-200 hover:bg-white transition-colors z-200">
                                 ${unmuteTxt}
                             </button>
                         </div>
                         
-                        <div class="w-full sm:w-1/2 flex flex-col justify-center text-center sm:text-left pt-2 sm:pt-0">
+                        <div ${dirAttr} class="w-full sm:w-1/2 flex flex-col justify-center text-center sm:${alignClass} pt-2 sm:pt-0">
                             <span class="text-3xl sm:text-4xl mb-2 drop-shadow-sm">🍗🔥</span>
                             <h3 class="text-xl sm:text-2xl font-black text-gray-800 mb-2 tracking-tight">${videoTitle}</h3>
                             <p class="text-xs sm:text-sm text-gray-600 font-semibold leading-relaxed mb-4">
@@ -1537,7 +1675,7 @@
                 if (!hasProducts) return;
 
                 let btn = document.createElement('button');
-                const catName = language === 'TR' ? catTR : categoriesEN[index];
+                const catName = categoryTranslations[language][index] || catTR;
 
                 // Tasarım: Kırmızı temalı Paket Servis navbar butonu
                 btn.className = 'tabBtn px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-300 font-black text-gray-500 hover:text-red-600 hover:bg-red-50 border border-transparent';
@@ -1588,9 +1726,24 @@
             const fallbackImage = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
 
             discountProducts.forEach(p => {
-                const name = language === 'TR' ? p.name : p.nameEN || p.name;
+                const name = getLocalizedValue(p, 'name');
                 const imageUrl = (p.image && p.image.trim() !== '') ? p.image : fallbackImage;
                 const discountPercent = Math.round(((p.price - p.discountPrice) / p.price) * 100);
+
+                // YENİ: Arapça hizalama ve Orijinal İsim Alt Başlığı
+                const isAr = language === 'AR';
+                const alignClass = isAr ? 'text-right' : 'text-left';
+                const dirAttr = isAr ? 'dir="rtl"' : 'dir="ltr"';
+                
+                let titleHtml = `<h4 ${dirAttr} class="font-bold text-[11px] text-gray-800 leading-tight mb-1 line-clamp-1 ${alignClass}">${name}</h4>`;
+                if (language !== 'TR' && name !== p.name) {
+                    titleHtml = `
+                        <div ${dirAttr} class="mb-1 flex flex-col w-full overflow-hidden ${alignClass}">
+                            <h4 class="font-bold text-[11px] text-gray-800 leading-tight truncate">${name}</h4>
+                            <span class="text-[10px] text-gray-700 font-semibold italic truncate">${p.name}</span>
+                        </div>
+                    `;
+                }
 
                 const item = document.createElement('div');
                 item.className = 'min-w-[150px] max-w-[150px] bg-white rounded-xl p-2 shadow-sm flex flex-col relative border border-red-200 cursor-pointer transform transition active:scale-95 flex-shrink-0 hover:bg-red-50';
@@ -1598,8 +1751,8 @@
                 item.innerHTML = `
                     <span class="absolute top-1.5 left-1.5 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md z-10 shadow-sm animate-pulse">-%${discountPercent}</span>
                     <img src="${imageUrl}" onerror="this.src='${fallbackImage}'" class="w-full h-20 object-cover rounded-lg mb-1.5">
-                    <h4 class="font-bold text-[11px] text-gray-800 leading-tight mb-1 line-clamp-1">${name}</h4>
-                    <div class="flex items-baseline gap-1.5 mt-auto">
+                    ${titleHtml}
+                    <div class="flex items-baseline gap-1.5 mt-auto ${isAr ? 'flex-row-reverse' : ''}">
                         <span class="text-red-600 font-black text-sm">${p.discountPrice} ₺</span>
                         <span class="text-gray-400 line-through text-[10px] font-medium">${p.price} ₺</span>
                     </div>
@@ -1607,8 +1760,30 @@
 
                 item.addEventListener('click', () => {
                     document.getElementById('modalImage').src = imageUrl;
-                    document.getElementById('modalTitle').textContent = name;
-                    document.getElementById('modalDesc').textContent = language === 'TR' ? p.desc : p.descEN || p.desc || '';
+                    
+                    const modalTitle = document.getElementById('modalTitle');
+                    const modalDesc = document.getElementById('modalDesc');
+
+                    if (language !== 'TR' && name !== p.name) {
+                        modalTitle.innerHTML = `${name} <br><span class="text-sm sm:text-base text-gray-600 font-bold italic block mt-1">${p.name}</span>`;
+                    } else {
+                        modalTitle.textContent = name;
+                    }
+                    
+                    modalDesc.textContent = getLocalizedValue(p, 'desc');
+
+                    if (language === 'AR') {
+                        modalTitle.setAttribute('dir', 'rtl');
+                        modalTitle.classList.add('text-right', 'w-full');
+                        modalDesc.setAttribute('dir', 'rtl');
+                        modalDesc.classList.add('text-right', 'w-full');
+                    } else {
+                        modalTitle.setAttribute('dir', 'ltr');
+                        modalTitle.classList.remove('text-right', 'w-full');
+                        modalDesc.setAttribute('dir', 'ltr');
+                        modalDesc.classList.remove('text-right', 'w-full');
+                    }
+                    
                     document.getElementById('modalPrice').textContent = p.discountPrice + " ₺";
 
                     const menuPriceBox = document.getElementById('modalMenuPriceBox');
@@ -1621,7 +1796,6 @@
                         }
                     }
 
-                    // İndirimli vitrinden tıklanınca eşlikçi alanını temizle ve aç
                     const crossSection = document.getElementById('modalCrossSellSection');
                     if (crossSection) crossSection.classList.add('hidden');
 
@@ -1633,16 +1807,17 @@
         }
 
         function updateLanguageContent() {
-            const langTR = document.getElementById('langTR');
-            const langEN = document.getElementById('langEN');
+            const contactTitle = document.getElementById('contactTitle');
+            const contactAddress = document.getElementById('contactAddress');
+            // Arapça için çeviri sözlüğünden çekiyoruz (Diğer diller index'te vardı, bunda da uiTranslations'tan yararlanılır)
+            const t = uiTranslations[language] || uiTranslations['TR']; 
 
-            if (language === 'TR') {
-                langTR.style.fontWeight = 'bold'; langEN.style.fontWeight = 'normal';
-            } else {
-                langTR.style.fontWeight = 'normal'; langEN.style.fontWeight = 'bold';
-            }
+            if (contactTitle) contactTitle.textContent = t.contactTitle || 'İletişim';
+            if (contactAddress) contactAddress.innerHTML = t.contactAddress || '📍 Yamanevler Mah. Alemdağ Caddesi No 159 D<br>Olimpiyat Kokoreç Ümraniye - İstanbul';
 
-            // Tüm gereksiz if/else gizlemeleri çöpe gitti
+            // Tasarımı ve navbar'ı bozmamak için body her zaman LTR (soldan sağa) kalır
+            document.body.dir = 'ltr';
+
             createCategoryTabs();
             renderCampaignSlider();
             renderDiscountSection();
@@ -1670,8 +1845,50 @@
         floatingRatingButton.addEventListener('click', () => { ratingModal.classList.remove('hidden'); });
 
         // --- EVENT LISTENERS ---
-        document.getElementById('langTR').addEventListener('click', () => { language = 'TR'; updateLanguageContent(); });
-        document.getElementById('langEN').addEventListener('click', () => { language = 'EN'; updateLanguageContent(); });
+       // --- EVENT LISTENERS ---
+
+        // --- YENİ DİL MENÜSÜ İŞLEMLERİ ---
+        const langDropdownBtn = document.getElementById('currentLangBtn');
+        const langDropdown = document.getElementById('languageDropdown');
+        const langFlag = document.getElementById('currentLangFlag');
+        const langText = document.getElementById('currentLangText');
+
+        const langFlags = { 'TR': '🇹🇷', 'EN': '🇬🇧', 'AR': '🇸🇦', 'ZH': '🇨🇳', 'JA': '🇯🇵' };
+        const langNames = { 'TR': 'Türkçe', 'EN': 'English', 'AR': 'العربية', 'ZH': '中文', 'JA': '日本語' };
+
+        langDropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            langDropdown.classList.toggle('hidden');
+            setTimeout(() => {
+                langDropdown.classList.toggle('opacity-0');
+                langDropdown.classList.toggle('scale-95');
+            }, 10);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!langDropdownBtn.contains(e.target) && !langDropdown.contains(e.target)) {
+                langDropdown.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => langDropdown.classList.add('hidden'), 200);
+            }
+        });
+
+        document.querySelectorAll('.lang-option').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const selectedLang = e.currentTarget.dataset.lang;
+                language = selectedLang;
+
+                // Ana butondaki bayrak ve yazıyı seçilenle değiştir
+                langFlag.textContent = langFlags[selectedLang];
+                langText.textContent = langNames[selectedLang];
+
+                // Menüyü kapat
+                langDropdown.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => langDropdown.classList.add('hidden'), 200);
+
+                updateLanguageContent();
+            });
+        });
+
         document.getElementById('imageModal').addEventListener('click', (e) => {
             // Sadece arka plana (imageModal ID'li div) veya X butonuna basıldıysa kapat
             const isBackground = e.target.id === 'imageModal';
