@@ -1410,17 +1410,31 @@
                         </div>
                     `;
                 } else {
-                    // 🍽️ NORMAL ÜRÜN GÖRÜNÜMÜ
+                   // 🍽️ NORMAL ÜRÜN GÖRÜNÜMÜ (Mobilde Kusursuz Dokunmatik Deneyimiyle - Silme Butonsuz)
+                    const hasImage = p.image && p.image.trim() !== '';
+                    const tempImg = hasImage ? p.image : 'https://via.placeholder.com/300x200?text=Görsel+Yok';
+                    
+                    // Görsel yoksa üstünde "➕" artısı çıksın, varsa tertemiz sadece görsel kalsın
+                    const imageOverlay = hasImage 
+                        ? '' 
+                        : `<div class="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center pointer-events-none"><span class="text-white text-xl font-bold">➕</span></div>`;
+
                     item.innerHTML = `
-                        <div class="flex flex-col">
-                            <span class="font-bold text-gray-800 text-sm sm:text-base">${p.name}</span>
-                            <span class="text-xs font-bold text-orange-600 mt-0.5 bg-orange-100 px-2 py-0.5 rounded-md w-fit">${p.category}</span>
+                        <div class="flex items-center gap-3 sm:w-1/2">
+                            <div class="relative w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0">
+                                <img src="${tempImg}" data-key="${p.key}" class="quickChangeImgBtn w-full h-full object-cover rounded-xl border border-gray-200 bg-white shadow-sm cursor-pointer hover:opacity-80 active:scale-95 transition" title="Görseli Değiştir/Ekle">
+                                ${imageOverlay}
+                            </div>
+                            <div class="flex flex-col overflow-hidden">
+                                <span class="font-bold text-gray-800 text-sm sm:text-base truncate" title="${p.name}">${p.name}</span>
+                                <span class="text-[10px] font-bold text-orange-600 mt-0.5 bg-orange-100 px-2 py-0.5 rounded-md w-fit truncate">${p.category}</span>
+                            </div>
                         </div>
-                        <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-gray-200/60">
+                        <div class="flex items-center justify-end gap-2 sm:gap-3 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-gray-200/60 w-full sm:w-auto">
                             <span class="text-sm font-black text-gray-700 bg-white border px-3 py-1.5 rounded-lg shadow-sm">${p.price} ₺</span>
-                            <div class="flex gap-2">
-                                <button data-key="${p.key}" class="editBtn bg-amber-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Düzenle</button>
-                                <button data-key="${p.key}" class="deleteBtn bg-red-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Sil</button>
+                            <div class="flex gap-1.5 sm:gap-2">
+                                <button data-key="${p.key}" class="editBtn bg-amber-500 text-white px-2.5 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Düzenle</button>
+                                <button data-key="${p.key}" class="deleteBtn bg-red-500 text-white px-2.5 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Sil</button>
                             </div>
                         </div>
                     `;
@@ -1441,6 +1455,45 @@
 
             if (!isArchiveView) {
                 document.querySelectorAll('.editBtn').forEach(btn => btn.addEventListener('click', (e) => openEditModal(e.target.dataset.key)));
+            }
+
+            // YENİ: Liste üzerinden hızlı görsel değiştirme ve silme dinleyicileri
+            if (!isArchiveView) {
+                document.querySelectorAll('.quickChangeImgBtn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const productKey = e.currentTarget.dataset.key;
+                        const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
+                        
+                        let tempInput = document.createElement('input');
+                        let tempImg = document.createElement('img');
+                        
+                        openCloudinaryWidget(tempInput, tempImg);
+                        const observer = new MutationObserver(async () => {
+                            if (tempInput.value) {
+                                try {
+                                    await database.ref(`${pathPrefix}/${productKey}/image`).set(tempInput.value);
+                                    alert("Ürün görseli başarıyla güncellendi!");
+                                } catch (err) { alert("Hata: " + err.message); }
+                                observer.disconnect();
+                            }
+                        });
+                        observer.observe(tempInput, { attributes: true });
+                    });
+                });
+
+                document.querySelectorAll('.quickDeleteImgBtn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const productKey = e.currentTarget.dataset.key;
+                        const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
+                        if (confirm("Görseli tamamen silmek istediğinize emin misiniz?")) {
+                            try {
+                                await database.ref(`${pathPrefix}/${productKey}/image`).set("");
+                            } catch (err) { alert("Hata: " + err.message); }
+                        }
+                    });
+                });
             }
         }
 
@@ -2959,13 +3012,21 @@
                 yesterday.setDate(yesterday.getDate() - 1);
                 const yesterdayStr = getLocalYYYYMMDD(yesterday);
 
-                // Firebase'den istatistikleri çek! (Konumlar aşağıda anlık çekilecek)
-                const [snapToday, snapYesterday, snapCategory, snapProducts] = await Promise.all([
+                // Firebase'den istatistikleri çek! (Tüm Zamanlar Dahil Edildi)
+                const [snapToday, snapYesterday, snapCategory, snapProducts, snapAllTime] = await Promise.all([
                     database.ref(`visitors_hourly/${statsMenuType}/${todayStr}`).once('value'),
                     database.ref(`visitors_hourly/${statsMenuType}/${yesterdayStr}`).once('value'),
                     database.ref(`stats/category_clicks/${statsMenuType}`).once('value'),
-                    database.ref(`stats/product_clicks/${statsMenuType}`).once('value')
+                    database.ref(`stats/product_clicks/${statsMenuType}`).once('value'),
+                    database.ref(`visitors_hourly/${statsMenuType}`).once('value')
                 ]);
+                
+                // ... verileri okuma satırlarından sonra şunu ekle:
+                let totalAllTimeVisitors = 0;
+                const allTimeData = snapAllTime.val() || {};
+                Object.values(allTimeData).forEach(dayObj => {
+                    Object.values(dayObj).forEach(count => totalAllTimeVisitors += count);
+                });
                 const todayData = snapToday.val() || {};
                 const yesterdayData = snapYesterday.val() || {};
                 const categoryData = snapCategory.val() || {};
@@ -3072,13 +3133,20 @@
                                         <span class="animate-pulse text-red-500">📍</span> Müşteri Haritası
                                     </h3>
                                     
-                                    <!-- YENİ: Zeki Zaman Filtreleme Butonları -->
-                                    <div class="flex flex-wrap gap-2 text-[10px] font-bold" id="mapFilterButtons">
-                                        <button data-filter="today" class="map-filter-btn bg-red-500 text-white px-3 py-1.5 rounded-lg shadow-sm border border-red-600 transition active:scale-95">Bugün</button>
-                                        <button data-filter="yesterday" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Dün</button>
-                                        <button data-filter="week" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Bu Hafta</button>
-                                        <button data-filter="month" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Bu Ay</button>
-                                        <button data-filter="all" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Tüm Zamanlar</button>
+                                    <!-- YENİ: Zeki Zaman ve Bölge Filtreleme Butonları -->
+                                    <div class="flex flex-col items-end gap-2">
+                                        <div class="flex flex-wrap justify-end gap-2 text-[10px] font-bold" id="mapFilterButtons">
+                                            <button data-filter="today" class="map-filter-btn bg-red-500 text-white px-3 py-1.5 rounded-lg shadow-sm border border-red-600 transition active:scale-95">Bugün</button>
+                                            <button data-filter="yesterday" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Dün</button>
+                                            <button data-filter="week" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Bu Hafta</button>
+                                            <button data-filter="month" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Bu Ay</button>
+                                            <button data-filter="all" class="map-filter-btn bg-white text-gray-600 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">Tüm Zamanlar</button>
+                                        </div>
+                                        <!-- Türkiye / Tümü Alt Filtresi (Baştan gizli) -->
+                                        <div id="mapRegionFilterArea" class="hidden flex gap-2 text-[10px] font-bold transition-all pt-2 border-t border-gray-100 w-full justify-end">
+                                            <button data-region="all" class="region-filter-btn bg-blue-500 text-white px-3 py-1 rounded-lg shadow-sm border border-blue-600 transition active:scale-95">🌍 Tümü</button>
+                                            <button data-region="turkey" class="region-filter-btn bg-white text-gray-600 px-3 py-1 rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition active:scale-95">🇹🇷 Türkiye</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div id="customerMap" class="w-full h-[350px] rounded-xl border border-gray-200 z-0 shadow-inner"></div>
@@ -3125,34 +3193,43 @@
                         </div>
 
                         <!-- 1. BÖLÜM: GERÇEK KPI KARTLARI -->
-                        <div class="anim-delay-2 grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <!-- 1. BÖLÜM: GERÇEK KPI KARTLARI -->
+                        <div class="anim-delay-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             
+                            <!-- BUGÜN KARTI -->
                             <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:-translate-y-1 transition duration-300">
-                                <div class="absolute -right-4 -top-4 text-gray-50 text-7xl select-none group-hover:scale-110 transition duration-500"></div>
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 relative z-10">Bugünkü Ziyaretçi</h3>
                                 <div class="flex items-end gap-3 relative z-10">
                                     <span class="text-3xl font-black text-gray-800">${visitorsToday}</span>
-                                    <span class="text-xs font-bold ${visitorTrendClass} px-2 py-1 rounded-lg mb-1">
-                                        ${visitorTrendStr}
-                                    </span>
+                                    <span class="text-xs font-bold ${visitorTrendClass} px-2 py-1 rounded-lg mb-1">${visitorTrendStr}</span>
                                 </div>
                             </div>
                             
+                            <!-- ETKİLEŞİM KARTI -->
                             <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group hover:-translate-y-1 transition duration-300">
-                                <div class="absolute -right-4 -top-4 text-gray-50 text-7xl select-none group-hover:scale-110 transition duration-500"></div>
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 relative z-10">Toplam Menü Etkileşimi</h3>
                                 <div class="flex items-end gap-3 relative z-10">
                                     <span class="text-3xl font-black text-gray-800">${totalProductClicks}</span>
-                                    <span class="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg mb-1">Tıklama/İnceleme</span>
+                                    <span class="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-lg mb-1">Tıklama</span>
                                 </div>
                             </div>
 
+                            <!-- POPÜLER KATEGORİ KARTI -->
                             <div class="bg-gradient-to-br from-gray-900 to-black p-4 rounded-2xl shadow-lg border border-gray-800 relative overflow-hidden text-white group hover:-translate-y-1 transition duration-300">
                                 <div class="absolute -right-4 -top-4 text-gray-800 text-7xl select-none group-hover:scale-110 transition duration-500">🔥</div>
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 relative z-10">En Çok İncelenen Kategori</h3>
                                 <div class="flex flex-col relative z-10 mt-1">
                                     <span class="text-xl font-black text-yellow-400 truncate">${topCategoryName}</span>
-                                    <span class="text-xs font-bold text-gray-400 mt-1">${topCategoryClicks} Görüntülenme</span>
+                                </div>
+                            </div>
+                            
+                            <!-- YENİ: TÜM ZAMANLAR KARTI -->
+                            <div class="bg-gradient-to-br from-indigo-600 to-blue-800 p-4 rounded-2xl shadow-lg border border-indigo-700 relative overflow-hidden text-white group hover:-translate-y-1 transition duration-300">
+                                <div class="absolute -right-4 -top-4 text-indigo-500/30 text-7xl select-none group-hover:scale-110 transition duration-500">🌍</div>
+                                <h3 class="text-xs font-bold text-indigo-200 uppercase tracking-wider mb-1 relative z-10">Tüm Zamanlar Trafik</h3>
+                                <div class="flex items-end gap-3 relative z-10 mt-1">
+                                    <span class="text-3xl font-black text-white" id="animTotalVisitors">0</span>
+                                    <span class="text-[10px] font-bold text-indigo-100 bg-indigo-900/50 px-2 py-1 rounded-lg mb-1">Toplam Giriş</span>
                                 </div>
                             </div>
                         </div>
@@ -3206,8 +3283,25 @@
 
                 loadModule(html);
 
+                // Tüm Zamanlar Sayacını canlandır (Tam Sayı olarak)
+                setTimeout(() => {
+                    const obj = document.getElementById('animTotalVisitors');
+                    if(obj) {
+                        let start = null;
+                        const step = (ts) => {
+                            if (!start) start = ts;
+                            const prog = Math.min((ts - start) / 1500, 1);
+                            obj.innerText = Math.floor(totalAllTimeVisitors * (1 - Math.pow(1 - prog, 4))).toLocaleString('tr-TR');
+                            if (prog < 1) requestAnimationFrame(step);
+                            else obj.innerText = totalAllTimeVisitors.toLocaleString('tr-TR');
+                        };
+                        requestAnimationFrame(step);
+                    }
+                }, 150);
+
                 // HARİTA VE ANLIK VERİ İŞLEMLERİ BAŞLANGICI
                 let mapFilterType = 'today'; // Varsayılan açılış: Bugün
+                let mapRegionFilter = 'all'; // Varsayılan: Tümü
 
                 if (statsMenuType === 'delivery') {
                     setTimeout(() => {
@@ -3230,126 +3324,158 @@
                         });
 
                         const markersLayer = L.layerGroup().addTo(map);
+                        
+                        // YENİ ÇÖZÜM: Verileri tutacak değişken ve harita çizim motoru dışarı alındı!
+                        let currentLocData = {};
 
+                        // Filtreleme yapıp haritayı çizen ana fonksiyon
+                        function updateMapDisplay() {
+                            markersLayer.clearLayers();
+                            let neighborhoodCounts = {};
+                            let bounds = [];
+
+                            // Bugünü milisaniye olarak gece 00:00'a sabitliyoruz
+                            const now = new Date();
+                            now.setHours(0, 0, 0, 0);
+
+                            Object.keys(currentLocData).forEach(dateKey => {
+                                const [y, m, d] = dateKey.split('-');
+                                const entryDate = new Date(y, m - 1, d);
+                                
+                                // Kaç gün önce sipariş verildiğini hesapla
+                                const timeDiff = now.getTime() - entryDate.getTime();
+                                const daysAgo = Math.floor(timeDiff / (1000 * 3600 * 24));
+
+                                // Butondan gelen emre göre filtrele
+                                let include = false;
+                                if (mapFilterType === 'today' && daysAgo === 0) include = true;
+                                else if (mapFilterType === 'yesterday' && daysAgo === 1) include = true;
+                                else if (mapFilterType === 'week' && daysAgo >= 0 && daysAgo <= 7) include = true;
+                                else if (mapFilterType === 'month' && daysAgo >= 0 && daysAgo <= 30) include = true;
+                                else if (mapFilterType === 'all') include = true;
+
+                                if (include) {
+                                    const dailyLocations = currentLocData[dateKey];
+                                    Object.keys(dailyLocations).forEach(pushId => {
+                                        const loc = dailyLocations[pushId];
+
+                                        // YENİ: Türkiye Filtresi Kontrolü
+                                        if (mapFilterType === 'all' && mapRegionFilter === 'turkey') {
+                                            const addr = (loc.fullAddress || "").toLowerCase();
+                                            if (!addr.includes('türkiye') && !addr.includes('turkey')) return;
+                                        }
+
+                                        const mahalleName = (loc.mahalle && loc.mahalle !== "Bilinmiyor" && loc.mahalle !== "Gizli") ? loc.mahalle : null;
+                                        if (mahalleName) {
+                                            neighborhoodCounts[mahalleName] = (neighborhoodCounts[mahalleName] || 0) + 1;
+                                        }
+
+                                        // Konum bas
+                                        if (loc.lat && loc.lon && loc.lat !== 0) {
+                                            const popupContent = `
+                                                <div class="text-center font-sans min-w-[180px]">
+                                                    <div class="font-black text-sm text-gray-800 border-b pb-1 mb-1 truncate">${loc.mahalle || 'Bilinmiyor'} / ${loc.ilce || ''}</div>
+                                                    <div class="text-[10px] text-gray-500 mb-2 leading-tight">${loc.fullAddress}</div>
+                                                    <div class="text-xs font-bold text-white bg-red-500 px-2 py-1 rounded inline-block shadow-sm">📅 ${dateKey} - ⏰ ${loc.time || '--:--'}</div>
+                                                </div>
+                                            `;
+                                            L.marker([loc.lat, loc.lon], { icon: redIcon })
+                                                .bindPopup(popupContent)
+                                                .addTo(markersLayer);
+
+                                            bounds.push([loc.lat, loc.lon]);
+                                        }
+                                    });
+                                }
+                            });
+
+                            // Noktalara göre kamerayı uzaklaştır/yakınlaştır
+                            if (bounds.length > 0) {
+                                map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+                            }
+
+                            // Seçilen filtreye göre Top 5 mahalleyi sağa diz
+                            const sortedNeighborhoods = Object.keys(neighborhoodCounts)
+                                .map(name => ({ name: name, count: neighborhoodCounts[name] }))
+                                .sort((a, b) => b.count - a.count)
+                                .slice(0, 5);
+
+                            const topListEl = document.getElementById('topNeighborhoodsList');
+                            if (sortedNeighborhoods.length === 0) {
+                                topListEl.innerHTML = '<div class="text-center text-xs text-gray-400 py-4 font-bold border border-dashed border-gray-700 rounded-xl">Seçili zaman/bölge diliminde sipariş/konum verisi yok.</div>';
+                            } else {
+                                topListEl.innerHTML = sortedNeighborhoods.map((n, index) => {
+                                    const medals = ['🥇', '🥈', '🥉', '🔹', '🔹'];
+                                    return `
+                                        <div class="flex items-center justify-between p-2.5 bg-gray-800 rounded-xl border border-gray-700 hover:bg-gray-700 transition transform hover:scale-[1.02]">
+                                            <div class="flex items-center gap-2 overflow-hidden pr-2">
+                                                <span class="text-lg drop-shadow-md">${medals[index]}</span>
+                                                <span class="font-bold text-xs sm:text-sm text-gray-200 truncate" title="${n.name}">${n.name}</span>
+                                            </div>
+                                            <span class="font-black text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2 py-1 rounded-lg text-xs whitespace-nowrap shadow-inner">
+                                                ${n.count} Kişi
+                                            </span>
+                                        </div>
+                                    `;
+                                }).join('');
+                            }
+                        }
+
+                        // 🚀 ÇÖZÜM: BUTON DİNLEYİCİLERİ FİREBASE'İN DIŞINA ALINDI (Anında Tepki Verir)
+                        
+                        // ZAMAN BUTONU DİNLEYİCİSİ
+                        const filterBtns = document.querySelectorAll('.map-filter-btn');
+                        filterBtns.forEach(btn => {
+                            btn.onclick = (e) => { 
+                                filterBtns.forEach(b => {
+                                    b.classList.remove('bg-red-500', 'text-white', 'border-red-600');
+                                    b.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+                                });
+                                const clicked = e.currentTarget;
+                                clicked.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+                                clicked.classList.add('bg-red-500', 'text-white', 'border-red-600');
+
+                                mapFilterType = clicked.dataset.filter;
+                                
+                                // "Tüm Zamanlar" Seçilirse Türkiye Filtresini Göster
+                                const regionArea = document.getElementById('mapRegionFilterArea');
+                                if(mapFilterType === 'all') {
+                                    regionArea.classList.remove('hidden');
+                                } else {
+                                    regionArea.classList.add('hidden');
+                                }
+
+                                updateMapDisplay();
+                            };
+                        });
+
+                        // BÖLGE (TÜRKİYE/TÜMÜ) BUTONU DİNLEYİCİSİ
+                        const regionBtns = document.querySelectorAll('.region-filter-btn');
+                        regionBtns.forEach(btn => {
+                            btn.onclick = (e) => { 
+                                regionBtns.forEach(b => {
+                                    b.classList.remove('bg-blue-500', 'text-white', 'border-blue-600');
+                                    b.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+                                });
+                                const clicked = e.currentTarget;
+                                clicked.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+                                clicked.classList.add('bg-blue-500', 'text-white', 'border-blue-600');
+                                
+                                mapRegionFilter = clicked.dataset.region;
+                                updateMapDisplay(); // Tıklandığı an haritayı günceller
+                            };
+                        });
+
+                        // SADECE FİREBASE'DEN VERİYİ ÇEKER (İçinde Buton Yok)
                         if (activeListeners.locations) {
                             database.ref(`visitor_locations/delivery`).off('value', activeListeners.locations);
                         }
 
-                        // Firebase'den veriyi dinle
                         activeListeners.locations = database.ref(`visitor_locations/delivery`).on('value', (snapshot) => {
-                            const allLocData = snapshot.val() || {};
-
-                            // Filtreleme yapıp haritayı çizen ana fonksiyon
-                            function updateMapDisplay() {
-                                markersLayer.clearLayers();
-                                let neighborhoodCounts = {};
-                                let bounds = [];
-
-                                // Bugünü milisaniye olarak gece 00:00'a sabitliyoruz
-                                const now = new Date();
-                                now.setHours(0, 0, 0, 0);
-
-                                Object.keys(allLocData).forEach(dateKey => {
-                                    const [y, m, d] = dateKey.split('-');
-                                    const entryDate = new Date(y, m - 1, d);
-                                    
-                                    // Kaç gün önce sipariş verildiğini hesapla
-                                    const timeDiff = now.getTime() - entryDate.getTime();
-                                    const daysAgo = Math.floor(timeDiff / (1000 * 3600 * 24));
-
-                                    // Butondan gelen emre göre filtrele
-                                    let include = false;
-                                    if (mapFilterType === 'today' && daysAgo === 0) include = true;
-                                    else if (mapFilterType === 'yesterday' && daysAgo === 1) include = true;
-                                    else if (mapFilterType === 'week' && daysAgo >= 0 && daysAgo <= 7) include = true;
-                                    else if (mapFilterType === 'month' && daysAgo >= 0 && daysAgo <= 30) include = true;
-                                    else if (mapFilterType === 'all') include = true;
-
-                                    if (include) {
-                                        const dailyLocations = allLocData[dateKey];
-                                        Object.keys(dailyLocations).forEach(pushId => {
-                                            const loc = dailyLocations[pushId];
-
-                                            const mahalleName = (loc.mahalle && loc.mahalle !== "Bilinmiyor" && loc.mahalle !== "Gizli") ? loc.mahalle : null;
-                                            if (mahalleName) {
-                                                neighborhoodCounts[mahalleName] = (neighborhoodCounts[mahalleName] || 0) + 1;
-                                            }
-
-                                            // Konum bas
-                                            if (loc.lat && loc.lon && loc.lat !== 0) {
-                                                const popupContent = `
-                                                    <div class="text-center font-sans min-w-[180px]">
-                                                        <div class="font-black text-sm text-gray-800 border-b pb-1 mb-1 truncate">${loc.mahalle || 'Bilinmiyor'} / ${loc.ilce || ''}</div>
-                                                        <div class="text-[10px] text-gray-500 mb-2 leading-tight">${loc.fullAddress}</div>
-                                                        <div class="text-xs font-bold text-white bg-red-500 px-2 py-1 rounded inline-block shadow-sm">📅 ${dateKey} - ⏰ ${loc.time || '--:--'}</div>
-                                                    </div>
-                                                `;
-                                                L.marker([loc.lat, loc.lon], { icon: redIcon })
-                                                    .bindPopup(popupContent)
-                                                    .addTo(markersLayer);
-
-                                                bounds.push([loc.lat, loc.lon]);
-                                            }
-                                        });
-                                    }
-                                });
-
-                                // Noktalara göre kamerayı uzaklaştır/yakınlaştır
-                                if (bounds.length > 0) {
-                                    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
-                                }
-
-                                // Seçilen filtreye göre Top 5 mahalleyi sağa diz
-                                const sortedNeighborhoods = Object.keys(neighborhoodCounts)
-                                    .map(name => ({ name: name, count: neighborhoodCounts[name] }))
-                                    .sort((a, b) => b.count - a.count)
-                                    .slice(0, 5);
-
-                                const topListEl = document.getElementById('topNeighborhoodsList');
-                                if (sortedNeighborhoods.length === 0) {
-                                    topListEl.innerHTML = '<div class="text-center text-xs text-gray-400 py-4 font-bold border border-dashed border-gray-700 rounded-xl">Seçili zaman diliminde sipariş/konum verisi yok.</div>';
-                                } else {
-                                    topListEl.innerHTML = sortedNeighborhoods.map((n, index) => {
-                                        const medals = ['🥇', '🥈', '🥉', '🔹', '🔹'];
-                                        return `
-                                            <div class="flex items-center justify-between p-2.5 bg-gray-800 rounded-xl border border-gray-700 hover:bg-gray-700 transition transform hover:scale-[1.02]">
-                                                <div class="flex items-center gap-2 overflow-hidden pr-2">
-                                                    <span class="text-lg drop-shadow-md">${medals[index]}</span>
-                                                    <span class="font-bold text-xs sm:text-sm text-gray-200 truncate" title="${n.name}">${n.name}</span>
-                                                </div>
-                                                <span class="font-black text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-2 py-1 rounded-lg text-xs whitespace-nowrap shadow-inner">
-                                                    ${n.count} Kişi
-                                                </span>
-                                            </div>
-                                        `;
-                                    }).join('');
-                                }
-                            }
-
-                            // Firebase verisi ilk geldiğinde varsayılan olarak "Bugün"ü çiz
-                            updateMapDisplay();
-
-                            // Butonlara Tıklama Olaylarını (Event Listeners) Bağla
-                            const filterBtns = document.querySelectorAll('.map-filter-btn');
-                            filterBtns.forEach(btn => {
-                                btn.addEventListener('click', (e) => {
-                                    // Bütün butonların kırmızılığını (aktifliğini) al
-                                    filterBtns.forEach(b => {
-                                        b.classList.remove('bg-red-500', 'text-white', 'border-red-600');
-                                        b.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
-                                    });
-                                    
-                                    // Sadece tıklanan butonu kırmızı yap
-                                    const clicked = e.currentTarget;
-                                    clicked.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
-                                    clicked.classList.add('bg-red-500', 'text-white', 'border-red-600');
-
-                                    // Motora yeni emri ver ve haritayı yeniden çizdir
-                                    mapFilterType = clicked.dataset.filter;
-                                    updateMapDisplay();
-                                });
-                            });
+                            currentLocData = snapshot.val() || {};
+                            updateMapDisplay(); // Veri geldiğinde 1 kere çizer
                         });
+
                     }, 150); // HTML render için bekleme süresi
                 }
                 // Olay Dinleyicisini Bağla
