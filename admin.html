@@ -127,70 +127,91 @@
         /* --- OLİMPİYAT A4 BASKI TASARIMI (KOMPAKT VERSİYON - TAŞMAYI ÖNLER) --- */
         /* --- YAZDIRMA ÇAKIŞMALARINI ÖNLEYEN KESİN ÇÖZÜM --- */
         /* --- YAZDIRMA ÇAKIŞMALARINI VE SAYFA KESİLMESİNİ ÖNLEYEN KESİN ÇÖZÜM --- */
+       /* ======================================================= */
+        /* 🖨️ KUSURSUZ YAZICI VE 5MM MARJ MOTORU (BOŞ SAYFA ÇÖZÜMÜ) */
+        /* ======================================================= */
         @media print {
-
-            /* 1. Tüm sayfa elemanlarını yazıcıda varsayılan olarak gizle */
-            body>* {
+            /* 1. Tüm modalları, butonları ve sol siyah menüyü yazıcıda tamamen gizle */
+            .no-print, #adminLoginOverlay, #editProductModal, #missingProductsModal, #printSelectionModal, #debtPreviewModal, body > div.flex.min-h-screen > div:first-child {
                 display: none !important;
             }
 
-            /* 2. EĞER MENÜ YA DA ETİKET AÇIKSA, ONLARI YAZDIR (FLEX İPTAL, BLOCK KULLAN) */
-            body>#printModuleArea:not(.hidden),
-            body>#labelPrintArea:not(.hidden) {
-                display: block !important;
-                /* Flex iptal edildi, block yapıldı ki sayfalar bölünebilsin */
-                position: static !important;
-                /* Absolute iptal edildi, kağıt akışına bırakıldı */
-                width: 100% !important;
-                height: auto !important;
-                overflow: visible !important;
+            /* 2. Arkaplanı kağıt beyazı yap */
+            body {
+                background-color: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
-            /* 3. Etiketleri tutan ana konteyneri de blok yapıyoruz ki alt alta kağıtlara taşsın */
+            /* 3. İçerik çerçevelerini kağıda tam yay (Gizlenen elementlerin boşluğunu yutar) */
+            body > div.flex.min-h-screen, main, #contentContainer {
+                display: block !important;
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                background: transparent !important;
+            }
+
+            /* Modül kutularının gölgelerini ve beyaz kutu arka planlarını sıfırla */
+            #contentContainer > div {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                min-height: 0 !important;
+            }
+
+            /* 4. A4 SAYFASINA KESİN ÖLÇÜLER VE 5MM BOŞLUK KURALI */
+            @page {
+                size: A4 portrait;
+                margin: 5mm; /* YAZICIYA KESİN EMİR: Kağıdın dört bir yanından 5mm boşluk bırak! */
+            }
+
+           /* YENİ EKLENEN: Alttaki gereksiz boşlukları sıfırlayıp 2. sayfaya taşmayı önler */
+            .pb-8, .mb-8 { 
+                padding-bottom: 0 !important; 
+                margin-bottom: 0 !important; 
+            }
+
+            /* Menü Çıktı Ayarları */
+            .a4-menu-page {
+                margin: 0 auto !important;
+                width: 200mm !important; 
+                height: 286mm !important; /* KESİN ÇÖZÜM: 1mm tolerans bıraktık ki ikinci boş sayfaya taşırmasın */
+                background-color: #000000 !important;
+                border: 3mm solid #ffcc00 !important;
+                box-sizing: border-box !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+            }
+
+            /* Etiket Çıktı Ayarları Koruması */
             #labelPagesContainer {
                 display: block !important;
                 padding: 0 !important;
                 margin: 0 !important;
             }
 
-            /* Butonları yazıcıda gizle */
-            .no-print {
-                display: none !important;
-            }
-
-            @page {
-                size: A4;
-                margin: 0;
-            }
-
-            body {
-                padding: 0;
-                margin: 0;
-                background-color: #ffffff;
-                /* Kağıt arkaplanı varsayılan beyaz */
-            }
-
-            /* Menü A4 sayfası ayarı (Siyah) */
-            .a4-menu-page {
-                margin: 0mm auto 0 auto !important;
-                box-shadow: none !important;
-                background-color: #000000 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                width: 200mm;
-                height: 287mm;
-            }
-
-            /* Etiket A4 sayfası ayarı (Beyaz ve çok sayfalı) */
             .a4-label-page {
                 margin: 0 auto !important;
-                box-shadow: none !important;
                 background-color: #ffffff !important;
                 page-break-after: always !important;
-                /* Tarayıcıya zorla YENİ SAYFAYA GEÇ komutu */
                 break-after: page !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                box-shadow: none !important;
+            }
+
+            .drink-menu-page {
+                margin: 0 auto !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                box-shadow: none !important;
             }
         }
 
@@ -205,15 +226,18 @@
             print-color-adjust: exact;
         }
 
-        .a4-menu-page {
+       .a4-menu-page {
             background-color: #000000;
-            width: 200;
-            height: 287mm;
+            width: 200mm; /* A4 boyutunu kesin milimetre ile kilitliyoruz */
+            height: 287mm; /* A4 boyutunu kesin milimetre ile kilitliyoruz */
+            max-width: 200mm; /* Tailwind'in vs. ekranı esnetmesini engeller */
             padding: 7mm 8mm;
             border: 3mm solid #ffcc00;
             position: relative;
             page-break-inside: avoid;
             margin: 0 auto;
+            box-sizing: border-box; /* Padding'in genişliği bozmasını önler */
+            flex-shrink: 0; /* Ekran küçülünce A4'ün yamulmasını/daralmasını önler */
         }
 
         /* Boşluklar ve fontlar daraltıldı */
@@ -584,112 +608,7 @@
             opacity: 0;
         }
 
-        @media print {
-
-            /* 1. Ekrandaki gereksiz her şeyi gizle */
-            body>* {
-                display: none !important;
-            }
-
-            #adminLoginOverlay,
-            #editProductModal,
-            #missingProductsModal,
-            #printSelectionModal,
-            #debtPreviewModal {
-                display: none !important;
-            }
-
-            .no-print {
-                display: none !important;
-            }
-
-            /* 2. SADECE Ana İçerik Çerçevesini göster (min-h-screen class'ına sahip div) */
-            body>div.min-h-screen.bg-gray-50 {
-                display: flex !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
-            /* 3. Sol Menüyü gizle (Yukarıdaki div'in içindeki ilk eleman) */
-            body>div.min-h-screen.bg-gray-50>div:first-child {
-                display: none !important;
-            }
-
-            /* 4. Sağ Tarafı (Ana Alanı) Tam Ekran Yap */
-            main {
-                display: block !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                overflow: visible !important;
-            }
-
-            #contentContainer {
-                display: block !important;
-                width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-
-            /* 5. Beyaz kutuları, gölgeleri ve kaydırma çubuklarını sıfırla ki kağıt ekranın tam sol üstüne otursun */
-            #contentContainer>div {
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                background: transparent !important;
-                min-height: 0 !important;
-            }
-
-            .overflow-x-auto,
-            .overflow-y-auto,
-            .overflow-hidden {
-                overflow: visible !important;
-                padding-bottom: 0 !important;
-            }
-
-            /* 6. A4 Fiyat Listesi Ayarları */
-            .a4-menu-page {
-                margin-top: 5mm;
-                margin: 0 !important;
-                box-shadow: none !important;
-                background-color: #000000 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-                width: 200mm !important;
-                height: 280mm !important;
-            }
-
-            /* 7. İçecek Listesi Ayarları */
-            .drink-menu-page {
-                margin: 0 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            /* 8. Etiket Sayfaları Ayarları */
-            #labelPagesContainer {
-                display: block !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
-            .a4-label-page {
-                display: flex !important;
-                margin: 0 !important;
-                box-shadow: none !important;
-                background-color: #ffffff !important;
-                page-break-after: always !important;
-                break-after: page !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-
-        }
+     
 
         /* --- 📱 DEV ETİKETLER İÇİN İPHONE YAZI KAYMA ÇÖZÜMÜ --- */
         @media screen and (max-width: 768px) {
@@ -2409,7 +2328,7 @@
                         <h2 class="text-xl font-black text-gray-800">📄 A4 Fiyat Listesi</h2>
                         <button onclick="window.print()" class="bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">🖨️ Yazdır</button>
                     </div>
-                    <div class="flex justify-center w-full overflow-hidden pb-8">
+                    <div class="flex justify-center w-full overflow-x-auto pb-8 scrollbar-none">
                         <div class="a4-menu-page">
                             <div class="menu-top-row">
                                 <div class="top-left">Tüm vergiler dahildir.</div>
