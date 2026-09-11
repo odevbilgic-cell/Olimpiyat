@@ -864,6 +864,11 @@
                 <button id="showDebtCalculator"
                     class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💳
                     Borç Hesapla</button>
+
+                    <button id="showSystemPrices"
+                    class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">🧮
+                    Sistem Fiyatları</button>
+
                 <div class="flex flex-col w-auto md:w-full flex-shrink-0">
                     <button id="togglePrintMenuBtn"
                         class="text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center justify-between w-full gap-2 relative z-40">
@@ -1141,6 +1146,7 @@
                 else if (activeId === 'showBulkUpdate') renderBulkUpdateModule();
                 else if (activeId === 'showStats') renderStatsModule();
                 else if (activeId === 'showDebtCalculator') renderDebtCalculatorModule();
+                else if (activeId === 'showSystemPrices') renderSystemPricesModule();
                 else if (activeId === 'showGlobalDateUpdate') renderGlobalDateModule(); // YENİ EKLENDİ
                 else if (activeId === 'showLabels') renderLabelModule(); // YENİ EKLENDİ
                 else if (activeId === 'showPrintA4') renderPrintA4Module();
@@ -4003,6 +4009,325 @@
             };
         };
 
+        // --- 🧮 SİSTEM FİYATLARI (KOMİSYON HESAPLAYICI) MODÜLÜ ---
+        function renderSystemPricesModule() {
+            setActiveTab('showSystemPrices');
+            const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
+
+            loadModule(`
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh] max-w-4xl mx-auto">
+                    <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-2 flex-shrink-0">
+                        <span>🧮</span> ${menuTitle} Sistem Fiyatları
+                    </h2>
+                    <p class="text-xs text-gray-500 font-bold mb-4 flex-shrink-0">Firmaların komisyon oranlarına göre tavsiye edilen satış fiyatlarınızı otomatik hesaplar.</p>
+                    
+                    <!-- FİRMA SEÇİM BUTONLARI -->
+                    <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-4 flex-shrink-0">
+                        <button id="btnPlatformYS" class="platform-btn bg-rose-50 border-2 border-rose-200 text-rose-600 font-black py-2 sm:py-3 rounded-xl hover:bg-rose-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ys')">
+                            <span class="text-lg block sm:inline">🥡</span> Yemeksepeti
+                        </button>
+                        <button id="btnPlatformMY" class="platform-btn bg-orange-50 border-2 border-orange-200 text-orange-500 font-black py-2 sm:py-3 rounded-xl hover:bg-orange-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('my')">
+                            <span class="text-lg block sm:inline">🛒</span> Migros Yemek
+                        </button>
+                        <button id="btnPlatformUE" class="platform-btn bg-green-50 border-2 border-green-200 text-green-600 font-black py-2 sm:py-3 rounded-xl hover:bg-green-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ue')">
+                            <span class="text-lg block sm:inline">🚙</span> Uber Eats
+                        </button>
+                    </div>
+
+                    <!-- ÜRÜN LİSTESİ ALANI -->
+                    <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-2 scrollbar-none flex flex-col gap-4 border-t border-gray-100 pt-4">
+                        <div class="flex items-center justify-center h-full text-gray-400 font-bold text-sm">
+                            Yukarıdan hesaplamak istediğiniz platformu seçin.
+                        </div>
+                    </div>
+                </div>
+            `);
+            
+            // Varsayılan olarak Yemeksepeti'ni aç
+            renderSystemPricesList('ys');
+        }
+
+     // Çekilen canlı fiyatları hafızada tutacak obje
+        window.lastFetchedPrices = { ys: null, my: null, ue: null };
+
+        // 🧠 YENİ: YEMEKSEPETİ KESİN EŞLEŞTİRME SÖZLÜĞÜ VE MOTORU
+        function findBestPlatformMatch(dbName, fetchedData) {
+            if (!fetchedData || Object.keys(fetchedData).length === 0) return null;
+
+            // Yazıları küçük harfe çevirip, fazladan boşlukları temizleyen fonksiyon
+            const normalize = (text) => {
+                if (!text) return "";
+                return text.replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase().replace(/\s+/g, ' ').trim();
+            };
+
+            const dbNorm = normalize(dbName);
+
+            // Dükkandaki ismini -> Yemeksepeti ismine ÇEVİREN KESİN SÖZLÜK
+            const dictionary = {
+                "yarım ekmek kokoreç": "yarım ekmek arası istanbul kokoreç",
+                "üç çeyrek kokoreç": "3/4 ekmek arası istanbul kokoreç",
+                "üç çeyrek ekmek kokoreç": "3/4 ekmek arası istanbul kokoreç",
+                "tam ekmek kokoreç": "tam ekmek arası istanbul kokoreç",
+                "porsiyon kokoreç": "istanbul kokoreç",
+                
+                "yarım ekmek izmir kokoreç": "yarım ekmek arası izmir kokoreç",
+                "üç çeyrek izmir kokoreç": "3/4 ekmek arası izmir kokoreç",
+                "üç çeyrek ekmek izmir kokoreç": "3/4 ekmek arası izmir kokoreç",
+                "tam ekmek izmir kokoreç": "tam ekmek arası izmir kokoreç",
+                "porsiyon izmir kokoreç": "izmir kokoreç porsiyon",
+                "izmir kokoreç porsiyon": "izmir kokoreç porsiyon",
+
+                "tombik kokoreç": "tombik ekmek kuzu kokoreç",
+                "tombik ekmek kokoreç": "tombik ekmek kuzu kokoreç",
+                "tombik ekmek kuzu kokoreç": "tombik ekmek kuzu kokoreç",
+
+                "yarım ekmek tavuk döner": "yarım ekmek arası tavuk döner",
+                "üç çeyrek tavuk döner": "3/4 ekmek arası tavuk döner",
+                "tam ekmek tavuk döner": "tam ekmek arası tavuk döner",
+                "tombik ekmek tavuk döner": "tombik ekmek arası tavuk döner",
+                
+                "sade patso": "patso",
+                "sosisli patso": "sosisli patso",
+                "tavuklu patso": "tavuk dönerli patso"
+            };
+
+            // Eğer sözlükte karşılığı varsa onu kullan, yoksa kendi ismini kullan
+            const expectedYsName = dictionary[dbNorm] ? dictionary[dbNorm] : dbNorm;
+
+            // 1. ADIM: Tam Eşleşme Kontrolü (Birebir İsim Uyuşmazlığı)
+            for (let fName in fetchedData) {
+                if (normalize(fName) === expectedYsName || normalize(fName) === dbNorm) {
+                    return { name: fName, price: fetchedData[fName] };
+                }
+            }
+
+            // 2. ADIM: İçinde Geçme Kontrolü (Yemeksepeti ekstra kelime eklemişse)
+            for (let fName in fetchedData) {
+                const fNorm = normalize(fName);
+                if (fNorm.includes(expectedYsName) || expectedYsName.includes(fNorm)) {
+                    return { name: fName, price: fetchedData[fName] };
+                }
+            }
+
+            // 3. ADIM: Parçalı Kelime Eşleştirme (Son Çare)
+            // 3/4 ifadesini üç çeyrek yaparak karşılaştır
+            const cleanDbWords = dbNorm.replace(/3\/4/g, 'üç çeyrek').split(' ').filter(w => w.length > 2);
+            for (let fName in fetchedData) {
+                const fNorm = normalize(fName).replace(/3\/4/g, 'üç çeyrek');
+                
+                // İzmir ve İstanbul ayrımı çok keskin olmalı (karışmasın diye)
+                if (dbNorm.includes('izmir') && !fNorm.includes('izmir')) continue;
+                if (!dbNorm.includes('izmir') && fNorm.includes('izmir')) continue;
+
+                let matchCount = 0;
+                cleanDbWords.forEach(w => {
+                    if (fNorm.includes(w)) matchCount++;
+                });
+
+                if (matchCount >= Math.ceil(cleanDbWords.length * 0.7)) {
+                    return { name: fName, price: fetchedData[fName] };
+                }
+            }
+
+            return null; // Hiçbiri tutmazsa
+        }
+
+        window.renderSystemPricesList = function(platform) {
+            document.querySelectorAll('.platform-btn').forEach(btn => {
+                btn.classList.remove('bg-rose-600', 'bg-orange-500', 'bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600', 'border-orange-500', 'border-green-600');
+                if(btn.id === 'btnPlatformYS') btn.classList.add('bg-rose-50', 'text-rose-600', 'border-rose-200');
+                if(btn.id === 'btnPlatformMY') btn.classList.add('bg-orange-50', 'text-orange-500', 'border-orange-200');
+                if(btn.id === 'btnPlatformUE') btn.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
+            });
+            
+            let activeColor = ''; let bgLight = ''; let borderClass = ''; let platformName = '';
+            
+            if(platform === 'ys') {
+                const btn = document.getElementById('btnPlatformYS');
+                btn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600');
+                btn.classList.remove('bg-rose-50', 'text-rose-600');
+                activeColor = 'text-rose-600'; bgLight = 'bg-rose-50'; borderClass = 'border-rose-200'; platformName = 'Yemeksepeti';
+            } else if(platform === 'my') {
+                const btn = document.getElementById('btnPlatformMY');
+                btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500');
+                btn.classList.remove('bg-orange-50', 'text-orange-500');
+                activeColor = 'text-orange-600'; bgLight = 'bg-orange-50'; borderClass = 'border-orange-200'; platformName = 'Migros Yemek';
+            } else if(platform === 'ue') {
+                const btn = document.getElementById('btnPlatformUE');
+                btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600');
+                btn.classList.remove('bg-green-50', 'text-green-600');
+                activeColor = 'text-green-600'; bgLight = 'bg-green-50'; borderClass = 'border-green-200'; platformName = 'Uber Eats';
+            }
+
+            const container = document.getElementById('systemPricesListContainer');
+            container.innerHTML = '';
+
+            let checkButtonHtml = `
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-50 border border-gray-200 p-3 rounded-xl mb-4 gap-3 flex-shrink-0 shadow-inner">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-black text-gray-700">🤖 ${platformName} Fiyat Tarayıcısı</span>
+                        <span class="text-[10px] font-bold text-gray-500">Canlı fiyatlarınızı çeker ve zararda olup olmadığınızı denetler.</span>
+                    </div>
+                    <button id="btnCheckPlatformPrices" onclick="checkPlatformPrices('${platform}')" class="w-full sm:w-auto bg-gray-900 text-white px-4 py-2.5 rounded-lg text-xs font-black hover:bg-black transition active:scale-95 shadow-md flex items-center justify-center gap-2">
+                        🔍 Canlı Fiyatları Kontrol Et
+                    </button>
+                </div>
+            `;
+
+            // 🛠️ YENİ HATA AYIKLAMA (RÖNTGEN) EKRANI (TERMINAL) 🛠️
+            if (window.lastFetchedPrices[platform]) {
+                const rawDataStr = JSON.stringify(window.lastFetchedPrices[platform], null, 2);
+                checkButtonHtml += `
+                    <div class="bg-gray-900 text-green-400 p-4 rounded-xl mb-4 text-[10px] sm:text-xs overflow-auto max-h-60 font-mono border border-gray-700 shadow-inner w-full flex-shrink-0">
+                        <span class="text-white font-bold block mb-2">📡 Botun Çektiği Ham Veriler (Terminal Çıktısı):</span>
+                        <pre>${rawDataStr}</pre>
+                    </div>
+                `;
+            }
+
+            container.innerHTML += checkButtonHtml;
+
+            let hasAnyProduct = false;
+
+            categoriesTR.forEach(cat => {
+                const catProducts = products.filter(p => p.category === cat && !p.isArchived);
+                if(catProducts.length === 0) return;
+
+                hasAnyProduct = true;
+                
+                let html = `
+                    <div class="mb-4">
+                        <h3 class="font-black ${activeColor} text-sm sm:text-base mb-2 border-b ${borderClass} pb-1 flex items-center gap-2">
+                            <span>📌</span> ${cat}
+                        </h3>
+                        <div class="flex flex-col gap-2.5">
+                `;
+                
+                catProducts.sort((a,b) => (a.order || 9999) - (b.order || 9999)).forEach(p => {
+                    const rPrice = p.discountPrice || p.price;
+                    let pPrice = 0;
+                    
+                    if (platform === 'ys') {
+                        pPrice = rPrice / 0.704;
+                    } else if (platform === 'my') {
+                        pPrice = rPrice / 0.89;
+                    } else if (platform === 'ue') {
+                        pPrice = rPrice / 0.62;
+                    }
+                    pPrice = Math.round(pPrice);
+
+                    let warningHtml = "";
+                    if (window.lastFetchedPrices[platform]) {
+                        const match = findBestPlatformMatch(p.name, window.lastFetchedPrices[platform]);
+
+                        if (match) {
+                            const fetchedPrice = match.price;
+                            const matchedName = match.name;
+
+                            if (fetchedPrice < pPrice) {
+                                const fark = pPrice - fetchedPrice;
+                                warningHtml = `
+                                    <div class="bg-red-50 border-t border-red-200 p-2.5 flex justify-between items-center rounded-b-xl px-3 sm:px-4">
+                                        <span class="text-[10px] sm:text-xs font-bold text-red-600 flex items-center gap-1.5">⚠️ <b class="font-black">ZARARDASINIZ!</b> Zam Yapın.</span>
+                                        <div class="flex flex-col items-end">
+                                            <span class="text-[10px] sm:text-xs font-black text-white bg-red-600 px-2 py-1 rounded shadow-sm whitespace-nowrap">Platform: ${fetchedPrice} ₺ (-${fark} ₺)</span>
+                                            <span class="text-[8px] text-gray-400 mt-0.5 truncate max-w-[140px]" title="${matchedName}">Eşleşen: ${matchedName}</span>
+                                        </div>
+                                    </div>`;
+                            } else {
+                                warningHtml = `
+                                    <div class="bg-emerald-50 border-t border-emerald-200 p-2.5 flex justify-between items-center rounded-b-xl px-3 sm:px-4">
+                                        <span class="text-[10px] sm:text-xs font-bold text-emerald-600 flex items-center gap-1.5">✅ <b class="font-black">FİYAT UYGUN.</b> Zarar yok.</span>
+                                        <div class="flex flex-col items-end">
+                                            <span class="text-[10px] sm:text-xs font-black text-white bg-emerald-500 px-2 py-1 rounded shadow-sm whitespace-nowrap">Platform: ${fetchedPrice} ₺</span>
+                                            <span class="text-[8px] text-gray-400 mt-0.5 truncate max-w-[140px]" title="${matchedName}">Eşleşen: ${matchedName}</span>
+                                        </div>
+                                    </div>`;
+                            }
+                        } else {
+                            warningHtml = `
+                                <div class="bg-gray-100 border-t border-gray-200 p-2.5 flex justify-between items-center rounded-b-xl px-3 sm:px-4">
+                                    <span class="text-[10px] sm:text-xs font-bold text-gray-500 flex items-center gap-1.5">❓ <b class="font-black">EŞLEŞMEDİ!</b> Platformda bulunamadı.</span>
+                                </div>`;
+                        }
+                    }
+
+                    const topRounding = warningHtml !== "" ? "rounded-t-xl" : "rounded-xl border-b";
+
+                    html += `
+                        <div class="flex flex-col shadow-sm hover:shadow-md transition rounded-xl">
+                            <div class="flex items-center justify-between p-2.5 sm:p-3 bg-white border-t border-l border-r ${borderClass} ${bgLight} ${topRounding}">
+                                <div class="flex items-center gap-3 w-1/2 overflow-hidden">
+                                    <img src="${p.image && p.image.trim() !== '' ? p.image : 'https://via.placeholder.com/150'}" class="w-10 h-10 object-cover rounded-lg border border-white shadow-sm flex-shrink-0">
+                                    <span class="font-bold text-gray-800 text-xs sm:text-sm truncate" title="${p.name}">${p.name}</span>
+                                </div>
+                                
+                                <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3 sm:gap-6 w-1/2 justify-end">
+                                    <div class="flex flex-col items-end">
+                                        <span class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Restoran</span>
+                                        <span class="font-black text-gray-700 text-xs sm:text-sm">${rPrice} ₺</span>
+                                    </div>
+                                    
+                                    <span class="hidden sm:flex text-gray-300 font-black text-lg">▶</span>
+                                    
+                                    <div class="flex flex-col items-end bg-white px-3 py-1 rounded-lg border ${borderClass} shadow-sm">
+                                        <span class="text-[9px] font-black ${activeColor} uppercase tracking-wider">Önerilen</span>
+                                        <span class="font-black ${activeColor} text-sm sm:text-lg">${pPrice} ₺</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ${warningHtml}
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+                container.innerHTML += html;
+            });
+
+            if(!hasAnyProduct) {
+                container.innerHTML += '<div class="text-center text-gray-400 font-bold mt-10">Bu menüde listelenecek ürün bulunamadı.</div>';
+            }
+        };
+
+        // 🚀 BOTU TETİKLEYEN FONKSİYON
+        window.checkPlatformPrices = async function(platform) {
+            if (platform !== 'ys') {
+                alert("Şu anlık sadece Yemeksepeti botu aktiftir. Diğer platformlar yakında Node.js tarafına eklenecek.");
+                return;
+            }
+
+            const btn = document.getElementById('btnCheckPlatformPrices');
+            btn.innerHTML = "⏳ Bot Çekiyor, Lütfen 10 Saniye Bekleyin...";
+            btn.disabled = true;
+            btn.classList.add('animate-pulse', 'bg-orange-500', 'text-white');
+            btn.classList.remove('bg-gray-900');
+
+            try {
+                const response = await fetch("https://olimpiyat-api.onrender.com/api/fetch-ys-prices", {
+                    method: "POST"
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    window.lastFetchedPrices[platform] = data.data; 
+                    alert("Fiyatlar Yemeksepeti'nden başarıyla çekildi!");
+                    renderSystemPricesList(platform); 
+                } else {
+                    alert("Bot Hatası: " + data.error);
+                    btn.innerHTML = "🔍 Tekrar Dene";
+                    btn.disabled = false;
+                    btn.classList.remove('animate-pulse', 'bg-orange-500');
+                    btn.classList.add('bg-gray-900');
+                }
+            } catch (error) {
+                alert("Sunucuya ulaşılamadı. Node.js backend'in çalıştığından emin olun.");
+                btn.innerHTML = "🔍 Tekrar Dene";
+                btn.disabled = false;
+                btn.classList.remove('animate-pulse', 'bg-orange-500');
+                btn.classList.add('bg-gray-900');
+            }
+        };
+
         // --- 💳 BORÇ YÖNETİMİ İŞLEM FONKSİYONLARI ---
 
         window.changeActiveEkstre = function (ekstreKey) {
@@ -4720,6 +5045,7 @@
             showStatsBtn.addEventListener('click', renderStatsModule);
             // YENİ EKLENEN
             document.getElementById('showDebtCalculator').addEventListener('click', renderDebtCalculatorModule);
+            document.getElementById('showSystemPrices').addEventListener('click', renderSystemPricesModule);
             document.getElementById('showGlobalDateUpdate').addEventListener('click', renderGlobalDateModule);
 
 
