@@ -225,10 +225,11 @@
 
         .top-left {
             display: table-cell;
-            color: #d1cece;
-            font-size: 11px;
+            color: #ffffff;
+            font-size: 12px;
             font-weight: 500;
             vertical-align: top;
+            font-style: italic;
         }
 
         .top-right {
@@ -245,6 +246,7 @@
             color: #d1cece;
             font-size: 10px;
             font-weight: normal;
+            font-style: italic;
         }
 
         /* Logo altındaki boşluk azaltıldı */
@@ -262,9 +264,10 @@
 
         .main-title {
             color: #ffcc00;
-            font-size: 20px;
+            font-size: 17px;
             font-weight: 900;
             letter-spacing: 2px;
+            margin-top: -5px;
         }
 
         .menu-table-container {
@@ -292,7 +295,7 @@
 
         .category-block h3 {
             color: #ffcc00;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 900;
             margin-bottom: 4px;
             letter-spacing: 0.5px;
@@ -305,7 +308,7 @@
             display: table;
             width: 100%;
             color: #ffffff;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             margin-bottom: 2px;
         }
@@ -331,9 +334,9 @@
 
         /* Midye alanı daraltıldı */
         .midye-block {
-            margin-top: 16px;
+            margin-top: -5px;
             color: #ffffff;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 900;
             letter-spacing: 0.5px;
             border: 1px dashed #ffcc00;
@@ -5262,10 +5265,10 @@
         const expectedPdfLayout = [
             { cat: "KOKOREÇ", items: ["Yarım Ekmek Kokoreç", "Yarım Ekmek İzmir Kokoreç", "Üç Çeyrek Ekmek Kokoreç", "Porsiyon Kokoreç"] },
             { cat: "TAVUK KOKOREÇ", items: ["Yarım Tavuk Kokoreç", "Üç Çeyrek Tavuk Kokoreç"] },
-            { cat: "PATSO", items: ["Sade Patso", "Sosisli Patso", "Ciğerli Patso", "Köfteli Patso", "Kaşarlı Patso", "Tavuklu Patso", "Amerikanlı Patso", "Porsiyon Patates"] },
+            { cat: "PATSO", items: ["Sade Patso", "Sosisli Patso", "Ciğerli Patso", "Köfteli Patso", "Kaşarlı Patso", "Tavuklu Patso", "Amerikanlı Patso","Sosisli Kaşarlı Patso", "Goralı Patso","Sucuklu Patso","Sucuklu Kaşarlı Patso", "Porsiyon Patates"] },
             { cat: "TAVUK DÖNER", items: ["Yarım Ekmek Tavuk Döner", "Tombik Ekmek Tavuk Döner", "Üç Çeyrek Ekmek Döner", "Dürüm Tavuk Döner", "Pilav Üstü Tavuk Döner"] },
-            { cat: "SANDVİÇ - TOST", items: ["Sosisli Sandviç", "Goralı Sandiviç", "Yarım Ekmek Kaşarlı Tost", "Yarım Ekmek Karışık Tost"] },
-            { cat: "HAMBURGERLER", items: ["Hamburger", "Double Hamburger", "Cheeseburger", "Islak Hamburger", "Islak Cheeseburger"] },
+            { cat: "SANDVİÇ - TOST", items: ["Sosisli Sandviç", "Goralı Sandiviç", "Kaşarlı Tost","Sucuklu Tost", "Karışık Tost"] },
+            { cat: "HAMBURGERLER", items: ["Hamburger", "Double Hamburger", "Cheeseburger", "Islak Hamburger", "Islak Cheeseburger","Amerikanlı ıslak Hamburger"] },
             { cat: "KÖFTE", items: ["Yarım Ekmek Köfte", "Üç Çeyrek Ekmek Köfte", "Porsiyon Köfte"] },
             { cat: "CİĞER", items: ["Yarım Ekmek Ciğer", "Üç Çeyrek Ekmek Ciğer", "Porsiyon Ciğer"] },
             { cat: "SUCUK EKMEK", items: ["Yarım Ekmek Sucuk", "Üç Çeyrek Ekmek Sucuk"] },
