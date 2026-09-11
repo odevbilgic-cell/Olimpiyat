@@ -1300,22 +1300,197 @@
         async function deleteCampaignUrl(key) { await campaignsRef.child(key).remove(); }
         function sortProductsByOrder(productsArray) { return productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)); }
 
-        // --- MODÜLLERİN YÜKLENMESİ ---
+       // YENİ EŞİTLEME MODALINI OLUŞTUR (Sayfa yüklendiğinde bir kere çalışır)
+        function createSyncModal() {
+            if(document.getElementById('syncProductsModal')) return;
+            const div = document.createElement('div');
+            div.id = 'syncProductsModal';
+            div.className = 'hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex justify-center items-center p-4';
+            div.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl p-5 sm:p-6 w-full max-w-2xl relative animate-pop-in border-t-8 border-blue-500 flex flex-col max-h-[90vh]">
+                    <button onclick="document.getElementById('syncProductsModal').classList.add('hidden')" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 font-bold text-lg z-10">✖</button>
+                    <h2 class="text-xl font-black text-gray-800 mb-1 flex items-center gap-2"><span>🔄</span> Menüler Arası Aktarım</h2>
+                    <p class="text-[11px] text-gray-500 mb-4 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                        Bir menüde olup diğerinde olmayan ürünler aşağıda listelenmiştir.<br>
+                        👉 Seçmek için ürünün üzerine <b>basılı tutun</b> veya kutucuğa tıklayın.
+                    </p>
+                    
+                    <div id="syncProductsListContainer" class="overflow-y-auto flex-1 pr-2 space-y-4 scrollbar-none mb-4 p-2 border border-gray-100 rounded-xl bg-gray-50/50">
+                        <!-- Dinamik İçerik Buraya Gelecek -->
+                    </div>
+                    
+                    <button onclick="executeSyncProducts()" class="bg-blue-600 text-white px-4 py-3.5 rounded-xl font-black shadow-md hover:bg-blue-700 transition w-full active:scale-95">✅ Seçilenleri Kurallara Göre Kopyala</button>
+                </div>
+            `;
+            document.body.appendChild(div);
+        }
+        createSyncModal();
+
+        // MENÜLER ARASI EKSİKLERİ BULAN VE POP-UP AÇAN FONKSİYON
+        window.openSyncProductsModal = async function() {
+            const btn = document.getElementById('syncMenuBtn');
+            if(btn) { btn.innerHTML = "⏳ Hesaplanıyor..."; btn.disabled = true; }
+
+            try {
+                const snapInPlace = await database.ref(inPlaceProductsPath).once('value');
+                const snapDelivery = await database.ref(deliveryProductsPath).once('value');
+                
+                const inPlaceArr = Object.keys(snapInPlace.val() || {}).map(k => ({key:k, ...(snapInPlace.val()[k])})).filter(p => !p.isArchived);
+                const deliveryArr = Object.keys(snapDelivery.val() || {}).map(k => ({key:k, ...(snapDelivery.val()[k])})).filter(p => !p.isArchived);
+                
+                // 1. Yerinde olup Pakette OLMAYANLAR (Pakete Kopyalanacaklar)
+                const missingInDelivery = inPlaceArr.filter(p1 => !deliveryArr.find(p2 => p2.name.toLowerCase().trim() === p1.name.toLowerCase().trim()));
+                
+                // 2. Pakette olup Yerinde OLMAYANLAR (Yerindeye Kopyalanacaklar)
+                const missingInPlace = deliveryArr.filter(p1 => !inPlaceArr.find(p2 => p2.name.toLowerCase().trim() === p1.name.toLowerCase().trim()));
+                
+                const container = document.getElementById('syncProductsListContainer');
+                container.innerHTML = '';
+
+                let html = '';
+
+                if (missingInDelivery.length === 0 && missingInPlace.length === 0) {
+                    html = '<div class="text-center text-gray-500 font-bold py-10">🎉 Harika! İki menünüzdeki ürünler de birbiriyle tamamen aynı.</div>';
+                } else {
+                    // Pakete Eklenecekler Listesi
+                    if (missingInDelivery.length > 0) {
+                        html += `<h3 class="font-black text-blue-800 text-sm border-b-2 border-blue-200 pb-1 mb-2">🛵 Pakette Olmayanlar (Pakete Eklenecek)</h3>`;
+                        missingInDelivery.forEach(p => {
+                            const dataStr = encodeURIComponent(JSON.stringify(p));
+                            html += `
+                                <div class="sync-item flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl shadow-sm transition duration-300 cursor-pointer select-none">
+                                    <div class="flex items-center gap-3 overflow-hidden pointer-events-none">
+                                        <img src="${p.image || 'https://via.placeholder.com/150'}" class="w-10 h-10 object-cover rounded-lg border">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs font-bold text-gray-800 truncate">${p.name}</span>
+                                            <span class="text-[9px] text-gray-500">${p.category}</span>
+                                        </div>
+                                    </div>
+                                    <input type="checkbox" class="sync-cb w-5 h-5 accent-blue-600 cursor-pointer ml-2" data-direction="toDelivery" data-product="${dataStr}">
+                                </div>
+                            `;
+                        });
+                    }
+
+                    // Yerindeye Eklenecekler Listesi
+                    if (missingInPlace.length > 0) {
+                        html += `<h3 class="font-black text-orange-800 text-sm border-b-2 border-orange-200 pb-1 mt-4 mb-2">🍽️ Yerinde Menüde Olmayanlar (Yerindeye Eklenecek)</h3>`;
+                        missingInPlace.forEach(p => {
+                            const dataStr = encodeURIComponent(JSON.stringify(p));
+                            html += `
+                                <div class="sync-item flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl shadow-sm transition duration-300 cursor-pointer select-none">
+                                    <div class="flex items-center gap-3 overflow-hidden pointer-events-none">
+                                        <img src="${p.image || 'https://via.placeholder.com/150'}" class="w-10 h-10 object-cover rounded-lg border">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs font-bold text-gray-800 truncate">${p.name}</span>
+                                            <span class="text-[9px] text-gray-500">${p.category}</span>
+                                        </div>
+                                    </div>
+                                    <input type="checkbox" class="sync-cb w-5 h-5 accent-orange-500 cursor-pointer ml-2" data-direction="toInPlace" data-product="${dataStr}">
+                                </div>
+                            `;
+                        });
+                    }
+                }
+
+                container.innerHTML = html;
+
+                // BASILI TUTARAK SEÇME ÖZELLİĞİ
+                document.querySelectorAll('.sync-item').forEach(item => {
+                    let timer;
+                    const cb = item.querySelector('.sync-cb');
+                    
+                    const toggleSelect = () => {
+                        cb.checked = !cb.checked;
+                        item.classList.toggle('bg-blue-50', cb.checked);
+                        item.classList.toggle('border-blue-400', cb.checked);
+                        if(navigator.vibrate) navigator.vibrate(50);
+                    };
+
+                    const start = (e) => {
+                        if(e.target === cb) return; // Checkboxa direkt basılırsa elleme
+                        timer = setTimeout(toggleSelect, 400); // 0.4 saniye basılı tutunca seçer
+                    };
+                    const cancel = () => clearTimeout(timer);
+                    
+                    item.addEventListener('touchstart', start, {passive: true});
+                    item.addEventListener('touchend', cancel);
+                    item.addEventListener('touchmove', cancel);
+                    item.addEventListener('mousedown', start);
+                    item.addEventListener('mouseup', cancel);
+                    item.addEventListener('mouseleave', cancel);
+                    
+                    // Normal tıklama ile kutucuğun renklenmesi
+                    cb.addEventListener('change', () => {
+                        item.classList.toggle('bg-blue-50', cb.checked);
+                        item.classList.toggle('border-blue-400', cb.checked);
+                    });
+                });
+
+                document.getElementById('syncProductsModal').classList.remove('hidden');
+            } catch (err) {
+                alert("Veriler çekilirken hata oluştu: " + err.message);
+            } finally {
+                if(btn) { btn.innerHTML = "🔄 Menüleri Eşitle"; btn.disabled = false; }
+            }
+        };
+
+        // KOPYALAMAYI ÇALIŞTIRAN SİSTEM (Senin yazdığın fiyat kurallarına göre çalışır)
+        window.executeSyncProducts = async function() {
+            const checkboxes = document.querySelectorAll('.sync-cb:checked');
+            if(checkboxes.length === 0) { alert("Lütfen aktarılacak en az bir ürün seçin."); return; }
+            
+            let inPlaceUpdates = {};
+            let deliveryUpdates = {};
+            
+            checkboxes.forEach(cb => {
+                const data = JSON.parse(decodeURIComponent(cb.dataset.product));
+                const direction = cb.dataset.direction; 
+                const newKey = database.ref().push().key; // Yeni kimlik oluştur
+                
+                if (direction === 'toDelivery') {
+                    // Pakete Gidiyorsa -> Oto Zam Kuralını İşlet (+10, +20 vb.)
+                    let targetPrice = getAutoDeliveryPrice(data.name, data.category, data.price);
+                    if(targetPrice === null) targetPrice = data.price; // İçecekler değişmez
+                    
+                    deliveryUpdates[newKey] = { ...data, price: targetPrice, lastUpdated: Date.now() };
+                } else {
+                    // Yerindeye Gidiyorsa -> Zamı Geri Alarak (İndirim Yaparak) Kaydet
+                    let targetPrice = data.price;
+                    if(data.category !== 'İçecekler') {
+                        const lowerName = data.name.toLowerCase();
+                        if(lowerName.includes('tam ekmek')) targetPrice -= 20;
+                        else if(lowerName.includes('midye (adet)') || lowerName.includes('midye tane')) targetPrice -= 1;
+                        else targetPrice -= 10;
+                    }
+                    inPlaceUpdates[newKey] = { ...data, price: targetPrice, lastUpdated: Date.now() };
+                }
+            });
+            
+            try {
+                if(Object.keys(inPlaceUpdates).length > 0) await database.ref(inPlaceProductsPath).update(inPlaceUpdates);
+                if(Object.keys(deliveryUpdates).length > 0) await database.ref(deliveryProductsPath).update(deliveryUpdates);
+                
+                alert(`${checkboxes.length} ürün kurallı fiyatlarıyla başarıyla aktarıldı!`);
+                document.getElementById('syncProductsModal').classList.add('hidden');
+            } catch(e) {
+                alert("Hata: " + e.message);
+            }
+        };
+
         function renderProductsModule() {
             setActiveTab('showProducts');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
 
-            // YENİ: Kopyalama butonu SADECE Paket Servis menüsündeyken başlığın yanına eklenecek
-            const copyBtnHtml = currentMenuType === 'delivery'
-                ? `<button id="headerCopyToDeliveryBtn" class="ml-auto bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-black hover:bg-blue-700 transition shadow-md whitespace-nowrap">🔄 Yerinde Menüyü Kopyala</button>`
-                : '';
+            // YENİ RÖNTGEN VE EŞİTLEME BUTONU
+            const syncBtnHtml = `<button id="syncMenuBtn" onclick="openSyncProductsModal()" class="ml-auto bg-gradient-to-br from-blue-500 to-indigo-600 text-white px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black hover:scale-[1.02] transition shadow-md whitespace-nowrap flex items-center gap-1 active:scale-95">🔄 EKSİKLERİ AKTAR</button>`;
 
             loadModule(`
                 <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh]">
                     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 flex-shrink-0">
                         <div class="flex items-center w-full sm:w-auto gap-3">
                             <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-1">📦 ${menuTitle}</h2>
-                            ${copyBtnHtml}
+                            ${syncBtnHtml}
                         </div>
                         <button id="toggleArchiveBtn" class="bg-gray-800 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-gray-900 transition flex items-center justify-center gap-2 active:scale-95 w-full sm:w-auto">
                             <span>📦</span> Rafım (Gizlenenler)
@@ -1340,12 +1515,6 @@
                     </ul>
                 </div>
             `);
-
-            // YENİ: Başlıktaki kopyalama butonuna tıklama olayını ekle
-            const headerCopyBtn = document.getElementById('headerCopyToDeliveryBtn');
-            if (headerCopyBtn) {
-                headerCopyBtn.addEventListener('click', copyMenuDataToDelivery);
-            }
 
             const filterSelect = document.getElementById('filterCategory');
             filterSelect.addEventListener('change', () => renderProductList(filterSelect.value, false));
@@ -4009,33 +4178,99 @@
             };
         };
 
+      // --- 🎯 KOPYALAMA VE KAYDIRMA YARDIMCI FONKSİYONLARI ---
+        window.copySysPrice = function(el, priceVal) {
+            const formattedPrice = Number.isInteger(Number(priceVal)) ? priceVal.toString() : Number(priceVal).toFixed(2);
+            
+            navigator.clipboard.writeText(formattedPrice).then(() => {
+                const targetSpan = el.querySelector('.price-val-text');
+                const originalHtml = targetSpan.innerHTML;
+                const originalClasses = targetSpan.className;
+                
+                // Genişliği tam o anki boyutuna kilitle (Kutunun büyümesini engeller)
+                const currentWidth = targetSpan.offsetWidth;
+                targetSpan.style.width = currentWidth + 'px';
+                
+                // İstenen stil: Kırmızı arka plan, beyaz yazı, kutuyu bozmayan metin
+                targetSpan.className = 'font-black text-white bg-red-600 rounded text-[9px] sm:text-[10px] flex items-center justify-center transition-all shadow-inner';
+                targetSpan.innerHTML = 'KOPYALANDI';
+                
+                // 1.5 saniye sonra orijinal fiyata geri dön
+                setTimeout(() => {
+                    targetSpan.innerHTML = originalHtml;
+                    targetSpan.className = originalClasses;
+                    targetSpan.style.width = ''; // Genişlik kilidini kaldır
+                }, 1500);
+            }).catch(err => {
+                alert('Kopyalama başarısız oldu: ' + err);
+            });
+        };
+
+        window.scrollToSysCatIndex = function(index, smooth = true) {
+            const targetEl = document.getElementById(`sys-cat-${index}`);
+            const container = document.getElementById('systemPricesListContainer');
+            if (targetEl && container) {
+                container.scrollTo({
+                    top: targetEl.offsetTop - container.offsetTop - 10,
+                    behavior: smooth ? 'smooth' : 'auto'
+                });
+                
+                document.querySelectorAll('.sys-cat-btn').forEach(btn => {
+                    btn.classList.remove('bg-gray-800', 'text-white', 'border-gray-800');
+                    btn.classList.add('text-gray-500', 'border-gray-200', 'bg-white');
+                });
+                
+                const activeBtn = document.getElementById(`btn-sys-cat-${index}`);
+                if (activeBtn) {
+                    activeBtn.classList.remove('text-gray-500', 'border-gray-200', 'bg-white');
+                    activeBtn.classList.add('bg-gray-800', 'text-white', 'border-gray-800');
+                    activeBtn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+                }
+                
+                localStorage.setItem('last_sys_category', index);
+                window.lastActiveSysCat = String(index);
+            }
+        };
+
         // --- 🧮 SİSTEM FİYATLARI (KOMİSYON HESAPLAYICI) MODÜLÜ ---
         function renderSystemPricesModule() {
             setActiveTab('showSystemPrices');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
 
+            // YATAY KAYDIRILABİLİR NAVBAR MENÜSÜ
+            let categoryNavHtml = `<div class="flex overflow-x-auto scrollbar-none gap-2 py-2 mb-1 border-b border-gray-100 flex-shrink-0" id="sysCategoryNavbar">`;
+            categoriesTR.forEach((cat, idx) => {
+                categoryNavHtml += `<button onclick="scrollToSysCatIndex('${idx}', true)" id="btn-sys-cat-${idx}" class="sys-cat-btn px-4 py-2 rounded-full border border-gray-200 text-[11px] font-bold text-gray-500 bg-white whitespace-nowrap hover:bg-orange-50 transition active:scale-95 flex-shrink-0 shadow-sm">${cat}</button>`;
+            });
+            categoryNavHtml += `</div>`;
+
             loadModule(`
                 <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh] max-w-4xl mx-auto">
-                    <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-2 flex-shrink-0">
-                        <span>🧮</span> ${menuTitle} Sistem Fiyatları
-                    </h2>
-                    <p class="text-xs text-gray-500 font-bold mb-4 flex-shrink-0">Firmaların komisyon oranlarına göre tavsiye edilen satış fiyatlarınızı otomatik hesaplar.</p>
-                    
-                    <!-- FİRMA SEÇİM BUTONLARI -->
-                    <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-4 flex-shrink-0">
-                        <button id="btnPlatformYS" class="platform-btn bg-rose-50 border-2 border-rose-200 text-rose-600 font-black py-2 sm:py-3 rounded-xl hover:bg-rose-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ys')">
-                            <span class="text-lg block sm:inline">🥡</span> Yemeksepeti
-                        </button>
-                        <button id="btnPlatformMY" class="platform-btn bg-orange-50 border-2 border-orange-200 text-orange-500 font-black py-2 sm:py-3 rounded-xl hover:bg-orange-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('my')">
-                            <span class="text-lg block sm:inline">🛒</span> Migros Yemek
-                        </button>
-                        <button id="btnPlatformUE" class="platform-btn bg-green-50 border-2 border-green-200 text-green-600 font-black py-2 sm:py-3 rounded-xl hover:bg-green-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ue')">
-                            <span class="text-lg block sm:inline">🚙</span> Uber Eats
-                        </button>
+                    <div class="flex-shrink-0">
+                        <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-2">
+                            <span>🧮</span> ${menuTitle} Sistem Fiyatları
+                        </h2>
+                        <p class="text-xs text-gray-500 font-bold mb-4">Firmaların komisyon oranlarına göre tavsiye edilen satış fiyatlarınızı otomatik hesaplar. Fiyatı kopyalamak için üzerine tıklayın.</p>
+                        
+                        <!-- FİRMA SEÇİM BUTONLARI -->
+                        <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-2">
+                            <button id="btnPlatformYS" class="platform-btn bg-rose-50 border-2 border-rose-200 text-rose-600 font-black py-2 sm:py-3 rounded-xl hover:bg-rose-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ys')">
+                                <span class="text-lg block sm:inline">🥡</span> Yemeksepeti
+                            </button>
+                            <button id="btnPlatformMY" class="platform-btn bg-orange-50 border-2 border-orange-200 text-orange-500 font-black py-2 sm:py-3 rounded-xl hover:bg-orange-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('my')">
+                                <span class="text-lg block sm:inline">🛒</span> Migros Yemek
+                            </button>
+                            <button id="btnPlatformUE" class="platform-btn bg-green-50 border-2 border-green-200 text-green-600 font-black py-2 sm:py-3 rounded-xl hover:bg-green-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ue')">
+                                <span class="text-lg block sm:inline">🚙</span> Uber Eats
+                            </button>
+                        </div>
+                        
+                        <!-- YATAY KATEGORİ NAVBAR'I -->
+                        ${categoryNavHtml}
                     </div>
 
                     <!-- ÜRÜN LİSTESİ ALANI -->
-                    <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-2 scrollbar-none flex flex-col gap-4 border-t border-gray-100 pt-4">
+                    <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-6 scrollbar-none flex flex-col gap-4 pt-2 scroll-smooth relative">
                         <div class="flex items-center justify-center h-full text-gray-400 font-bold text-sm">
                             Yukarıdan hesaplamak istediğiniz platformu seçin.
                         </div>
@@ -4043,93 +4278,7 @@
                 </div>
             `);
             
-            // Varsayılan olarak Yemeksepeti'ni aç
             renderSystemPricesList('ys');
-        }
-
-     // Çekilen canlı fiyatları hafızada tutacak obje
-        window.lastFetchedPrices = { ys: null, my: null, ue: null };
-
-        // 🧠 YENİ: YEMEKSEPETİ KESİN EŞLEŞTİRME SÖZLÜĞÜ VE MOTORU
-        function findBestPlatformMatch(dbName, fetchedData) {
-            if (!fetchedData || Object.keys(fetchedData).length === 0) return null;
-
-            // Yazıları küçük harfe çevirip, fazladan boşlukları temizleyen fonksiyon
-            const normalize = (text) => {
-                if (!text) return "";
-                return text.replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase().replace(/\s+/g, ' ').trim();
-            };
-
-            const dbNorm = normalize(dbName);
-
-            // Dükkandaki ismini -> Yemeksepeti ismine ÇEVİREN KESİN SÖZLÜK
-            const dictionary = {
-                "yarım ekmek kokoreç": "yarım ekmek arası istanbul kokoreç",
-                "üç çeyrek kokoreç": "3/4 ekmek arası istanbul kokoreç",
-                "üç çeyrek ekmek kokoreç": "3/4 ekmek arası istanbul kokoreç",
-                "tam ekmek kokoreç": "tam ekmek arası istanbul kokoreç",
-                "porsiyon kokoreç": "istanbul kokoreç",
-                
-                "yarım ekmek izmir kokoreç": "yarım ekmek arası izmir kokoreç",
-                "üç çeyrek izmir kokoreç": "3/4 ekmek arası izmir kokoreç",
-                "üç çeyrek ekmek izmir kokoreç": "3/4 ekmek arası izmir kokoreç",
-                "tam ekmek izmir kokoreç": "tam ekmek arası izmir kokoreç",
-                "porsiyon izmir kokoreç": "izmir kokoreç porsiyon",
-                "izmir kokoreç porsiyon": "izmir kokoreç porsiyon",
-
-                "tombik kokoreç": "tombik ekmek kuzu kokoreç",
-                "tombik ekmek kokoreç": "tombik ekmek kuzu kokoreç",
-                "tombik ekmek kuzu kokoreç": "tombik ekmek kuzu kokoreç",
-
-                "yarım ekmek tavuk döner": "yarım ekmek arası tavuk döner",
-                "üç çeyrek tavuk döner": "3/4 ekmek arası tavuk döner",
-                "tam ekmek tavuk döner": "tam ekmek arası tavuk döner",
-                "tombik ekmek tavuk döner": "tombik ekmek arası tavuk döner",
-                
-                "sade patso": "patso",
-                "sosisli patso": "sosisli patso",
-                "tavuklu patso": "tavuk dönerli patso"
-            };
-
-            // Eğer sözlükte karşılığı varsa onu kullan, yoksa kendi ismini kullan
-            const expectedYsName = dictionary[dbNorm] ? dictionary[dbNorm] : dbNorm;
-
-            // 1. ADIM: Tam Eşleşme Kontrolü (Birebir İsim Uyuşmazlığı)
-            for (let fName in fetchedData) {
-                if (normalize(fName) === expectedYsName || normalize(fName) === dbNorm) {
-                    return { name: fName, price: fetchedData[fName] };
-                }
-            }
-
-            // 2. ADIM: İçinde Geçme Kontrolü (Yemeksepeti ekstra kelime eklemişse)
-            for (let fName in fetchedData) {
-                const fNorm = normalize(fName);
-                if (fNorm.includes(expectedYsName) || expectedYsName.includes(fNorm)) {
-                    return { name: fName, price: fetchedData[fName] };
-                }
-            }
-
-            // 3. ADIM: Parçalı Kelime Eşleştirme (Son Çare)
-            // 3/4 ifadesini üç çeyrek yaparak karşılaştır
-            const cleanDbWords = dbNorm.replace(/3\/4/g, 'üç çeyrek').split(' ').filter(w => w.length > 2);
-            for (let fName in fetchedData) {
-                const fNorm = normalize(fName).replace(/3\/4/g, 'üç çeyrek');
-                
-                // İzmir ve İstanbul ayrımı çok keskin olmalı (karışmasın diye)
-                if (dbNorm.includes('izmir') && !fNorm.includes('izmir')) continue;
-                if (!dbNorm.includes('izmir') && fNorm.includes('izmir')) continue;
-
-                let matchCount = 0;
-                cleanDbWords.forEach(w => {
-                    if (fNorm.includes(w)) matchCount++;
-                });
-
-                if (matchCount >= Math.ceil(cleanDbWords.length * 0.7)) {
-                    return { name: fName, price: fetchedData[fName] };
-                }
-            }
-
-            return null; // Hiçbiri tutmazsa
         }
 
         window.renderSystemPricesList = function(platform) {
@@ -4140,143 +4289,101 @@
                 if(btn.id === 'btnPlatformUE') btn.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
             });
             
-            let activeColor = ''; let bgLight = ''; let borderClass = ''; let platformName = '';
+            let activeColor = ''; let bgLight = ''; let borderClass = ''; 
             
             if(platform === 'ys') {
                 const btn = document.getElementById('btnPlatformYS');
                 btn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600');
                 btn.classList.remove('bg-rose-50', 'text-rose-600');
-                activeColor = 'text-rose-600'; bgLight = 'bg-rose-50'; borderClass = 'border-rose-200'; platformName = 'Yemeksepeti';
+                activeColor = 'text-rose-600'; bgLight = 'bg-rose-50'; borderClass = 'border-rose-200';
             } else if(platform === 'my') {
                 const btn = document.getElementById('btnPlatformMY');
                 btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500');
                 btn.classList.remove('bg-orange-50', 'text-orange-500');
-                activeColor = 'text-orange-600'; bgLight = 'bg-orange-50'; borderClass = 'border-orange-200'; platformName = 'Migros Yemek';
+                activeColor = 'text-orange-600'; bgLight = 'bg-orange-50'; borderClass = 'border-orange-200';
             } else if(platform === 'ue') {
                 const btn = document.getElementById('btnPlatformUE');
                 btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600');
                 btn.classList.remove('bg-green-50', 'text-green-600');
-                activeColor = 'text-green-600'; bgLight = 'bg-green-50'; borderClass = 'border-green-200'; platformName = 'Uber Eats';
+                activeColor = 'text-green-600'; bgLight = 'bg-green-50'; borderClass = 'border-green-200';
             }
 
             const container = document.getElementById('systemPricesListContainer');
             container.innerHTML = '';
 
-            let checkButtonHtml = `
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-50 border border-gray-200 p-3 rounded-xl mb-4 gap-3 flex-shrink-0 shadow-inner">
-                    <div class="flex flex-col">
-                        <span class="text-xs font-black text-gray-700">🤖 ${platformName} Fiyat Tarayıcısı</span>
-                        <span class="text-[10px] font-bold text-gray-500">Canlı fiyatlarınızı çeker ve zararda olup olmadığınızı denetler.</span>
-                    </div>
-                    <button id="btnCheckPlatformPrices" onclick="checkPlatformPrices('${platform}')" class="w-full sm:w-auto bg-gray-900 text-white px-4 py-2.5 rounded-lg text-xs font-black hover:bg-black transition active:scale-95 shadow-md flex items-center justify-center gap-2">
-                        🔍 Canlı Fiyatları Kontrol Et
-                    </button>
-                </div>
-            `;
-
-            // 🛠️ YENİ HATA AYIKLAMA (RÖNTGEN) EKRANI (TERMINAL) 🛠️
-            if (window.lastFetchedPrices[platform]) {
-                const rawDataStr = JSON.stringify(window.lastFetchedPrices[platform], null, 2);
-                checkButtonHtml += `
-                    <div class="bg-gray-900 text-green-400 p-4 rounded-xl mb-4 text-[10px] sm:text-xs overflow-auto max-h-60 font-mono border border-gray-700 shadow-inner w-full flex-shrink-0">
-                        <span class="text-white font-bold block mb-2">📡 Botun Çektiği Ham Veriler (Terminal Çıktısı):</span>
-                        <pre>${rawDataStr}</pre>
-                    </div>
-                `;
-            }
-
-            container.innerHTML += checkButtonHtml;
-
             let hasAnyProduct = false;
+            const isYS = (platform === 'ys');
 
-            categoriesTR.forEach(cat => {
+            categoriesTR.forEach((cat, catIndex) => {
                 const catProducts = products.filter(p => p.category === cat && !p.isArchived);
                 if(catProducts.length === 0) return;
 
                 hasAnyProduct = true;
                 
                 let html = `
-                    <div class="mb-4">
-                        <h3 class="font-black ${activeColor} text-sm sm:text-base mb-2 border-b ${borderClass} pb-1 flex items-center gap-2">
+                    <div class="mb-4 sys-cat-section" id="sys-cat-${catIndex}">
+                        <h3 class="font-black ${activeColor} text-sm sm:text-base mb-2 border-b ${borderClass} pb-1 flex items-center gap-2 sticky top-0 bg-white z-10 pt-1 shadow-sm">
                             <span>📌</span> ${cat}
                         </h3>
-                        <div class="flex flex-col gap-2.5">
+                        <div class="flex flex-col gap-2.5 mt-2">
                 `;
                 
                 catProducts.sort((a,b) => (a.order || 9999) - (b.order || 9999)).forEach(p => {
-                    const rPrice = p.discountPrice || p.price;
-                    let pPrice = 0;
+                    const rPrice = p.discountPrice || p.price; 
+                    let pPrice = 0;       
+                    let customerPrice = 0; 
                     
-                    if (platform === 'ys') {
-                        pPrice = rPrice / 0.704;
+                    if (isYS) {
+                        const rawCustomerPrice = rPrice / 0.88;
+                        customerPrice = Math.ceil(rawCustomerPrice * 2) / 2; 
+                        pPrice = customerPrice / 0.80; 
                     } else if (platform === 'my') {
-                        pPrice = rPrice / 0.89;
+                        pPrice = Math.round(rPrice / 0.89);
                     } else if (platform === 'ue') {
-                        pPrice = rPrice / 0.62;
-                    }
-                    pPrice = Math.round(pPrice);
-
-                    let warningHtml = "";
-                    if (window.lastFetchedPrices[platform]) {
-                        const match = findBestPlatformMatch(p.name, window.lastFetchedPrices[platform]);
-
-                        if (match) {
-                            const fetchedPrice = match.price;
-                            const matchedName = match.name;
-
-                            if (fetchedPrice < pPrice) {
-                                const fark = pPrice - fetchedPrice;
-                                warningHtml = `
-                                    <div class="bg-red-50 border-t border-red-200 p-2.5 flex justify-between items-center rounded-b-xl px-3 sm:px-4">
-                                        <span class="text-[10px] sm:text-xs font-bold text-red-600 flex items-center gap-1.5">⚠️ <b class="font-black">ZARARDASINIZ!</b> Zam Yapın.</span>
-                                        <div class="flex flex-col items-end">
-                                            <span class="text-[10px] sm:text-xs font-black text-white bg-red-600 px-2 py-1 rounded shadow-sm whitespace-nowrap">Platform: ${fetchedPrice} ₺ (-${fark} ₺)</span>
-                                            <span class="text-[8px] text-gray-400 mt-0.5 truncate max-w-[140px]" title="${matchedName}">Eşleşen: ${matchedName}</span>
-                                        </div>
-                                    </div>`;
-                            } else {
-                                warningHtml = `
-                                    <div class="bg-emerald-50 border-t border-emerald-200 p-2.5 flex justify-between items-center rounded-b-xl px-3 sm:px-4">
-                                        <span class="text-[10px] sm:text-xs font-bold text-emerald-600 flex items-center gap-1.5">✅ <b class="font-black">FİYAT UYGUN.</b> Zarar yok.</span>
-                                        <div class="flex flex-col items-end">
-                                            <span class="text-[10px] sm:text-xs font-black text-white bg-emerald-500 px-2 py-1 rounded shadow-sm whitespace-nowrap">Platform: ${fetchedPrice} ₺</span>
-                                            <span class="text-[8px] text-gray-400 mt-0.5 truncate max-w-[140px]" title="${matchedName}">Eşleşen: ${matchedName}</span>
-                                        </div>
-                                    </div>`;
-                            }
-                        } else {
-                            warningHtml = `
-                                <div class="bg-gray-100 border-t border-gray-200 p-2.5 flex justify-between items-center rounded-b-xl px-3 sm:px-4">
-                                    <span class="text-[10px] sm:text-xs font-bold text-gray-500 flex items-center gap-1.5">❓ <b class="font-black">EŞLEŞMEDİ!</b> Platformda bulunamadı.</span>
-                                </div>`;
-                        }
+                        pPrice = Math.round(rPrice / 0.62);
                     }
 
-                    const topRounding = warningHtml !== "" ? "rounded-t-xl" : "rounded-xl border-b";
-
-                    html += `
-                        <div class="flex flex-col shadow-sm hover:shadow-md transition rounded-xl">
-                            <div class="flex items-center justify-between p-2.5 sm:p-3 bg-white border-t border-l border-r ${borderClass} ${bgLight} ${topRounding}">
-                                <div class="flex items-center gap-3 w-1/2 overflow-hidden">
-                                    <img src="${p.image && p.image.trim() !== '' ? p.image : 'https://via.placeholder.com/150'}" class="w-10 h-10 object-cover rounded-lg border border-white shadow-sm flex-shrink-0">
-                                    <span class="font-bold text-gray-800 text-xs sm:text-sm truncate" title="${p.name}">${p.name}</span>
+                    let priceSectionHtml = "";
+                    if (isYS) {
+                        priceSectionHtml = `
+                            <div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 w-2/3 justify-end">
+                                <div class="flex flex-col items-center border-r border-rose-100 px-2 sm:px-3">
+                                    <span class="text-[8px] font-bold text-gray-500 uppercase tracking-wider">Restoran</span>
+                                    <span class="font-black text-gray-700 text-xs sm:text-sm">${rPrice} ₺</span>
                                 </div>
-                                
-                                <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3 sm:gap-6 w-1/2 justify-end">
-                                    <div class="flex flex-col items-end">
-                                        <span class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Restoran</span>
-                                        <span class="font-black text-gray-700 text-xs sm:text-sm">${rPrice} ₺</span>
-                                    </div>
-                                    
-                                    <span class="hidden sm:flex text-gray-300 font-black text-lg">▶</span>
-                                    
-                                    <div class="flex flex-col items-end bg-white px-3 py-1 rounded-lg border ${borderClass} shadow-sm">
-                                        <span class="text-[9px] font-black ${activeColor} uppercase tracking-wider">Önerilen</span>
-                                        <span class="font-black ${activeColor} text-sm sm:text-lg">${pPrice} ₺</span>
-                                    </div>
+                                <div class="flex flex-col items-center border-r border-rose-100 px-2 sm:px-3 bg-rose-50 rounded-lg py-1">
+                                    <span class="text-[8px] font-black text-rose-500 uppercase tracking-wider whitespace-nowrap">Müşterinin Gördüğü</span>
+                                    <span class="font-black text-rose-700 text-xs sm:text-sm">${customerPrice.toFixed(2)} ₺</span>
+                                </div>
+                                <div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-end px-2 sm:px-3 rounded cursor-pointer transition active:scale-95 group" title="Fiyatı Kopyalamak İçin Tıkla">
+                                    <span class="text-[8px] font-black text-rose-600 uppercase tracking-wider transition">Siteye Girilecek</span>
+                                    <div class="font-black text-white bg-rose-600 px-2 py-0.5 rounded shadow-sm text-sm sm:text-base price-val-text min-w-[70px] text-center flex items-center justify-center">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</div>
                                 </div>
                             </div>
-                            ${warningHtml}
+                        `;
+                    } else {
+                        priceSectionHtml = `
+                            <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3 sm:gap-6 w-1/2 justify-end">
+                                <div class="flex flex-col items-end">
+                                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Restoran</span>
+                                    <span class="font-black text-gray-700 text-xs sm:text-sm">${rPrice} ₺</span>
+                                </div>
+                                <span class="hidden sm:flex text-gray-300 font-black text-lg">▶</span>
+                                <div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-end bg-white px-3 py-1 rounded-lg border ${borderClass} shadow-sm cursor-pointer hover:bg-gray-50 active:scale-95 transition group" title="Fiyatı Kopyalamak İçin Tıkla">
+                                    <span class="text-[9px] font-black ${activeColor} uppercase tracking-wider transition">Önerilen</span>
+                                    <div class="font-black ${activeColor} text-sm sm:text-lg price-val-text min-w-[60px] text-center flex items-center justify-center">${pPrice} ₺</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    html += `
+                        <div class="flex items-center justify-between p-2 sm:p-3 bg-white border ${borderClass} ${bgLight} rounded-xl shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center gap-2 w-1/3 sm:w-1/2 overflow-hidden">
+                                <img src="${p.image && p.image.trim() !== '' ? p.image : 'https://via.placeholder.com/150'}" class="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded border border-white shadow-sm flex-shrink-0">
+                                <span class="font-bold text-gray-800 text-[10px] sm:text-sm truncate" title="${p.name}">${p.name}</span>
+                            </div>
+                            ${priceSectionHtml}
                         </div>
                     `;
                 });
@@ -4287,46 +4394,48 @@
             if(!hasAnyProduct) {
                 container.innerHTML += '<div class="text-center text-gray-400 font-bold mt-10">Bu menüde listelenecek ürün bulunamadı.</div>';
             }
-        };
 
-        // 🚀 BOTU TETİKLEYEN FONKSİYON
-        window.checkPlatformPrices = async function(platform) {
-            if (platform !== 'ys') {
-                alert("Şu anlık sadece Yemeksepeti botu aktiftir. Diğer platformlar yakında Node.js tarafına eklenecek.");
-                return;
-            }
+            // 🎯 RENDER BİTTİKTEN SONRA HAFIZAYI ÇAĞIR VE AKILLI KAYDIRICIYI BAŞLAT
+            setTimeout(() => {
+                const savedCatIndex = localStorage.getItem('last_sys_category') || "0";
+                scrollToSysCatIndex(savedCatIndex, false); 
 
-            const btn = document.getElementById('btnCheckPlatformPrices');
-            btn.innerHTML = "⏳ Bot Çekiyor, Lütfen 10 Saniye Bekleyin...";
-            btn.disabled = true;
-            btn.classList.add('animate-pulse', 'bg-orange-500', 'text-white');
-            btn.classList.remove('bg-gray-900');
-
-            try {
-                const response = await fetch("https://olimpiyat-api.onrender.com/api/fetch-ys-prices", {
-                    method: "POST"
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    window.lastFetchedPrices[platform] = data.data; 
-                    alert("Fiyatlar Yemeksepeti'nden başarıyla çekildi!");
-                    renderSystemPricesList(platform); 
-                } else {
-                    alert("Bot Hatası: " + data.error);
-                    btn.innerHTML = "🔍 Tekrar Dene";
-                    btn.disabled = false;
-                    btn.classList.remove('animate-pulse', 'bg-orange-500');
-                    btn.classList.add('bg-gray-900');
+                if (!container.dataset.spyAttached) {
+                    container.dataset.spyAttached = 'true';
+                    container.addEventListener('scroll', () => {
+                        const sections = container.querySelectorAll('.sys-cat-section');
+                        let currentActiveIndex = window.lastActiveSysCat || "0"; 
+                        
+                        sections.forEach(sec => {
+                            const secTop = sec.offsetTop - container.offsetTop;
+                            // Eğer kaydırma pozisyonu başlığın hizasını geçmişse o bölümü aktif say
+                            if (container.scrollTop >= secTop - 30) {
+                                currentActiveIndex = sec.id.replace('sys-cat-', '');
+                            }
+                        });
+                        
+                        // Sadece yeni bir kategoriye girildiyse Navbar butonlarını değiştir
+                        if(window.lastActiveSysCat !== currentActiveIndex) {
+                            window.lastActiveSysCat = currentActiveIndex;
+                            localStorage.setItem('last_sys_category', currentActiveIndex);
+                            
+                            document.querySelectorAll('.sys-cat-btn').forEach(b => {
+                                b.classList.remove('bg-gray-800', 'text-white', 'border-gray-800');
+                                b.classList.add('text-gray-500', 'border-gray-200', 'bg-white');
+                            });
+                            
+                            const activeBtn = document.getElementById(`btn-sys-cat-${currentActiveIndex}`);
+                            if (activeBtn) {
+                                activeBtn.classList.remove('text-gray-500', 'border-gray-200', 'bg-white');
+                                activeBtn.classList.add('bg-gray-800', 'text-white', 'border-gray-800');
+                                activeBtn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+                            }
+                        }
+                    });
                 }
-            } catch (error) {
-                alert("Sunucuya ulaşılamadı. Node.js backend'in çalıştığından emin olun.");
-                btn.innerHTML = "🔍 Tekrar Dene";
-                btn.disabled = false;
-                btn.classList.remove('animate-pulse', 'bg-orange-500');
-                btn.classList.add('bg-gray-900');
-            }
+            }, 100); 
         };
+        
 
         // --- 💳 BORÇ YÖNETİMİ İŞLEM FONKSİYONLARI ---
 
