@@ -810,6 +810,10 @@
                         <button id="showPrintA4"
                             class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">📄
                             A4 Fiyat Listesi</button>
+                            <!-- YENİ EKLENEN BUTON -->
+                        <button id="showPrintMenusA4"
+                            class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">🖼️
+                            Menüler Fiyat Listesi</button>
                         <button id="showPrintDrink"
                             class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">🥤
                             İçecek Listesi</button>
@@ -2348,6 +2352,171 @@
                 </div>
             `);
             analyzeAndBuildPrintMenu(); // İçini verilerle doldurur
+        }
+
+       function renderPrintMenusModule() {
+            setActiveTab('showPrintMenusA4');
+            
+            // 1. Veritabanındaki Fiyatları Hazırla
+            const dbProductMap = {};
+            products.forEach(p => {
+                const cleanName = (p.name || "").toLocaleLowerCase('tr-TR').trim();
+                dbProductMap[cleanName] = p.discountPrice || p.price;
+            });
+
+            // 2. Akıllı İsim Eşleştirme Motoru (A4 Listesindeki ile aynı kurallar)
+            const rawProductAliases = {
+                "üç Çeyrek Ekmek Kokoreç": "üç çeyrek kokoreç",
+                "BÜYÜK AYRAN": "kapalı ayran",
+                "MİDYE tane": "midye (adet)",
+                "Şalgam Suyu": "şalgam",
+                "yarım tavuk KOKOREÇ": "yarım ekmek tavuk kokoreç",
+                "Tavuklu Patso": "Tavuk dönerli Patso",
+                "Üç Çeyrek Ekmek Döner": "Üç Çeyrek Ekmek Tavuk Döner",
+                "Pilav Üstü Tavuk Döner": "Pilavüstü Tavuk Döner",
+                "Sosisli Sandviç": "Sosisli Sandiviç",
+                "Yarım Ekmek Kaşarlı Tost": "Kaşarlı Tost",
+                "Yarım Ekmek Karışık Tost": "Karışık Tost",
+                "Yarım Ekmek Sucuk": "Sucuk ekmek",
+                "Üç Çeyrek Ekmek Sucuk": "Üç Çeyrek Ekmek Köfte",
+                "Limonata (Büyük)": "Açık Ayran",
+                "Limonata (Küçük)": "Küçük Ayran"
+            };
+
+            const productAliases = {};
+            for (let key in rawProductAliases) {
+                productAliases[key.toLocaleLowerCase('tr-TR').trim()] = rawProductAliases[key].toLocaleLowerCase('tr-TR').trim();
+            }
+
+            // 3. Görseldeki 10 Adet Menünün İçerikleri
+            const menuAliases = {
+                "menü 1": "ıslak burger menü",
+                "menü 2": "sosisli menü",
+                "menü 3": ["dürüm tavuk döner", "şişe kola"],
+                "menü 4": "pilav üstü döner menü",
+                "menü 5": "tavuk dürüm menü",
+                "menü 6": "tombik tavuk döner menü",
+                "menü 7": "yarım ekmek kokoreç menü",
+                "menü 8": "yarım ekmek döner menü",
+                "menü 9": "yarım köfte menü",
+                "menü 10": "yarım ekmek döner menü (çorbalı)"
+            };
+
+            // 4. Her bir menünün toplam fiyatını hesapla
+            const prices = {};
+            for(let i=1; i<=10; i++) {
+                let key = "menü " + i;
+                let price = 0;
+                let aliasValue = menuAliases[key];
+                
+                if (Array.isArray(aliasValue)) {
+                    aliasValue.forEach(subItem => {
+                        let cleanSubItem = subItem.toLocaleLowerCase('tr-TR').trim();
+                        if(productAliases[cleanSubItem]) cleanSubItem = productAliases[cleanSubItem];
+                        price += Number(dbProductMap[cleanSubItem] || 0);
+                    });
+                } else {
+                    let cleanAlias = aliasValue.toLocaleLowerCase('tr-TR').trim();
+                    if(productAliases[cleanAlias]) cleanAlias = productAliases[cleanAlias];
+                    price = Number(dbProductMap[cleanAlias] || 0);
+                }
+                prices[i] = price > 0 ? price : "0";
+            }
+
+            // 5. Ekrana Koordinatlı Şablonu Bas
+            loadModule(`
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in min-h-[80vh] flex flex-col items-center">
+                    <div class="w-full flex justify-between items-center mb-6 no-print border-b border-gray-200 pb-4">
+                        <h2 class="text-xl font-black text-gray-800">🖼️ Menüler Fiyat Listesi (Dikey A4)</h2>
+                        <button onclick="window.print()" class="bg-[#ffcc00] text-black font-black px-6 py-2.5 rounded-xl hover:bg-yellow-500 shadow-lg flex items-center justify-center gap-2 transition transform hover:scale-105 text-sm">🖨️ Yazdır</button>
+                    </div>
+                    
+                    <div class="w-full max-w-2xl bg-orange-50 rounded-2xl p-4 mb-8 shadow-inner border border-orange-200 no-print">
+                        <p class="text-xs text-orange-800 font-bold">Aşağıdaki şablonda menü fiyatlarınız dikey A4 resminin üzerine yerleştirilmiştir.</p>
+                        <p class="text-[10px] text-gray-500 font-bold mt-1">Gerekirse kutucukların yerini koddaki "%" değerlerinden hassas olarak ayarlayabilirsiniz.</p>
+                    </div>
+
+                    <div class="w-full flex justify-center pb-10 overflow-x-auto scrollbar-none">
+                        <style>
+                            .a4-portrait-image-page {
+                                position: relative;
+                                width: 210mm; 
+                                height: 297mm;
+                                background-color: #ffffff;
+                                margin: 0 auto;
+                                flex-shrink: 0;
+                                overflow: hidden;
+                                box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+                                border: 1px solid #ccc;
+                            }
+                            
+                            .a4-portrait-image-page img {
+                                width: 100%;
+                                height: 100%;
+                                object-fit: fill;
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                z-index: 1;
+                            }
+                            
+                            /* ÇIPLAK FİYAT YAZISI STİLİ (Siyah, Küçültülmüş ve Şeffaf Kutu) */
+                            .menu-price-tag {
+                                position: absolute;
+                                z-index: 2;
+                                font-family: 'Arial Black', Impact, sans-serif;
+                                font-size: 20px; /* Boyut Küçültüldü */
+                                font-weight: 900;
+                                color: #000000; /* Renk Siyah Yapıldı */
+                                background-color: transparent; 
+                                border: none; 
+                                transform: translate(-50%, -50%);
+                                text-align: center;
+                                letter-spacing: -1px;
+                            }
+
+                            /* 🖨️ Yazıcı Ayarları */
+                            @media print {
+                                @page {
+                                    size: A4 portrait !important; 
+                                    margin: 0 !important; 
+                                }
+                                body > * { display: none !important; }
+                                body > #printModuleArea:not(.hidden) { display: block !important; }
+                                
+                                .a4-portrait-image-page {
+                                    margin: 0 !important;
+                                    width: 210mm !important;
+                                    height: 297mm !important;
+                                    box-shadow: none !important;
+                                    border: none !important;
+                                }
+                            }
+                        </style>
+
+                        <!-- KOORDİNATLI GÖRSEL ALANI -->
+                        <div class="a4-portrait-image-page">
+                            <!-- Dosya adı senin belirlediğin şekilde ayarlandı -->
+                            <img src="olmenuarkaA4.jpg" alt="Olimpiyat Menüler">
+                            
+                            <!-- 1. Satır (Üst Kısım Menüleri 1-5) -->
+                            <!-- Her kutunun koordinatları görseldeki minik kaymalara göre özel olarak girildi -->
+                            <div class="menu-price-tag" style="top: 21.6%; left: 11.5%;">${prices[1]}</div>
+                            <div class="menu-price-tag" style="top: 22.0%; left: 30.5%;">${prices[2]}</div>
+                            <div class="menu-price-tag" style="top: 22.0%; left: 49.3%;">${prices[3]}</div>
+                            <div class="menu-price-tag" style="top: 22.6%; left: 68.5%;">${prices[4]}</div>
+                            <div class="menu-price-tag" style="top: 22.4%; left: 87.6%;">${prices[5]}</div>
+
+                            <!-- 2. Satır (Alt Kısım Menüleri 6-10) -->
+                            <div class="menu-price-tag" style="top: 38.0%; left: 11.5%;">${prices[6]}</div>
+                            <div class="menu-price-tag" style="top: 38.3%; left: 30.5%;">${prices[7]}</div>
+                            <div class="menu-price-tag" style="top: 38.6%; left: 49.5%;">${prices[8]}</div>
+                            <div class="menu-price-tag" style="top: 38.5%; left: 69.0%;">${prices[9]}</div>
+                            <div class="menu-price-tag" style="top: 38.5%; left: 88.6%;">${prices[10]}</div>
+                        </div>
+                    </div>
+                </div>
+            `);
         }
 
         function renderPrintDrinkModule() {
@@ -5004,7 +5173,7 @@
 
 
             // Mobilde herhangi bir baskı seçeneğine tıklandığında alt menüyü otomatik kapat
-            const printTabs = ['showPrintA4', 'showPrintDrink', 'showPrintLabel', 'showPrintQR', 'showPrintSticker'];
+            const printTabs = ['showPrintA4', 'showPrintMenusA4', 'showPrintDrink', 'showPrintLabel', 'showPrintQR', 'showPrintSticker'];
             printTabs.forEach(id => {
                 document.getElementById(id).addEventListener('click', () => {
                     // Sadece mobildeyken kapat (Masaüstünde alt menü açık kalmaya devam edebilir)
@@ -5019,6 +5188,7 @@
 
             // Alt Sekmeleri Tıklama Bağlantıları
             document.getElementById('showPrintA4').addEventListener('click', renderPrintA4Module);
+            document.getElementById('showPrintMenusA4').addEventListener('click', renderPrintMenusModule);
             document.getElementById('showPrintDrink').addEventListener('click', renderPrintDrinkModule);
             document.getElementById('showPrintLabel').addEventListener('click', renderPrintLabelModule);
             document.getElementById('showPrintQR').addEventListener('click', renderPrintQRModule);
