@@ -4323,6 +4323,63 @@
             }
         };
 
+       // --- 🧮 MANUEL HESAPLAYICI DİNAMİK MOTORU ---
+        window.updateSysCalc = function(changedInput, platform, value) {
+            let val = parseFloat(value);
+            // Kutucuğu tamamen silerse (boş bırakırsa) hata vermesin, 0 kabul etsin
+            if (isNaN(val)) val = 0; 
+
+            let rPrice, cPrice, pPrice;
+
+            if (platform === 'ys') {
+                if (changedInput === 'r') {
+                    rPrice = val;
+                    cPrice = Math.ceil((rPrice / 0.88) * 2) / 2;
+                    pPrice = cPrice / 0.80;
+                } else if (changedInput === 'c') {
+                    cPrice = val;
+                    rPrice = cPrice * 0.88;
+                    pPrice = cPrice / 0.80;
+                } else if (changedInput === 'p') {
+                    pPrice = val;
+                    cPrice = pPrice * 0.80;
+                    rPrice = cPrice * 0.88;
+                }
+                window.manualCalcBaseRestoranPrice = rPrice; // Hafızaya al
+
+                // Güncellenen değerleri kutucuklara yaz (Sıfırsa sadece 0 yaz)
+                if(changedInput !== 'r') document.getElementById('calc-r').value = rPrice > 0 ? rPrice.toFixed(2) : "0";
+                if(changedInput !== 'c') document.getElementById('calc-c').value = cPrice > 0 ? cPrice.toFixed(2) : "0";
+                if(changedInput !== 'p') document.getElementById('calc-p').value = pPrice > 0 ? pPrice.toFixed(2) : "0";
+            } 
+            else if (platform === 'my') {
+                if (changedInput === 'r') {
+                    rPrice = val;
+                    pPrice = Math.round(rPrice / 0.89);
+                } else if (changedInput === 'p') {
+                    pPrice = val;
+                    rPrice = pPrice * 0.89;
+                }
+                window.manualCalcBaseRestoranPrice = rPrice;
+
+                if(changedInput !== 'r') document.getElementById('calc-r').value = rPrice > 0 ? rPrice.toFixed(2) : "0";
+                if(changedInput !== 'p') document.getElementById('calc-p').value = pPrice > 0 ? Math.round(pPrice) : "0";
+            }
+            else if (platform === 'ue') {
+                if (changedInput === 'r') {
+                    rPrice = val;
+                    pPrice = Math.round(rPrice / 0.62);
+                } else if (changedInput === 'p') {
+                    pPrice = val;
+                    rPrice = pPrice * 0.62;
+                }
+                window.manualCalcBaseRestoranPrice = rPrice;
+
+                if(changedInput !== 'r') document.getElementById('calc-r').value = rPrice > 0 ? rPrice.toFixed(2) : "0";
+                if(changedInput !== 'p') document.getElementById('calc-p').value = pPrice > 0 ? Math.round(pPrice) : "0";
+            }
+        };
+
         // --- 🧮 SİSTEM FİYATLARI (KOMİSYON HESAPLAYICI) MODÜLÜ ---
         function renderSystemPricesModule() {
             setActiveTab('showSystemPrices');
@@ -4335,40 +4392,56 @@
             });
             categoryNavHtml += `</div>`;
 
+            // MASAÜSTÜ SOL/SAĞ BÖLÜNME MANTIĞI EKLENDİ (xl:flex-row)
             loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh] max-w-4xl mx-auto">
-                    <div class="flex-shrink-0">
-                        <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-2">
-                            <span>🧮</span> ${menuTitle} Sistem Fiyatları
-                        </h2>
-                        <p class="text-xs text-gray-500 font-bold mb-4">Firmaların komisyon oranlarına göre tavsiye edilen satış fiyatlarınızı otomatik hesaplar. Fiyatı kopyalamak için üzerine tıklayın.</p>
-                        
-                        <!-- FİRMA SEÇİM BUTONLARI -->
-                        <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-2">
-                            <button id="btnPlatformYS" class="platform-btn bg-rose-50 border-2 border-rose-200 text-rose-600 font-black py-2 sm:py-3 rounded-xl hover:bg-rose-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ys')">
-                                <span class="text-lg block sm:inline">🥡</span> Yemeksepeti
-                            </button>
-                            <button id="btnPlatformMY" class="platform-btn bg-orange-50 border-2 border-orange-200 text-orange-500 font-black py-2 sm:py-3 rounded-xl hover:bg-orange-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('my')">
-                                <span class="text-lg block sm:inline">🛒</span> Migros Yemek
-                            </button>
-                            <button id="btnPlatformUE" class="platform-btn bg-green-50 border-2 border-green-200 text-green-600 font-black py-2 sm:py-3 rounded-xl hover:bg-green-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ue')">
-                                <span class="text-lg block sm:inline">🚙</span> Uber Eats
-                            </button>
+                <div class="flex flex-col xl:flex-row w-full gap-4 items-start h-[79dvh] md:h-[85dvh]">
+                    
+                    <!-- SOL PANEL (Ürün Listesi Alanı) -->
+                    <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 animate-pop-in flex flex-col w-full xl:w-8/12 h-full">
+                        <div class="flex-shrink-0">
+                            <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-2">
+                                <span>🧮</span> ${menuTitle} Sistem Fiyatları
+                            </h2>
+                            <p class="text-xs text-gray-500 font-bold mb-4">Firmaların komisyon oranlarına göre tavsiye edilen satış fiyatlarınızı otomatik hesaplar. Fiyatı kopyalamak için üzerine tıklayın.</p>
+                            
+                            <!-- FİRMA SEÇİM BUTONLARI -->
+                            <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-2">
+                                <button id="btnPlatformYS" class="platform-btn bg-rose-50 border-2 border-rose-200 text-rose-600 font-black py-2 sm:py-3 rounded-xl hover:bg-rose-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ys')">
+                                    <span class="text-lg block sm:inline">🥡</span> Yemeksepeti
+                                </button>
+                                <button id="btnPlatformMY" class="platform-btn bg-orange-50 border-2 border-orange-200 text-orange-500 font-black py-2 sm:py-3 rounded-xl hover:bg-orange-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('my')">
+                                    <span class="text-lg block sm:inline">🛒</span> Migros Yemek
+                                </button>
+                                <button id="btnPlatformUE" class="platform-btn bg-green-50 border-2 border-green-200 text-green-600 font-black py-2 sm:py-3 rounded-xl hover:bg-green-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ue')">
+                                    <span class="text-lg block sm:inline">🚙</span> Uber Eats
+                                </button>
+                            </div>
+                            
+                            <!-- YATAY KATEGORİ NAVBAR'I -->
+                            ${categoryNavHtml}
                         </div>
-                        
-                        <!-- YATAY KATEGORİ NAVBAR'I -->
-                        ${categoryNavHtml}
+
+                        <!-- ÜRÜN LİSTESİ ALANI -->
+                        <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-6 scrollbar-none flex flex-col gap-4 pt-2 scroll-smooth relative">
+                            <div class="flex items-center justify-center h-full text-gray-400 font-bold text-sm">
+                                Yukarıdan hesaplamak istediğiniz platformu seçin.
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- ÜRÜN LİSTESİ ALANI -->
-                    <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-6 scrollbar-none flex flex-col gap-4 pt-2 scroll-smooth relative">
-                        <div class="flex items-center justify-center h-full text-gray-400 font-bold text-sm">
-                            Yukarıdan hesaplamak istediğiniz platformu seçin.
-                        </div>
+                    <!-- SAĞ PANEL (Manuel Hesaplayıcı - Sadece Masaüstünde Gözükür) -->
+                    <div id="systemPricesCalculatorContainer" class="hidden xl:flex w-full xl:w-4/12 bg-white rounded-2xl shadow-sm p-6 border border-gray-100 animate-pop-in flex-col gap-4 sticky top-0 h-fit">
+                        <!-- Javascript ile platforma göre doldurulacak -->
                     </div>
+
                 </div>
             `);
             
+            // YENİ: Varsayılan olarak hep "0" ile başlasın
+            if (typeof window.manualCalcBaseRestoranPrice === 'undefined') {
+                window.manualCalcBaseRestoranPrice = 0;
+            }
+
             renderSystemPricesList('ys');
         }
 
@@ -4380,25 +4453,96 @@
                 if(btn.id === 'btnPlatformUE') btn.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
             });
             
-            let activeColor = ''; let bgLight = ''; let borderClass = ''; 
+            let activeColor = ''; let bgLight = ''; let borderClass = ''; let commissionText = '';
             
             if(platform === 'ys') {
                 const btn = document.getElementById('btnPlatformYS');
                 btn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600');
                 btn.classList.remove('bg-rose-50', 'text-rose-600');
                 activeColor = 'text-rose-600'; bgLight = 'bg-rose-50'; borderClass = 'border-rose-200';
+                commissionText = '%20 İnd. + %12 Komisyon';
             } else if(platform === 'my') {
                 const btn = document.getElementById('btnPlatformMY');
                 btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500');
                 btn.classList.remove('bg-orange-50', 'text-orange-500');
                 activeColor = 'text-orange-600'; bgLight = 'bg-orange-50'; borderClass = 'border-orange-200';
+                commissionText = '%11 Komisyon';
             } else if(platform === 'ue') {
                 const btn = document.getElementById('btnPlatformUE');
                 btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600');
                 btn.classList.remove('bg-green-50', 'text-green-600');
                 activeColor = 'text-green-600'; bgLight = 'bg-green-50'; borderClass = 'border-green-200';
+                commissionText = '%38 Komisyon';
             }
 
+            // --- SAĞ PANEL MANUEL HESAPLAYICI DOLDURMA ---
+            let calcHtml = '';
+            let rPrice = window.manualCalcBaseRestoranPrice || 0; // Eğer tanımsızsa 0 yap
+
+            if (platform === 'ys') {
+                let rawCustomer = rPrice / 0.88;
+                let cPrice = Math.ceil(rawCustomer * 2) / 2;
+                let pPrice = cPrice / 0.80;
+
+                // Tıklayınca eğer sıfırsa silecek akıllı inputlar
+                calcHtml = `
+                    <h3 class="font-black text-rose-700 text-lg border-b border-rose-200 pb-3 mb-2 flex items-center gap-2">🧮 Manuel Hesaplayıcı (YS)</h3>
+                    <div class="flex flex-col gap-5 mt-2">
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net İstediğin)</label>
+                            <div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-100 p-4 rounded-2xl font-black text-gray-800 text-xl outline-none focus:border-rose-500 bg-white shadow-sm transition" oninput="updateSysCalc('r', 'ys', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-4 font-bold text-gray-400 text-lg pointer-events-none">₺</span></div>
+                        </div>
+                        <div class="flex justify-center -my-2 z-10"><span class="bg-rose-100 text-rose-500 rounded-full w-8 h-8 flex items-center justify-center font-bold border-2 border-white shadow-sm">↓</span></div>
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-black text-rose-600 uppercase bg-rose-50 px-2 py-1 rounded w-fit mb-1 border border-rose-100">Müşterinin Gördüğü (Kuruşlu)</label>
+                            <div class="relative"><input id="calc-c" type="number" value="${cPrice > 0 ? cPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-200 p-4 rounded-2xl font-black text-rose-700 text-xl outline-none focus:border-rose-500 bg-rose-50 shadow-sm transition" oninput="updateSysCalc('c', 'ys', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-4 font-bold text-rose-400 text-lg pointer-events-none">₺</span></div>
+                        </div>
+                        <div class="flex justify-center -my-2 z-10"><span class="bg-rose-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold border-2 border-white shadow-sm">↓</span></div>
+                        <div class="flex flex-col relative">
+                            <label class="text-[10px] font-black text-white bg-rose-600 px-2 py-1.5 rounded w-fit mb-1 absolute -top-4 left-3 shadow-md z-10">Siteye Girilecek Önerilen Fiyat</label>
+                            <div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? pPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-500 p-5 pt-6 rounded-2xl font-black text-rose-900 text-2xl outline-none focus:ring-4 focus:ring-rose-200 bg-rose-100 shadow-md transition" oninput="updateSysCalc('p', 'ys', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-5 font-black text-rose-500 text-2xl pointer-events-none">₺</span></div>
+                        </div>
+                    </div>
+                `;
+            } else if (platform === 'my') {
+                let pPrice = Math.round(rPrice / 0.89);
+                calcHtml = `
+                    <h3 class="font-black text-orange-700 text-lg border-b border-orange-200 pb-3 mb-2 flex items-center gap-2">🧮 Manuel Hesaplayıcı (MY)</h3>
+                    <div class="flex flex-col gap-5 mt-2">
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net İstediğin)</label>
+                            <div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-orange-100 p-4 rounded-2xl font-black text-gray-800 text-xl outline-none focus:border-orange-500 bg-white shadow-sm transition" oninput="updateSysCalc('r', 'my', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-4 font-bold text-gray-400 text-lg pointer-events-none">₺</span></div>
+                        </div>
+                        <div class="flex justify-center -my-2 z-10"><span class="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold border-2 border-white shadow-sm">↓</span></div>
+                        <div class="flex flex-col relative">
+                            <label class="text-[10px] font-black text-white bg-orange-500 px-2 py-1.5 rounded w-fit mb-1 absolute -top-4 left-3 shadow-md z-10">Siteye Girilecek Önerilen Fiyat</label>
+                            <div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? Math.round(pPrice) : '0'}" class="w-full border-2 border-orange-500 p-5 pt-6 rounded-2xl font-black text-orange-900 text-2xl outline-none focus:ring-4 focus:ring-orange-200 bg-orange-50 shadow-md transition" oninput="updateSysCalc('p', 'my', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-5 font-black text-orange-500 text-2xl pointer-events-none">₺</span></div>
+                        </div>
+                    </div>
+                `;
+            } else if (platform === 'ue') {
+                let pPrice = Math.round(rPrice / 0.62);
+                calcHtml = `
+                    <h3 class="font-black text-green-700 text-lg border-b border-green-200 pb-3 mb-2 flex items-center gap-2">🧮 Manuel Hesaplayıcı (UE)</h3>
+                    <div class="flex flex-col gap-5 mt-2">
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net İstediğin)</label>
+                            <div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-green-100 p-4 rounded-2xl font-black text-gray-800 text-xl outline-none focus:border-green-500 bg-white shadow-sm transition" oninput="updateSysCalc('r', 'ue', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-4 font-bold text-gray-400 text-lg pointer-events-none">₺</span></div>
+                        </div>
+                        <div class="flex justify-center -my-2 z-10"><span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold border-2 border-white shadow-sm">↓</span></div>
+                        <div class="flex flex-col relative">
+                            <label class="text-[10px] font-black text-white bg-green-600 px-2 py-1.5 rounded w-fit mb-1 absolute -top-4 left-3 shadow-md z-10">Siteye Girilecek Önerilen Fiyat</label>
+                            <div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? Math.round(pPrice) : '0'}" class="w-full border-2 border-green-500 p-5 pt-6 rounded-2xl font-black text-green-900 text-2xl outline-none focus:ring-4 focus:ring-green-200 bg-green-50 shadow-md transition" oninput="updateSysCalc('p', 'ue', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-5 font-black text-green-500 text-2xl pointer-events-none">₺</span></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const calcContainer = document.getElementById('systemPricesCalculatorContainer');
+            if(calcContainer) calcContainer.innerHTML = calcHtml;
+
+
+            // --- SOL LİSTE DOLDURMA ---
             const container = document.getElementById('systemPricesListContainer');
             container.innerHTML = '';
 
@@ -4411,10 +4555,12 @@
 
                 hasAnyProduct = true;
                 
+                // KATEGORİ BAŞLIĞI VE SAĞINDA KOMİSYON YAZISI
                 let html = `
                     <div class="mb-4 sys-cat-section" id="sys-cat-${catIndex}">
-                        <h3 class="font-black ${activeColor} text-sm sm:text-base mb-2 border-b ${borderClass} pb-1 flex items-center gap-2 sticky top-0 bg-white z-10 pt-1 shadow-sm">
-                            <span>📌</span> ${cat}
+                        <h3 class="font-black ${activeColor} text-sm sm:text-base mb-2 border-b ${borderClass} pb-1 flex justify-between items-center sticky top-0 bg-white z-10 pt-1 shadow-sm px-1">
+                            <div class="flex items-center gap-2"><span>📌</span> ${cat}</div>
+                            <span class="text-[9px] sm:text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-lg border ${borderClass} shadow-inner">${commissionText}</span>
                         </h3>
                         <div class="flex flex-col gap-2.5 mt-2">
                 `;
@@ -4499,13 +4645,11 @@
                         
                         sections.forEach(sec => {
                             const secTop = sec.offsetTop - container.offsetTop;
-                            // Eğer kaydırma pozisyonu başlığın hizasını geçmişse o bölümü aktif say
                             if (container.scrollTop >= secTop - 30) {
                                 currentActiveIndex = sec.id.replace('sys-cat-', '');
                             }
                         });
                         
-                        // Sadece yeni bir kategoriye girildiyse Navbar butonlarını değiştir
                         if(window.lastActiveSysCat !== currentActiveIndex) {
                             window.lastActiveSysCat = currentActiveIndex;
                             localStorage.setItem('last_sys_category', currentActiveIndex);
