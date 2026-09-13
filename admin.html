@@ -1403,200 +1403,608 @@
                 alert("Hata: " + e.message);
             }
         };
+// --- 🌐 GLOBAL DURUM (STATE) YÖNETİMİ ---
+        window.currentProductMode = 'default'; // 'default', 'price_edit', 'sort_edit', 'content_edit'
+        window.productSearchQuery = '';
 
+        window.setProductMode = function(mode) {
+            window.currentProductMode = mode;
+            renderProductsModule();
+        };
+
+        // --- 🚀 YENİ ANA EKRAN VE AKILLI MOD MOTORU ---
         function renderProductsModule() {
             setActiveTab('showProducts');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
 
-            // YENİ RÖNTGEN VE EŞİTLEME BUTONU
-            const syncBtnHtml = `<button id="syncMenuBtn" onclick="openSyncProductsModal()" class="ml-auto bg-gradient-to-br from-blue-500 to-indigo-600 text-white px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black hover:scale-[1.02] transition shadow-md whitespace-nowrap flex items-center gap-1 active:scale-95">🔄 EKSİKLERİ AKTAR</button>`;
-
-            loadModule(`
-                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-orange-100 animate-pop-in flex flex-col h-[79dvh] md:h-[85dvh]">
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4 flex-shrink-0">
-                        <div class="flex items-center w-full sm:w-auto gap-3">
-                            <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-1">📦 ${menuTitle}</h2>
-                            ${syncBtnHtml}
-                        </div>
-                        <button id="toggleArchiveBtn" class="bg-gray-800 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-gray-900 transition flex items-center justify-center gap-2 active:scale-95 w-full sm:w-auto">
-                            <span>📦</span> Rafım (Gizlenenler)
-                        </button>
-                    </div>
-                    
-                    <div id="productControls" class="mb-4 flex-shrink-0">
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kategoriye Göre Filtrele</label>
-                        <select id="filterCategory" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-semibold bg-gray-50 outline-none focus:border-orange-500">
-                            <option value="Tümü">Tüm Kategoriler</option>
-                            ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-                        </select>
-                    </div>
-                    
-                    <div id="archiveControls" class="hidden mb-4 p-4 bg-red-50 border border-red-100 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3 shadow-inner flex-shrink-0">
-                        <span class="text-sm font-black text-red-700">Rafa Kaldırılan (Gizli) Ürünler</span>
-                        <button id="unarchiveSelectedBtn" class="w-full sm:w-auto bg-green-600 text-white px-4 py-2.5 rounded-xl text-xs font-black shadow-md hover:bg-green-700 transition active:scale-95">✅ Seçilenleri Raftan Çıkar</button>
-                    </div>
-
-                    <ul id="productList" class="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-2 pb-2">
-                        <li class="p-4 text-center text-gray-400 text-sm">Ürünler yükleniyor...</li>
-                    </ul>
-                </div>
-            `);
-
-            const filterSelect = document.getElementById('filterCategory');
-            filterSelect.addEventListener('change', () => renderProductList(filterSelect.value, false));
-
-            let isShowingArchive = false;
-            document.getElementById('toggleArchiveBtn').addEventListener('click', (e) => {
-                isShowingArchive = !isShowingArchive;
-                const btn = e.currentTarget;
-                if (isShowingArchive) {
-                    btn.innerHTML = '<span>⬅️</span> Ürünlere Dön';
-                    btn.classList.replace('bg-gray-800', 'bg-orange-500');
-                    btn.classList.replace('hover:bg-gray-900', 'hover:bg-orange-600');
-                    document.getElementById('productControls').classList.add('hidden');
-                    document.getElementById('archiveControls').classList.remove('hidden');
-                    renderProductList('Tümü', true);
-                } else {
-                    btn.innerHTML = '<span>📦</span> Rafım (Gizlenenler)';
-                    btn.classList.replace('bg-orange-500', 'bg-gray-800');
-                    btn.classList.replace('hover:bg-orange-600', 'hover:bg-gray-900');
-                    document.getElementById('productControls').classList.remove('hidden');
-                    document.getElementById('archiveControls').classList.add('hidden');
-                    renderProductList(document.getElementById('filterCategory').value, false);
-                }
+            // 1. ESKİ BUTONLARI SOL MENÜDEN SİL (Temizlik)
+            ['showSorting', 'showAddProduct', 'showBulkUpdate'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
             });
 
-            document.getElementById('unarchiveSelectedBtn').addEventListener('click', unarchiveSelected);
+            // Ekranı Tam Genişliğe (Full Width) Çıkarma
+            const container = document.getElementById('contentContainer');
+            if(container) {
+                container.className = 'w-full w-full pb-0 md:pb-0 px-2 sm:px-4'; 
+            }
 
-            if (products.length > 0) renderProductList(filterSelect.value, false);
+            // 2. ÜST KONTROL BARININ MODA GÖRE DEĞİŞMESİ
+            let topBarHtml = '';
+            
+            if (window.currentProductMode === 'default') {
+                topBarHtml = `
+                    <!-- Arama Çubuğu -->
+                    <div class="relative w-full md:w-1/3">
+                        <input type="text" id="menuSearchInput" value="${window.productSearchQuery}" onkeyup="window.productSearchQuery = this.value; renderProductList()" placeholder="Menüde Ara" class="w-full border border-gray-300 rounded-lg py-2.5 px-4 pl-10 focus:outline-none focus:border-[#009b82] text-sm font-semibold transition bg-white shadow-sm">
+                        <span class="absolute left-3 top-2.5 text-gray-400 text-lg font-bold">⚲</span>
+                    </div>
+                    
+                    <!-- Sağ Aksiyon Butonları -->
+                    <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                        <button class="bg-[#009b82] text-white px-4 py-2.5 rounded-lg font-bold flex items-center gap-1.5 text-sm hover:bg-[#00826d] transition shadow-sm">
+                            <span class="text-lg leading-none mb-0.5">+</span> Başlık
+                        </button>
+                        
+                        <!-- ÜST ANA 3 NOKTA MENÜSÜ -->
+                        <div class="relative">
+                            <button onclick="toggleDropdown(event, 'mainTopDropdown')" class="bg-white border border-gray-300 text-gray-700 px-3 py-2.5 rounded-lg hover:bg-gray-50 flex items-center justify-center text-xl font-black tracking-widest leading-none pb-3 shadow-sm">...</button>
+                            <div id="mainTopDropdown" class="dropdown-menu absolute right-0 top-full mt-2 hidden bg-white border border-gray-200 shadow-2xl rounded-xl w-64 z-[999] overflow-hidden">
+                                <button onclick="setProductMode('sort_edit')" class="w-full text-left px-4 py-3.5 text-sm font-bold text-gray-700 hover:bg-gray-50 border-b border-gray-100 flex items-center gap-3 transition">
+                                    <span class="text-lg">☰</span> Sırayı Değiştir
+                                </button>
+                                <button onclick="setProductMode('price_edit')" class="w-full text-left px-4 py-3.5 text-sm font-bold text-gray-700 hover:bg-gray-50 border-b border-gray-100 flex items-center gap-3 transition">
+                                    <span class="text-lg">🏷️</span> Fiyat Değiştir
+                                </button>
+                                <!-- YENİ İÇERİK DÜZENLEME MODU BUTONU -->
+                                <button onclick="setProductMode('content_edit')" class="w-full text-left px-4 py-3.5 text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
+                                    <span class="text-lg">🖼️</span> Görsel ve Açıklama Düzenleme
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (window.currentProductMode === 'price_edit') {
+                topBarHtml = `
+                    <div class="flex items-center gap-3 w-full sm:w-auto bg-blue-50 px-4 py-2 rounded-lg border border-blue-100 text-blue-700 font-bold text-sm">
+                        <span class="text-xl">ℹ️</span> Fiyatları yandaki kutucuklardan hızlıca güncelleyebilirsiniz.
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end mt-3 sm:mt-0">
+                        <button onclick="setProductMode('default')" class="bg-white border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg font-bold hover:bg-gray-50 transition shadow-sm">Vazgeç</button>
+                        <button onclick="saveBulkPricesModern()" class="bg-[#009b82] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#00826d] transition shadow-md active:scale-95">Kaydet</button>
+                    </div>
+                `;
+            } else if (window.currentProductMode === 'sort_edit') {
+                topBarHtml = `
+                    <div class="flex items-center gap-3 w-full sm:w-auto bg-orange-50 px-4 py-2 rounded-lg border border-orange-100 text-orange-700 font-bold text-sm">
+                        <span class="text-xl">↕️</span> Ürünlerin sırasını değiştirmek için çizgilere basılı tutarak sürükleyin.
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end mt-3 sm:mt-0">
+                        <button onclick="setProductMode('default')" class="bg-white border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg font-bold hover:bg-gray-50 transition shadow-sm">Vazgeç</button>
+                        <button onclick="saveNewSortingModern()" class="bg-[#009b82] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#00826d] transition shadow-md active:scale-95">Kaydet</button>
+                    </div>
+                `;
+            } else if (window.currentProductMode === 'content_edit') {
+                // --- 🌟 YENİ: İÇERİK DÜZENLEME ÜST BARI ---
+                topBarHtml = `
+                    <div class="flex items-center gap-3 w-full sm:w-auto bg-purple-50 px-4 py-2 rounded-lg border border-purple-100 text-purple-700 font-bold text-sm">
+                        <span class="text-xl">🖼️</span> Resmi değiştirmek için görsele tıklayın, metinleri kutulardan güncelleyin.
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end mt-3 sm:mt-0">
+                        <button onclick="setProductMode('default')" class="bg-white border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg font-bold hover:bg-gray-50 transition shadow-sm">Vazgeç</button>
+                        <button onclick="saveBulkContentModern()" class="bg-[#009b82] text-white px-8 py-2.5 rounded-lg font-bold hover:bg-[#00826d] transition shadow-md active:scale-95">Kaydet</button>
+                    </div>
+                `;
+            }
+
+            // Ana Şablonu Ekrana Bas (DİKKAT: Pop-up kutusu animasyon dışına çıkarıldı!)
+            loadModule(`
+                <!-- 1. İçerik ve Liste Alanı -->
+                <div class="bg-transparent animate-pop-in flex flex-col min-h-screen">
+                    <!-- 🌟 ÜST KONTROL BARI (Sabit/Sticky) -->
+                    <div class="sticky top-0 z-40 bg-[#fff7f0] pt-2 pb-4">
+                        <div class="flex flex-col md:flex-row justify-between items-center bg-white p-3 sm:p-4 rounded-xl shadow-sm border border-gray-200 w-full min-h-[60px]">
+                            ${topBarHtml}
+                        </div>
+                    </div>
+                    
+                    <!-- 📦 DİNAMİK İÇERİK LİSTESİ ALANI -->
+                    <div id="productList" class="flex flex-col gap-6 flex-1 pr-1 pb-32 mt-2">
+                        <div class="p-10 text-center text-gray-400 text-sm font-bold">Yükleniyor...</div>
+                    </div>
+                </div>
+
+                <!-- 2. ➕ YENİ ÜRÜN EKLEME POP-UP'I (Animasyondan Bağımsız, Ekranın Tam Ortasında) -->
+                <div id="quickAddProductModal" class="hidden fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;">
+                    <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-lg relative max-h-[90vh] overflow-y-auto border-t-8 border-[#009b82] animate-pop-in">
+                        <button onclick="document.getElementById('quickAddProductModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-2xl font-black transition">✖</button>
+                        <h2 class="text-2xl font-black mb-6 text-[#009b82] flex items-center gap-2">➕ Yeni Ürün Ekle</h2>
+                        
+                        <div class="flex flex-col gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 uppercase mb-1">Ürün Adı (TR) *</label><input id="quickProductName" placeholder="Kokoreç vb." class="border border-gray-300 p-3 rounded-xl text-sm font-semibold outline-none focus:border-[#009b82] focus:ring-1 focus:ring-[#009b82]" /></div>
+                                <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 uppercase mb-1">Product Name (EN)</label><input id="quickProductNameEN" placeholder="Optional" class="border border-gray-300 p-3 rounded-xl text-sm font-semibold outline-none focus:border-[#009b82] focus:ring-1 focus:ring-[#009b82]" /></div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 uppercase mb-1">Açıklama (TR)</label><input id="quickProductDesc" placeholder="Kekik, pul biberli vb." class="border border-gray-300 p-3 rounded-xl text-sm font-semibold outline-none focus:border-[#009b82] focus:ring-1 focus:ring-[#009b82]" /></div>
+                                <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 uppercase mb-1">Description (EN)</label><input id="quickProductDescEN" placeholder="Optional" class="border border-gray-300 p-3 rounded-xl text-sm font-semibold outline-none focus:border-[#009b82] focus:ring-1 focus:ring-[#009b82]" /></div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 uppercase mb-1">Fiyat (₺) *</label><input id="quickProductPrice" type="number" placeholder="0" class="border border-gray-300 p-3 rounded-xl text-lg font-black text-gray-800 outline-none focus:border-[#009b82] focus:ring-1 focus:ring-[#009b82]" /></div>
+                                <div class="flex flex-col"><label class="text-xs font-bold text-gray-500 uppercase mb-1">Kategori *</label>
+                                    <select id="quickProductCategory" class="border border-gray-300 p-3 rounded-xl text-sm font-bold bg-white outline-none focus:border-[#009b82] focus:ring-1 focus:ring-[#009b82]">
+                                        <option value="">-- Seçiniz --</option>
+                                        ${categoriesTR.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="p-4 border border-dashed border-gray-300 rounded-2xl bg-gray-50 mt-2 flex items-center gap-4">
+                                <img id="quickImagePreview" class="w-16 h-16 object-cover rounded-xl border border-gray-200 hidden bg-white shadow-sm" src="" alt="Yeni Görsel">
+                                <div class="flex-1">
+                                    <button id="quickUploadBtn" onclick="openQuickUploadWidget()" class="bg-gray-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-black transition w-full shadow-sm">Görsel Seç ve Yükle</button>
+                                    <input type="hidden" id="quickProductImageURL" value="" />
+                                </div>
+                            </div>
+                            <button onclick="quickSaveNewProduct()" class="bg-[#009b82] text-white px-4 py-4 rounded-2xl font-black text-base shadow-lg hover:bg-[#00826d] transition transform active:scale-95 mt-4">ÜRÜNÜ SİSTEME KAYDET</button>
+                        </div>
+                    </div>
+            `);
+
+            if (products.length > 0) renderProductList();
         }
 
-        function renderProductList(filter = 'Tümü', isArchiveView = false) {
+        // --- 📋 ÜRÜN LİSTESİNİ ÇİZEN MOTOR (MODE'LARA GÖRE DEĞİŞİR) ---
+        function renderProductList() {
             const listEl = document.getElementById('productList');
             if (!listEl) return;
             listEl.innerHTML = '';
 
-            const sortedProducts = sortProductsByOrder([...products]);
+            const mode = window.currentProductMode;
+            const searchTerm = window.productSearchQuery || "";
 
-            // Rafa kaldırılanları (isArchived) ayır
-            let filtered;
-            if (isArchiveView) {
-                filtered = sortedProducts.filter(p => p.isArchived === true);
-            } else {
-                filtered = sortedProducts.filter(p => p.isArchived !== true);
-                if (filter !== 'Tümü') filtered = filtered.filter(p => p.category === filter);
+            let filteredProducts = [...products];
+            if (searchTerm.trim() !== "" && mode === 'default') {
+                const term = searchTerm.toLocaleLowerCase('tr-TR').trim();
+                filteredProducts = filteredProducts.filter(p => p.name.toLocaleLowerCase('tr-TR').includes(term) || (p.desc && p.desc.toLocaleLowerCase('tr-TR').includes(term)));
             }
 
-            if (filtered.length === 0) {
-                listEl.innerHTML = `<li class="p-4 text-center bg-gray-50 rounded-xl text-gray-400 text-sm border border-dashed">${isArchiveView ? 'Rafta hiçbir ürün bulunmuyor.' : 'Bu kategoride henüz ürün bulunmamaktadır.'}</li>`;
-                return;
-            }
+            const sortedProducts = sortProductsByOrder(filteredProducts);
+            let hasAnyProduct = false;
 
-            filtered.forEach((p) => {
-                const item = document.createElement('li');
-                item.className = 'flex flex-col sm:flex-row justify-between sm:items-center bg-gray-50 p-3.5 rounded-xl border border-gray-100 gap-3 hover:bg-gray-100/50 transition';
+            categoriesTR.forEach((cat, catIdx) => {
+                const catProducts = sortedProducts.filter(p => p.category === cat);
+                if (catProducts.length === 0) return;
+                hasAnyProduct = true;
 
-                if (isArchiveView) {
-                    // 📦 RAF GÖRÜNÜMÜ (Tiklenebilir)
-                    item.innerHTML = `
-                        <label class="flex items-center gap-3 cursor-pointer flex-1">
-                            <input type="checkbox" value="${p.key}" class="archive-cb w-5 h-5 accent-green-600 rounded cursor-pointer">
-                            <div class="flex flex-col">
-                                <span class="font-bold text-gray-500 line-through text-sm sm:text-base">${p.name}</span>
-                                <span class="text-xs font-bold text-red-400 mt-0.5">${p.category} - ${p.price} ₺</span>
-                            </div>
-                        </label>
-                        <div class="flex items-center gap-2">
-                            <button data-key="${p.key}" class="deleteBtn bg-gray-300 text-gray-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition hover:bg-red-500 hover:text-white">Kalıcı Sil</button>
-                        </div>
-                    `;
-                } else {
-                   // 🍽️ NORMAL ÜRÜN GÖRÜNÜMÜ (Mobilde Kusursuz Dokunmatik Deneyimiyle - Silme Butonsuz)
-                    const hasImage = p.image && p.image.trim() !== '';
-                    const tempImg = hasImage ? p.image : 'https://via.placeholder.com/300x200?text=Görsel+Yok';
-                    
-                    // Görsel yoksa üstünde "➕" artısı çıksın, varsa tertemiz sadece görsel kalsın
-                    const imageOverlay = hasImage 
-                        ? '' 
-                        : `<div class="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center pointer-events-none"><span class="text-white text-xl font-bold">➕</span></div>`;
-
-                    item.innerHTML = `
-                        <div class="flex items-center gap-3 sm:w-1/2">
-                            <div class="relative w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0">
-                                <img src="${tempImg}" data-key="${p.key}" class="quickChangeImgBtn w-full h-full object-cover rounded-xl border border-gray-200 bg-white shadow-sm cursor-pointer hover:opacity-80 active:scale-95 transition" title="Görseli Değiştir/Ekle">
-                                ${imageOverlay}
-                            </div>
-                            <div class="flex flex-col overflow-hidden">
-                                <span class="font-bold text-gray-800 text-sm sm:text-base truncate" title="${p.name}">${p.name}</span>
-                                <span class="text-[10px] font-bold text-orange-600 mt-0.5 bg-orange-100 px-2 py-0.5 rounded-md w-fit truncate">${p.category}</span>
+                // 1. Kategori Başlığı
+                let categoryHtml = `
+                    <div class="flex flex-col rounded-2xl bg-white border border-gray-200 shadow-sm mb-2">
+                        <div class="bg-[#f8f9fa] flex items-center justify-between p-3.5 sm:p-5 rounded-t-2xl border-b border-gray-200">
+                            <div class="flex items-center gap-4">
+                                <span class="font-black text-gray-800 text-lg">${cat}</span>
+                                ${mode === 'default' ? `
+                                <button onclick="openAddProductModal('${cat}')" class="bg-[#e6f4f1] text-[#009b82] px-3.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 hover:bg-[#d0ece5] transition">
+                                    <span class="text-xl leading-none mb-0.5">+</span> Ürün Tanımla
+                                </button>
+                                ` : ''}
                             </div>
                         </div>
-                        <div class="flex items-center justify-end gap-2 sm:gap-3 border-t sm:border-t-0 pt-2.5 sm:pt-0 border-gray-200/60 w-full sm:w-auto">
-                            <span class="text-sm font-black text-gray-700 bg-white border px-3 py-1.5 rounded-lg shadow-sm">${p.price} ₺</span>
-                            <div class="flex gap-1.5 sm:gap-2">
-                                <button data-key="${p.key}" class="editBtn bg-amber-500 text-white px-2.5 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Düzenle</button>
-                                <button data-key="${p.key}" class="deleteBtn bg-red-500 text-white px-2.5 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">Sil</button>
-                            </div>
-                        </div>
-                    `;
-                }
-                listEl.appendChild(item);
-            });
+                `;
 
-            // Buton Dinleyicileri
-            document.querySelectorAll('.deleteBtn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const productKeyToDelete = e.target.dataset.key;
-                    if (confirm("Bu ürünü tamamen silmek istediğinizden emin misiniz?")) {
-                        try { await deleteProductFromFirebase(productKeyToDelete); }
-                        catch (error) { alert("Hata: " + error.message); }
-                    }
-                });
-            });
-
-            if (!isArchiveView) {
-                document.querySelectorAll('.editBtn').forEach(btn => btn.addEventListener('click', (e) => openEditModal(e.target.dataset.key)));
-            }
-
-            // YENİ: Liste üzerinden hızlı görsel değiştirme ve silme dinleyicileri
-            if (!isArchiveView) {
-                document.querySelectorAll('.quickChangeImgBtn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const productKey = e.currentTarget.dataset.key;
-                        const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
-                        
-                        let tempInput = document.createElement('input');
-                        let tempImg = document.createElement('img');
-                        
-                        openCloudinaryWidget(tempInput, tempImg);
-                        const observer = new MutationObserver(async () => {
-                            if (tempInput.value) {
-                                try {
-                                    await database.ref(`${pathPrefix}/${productKey}/image`).set(tempInput.value);
-                                    alert("Ürün görseli başarıyla güncellendi!");
-                                } catch (err) { alert("Hata: " + err.message); }
-                                observer.disconnect();
-                            }
-                        });
-                        observer.observe(tempInput, { attributes: true });
+                // --- SIRALAMA (SORT) MODU ---
+                if (mode === 'sort_edit') {
+                    categoryHtml += `<ul id="sortable-cat-${catIdx}" class="sortable-group flex flex-col p-2 bg-gray-50/50">`;
+                    catProducts.forEach((p) => {
+                        categoryHtml += `
+                            <li class="sortable-item bg-white border border-gray-200 rounded-lg p-3 mb-2 flex items-center gap-3 shadow-sm" data-id="${p.key}">
+                                <div class="text-gray-400 text-2xl cursor-grab active:cursor-grabbing px-2 select-none hover:text-orange-500 transition">☰</div>
+                                <img src="${p.image || 'https://via.placeholder.com/50'}" class="w-10 h-10 rounded object-cover border">
+                                <span class="font-bold text-gray-700 flex-1">${p.name}</span>
+                                <span class="text-gray-400 font-bold text-sm">${p.price} TL</span>
+                            </li>
+                        `;
                     });
-                });
+                    categoryHtml += `</ul></div>`;
+                    listEl.innerHTML += categoryHtml;
+                } 
+                
+                // --- FİYAT DEĞİŞTİRME (PRICE) MODU ---
+                else if (mode === 'price_edit') {
+                    categoryHtml += `<div class="flex flex-col bg-white overflow-hidden rounded-b-2xl">`;
+                    catProducts.forEach((p, index) => {
+                        const hasImg = p.image && p.image.trim() !== '';
+                        const tempImg = hasImg ? p.image : 'https://via.placeholder.com/150';
+                        const borderClass = index === catProducts.length - 1 ? '' : 'border-b border-gray-100';
 
-                document.querySelectorAll('.quickDeleteImgBtn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        e.stopPropagation();
-                        const productKey = e.currentTarget.dataset.key;
-                        const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
-                        if (confirm("Görseli tamamen silmek istediğinize emin misiniz?")) {
-                            try {
-                                await database.ref(`${pathPrefix}/${productKey}/image`).set("");
-                            } catch (err) { alert("Hata: " + err.message); }
-                        }
+                        categoryHtml += `
+                            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between p-3 sm:p-4 ${borderClass} hover:bg-gray-50 transition gap-4">
+                                <div class="flex items-center gap-3 w-full lg:w-4/12 overflow-hidden flex-shrink-0">
+                                    <img src="${tempImg}" class="w-12 h-12 rounded object-cover border border-gray-200 shadow-sm flex-shrink-0">
+                                    <div class="flex flex-col truncate">
+                                        <span class="font-bold text-gray-800 text-sm truncate" title="${p.name}">${p.name}</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-wrap sm:flex-nowrap items-center justify-between lg:justify-end w-full lg:w-8/12 gap-3 sm:gap-6">
+                                    <div class="flex flex-col items-center sm:items-end bg-gray-100 px-3 py-1.5 rounded-lg flex-shrink-0">
+                                        <span class="text-[9px] text-gray-500 font-bold uppercase tracking-wider mb-0.5">Mevcut</span>
+                                        <span class="text-sm font-black text-gray-700">${p.price} <span class="text-[10px]">TL</span></span>
+                                    </div>
+                                    <span class="text-gray-300 font-black hidden sm:block">▶</span>
+                                    <div class="flex flex-col flex-1 sm:w-28 sm:flex-none">
+                                        <span class="text-[9px] text-[#009b82] font-bold uppercase mb-1 tracking-wider">Yeni Fiyat</span>
+                                        <div class="flex items-center border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus-within:border-[#009b82] focus-within:ring-1 focus-within:ring-[#009b82] transition shadow-inner">
+                                            <input type="number" class="modern-price-input w-full outline-none font-black text-gray-800 text-sm bg-transparent" data-key="${p.key}" value="${p.price}">
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col flex-1 sm:w-28 sm:flex-none">
+                                        <span class="text-[9px] text-orange-500 font-bold uppercase mb-1 tracking-wider">Üstü Çizili</span>
+                                        <div class="flex items-center border border-gray-300 rounded-lg px-2 py-1.5 bg-white focus-within:border-orange-500 focus-within:ring-1 focus-within:ring-orange-500 transition shadow-inner">
+                                            <input type="number" class="modern-discount-input w-full outline-none font-black text-orange-600 text-sm bg-transparent" data-key="${p.key}" value="${p.discountPrice || ''}" placeholder="Yok">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    categoryHtml += `</div></div>`;
+                    listEl.innerHTML += categoryHtml;
+                }
+
+                // --- 🌟 YENİ: İÇERİK DEĞİŞTİRME (RESİM & METİN) MODU ---
+                else if (mode === 'content_edit') {
+                    categoryHtml += `<div class="flex flex-col bg-white overflow-hidden rounded-b-2xl">`;
+                    catProducts.forEach((p, index) => {
+                        const hasImg = p.image && p.image.trim() !== '';
+                        const tempImg = hasImg ? p.image : 'https://via.placeholder.com/150x150?text=Görsel+Yok';
+                        const borderClass = index === catProducts.length - 1 ? '' : 'border-b border-gray-100';
+
+                        categoryHtml += `
+                            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between p-3 sm:p-4 ${borderClass} hover:bg-purple-50/30 transition gap-4">
+                                
+                                <!-- Sol Taraf: Değiştirilebilir Tıklanabilir Görsel -->
+                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 bg-white border border-gray-200 rounded-xl flex-shrink-0 p-1 cursor-pointer group shadow-sm hover:border-purple-400 transition" onclick="triggerContentImageUpload('${p.key}')" title="Yeni Görsel Seç">
+                                    <img src="${tempImg}" id="content-img-${p.key}" class="w-full h-full object-cover rounded-lg group-hover:opacity-70 transition">
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center rounded-xl opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                                        <div class="bg-black/60 text-white w-8 h-8 flex items-center justify-center rounded-full mb-1"><span class="text-sm">📷</span></div>
+                                    </div>
+                                    <input type="hidden" id="content-url-${p.key}" value="${p.image || ''}">
+                                </div>
+                                
+                                <!-- Sağ Taraf: Metin Kutuları -->
+                                <div class="flex flex-col flex-1 w-full gap-2.5">
+                                    <!-- Ürün İsmi Düzenleme -->
+                                    <div class="relative">
+                                        <span class="absolute -top-2 left-3 bg-white px-1 text-[9px] font-bold text-gray-400 uppercase">Ürün Adı</span>
+                                        <input type="text" id="content-name-${p.key}" value="${p.name}" placeholder="Ürün adını girin..." class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm font-black text-gray-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition shadow-inner">
+                                    </div>
+                                    <!-- Açıklama Düzenleme -->
+                                    <div class="relative">
+                                        <span class="absolute -top-2 left-3 bg-white px-1 text-[9px] font-bold text-gray-400 uppercase">İçerik Açıklaması</span>
+                                        <textarea id="content-desc-${p.key}" rows="2" placeholder="Ürün malzemelerini veya açıklamasını girin..." class="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs font-medium text-gray-600 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition shadow-inner resize-none leading-relaxed">${p.desc || ''}</textarea>
+                                    </div>
+                                </div>
+
+                            </div>
+                        `;
+                    });
+                    categoryHtml += `</div></div>`;
+                    listEl.innerHTML += categoryHtml;
+                }
+
+                // --- STANDART GÖRÜNÜM (AÇIK/KAPALI VE 3 NOKTA) ---
+                else {
+                    catProducts.forEach((p, index) => {
+                        const hasImage = p.image && p.image.trim() !== '';
+                        const tempImg = hasImage ? p.image : 'https://via.placeholder.com/150x150?text=Görsel+Yok';
+                        const isArchived = p.isArchived === true;
+                        
+                        const toggleBg = !isArchived ? 'bg-[#22c55e]' : 'bg-gray-300';
+                        const toggleDot = !isArchived ? 'translate-x-full border-white' : 'translate-x-0 border-gray-300';
+                        const statusText = !isArchived ? 'Açık' : 'Kapalı';
+
+                        const formattedPrice = parseFloat(p.price).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        const borderClass = index === catProducts.length - 1 ? 'rounded-b-2xl' : 'border-b border-gray-100';
+
+                        categoryHtml += `
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-5 ${borderClass} hover:bg-gray-50 transition duration-300 group">
+                                <!-- Sol Taraf -->
+                                <div class="flex items-start gap-5 w-full sm:w-auto">
+                                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 bg-white border border-gray-200 rounded-xl flex-shrink-0 p-1 cursor-default">
+                                        <img src="${tempImg}" class="w-full h-full object-cover rounded-lg transition">
+                                    </div>
+                                    <div class="flex flex-col justify-center flex-1 py-1">
+                                        <span class="font-bold text-gray-800 text-sm sm:text-base">${p.name}</span>
+                                        <span class="text-xs text-gray-400 mt-1 line-clamp-2 pr-4 leading-relaxed font-medium">${p.desc || ''}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Sağ Taraf -->
+                                <div class="flex items-center gap-4 flex-shrink-0 mt-4 sm:mt-0 w-full sm:w-auto justify-end sm:pr-2">
+                                    <span class="text-sm sm:text-base font-medium text-gray-600 mr-2 sm:mr-6">${formattedPrice} TL</span>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs font-bold text-gray-500 w-10 text-right">${statusText}</span>
+                                        <label class="relative inline-flex items-center cursor-pointer" title="Ürünü müşteriye aç/kapat">
+                                            <input type="checkbox" class="sr-only peer" ${!isArchived ? 'checked' : ''} onchange="toggleProductVisibility('${p.key}', ${isArchived})">
+                                            <div class="w-10 h-5 bg-gray-200 rounded-full peer transition-colors duration-300 ${toggleBg}"></div>
+                                            <div class="absolute left-[2px] top-[2px] bg-white border rounded-full h-4 w-4 transition-transform duration-300 transform ${toggleDot}"></div>
+                                        </label>
+
+                                        <!-- ÜRÜN BAZLI 3 NOKTA MENÜSÜ -->
+                                        <div class="relative ml-1">
+                                            <button onclick="toggleDropdown(event, 'dropdown-${p.key}')" class="text-gray-500 hover:bg-gray-100 rounded-lg w-10 h-10 flex items-center justify-center focus:outline-none font-black text-xl tracking-widest leading-none pb-4 transition">...</button>
+                                            <div id="dropdown-${p.key}" class="dropdown-menu absolute right-0 top-full mt-2 hidden bg-white border border-gray-200 shadow-2xl rounded-xl w-44 z-[999] overflow-hidden">
+                                                <button onclick="openEditModal('${p.key}')" class="w-full text-left px-4 py-3.5 text-xs font-bold text-gray-700 hover:bg-gray-50 border-b border-gray-100 flex items-center gap-2 transition">✏️ Ürünü Düzenle</button>
+                                                <button onclick="setProductMode('price_edit')" class="w-full text-left px-4 py-3.5 text-xs font-bold text-gray-700 hover:bg-gray-50 border-b border-gray-100 flex items-center gap-2 transition">🏷️ Fiyatı Düzenle</button>
+                                                <button onclick="deleteProductFromFirebase('${p.key}')" class="w-full text-left px-4 py-3.5 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2 transition">🗑️ Ürünü Sil</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    categoryHtml += `</div></div>`;
+                    listEl.innerHTML += categoryHtml;
+                }
+            });
+
+            if (!hasAnyProduct) {
+                listEl.innerHTML = `
+                    <div class="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-gray-200 shadow-sm mt-8">
+                        <span class="text-6xl mb-4">🍽️</span>
+                        <h3 class="text-lg font-black text-gray-800">Sonuç Bulunamadı</h3>
+                        <p class="text-sm text-gray-500 mt-2">Menünüz boş veya girdiğiniz kelimeye uygun ürün yok.</p>
+                    </div>
+                `;
+            }
+
+            // --- EĞER SIRALAMA MODUNDAYSAK SORTABLE'LARI BAŞLAT ---
+            if (mode === 'sort_edit') {
+                document.querySelectorAll('.sortable-group').forEach(groupEl => {
+                    Sortable.create(groupEl, {
+                        animation: 150,
+                        handle: '.cursor-grab',
+                        ghostClass: 'sortable-ghost'
                     });
                 });
             }
         }
+
+        // --- 🖱️ AÇILIR MENÜLER (DROPDOWN) İÇİN TIKLAMA VE KAPANMA MOTORU ---
+        window.toggleDropdown = function(event, dropdownId) {
+            event.stopPropagation(); 
+            const targetDropdown = document.getElementById(dropdownId);
+            const isCurrentlyHidden = targetDropdown.classList.contains('hidden');
+            
+            // Açık olan tüm menüleri gizle
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+
+            // Tıklananı aç
+            if (isCurrentlyHidden) {
+                targetDropdown.classList.remove('hidden');
+            }
+        };
+
+        // Herhangi bir yere tıklanınca açık menüleri kapat
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                if (!menu.classList.contains('hidden')) {
+                    menu.classList.add('hidden');
+                }
+            });
+        });
+
+        // --- 💾 YENİ: İÇERİK (GÖRSEL VE AÇIKLAMA) KAYDETME VE YÜKLEME MOTORU ---
+        window.triggerContentImageUpload = function(productKey) {
+            const urlInput = document.getElementById(`content-url-${productKey}`);
+            const previewImg = document.getElementById(`content-img-${productKey}`);
+            // Cloudinary'yi açıp görsel yüklendiğinde kutucuğa URL'i koyar ve resmi ekranda anında günceller.
+            openCloudinaryWidget(urlInput, previewImg);
+        };
+
+        window.saveBulkContentModern = async function() {
+            const updates = {};
+            let changes = 0;
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
+
+            // Ekranda renderlanmış olan tüm isim kutularını dönüyoruz
+            document.querySelectorAll('[id^="content-name-"]').forEach(nameInput => {
+                const pKey = nameInput.id.replace('content-name-', '');
+                const newName = nameInput.value.trim();
+                const newDesc = document.getElementById(`content-desc-${pKey}`).value.trim();
+                const newUrl = document.getElementById(`content-url-${pKey}`).value.trim();
+
+                const currentProduct = products.find(p => p.key === pKey);
+                if (!currentProduct) return;
+
+                let isChanged = false;
+                
+                // İsim değişmiş mi?
+                if (currentProduct.name !== newName && newName !== '') {
+                    updates[`${pathPrefix}/${pKey}/name`] = newName;
+                    isChanged = true;
+                }
+                
+                // Açıklama değişmiş mi?
+                if ((currentProduct.desc || '') !== newDesc) {
+                    updates[`${pathPrefix}/${pKey}/desc`] = newDesc;
+                    isChanged = true;
+                }
+                
+                // Görsel URL değişmiş mi?
+                if ((currentProduct.image || '') !== newUrl) {
+                    updates[`${pathPrefix}/${pKey}/image`] = newUrl;
+                    isChanged = true;
+                }
+
+                if (isChanged) {
+                    updates[`${pathPrefix}/${pKey}/lastUpdated`] = Date.now();
+                    changes++;
+                }
+            });
+
+            if (changes === 0) {
+                alert("Herhangi bir değişiklik yapmadınız.");
+                setProductMode('default');
+                return;
+            }
+
+            if(confirm(`${changes} adet ürünün görsel veya açıklama içeriği güncellenecektir. Onaylıyor musunuz?`)) {
+                try {
+                    await database.ref().update(updates);
+                    alert("Tüm içerikler başarıyla kaydedildi!");
+                    setProductMode('default'); // Ana ekrana dön
+                } catch(e) {
+                    alert("Hata: " + e.message);
+                }
+            }
+        };
+
+        // --- 💾 KAYDETME FONKSİYONLARI (Fiyat ve Sıralama) ---
+        window.saveBulkPricesModern = async function() {
+            const priceInputs = document.querySelectorAll('.modern-price-input');
+            const discountInputs = document.querySelectorAll('.modern-discount-input');
+            const updates = {};
+            let changes = 0;
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
+
+            priceInputs.forEach((input, idx) => {
+                const pKey = input.dataset.key;
+                const newPrice = parseFloat(input.value);
+                const currentProduct = products.find(p => p.key === pKey);
+                
+                const discInput = discountInputs[idx];
+                const newDiscVal = discInput.value.trim() !== '' ? parseFloat(discInput.value) : null;
+
+                if (!currentProduct || isNaN(newPrice)) return;
+
+                if (parseFloat(currentProduct.price.toFixed(2)) !== parseFloat(newPrice.toFixed(2))) {
+                    updates[`${pathPrefix}/${pKey}/price`] = newPrice;
+                    changes++;
+                }
+
+                const currDisc = currentProduct.discountPrice ? parseFloat(currentProduct.discountPrice.toFixed(2)) : null;
+                if (currDisc !== newDiscVal) {
+                    updates[`${pathPrefix}/${pKey}/discountPrice`] = newDiscVal;
+                    changes++;
+                }
+
+                if (changes > 0) updates[`${pathPrefix}/${pKey}/lastUpdated`] = Date.now();
+            });
+
+            if (changes === 0) {
+                alert("Değişiklik yapmadınız.");
+                setProductMode('default');
+                return;
+            }
+
+            if(confirm(`${changes} adet fiyat güncellemesi veritabanına işlenecektir. Onaylıyor musunuz?`)) {
+                try {
+                    await database.ref().update(updates);
+                    alert("Fiyatlar başarıyla kaydedildi!");
+                    setProductMode('default'); 
+                } catch(e) {
+                    alert("Hata: " + e.message);
+                }
+            }
+        };
+
+        window.saveNewSortingModern = async function() {
+            const updates = {};
+            let changes = 0;
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
+
+            document.querySelectorAll('.sortable-group').forEach(group => {
+                const items = group.children;
+                for (let i = 0; i < items.length; i++) {
+                    const pKey = items[i].dataset.id;
+                    const currentProduct = products.find(p => p.key === pKey);
+                    if (currentProduct && currentProduct.order !== i) {
+                        updates[`${pathPrefix}/${pKey}/order`] = i;
+                        changes++;
+                    }
+                }
+            });
+
+            if (changes === 0) {
+                setProductMode('default');
+                return;
+            }
+
+            try {
+                await database.ref().update(updates);
+                setProductMode('default'); 
+            } catch(e) {
+                alert("Hata: " + e.message);
+            }
+        };
+
+        // --- ➕ YARDIMCI FONKSİYONLAR ---
+        window.toggleProductVisibility = async function(productKey, currentArchivedStatus) {
+            const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
+            const newArchivedStatus = !currentArchivedStatus; 
+            try {
+                await database.ref(`${pathPrefix}/${productKey}`).update({
+                    isArchived: newArchivedStatus,
+                    lastUpdated: Date.now()
+                });
+            } catch (error) { alert("Durum güncellenirken hata: " + error.message); }
+        };
+
+        window.openAddProductModal = function(categoryName = "") {
+            document.getElementById('quickProductName').value = '';
+            document.getElementById('quickProductNameEN').value = '';
+            document.getElementById('quickProductDesc').value = '';
+            document.getElementById('quickProductDescEN').value = '';
+            document.getElementById('quickProductPrice').value = '';
+            document.getElementById('quickProductImageURL').value = '';
+            
+            const imgPreview = document.getElementById('quickImagePreview');
+            imgPreview.src = '';
+            imgPreview.classList.add('hidden');
+            
+            const catSelect = document.getElementById('quickProductCategory');
+            catSelect.value = categoryName;
+
+            document.getElementById('quickAddProductModal').classList.remove('hidden');
+        };
+
+        window.openQuickUploadWidget = function() {
+            openCloudinaryWidget(document.getElementById('quickProductImageURL'), document.getElementById('quickImagePreview'));
+        };
+
+        window.quickSaveNewProduct = async function() {
+            const name = document.getElementById('quickProductName').value.trim();
+            const nameEN = document.getElementById('quickProductNameEN').value.trim();
+            const desc = document.getElementById('quickProductDesc').value.trim();
+            const descEN = document.getElementById('quickProductDescEN').value.trim();
+            const price = parseFloat(document.getElementById('quickProductPrice').value);
+            const category = document.getElementById('quickProductCategory').value;
+            let imageURL = document.getElementById('quickProductImageURL').value.trim();
+
+            if (!name || isNaN(price) || !category) { 
+                alert('Lütfen zorunlu alanları (Ad, Fiyat, Kategori) doldurunuz.'); 
+                return; 
+            }
+
+            const maxOrder = products.length > 0 ? Math.max(...products.map(p => p.order === undefined ? 0 : p.order)) : 0;
+            const newProduct = { 
+                name, nameEN: nameEN || name, desc, descEN: descEN || desc, 
+                price, image: imageURL, category, lastUpdated: Date.now(), 
+                order: maxOrder + 1, isArchived: false 
+            };
+
+            try {
+                await productsRef.push(newProduct);
+                document.getElementById('quickAddProductModal').classList.add('hidden');
+            } catch (error) { alert("Hata: " + error.message); }
+        };
+
+       
+
+
 
         // Raftan Toplu Çıkarma İşlemi
         async function unarchiveSelected() {
