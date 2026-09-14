@@ -4852,30 +4852,44 @@
             renderSystemPricesList('ys');
         }
 
-      // --- 🔍 YENİ: MANUEL YEMEKSEPETİ CANLI TARAMA MOTORU (CACHED) ---
+     // --- 🔍 YENİ: KOPYALA-YAPIŞTIR (HACKER) SİSTEMİYLE KIYASLAMA MOTORU ---
         window.scanYemeksepetiLive = async function() {
             const btn = document.getElementById('btnScanYS');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Kontrol Ediliyor...';
+            
+            // Kullanıcıdan kopyaladığı veriyi yapıştırmasını iste
+            let pastedData = prompt("Yemeksepeti sayfasından kopyaladığınız veriyi buraya yapıştırın:\n(Klavyeden CTRL+V yaparak veya farenin sağ tuşuyla yapıştırıp Tamam'a basın)");
+            
+            if (!pastedData) {
+                alert("İşlem iptal edildi veya kutu boş bırakıldı.");
+                return;
+            }
+
+            btn.innerHTML = '⏳ Hesaplanıyor...';
             btn.disabled = true;
             
             try {
-                const response = await fetch('https://olimpiyat-api.onrender.com/api/get-cached-ys-prices');
-                const data = await response.json();
+                // Bizim özel imzamız var mı kontrol et
+                if (pastedData.startsWith("YS_DATA|")) {
+                    pastedData = pastedData.replace("YS_DATA|", "");
+                }
                 
-                if (data.success && data.prices && data.prices.length > 0) {
+                const prices = JSON.parse(pastedData);
+                
+                if (Array.isArray(prices) && prices.length > 0) {
                     window.liveYsPrices = {}; // Gelen verileri hafızaya al
-                    data.prices.forEach(item => {
+                    prices.forEach(item => {
                         window.liveYsPrices[item.name.toLocaleLowerCase('tr-TR').trim()] = item.price; // YS'deki Liste fiyatı
                     });
-                    alert(`✅ Yemeksepeti'nden en son aktarılan ${data.prices.length} ürünün verisi okundu. Karlılık durumu hesaplanıyor...`);
+                    
+                    alert(`✅ Harika! ${prices.length} ürünün verisi başarıyla eklendi. Kâr/Zarar durumu radara yansıtılıyor...`);
                     // Listeyi hafızadaki canlı fiyatlarla tekrar çiz
                     renderSystemPricesList('ys'); 
                 } else {
-                    alert("⚠️ Hata: Henüz Yemeksepeti'nden ürün aktarmadınız. Lütfen önce Yemeksepeti dükkan sayfanızı açıp 'YS Aktar' yer imine tıklayın.");
+                    alert("⚠️ Hata: Kopyalanan veri geçerli bir menü formatında değil.");
                 }
             } catch (err) {
-                alert("Bağlantı Hatası: Node.js sunucusuna ulaşılamadı.");
+                alert("⚠️ Hata: Veri bozuk veya yanlış bir şey kopyaladınız. Lütfen Yemeksepeti sayfasındaki butona tekrar basıp doğru kopyalandığından emin olun.");
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
