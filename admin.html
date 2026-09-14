@@ -4789,10 +4789,55 @@
         };
 
 
-        // --- 🧮 SİSTEM FİYATLARI (KOMİSYON HESAPLAYICI) MODÜLÜ ---
+       // --- 🔍 YENİ: KOPYALA-YAPIŞTIR (HACKER) SİSTEMİ + FIREBASE KALICI HAFIZA ---
+        window.scanYemeksepetiLive = async function() {
+            const btn = document.getElementById('btnScanYS');
+            const originalText = btn.innerHTML;
+            
+            let pastedData = prompt("Yemeksepeti sayfasından kopyaladığınız veriyi buraya yapıştırın:\n(Klavyeden CTRL+V yaparak veya farenin sağ tuşuyla yapıştırıp Tamam'a basın)");
+            
+            if (!pastedData) return;
+
+            btn.innerHTML = '⏳ Kaydediliyor...';
+            btn.disabled = true;
+            
+            try {
+                if (pastedData.startsWith("YS_DATA|")) {
+                    pastedData = pastedData.replace("YS_DATA|", "");
+                }
+                const prices = JSON.parse(pastedData);
+                
+                if (Array.isArray(prices) && prices.length > 0) {
+                    const newLivePrices = {};
+                    prices.forEach(item => {
+                        newLivePrices[item.name.toLocaleLowerCase('tr-TR').trim()] = item.price;
+                    });
+                    
+                    // 🚀 FIREBASE'E KAYDET (Eskiyi ezer, kalıcı olur)
+                    await database.ref('system_settings/liveYsPrices').set(newLivePrices);
+                    
+                    alert(`✅ Harika! ${prices.length} ürünün verisi kalıcı olarak veritabanına işlendi.`);
+                } else {
+                    alert("⚠️ Hata: Kopyalanan veri geçerli bir formatta değil.");
+                }
+            } catch (err) {
+                alert("⚠️ Hata: Veri bozuk veya yanlış bir şey kopyaladınız.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        // --- 🧮 SİSTEM FİYATLARI ANA MODÜLÜ (GENİŞ EKRAN) ---
         function renderSystemPricesModule() {
             setActiveTab('showSystemPrices');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
+
+            // 🚀 EKRANI TAM YAYMAK İÇİN MAX-WIDTH KALDIRILIYOR
+            const container = document.getElementById('contentContainer');
+            if(container) {
+                container.className = 'w-full pb-0 md:pb-0 px-2 sm:px-4 max-w-full'; 
+            }
 
             let categoryNavHtml = `<div class="flex overflow-x-auto scrollbar-none gap-2 py-2 mb-1 border-b border-gray-100 flex-shrink-0" id="sysCategoryNavbar">`;
             categoriesTR.forEach((cat, idx) => {
@@ -4800,23 +4845,28 @@
             });
             categoryNavHtml += `</div>`;
 
+            // xl:w-9/12 (Sol Liste %75) ve xl:w-3/12 (Sağ Hesaplayıcı %25) olarak ayarlandı
             loadModule(`
                 <div class="flex flex-col xl:flex-row w-full gap-4 items-start h-[79dvh] md:h-[85dvh]">
-                    <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 animate-pop-in flex flex-col w-full xl:w-8/12 h-full">
+                    <!-- SOL PANEL (GENİŞLETİLDİ) -->
+                    <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 animate-pop-in flex flex-col w-full xl:w-9/12 h-full">
                         <div class="flex-shrink-0">
-                            <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-2">
-                                <span>🧮</span> ${menuTitle} Sistem Fiyatları
-                            </h2>
-                            <p class="text-xs text-gray-500 font-bold mb-4">Firmaların komisyon oranlarına göre tavsiye edilen satış fiyatlarınızı otomatik hesaplar. Fiyatı kopyalamak için üzerine tıklayın.</p>
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-1">
+                                        <span>🧮</span> ${menuTitle} Sistem Fiyatları
+                                    </h2>
+                                    <p class="text-xs text-gray-500 font-bold mb-3">Sitedeki durumunuzu net kazanç üzerinden analiz edin ve eşitsizlikleri giderin.</p>
+                                </div>
+                            </div>
                             
-                            <!-- FİRMA SEÇİM BUTONLARI -->
                             <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-2">
                                 <div class="flex flex-col gap-1">
                                     <button id="btnPlatformYS" class="platform-btn bg-rose-50 border-2 border-rose-200 text-rose-600 font-black py-2 sm:py-3 rounded-xl hover:bg-rose-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ys')">
                                         <span class="text-lg block sm:inline">🥡</span> Yemeksepeti
                                     </button>
-                                    <button id="btnScanYS" onclick="scanYemeksepetiLive()" class="hidden bg-blue-50 text-blue-700 border border-blue-200 py-1.5 rounded-lg font-black text-[9px] sm:text-[10px] shadow-sm hover:bg-blue-100 active:scale-95 transition flex items-center justify-center gap-1">
-                                        🔍 SİTE İLE KIYASLA
+                                    <button id="btnScanYS" onclick="scanYemeksepetiLive()" class="hidden bg-blue-600 text-white border border-blue-700 py-2 rounded-lg font-black text-[10px] shadow-md hover:bg-blue-700 active:scale-95 transition flex items-center justify-center gap-1">
+                                        🔍 YENİ FİYATLARI YÜKLE
                                     </button>
                                 </div>
                                 <div>
@@ -4830,18 +4880,15 @@
                                     </button>
                                 </div>
                             </div>
-                            
                             ${categoryNavHtml}
                         </div>
 
-                        <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-6 scrollbar-none flex flex-col gap-4 pt-2 scroll-smooth relative">
-                            <div class="flex items-center justify-center h-full text-gray-400 font-bold text-sm">
-                                Yukarıdan hesaplamak istediğiniz platformu seçin.
-                            </div>
+                        <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-6 scrollbar-none flex flex-col gap-3 pt-2 scroll-smooth relative">
                         </div>
                     </div>
 
-                    <div id="systemPricesCalculatorContainer" class="hidden xl:flex w-full xl:w-4/12 bg-white rounded-2xl shadow-sm p-6 border border-gray-100 animate-pop-in flex-col gap-4 sticky top-0 h-fit">
+                    <!-- SAĞ PANEL (DARALTILDI) -->
+                    <div id="systemPricesCalculatorContainer" class="hidden xl:flex w-full xl:w-3/12 bg-white rounded-2xl shadow-sm p-5 border border-gray-100 animate-pop-in flex-col gap-4 sticky top-0 h-fit">
                     </div>
                 </div>
             `);
@@ -4849,52 +4896,20 @@
             if (typeof window.manualCalcBaseRestoranPrice === 'undefined') {
                 window.manualCalcBaseRestoranPrice = 0;
             }
-            renderSystemPricesList('ys');
+
+            // 🚀 FIREBASE'DEN CANLI FİYATLARI DİNLE (Değiştikçe listeyi otomatik günceller)
+            if (activeListeners.liveYsPrices) {
+                database.ref('system_settings/liveYsPrices').off('value', activeListeners.liveYsPrices);
+            }
+            activeListeners.liveYsPrices = database.ref('system_settings/liveYsPrices').on('value', (s) => {
+                window.liveYsPrices = s.val() || {};
+                // Eğer ekran zaten çizilmişse listeyi anında güncelle
+                if (document.getElementById('systemPricesListContainer')) {
+                    const isYSAktif = document.getElementById('btnPlatformYS') && document.getElementById('btnPlatformYS').classList.contains('bg-rose-600');
+                    renderSystemPricesList(isYSAktif ? 'ys' : 'ys'); // YS'yi tetikle
+                }
+            });
         }
-
-     // --- 🔍 YENİ: KOPYALA-YAPIŞTIR (HACKER) SİSTEMİYLE KIYASLAMA MOTORU ---
-        window.scanYemeksepetiLive = async function() {
-            const btn = document.getElementById('btnScanYS');
-            const originalText = btn.innerHTML;
-            
-            // Kullanıcıdan kopyaladığı veriyi yapıştırmasını iste
-            let pastedData = prompt("Yemeksepeti sayfasından kopyaladığınız veriyi buraya yapıştırın:\n(Klavyeden CTRL+V yaparak veya farenin sağ tuşuyla yapıştırıp Tamam'a basın)");
-            
-            if (!pastedData) {
-                alert("İşlem iptal edildi veya kutu boş bırakıldı.");
-                return;
-            }
-
-            btn.innerHTML = '⏳ Hesaplanıyor...';
-            btn.disabled = true;
-            
-            try {
-                // Bizim özel imzamız var mı kontrol et
-                if (pastedData.startsWith("YS_DATA|")) {
-                    pastedData = pastedData.replace("YS_DATA|", "");
-                }
-                
-                const prices = JSON.parse(pastedData);
-                
-                if (Array.isArray(prices) && prices.length > 0) {
-                    window.liveYsPrices = {}; // Gelen verileri hafızaya al
-                    prices.forEach(item => {
-                        window.liveYsPrices[item.name.toLocaleLowerCase('tr-TR').trim()] = item.price; // YS'deki Liste fiyatı
-                    });
-                    
-                    alert(`✅ Harika! ${prices.length} ürünün verisi başarıyla eklendi. Kâr/Zarar durumu radara yansıtılıyor...`);
-                    // Listeyi hafızadaki canlı fiyatlarla tekrar çiz
-                    renderSystemPricesList('ys'); 
-                } else {
-                    alert("⚠️ Hata: Kopyalanan veri geçerli bir menü formatında değil.");
-                }
-            } catch (err) {
-                alert("⚠️ Hata: Veri bozuk veya yanlış bir şey kopyaladınız. Lütfen Yemeksepeti sayfasındaki butona tekrar basıp doğru kopyalandığından emin olun.");
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        };
 
         window.renderSystemPricesList = function(platform) {
             document.querySelectorAll('.platform-btn').forEach(btn => {
