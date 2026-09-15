@@ -4965,10 +4965,9 @@
             "kutu içecekler": "coca cola (330 ml)"
         };
 
-        // --- 🛒 MİGROS YEMEK: KUTU OKUYUCU (VAKUM) MOTORU ---
+       // --- 🛒 MİGROS YEMEK VAKUM MOTORU ---
         window.scanMigrosLive = function() {
             if (document.getElementById('myPasteModal')) return;
-
             const modalHtml = `
             <div id="myPasteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex justify-center items-center p-4">
                 <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg relative border-t-8 border-orange-500 animate-pop-in">
@@ -4978,7 +4977,6 @@
                     <button id="processMyPasteBtn" class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black py-3.5 rounded-xl shadow-md text-sm">✅ Veriyi İşle ve Kıyasla</button>
                 </div>
             </div>`;
-            
             document.body.insertAdjacentHTML('beforeend', modalHtml);
             setTimeout(() => document.getElementById('myPasteArea').focus(), 100);
 
@@ -4986,7 +4984,6 @@
                 const btn = document.getElementById('processMyPasteBtn');
                 let pastedData = document.getElementById('myPasteArea').value;
                 if (!pastedData || pastedData.trim() === "") { alert("Lütfen veriyi yapıştırın!"); return; }
-
                 btn.innerHTML = '⏳ Hesaplanıyor...';
                 btn.disabled = true;
                 
@@ -5000,43 +4997,34 @@
                             try { prices = new Function("return " + pureJson)(); } catch(e2) {}
                         }
                     }
-
                     if (Array.isArray(prices) && prices.length > 0) {
                         const newLivePrices = {};
                         prices.forEach(item => {
                             if(item.name) {
-                                let safeKey = item.name.toLocaleLowerCase('tr-TR').trim().replace(/[.#$\[\]]/g, "_");
+                                // 🚀 ÇÖZÜM BURADA: Eğik çizgi (/) işareti de alt çizgiye (_) dönüştürüldü!
+                                let safeKey = item.name.toLocaleLowerCase('tr-TR').trim().replace(/[.#$\[\]\/]/g, "_");
                                 newLivePrices[safeKey] = parseFloat(item.price); 
                             }
                         });
-
                         window.liveMyPrices = newLivePrices;
                         document.getElementById('myPasteModal').remove(); 
                         renderSystemPricesList('my'); 
-
                         try {
                             await database.ref('system_settings/liveMyPrices').set(newLivePrices);
-                            alert(`✅ HARİKA! ${Object.keys(newLivePrices).length} ürün listeye yansıtıldı ve kaydedildi.`);
-                        } catch (dbErr) {
-                            alert(`✅ BAŞARILI! Veriler yansıtıldı.`);
+                            alert(`✅ HARİKA! ${Object.keys(newLivePrices).length} ürün FIREBASE'E KALICI OLARAK kaydedildi. Sayfayı yenileseniz de silinmeyecek!`);
+                        } catch (dbErr) { 
+                            alert(`⚠️ FİREBASE HATASI: Kayıt başarısız oldu (Hata: ${dbErr.message}). Veriler sadece geçici olarak ekranda.`); 
                         }
-                    } else {
-                        alert("⚠️ Hata: Veri okunamadı.");
-                    }
-                } catch (err) {
-                    alert("⚠️ Beklenmeyen bir hata oluştu.");
-                } finally {
-                    btn.innerHTML = '✅ Veriyi İşle ve Kıyasla';
-                    btn.disabled = false;
-                }
+                    } else { alert("⚠️ Hata: Veri okunamadı."); }
+                } catch (err) { alert("⚠️ Beklenmeyen bir hata oluştu."); } 
+                finally { btn.innerHTML = '✅ Veriyi İşle ve Kıyasla'; btn.disabled = false; }
             });
         };
 
 
-    // --- 🔍 1. SİHİRLİ KUTU OKUYUCU (SADECE ORIGINAL PRICE ALAN ZIRHLI MOTOR) ---
+    // --- 🥡 YEMEKSEPETİ VAKUM MOTORU (SADECE ORİJİNAL FİYAT ALIR) ---
         window.scanYemeksepetiLive = function() {
             if (document.getElementById('ysPasteModal')) return;
-
             const modalHtml = `
             <div id="ysPasteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex justify-center items-center p-4">
                 <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg relative border-t-8 border-rose-600 animate-pop-in">
@@ -5046,7 +5034,6 @@
                     <button id="processYsPasteBtn" class="w-full bg-gradient-to-r from-rose-600 to-red-600 text-white font-black py-3.5 rounded-xl shadow-md text-sm">✅ Veriyi İşle ve Kıyasla</button>
                 </div>
             </div>`;
-            
             document.body.insertAdjacentHTML('beforeend', modalHtml);
             setTimeout(() => document.getElementById('ysPasteArea').focus(), 100);
 
@@ -5054,7 +5041,6 @@
                 const btn = document.getElementById('processYsPasteBtn');
                 let pastedData = document.getElementById('ysPasteArea').value;
                 if (!pastedData || pastedData.trim() === "") { alert("Lütfen veriyi yapıştırın!"); return; }
-
                 btn.innerHTML = '⏳ Hesaplanıyor...';
                 btn.disabled = true;
                 
@@ -5068,7 +5054,6 @@
                             try { prices = new Function("return " + pureJson)(); } catch(e2) {}
                         }
                     }
-
                     if (!prices || prices.length === 0) {
                         const regex = /(?:"name"|name)\s*:\s*["']([^"']+)["'][^}]*?(?:"price"|price)\s*:\s*(\d+(?:\.\d+)?)[^}]*?(?:"originalPrice"|originalPrice)\s*:\s*(\d+(?:\.\d+)?)/gi;
                         let match;
@@ -5081,54 +5066,34 @@
                         const newLivePrices = {};
                         prices.forEach(item => {
                             if(item.name) {
-                                let safeKey = item.name.toLocaleLowerCase('tr-TR').trim().replace(/[.#$\[\]]/g, "_");
-                                
+                                // 🚀 ÇÖZÜM BURADA: Eğik çizgi (/) işareti de alt çizgiye (_) dönüştürüldü!
+                                let safeKey = item.name.toLocaleLowerCase('tr-TR').trim().replace(/[.#$\[\]\/]/g, "_");
                                 let cPrice = parseFloat(item.price || 0);
                                 let lPrice = parseFloat(item.originalPrice || item.price);
-                                
-                                // 🚀 İŞTE SENİN MANTIĞIN: Eğer Yemeksepeti'nden kopyalanan veride orijinal fiyat (üstü çizili) okunamamışsa,
-                                // yani lPrice ile cPrice aynı gelmişse (Örn: Kola 72-72 gelmişse), 
-                                // Kod senin dediğin gibi "Orijinal fiyat yüzde 20 düşülmemiş halidir" kuralını işletip 72'yi 90'a tamamlıyor!
-                                if (lPrice > 0 && lPrice === cPrice) {
-                                    lPrice = cPrice / 0.80;
-                                }
-
-                                // Veritabanına sadece ve SADECE senin emrettiğin gibi Orijinal (Yüzde 20 düşülmemiş) fiyatı kaydediyoruz.
+                                if (lPrice > 0 && lPrice === cPrice) lPrice = cPrice / 0.80;
                                 newLivePrices[safeKey] = lPrice; 
                             }
                         });
-
                         window.liveYsPrices = newLivePrices;
                         document.getElementById('ysPasteModal').remove(); 
                         renderSystemPricesList('ys'); 
-
                         try {
                             await database.ref('system_settings/liveYsPrices').set(newLivePrices);
-                            alert(`✅ HARİKA! ${Object.keys(newLivePrices).length} ürünün ANA (İndirimsiz) fiyatı listeye yansıtıldı ve kaydedildi.`);
-                        } catch (dbErr) {
-                            alert(`✅ BAŞARILI! Veriler yansıtıldı.`);
+                            alert(`✅ HARİKA! ${Object.keys(newLivePrices).length} ürün FIREBASE'E KALICI OLARAK kaydedildi. Sayfayı yenileseniz de silinmeyecek!`);
+                        } catch (dbErr) { 
+                            alert(`⚠️ FİREBASE HATASI: Kayıt başarısız oldu (Hata: ${dbErr.message}). Veriler sadece geçici olarak ekranda.`); 
                         }
-                    } else {
-                        alert("⚠️ Hata: Veri okunamadı.");
-                    }
-                } catch (err) {
-                    alert("⚠️ Beklenmeyen bir hata oluştu.");
-                } finally {
-                    btn.innerHTML = '✅ Veriyi İşle ve Kıyasla';
-                    btn.disabled = false;
-                }
+                    } else { alert("⚠️ Hata: Veri okunamadı."); }
+                } catch (err) { alert("⚠️ Beklenmeyen bir hata oluştu."); } 
+                finally { btn.innerHTML = '✅ Veriyi İşle ve Kıyasla'; btn.disabled = false; }
             });
         };
-        // --- 🧮 SİSTEM FİYATLARI ANA MODÜLÜ (TAM EKRAN GENİŞLİK) ---
+       // --- 🧮 SİSTEM FİYATLARI ANA EKRANI ---
         window.renderSystemPricesModule = function() {
             setActiveTab('showSystemPrices');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
-
-            // 🚀 EKRANI TAM YAYMAK İÇİN ORTADAKİ BOŞLUKLARI SIFIRLADIK
             const container = document.getElementById('contentContainer');
-            if(container) {
-                container.className = 'w-full pb-0 md:pb-0 px-2 sm:px-4 !max-w-none'; 
-            }
+            if(container) container.className = 'w-full pb-0 md:pb-0 px-2 sm:px-4 !max-w-none'; 
 
             let categoryNavHtml = `<div class="flex overflow-x-auto scrollbar-none gap-2 py-2 mb-1 border-b border-gray-100 flex-shrink-0" id="sysCategoryNavbar">`;
             categoriesTR.forEach((cat, idx) => {
@@ -5136,16 +5101,14 @@
             });
             categoryNavHtml += `</div>`;
 
-            // Liste %75 (xl:w-9/12) , Sağ Hesap Makinesi %25 (xl:w-3/12) olarak yayıldı
             loadModule(`
                 <div class="flex flex-col xl:flex-row w-full gap-4 items-start h-[79dvh] md:h-[85dvh]">
-                    <!-- SOL PANEL (GENİŞ LİSTE) -->
                     <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 animate-pop-in flex flex-col w-full xl:w-9/12 h-full">
                         <div class="flex-shrink-0">
                             <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-1">
-                                <span>🧮</span> ${menuTitle} Sistem Fiyatları
+                                <span>🧮</span> ${menuTitle} Fiyat Radarı
                             </h2>
-                            <p class="text-xs text-gray-500 font-bold mb-3">Sitedeki durumunuzu NET KAZANÇ üzerinden analiz edin. Yeni verileri 'Fiyatları Yükle' butonuyla ekleyin.</p>
+                            <p class="text-xs text-gray-500 font-bold mb-3">Gerçek net kazancınızı görün. Sitedeki fiyatlar ile hedef fiyatlarınızı akıllı kutularla eşitleyin.</p>
                             
                             <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-2">
                                 <div class="flex flex-col gap-1">
@@ -5156,11 +5119,10 @@
                                         🔍 YENİ FİYATLARI YÜKLE
                                     </button>
                                 </div>
-                                <div>
+                                <div class="flex flex-col gap-1">
                                     <button id="btnPlatformMY" class="platform-btn bg-orange-50 border-2 border-orange-200 text-orange-500 font-black w-full h-full py-2 sm:py-3 rounded-xl hover:bg-orange-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('my')">
                                         <span class="text-lg block sm:inline">🛒</span> Migros Yemek
                                     </button>
-                                    <!-- YENİ MİGROS BUTONU -->
                                     <button id="btnScanMY" onclick="scanMigrosLive()" class="hidden bg-blue-600 text-white border border-blue-700 py-2 rounded-lg font-black text-[10px] shadow-md hover:bg-blue-700 active:scale-95 transition flex items-center justify-center gap-1">
                                         🔍 YENİ FİYATLARI YÜKLE
                                     </button>
@@ -5175,33 +5137,33 @@
                         </div>
                         <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-6 scrollbar-none flex flex-col gap-3 pt-2 scroll-smooth relative"></div>
                     </div>
-
-                    <!-- SAĞ PANEL (HESAPLAYICI) -->
                     <div id="systemPricesCalculatorContainer" class="hidden xl:flex w-full xl:w-3/12 bg-white rounded-2xl shadow-sm p-5 border border-gray-100 animate-pop-in flex-col gap-4 sticky top-0 h-fit"></div>
                 </div>
             `);
             
             if (typeof window.manualCalcBaseRestoranPrice === 'undefined') window.manualCalcBaseRestoranPrice = 0;
 
-            // 🚀 FIREBASE'DEN CANLI FİYATLARI DİNLE (Değiştikçe listeyi otomatik renklendirir)
-            if (window.activeListeners && window.activeListeners.liveYsPrices) {
-                database.ref('system_settings/liveYsPrices').off('value', window.activeListeners.liveYsPrices);
-            }
             if(!window.activeListeners) window.activeListeners = {};
             
+            // YS Dinleyici
+            if (window.activeListeners.liveYsPrices) database.ref('system_settings/liveYsPrices').off('value', window.activeListeners.liveYsPrices);
             window.activeListeners.liveYsPrices = database.ref('system_settings/liveYsPrices').on('value', (s) => {
                 window.liveYsPrices = s.val() || {};
-                if (document.getElementById('systemPricesListContainer')) {
-                    const isYSAktif = document.getElementById('btnPlatformYS') && document.getElementById('btnPlatformYS').classList.contains('bg-rose-600');
-                    if (isYSAktif) renderSystemPricesList('ys'); 
+                const listContainer = document.getElementById('systemPricesListContainer');
+                const ysBtn = document.getElementById('btnPlatformYS');
+                
+                if (listContainer) {
+                    if (ysBtn && ysBtn.classList.contains('bg-rose-600')) {
+                        renderSystemPricesList('ys'); 
+                    } else if (ysBtn && !document.querySelector('.platform-btn.text-white')) {
+                        // 🚀 ÇÖZÜM: İlk defa açılıyorsa ve hiçbir buton tıklanmamışsa otomatik YS'yi aç
+                        renderSystemPricesList('ys');
+                    }
                 }
             });
 
-            // FIREBASE'DEN CANLI FİYATLARI DİNLE (MİGROS İÇİN)
-            if (window.activeListeners && window.activeListeners.liveMyPrices) {
-                database.ref('system_settings/liveMyPrices').off('value', window.activeListeners.liveMyPrices);
-            }
-            if(!window.activeListeners) window.activeListeners = {};
+            // MY Dinleyici
+            if (window.activeListeners.liveMyPrices) database.ref('system_settings/liveMyPrices').off('value', window.activeListeners.liveMyPrices);
             window.activeListeners.liveMyPrices = database.ref('system_settings/liveMyPrices').on('value', (s) => {
                 window.liveMyPrices = s.val() || {};
                 if (document.getElementById('systemPricesListContainer') && document.getElementById('btnPlatformMY') && document.getElementById('btnPlatformMY').classList.contains('bg-orange-500')) {
@@ -5225,20 +5187,26 @@
 
             if(platform === 'ys') {
                 const btn = document.getElementById('btnPlatformYS');
-                btn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600');
-                btn.classList.remove('bg-rose-50', 'text-rose-600');
+                if(btn) {
+                    btn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600');
+                    btn.classList.remove('bg-rose-50', 'text-rose-600');
+                }
                 activeColor = 'text-rose-600'; bgLight = 'bg-rose-50'; borderClass = 'border-rose-200'; commissionText = '%20 İnd. + %12 Komisyon';
                 if(scanBtn) scanBtn.classList.remove('hidden'); if(scanBtnMY) scanBtnMY.classList.add('hidden'); 
             } else if(platform === 'my') {
                 const btn = document.getElementById('btnPlatformMY');
-                btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500');
-                btn.classList.remove('bg-orange-50', 'text-orange-500');
+                if(btn) {
+                    btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500');
+                    btn.classList.remove('bg-orange-50', 'text-orange-500');
+                }
                 activeColor = 'text-orange-600'; bgLight = 'bg-orange-50'; borderClass = 'border-orange-200'; commissionText = '%11 Komisyon';
                 if(scanBtn) scanBtn.classList.add('hidden'); if(scanBtnMY) scanBtnMY.classList.remove('hidden'); 
             } else if(platform === 'ue') {
                 const btn = document.getElementById('btnPlatformUE');
-                btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600');
-                btn.classList.remove('bg-green-50', 'text-green-600');
+                if(btn) {
+                    btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600');
+                    btn.classList.remove('bg-green-50', 'text-green-600');
+                }
                 activeColor = 'text-green-600'; bgLight = 'bg-green-50'; borderClass = 'border-green-200'; commissionText = '%38 Komisyon';
                 if(scanBtn) scanBtn.classList.add('hidden'); if(scanBtnMY) scanBtnMY.classList.add('hidden');
             }
@@ -5258,6 +5226,7 @@
             if(document.getElementById('systemPricesCalculatorContainer')) document.getElementById('systemPricesCalculatorContainer').innerHTML = calcHtml;
 
             const container = document.getElementById('systemPricesListContainer');
+            if(!container) return;
             container.innerHTML = '';
             let hasAnyProduct = false;
 
@@ -5290,8 +5259,9 @@
                         let liveData = null;
                         if (window.liveYsPrices && Object.keys(window.liveYsPrices).length > 0) {
                             let searchName = p.name.toLocaleLowerCase('tr-TR').trim();
-                            let safeSearchKey = searchName.replace(/[.#$\[\]]/g, "_");
-                            if (window.ysIsimSozlugu && window.ysIsimSozlugu[searchName]) safeSearchKey = window.ysIsimSozlugu[searchName].replace(/[.#$\[\]]/g, "_");
+                            // 🚀 ÇÖZÜM BURADA: Okurken de eğik çizgiyi / değiştiriyoruz!
+                            let safeSearchKey = searchName.replace(/[.#$\[\]\/]/g, "_");
+                            if (window.ysIsimSozlugu && window.ysIsimSozlugu[searchName]) safeSearchKey = window.ysIsimSozlugu[searchName].replace(/[.#$\[\]\/]/g, "_");
                             liveData = window.liveYsPrices[safeSearchKey];
                             
                             if (!liveData) {
@@ -5338,8 +5308,9 @@
                         let liveData = null;
                         if (window.liveMyPrices && Object.keys(window.liveMyPrices).length > 0) {
                             let searchName = p.name.toLocaleLowerCase('tr-TR').trim();
-                            let safeSearchKey = searchName.replace(/[.#$\[\]]/g, "_");
-                            if (window.myIsimSozlugu && window.myIsimSozlugu[searchName]) safeSearchKey = window.myIsimSozlugu[searchName].replace(/[.#$\[\]]/g, "_");
+                            // 🚀 ÇÖZÜM BURADA: Okurken de eğik çizgiyi / değiştiriyoruz!
+                            let safeSearchKey = searchName.replace(/[.#$\[\]\/]/g, "_");
+                            if (window.myIsimSozlugu && window.myIsimSozlugu[searchName]) safeSearchKey = window.myIsimSozlugu[searchName].replace(/[.#$\[\]\/]/g, "_");
                             liveData = window.liveMyPrices[safeSearchKey];
                         }
 
@@ -5405,7 +5376,6 @@
                 }
             }, 100); 
         };
-
         // --- 💳 BORÇ YÖNETİMİ İŞLEM FONKSİYONLARI ---
 
         window.changeActiveEkstre = function (ekstreKey) {
