@@ -4677,31 +4677,29 @@
             };
         };
 
-      // --- 🎯 KOPYALAMA VE KAYDIRMA YARDIMCI FONKSİYONLARI ---
-        window.copySysPrice = function(el, priceVal) {
-            const formattedPrice = Number.isInteger(Number(priceVal)) ? priceVal.toString() : Number(priceVal).toFixed(2);
-            
-            navigator.clipboard.writeText(formattedPrice).then(() => {
-                const targetSpan = el.querySelector('.price-val-text');
-                const originalHtml = targetSpan.innerHTML;
-                const originalClasses = targetSpan.className;
+      /// --- 📋 YENİ: ZIRHLI FİYAT KOPYALAMA MOTORU (ASLA ÇÖKMEZ) ---
+        window.copySysPrice = function(element, price) {
+            // Fiyatı bilgisayarın hafızasına (panoya) kopyala
+            navigator.clipboard.writeText(price).then(() => {
                 
-                // Genişliği tam o anki boyutuna kilitle (Kutunun büyümesini engeller)
-                const currentWidth = targetSpan.offsetWidth;
-                targetSpan.style.width = currentWidth + 'px';
+                // Animasyon için metin elementini bul (Özel class yoksa içindeki son yazıyı al)
+                let priceTextElement = element.querySelector('.price-val-text') || element.lastElementChild;
                 
-                // İstenen stil: Kırmızı arka plan, beyaz yazı, kutuyu bozmayan metin
-                targetSpan.className = 'font-black text-white bg-red-600 rounded text-[9px] sm:text-[10px] flex items-center justify-center transition-all shadow-inner';
-                targetSpan.innerHTML = 'KOPYALANDI';
+                if (priceTextElement) {
+                    // Orijinal yazıyı hafızaya al
+                    const originalHTML = priceTextElement.innerHTML;
+                    
+                    // Kopyalandı yazısını bas (Küçük ve şık)
+                    priceTextElement.innerHTML = '<span class="text-[10px] sm:text-xs text-white bg-green-500 px-1 rounded shadow-inner font-black">Kopyalandı!</span>';
+                    
+                    // 1.5 saniye sonra eski haline geri getir
+                    setTimeout(() => {
+                        priceTextElement.innerHTML = originalHTML;
+                    }, 1500);
+                }
                 
-                // 1.5 saniye sonra orijinal fiyata geri dön
-                setTimeout(() => {
-                    targetSpan.innerHTML = originalHtml;
-                    targetSpan.className = originalClasses;
-                    targetSpan.style.width = ''; // Genişlik kilidini kaldır
-                }, 1500);
             }).catch(err => {
-                alert('Kopyalama başarısız oldu: ' + err);
+                alert("Kopyalama işlemi tarayıcı tarafından engellendi: " + err);
             });
         };
 
@@ -4788,55 +4786,192 @@
             }
         };
 
+        // -------------------------------------------------------------------
+        // 📖 YEMEKSEPETİ - SİSTEM İSİM EŞLEŞTİRME SÖZLÜĞÜ (KÜÇÜK HARFLERLE YAZIN)
+        // -------------------------------------------------------------------
+       // -------------------------------------------------------------------
+        // 📖 YEMEKSEPETİ - SİSTEM İSİM EŞLEŞTİRME SÖZLÜĞÜ (TAM UYUMLU VERSİYON)
+        // -------------------------------------------------------------------
+        window.ysIsimSozlugu = {
+            // --- KOKOREÇ ---
+            "yarım ekmek kokoreç": "yarım ekmek arası istanbul kokoreç",
+            "yarım ekmek izmir kokoreç": "yarım ekmek arası izmir kokoreç",
+            "üç çeyrek kokoreç": "3/4 ekmek arası istanbul kokoreç",
+            "üç çeyrek izmir kokoreç": "3/4 ekmek arası izmir kokoreç",
+            "tam ekmek kokoreç": "tam ekmek arası istanbul kokoreç",
+            "porsiyon kokoreç": "istanbul kokoreç",
+            "tombik ekmek kuzu kokoreç": "tombik ekmek kuzu kokoreç",
 
-       // --- 🔍 YENİ: KOPYALA-YAPIŞTIR (HACKER) SİSTEMİ + FIREBASE KALICI HAFIZA ---
-        window.scanYemeksepetiLive = async function() {
-            const btn = document.getElementById('btnScanYS');
-            const originalText = btn.innerHTML;
-            
-            let pastedData = prompt("Yemeksepeti sayfasından kopyaladığınız veriyi buraya yapıştırın:\n(Klavyeden CTRL+V yaparak veya farenin sağ tuşuyla yapıştırıp Tamam'a basın)");
-            
-            if (!pastedData) return;
+            // --- TAVUK KOKOREÇ & TAVUK DÖNER ---
+            "yarım ekmek tavuk kokoreç": "yarım ekmek arası tavuk kokoreç",
+            "üç çeyrek tavuk kokoreç": "3/4 ekmek arası tavuk kokoreç",
+            "tam ekmek tavuk kokoreç": "tam ekmek arası tavuk kokoreç",
+            "yarım ekmek tavuk döner": "yarım ekmek arası tavuk döner",
+            "tombik ekmek tavuk döner": "tombik ekmek arası tavuk döner",
+            "dürüm tavuk döner": "tavuk döner dürüm",
+            "üç çeyrek ekmek tavuk döner": "3/4 ekmek arası tavuk döner",
+            "pilavüstü tavuk döner": "pilav üstü tavuk döner",
+            "tam ekmek tavuk döner": "tam ekmek arası tavuk döner",
 
-            btn.innerHTML = '⏳ Kaydediliyor...';
-            btn.disabled = true;
+            // --- PATSO VE EKMEK ARASI ---
+            "sade patso": "sade patso sandviç",
+            "sosisli patso": "sosisli patso sandviç",
+            "tavuk dönerli patso": "tavuklu patso sandviç",
+            "kaşarlı patso": "kaşarlı patso sandviç",
+            "köfteli patso": "köfteli patso sandviç",
+            "ciğerli patso": "ciğerli patso sandviç",
+            "amerikanlı patso": "amerikan patso sandviç",
+            "sucuklu patso": "sucuklu patso sandviç",
+            "sosisli kaşarlı patso": "sucuklu kaşarlı patso", // YS'deki karşılığına göre
+            "sosisli sandiviç": "sosisli sandviç",
+            "goralı sandiviç": "goralı sosisli sandviç",
+            "sucuk ekmek": "yarım ekmek arası sucuk",
+            "goralı patso":"amerikanlı sosisli patso sandviç",
+
+            // --- KÖFTE & CİĞER ---
+            "yarım ekmek köfte": "yarım ekmek arası köfte",
+            "üç çeyrek ekmek köfte": "3/4 ekmek arası köfte",
+            "tam ekmek köfte": "tam ekmek arası ızgara köfte",
+            "porsiyon köfte": "ızgara köfte",
+            "yarım ekmek ciğer": "yarım ekmek arası ciğer",
+            "porsiyon ciğer": "porsiyon arnavut ciğeri",
+
+            // --- TOST ---
+            "kaşarlı tost": "yarım ekmek kaşarlı tost",
+            "sucuklu tost": "yarım ekmek sucuklu tost",
+            "karışık tost": "yarım ekmek karışık tost",
+
+            // --- MİDYE & YAN LEZZETLER ---
+            "midye (adet)": "midye dolma (adet)",
+            "porsiyon midye": "midye dolma (10 adet)",
+            "porsiyon patates": "patates kızartması",
+            "porsiyon pilav": "pirinç pilavı",
+            "günün çorbası": "günün çorbası",
+
+            // --- MENÜLER ---
+            "yarım ekmek döner menü": "yarım döner menü",
+            "tombik tavuk döner menü": "tombik döner menü",
+            "tavuk dürüm menü": "dürüm döner menü",
+            "hamburger menü": "hamburger menü",
+            "sosisli menü": "sosisli menü",
+            "ıslak burger menü": "ıslak hamburger menü",
+            "yarım köfte menü": "yarım ekmek köfte menü",
+            "yarım ekmek kokoreç menü": "yarım kokoreç menü",
+           
             
-            try {
-                if (pastedData.startsWith("YS_DATA|")) {
-                    pastedData = pastedData.replace("YS_DATA|", "");
-                }
-                const prices = JSON.parse(pastedData);
-                
-                if (Array.isArray(prices) && prices.length > 0) {
-                    const newLivePrices = {};
-                    prices.forEach(item => {
-                        newLivePrices[item.name.toLocaleLowerCase('tr-TR').trim()] = item.price;
-                    });
-                    
-                    // 🚀 FIREBASE'E KAYDET (Eskiyi ezer, kalıcı olur)
-                    await database.ref('system_settings/liveYsPrices').set(newLivePrices);
-                    
-                    alert(`✅ Harika! ${prices.length} ürünün verisi kalıcı olarak veritabanına işlendi.`);
-                } else {
-                    alert("⚠️ Hata: Kopyalanan veri geçerli bir formatta değil.");
-                }
-            } catch (err) {
-                alert("⚠️ Hata: Veri bozuk veya yanlış bir şey kopyaladınız.");
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+            // --- İÇECEKLER (Yemeksepetindeki Noktalar Sistemde Alt Çizgiye Dönüşür) ---
+            "açık ayran": "açık ayran (30 cl_)",
+            "1 lt açık ayran": "açık ayran (1 l_)",
+            "kapalı ayran": "büyük ayran",
+            "küçük ayran": "küçük ayran",
+            "şalgam": "şalgam suyu (30 cl_)",
+            "sade soda": "soda (20 cl_)",
+            "limonlu soda": "limonlu soda (20 cl_)",
+            "su": "su (50 cl_)",
+            "1 litre kola": "coca-cola (1 l_)",
+            "2.5 litre kola": "coca-cola (2,5 l_)",
+            "limonata": "limonata (30 cl_)",
+            "1 lt limonata": "limonata (1 l_)",
+            "şişe kola": "coca-cola (33 cl_)",
+            "kutu içecekler": "pepsi (33 cl_)" // Kutu içecek seçimi genel olduğu için YS'deki 33cl kola fiyatına endekslendi
         };
 
-        // --- 🧮 SİSTEM FİYATLARI ANA MODÜLÜ (GENİŞ EKRAN) ---
-        function renderSystemPricesModule() {
+
+    // --- 🔍 1. SİHİRLİ KUTU OKUYUCU (SADECE ORIGINAL PRICE ALAN ZIRHLI MOTOR) ---
+        window.scanYemeksepetiLive = function() {
+            if (document.getElementById('ysPasteModal')) return;
+
+            const modalHtml = `
+            <div id="ysPasteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex justify-center items-center p-4">
+                <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg relative border-t-8 border-rose-600 animate-pop-in">
+                    <button onclick="document.getElementById('ysPasteModal').remove()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-800 font-black text-xl transition">✖</button>
+                    <h2 class="text-xl font-black text-gray-800 mb-2 flex items-center gap-2"><span>🥡</span> Yemeksepeti Verisi Yapıştır</h2>
+                    <textarea id="ysPasteArea" translate="no" spellcheck="false" class="w-full h-40 border-2 border-rose-200 rounded-xl p-3 text-xs outline-none focus:border-rose-600 font-mono bg-rose-50 mb-4 shadow-inner" placeholder="Sağ tıklayıp yapıştırın..."></textarea>
+                    <button id="processYsPasteBtn" class="w-full bg-gradient-to-r from-rose-600 to-red-600 text-white font-black py-3.5 rounded-xl shadow-md text-sm">✅ Veriyi İşle ve Kıyasla</button>
+                </div>
+            </div>`;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            setTimeout(() => document.getElementById('ysPasteArea').focus(), 100);
+
+            document.getElementById('processYsPasteBtn').addEventListener('click', async () => {
+                const btn = document.getElementById('processYsPasteBtn');
+                let pastedData = document.getElementById('ysPasteArea').value;
+                if (!pastedData || pastedData.trim() === "") { alert("Lütfen veriyi yapıştırın!"); return; }
+
+                btn.innerHTML = '⏳ Hesaplanıyor...';
+                btn.disabled = true;
+                
+                let prices = [];
+                try {
+                    let jsonStart = pastedData.indexOf('[');
+                    let jsonEnd = pastedData.lastIndexOf(']');
+                    if (jsonStart !== -1 && jsonEnd !== -1) {
+                        let pureJson = pastedData.substring(jsonStart, jsonEnd + 1);
+                        try { prices = JSON.parse(pureJson); } catch(e) {
+                            try { prices = new Function("return " + pureJson)(); } catch(e2) {}
+                        }
+                    }
+
+                    if (!prices || prices.length === 0) {
+                        const regex = /(?:"name"|name)\s*:\s*["']([^"']+)["'][^}]*?(?:"price"|price)\s*:\s*(\d+(?:\.\d+)?)[^}]*?(?:"originalPrice"|originalPrice)\s*:\s*(\d+(?:\.\d+)?)/gi;
+                        let match;
+                        while ((match = regex.exec(pastedData)) !== null) {
+                            prices.push({ name: match[1].trim(), price: parseFloat(match[2]), originalPrice: parseFloat(match[3]) });
+                        }
+                    }
+
+                    if (Array.isArray(prices) && prices.length > 0) {
+                        const newLivePrices = {};
+                        prices.forEach(item => {
+                            if(item.name) {
+                                let safeKey = item.name.toLocaleLowerCase('tr-TR').trim().replace(/[.#$\[\]]/g, "_");
+                                
+                                let cPrice = parseFloat(item.price || 0);
+                                let lPrice = parseFloat(item.originalPrice || item.price);
+                                
+                                // 🚀 İŞTE SENİN MANTIĞIN: Eğer Yemeksepeti'nden kopyalanan veride orijinal fiyat (üstü çizili) okunamamışsa,
+                                // yani lPrice ile cPrice aynı gelmişse (Örn: Kola 72-72 gelmişse), 
+                                // Kod senin dediğin gibi "Orijinal fiyat yüzde 20 düşülmemiş halidir" kuralını işletip 72'yi 90'a tamamlıyor!
+                                if (lPrice > 0 && lPrice === cPrice) {
+                                    lPrice = cPrice / 0.80;
+                                }
+
+                                // Veritabanına sadece ve SADECE senin emrettiğin gibi Orijinal (Yüzde 20 düşülmemiş) fiyatı kaydediyoruz.
+                                newLivePrices[safeKey] = lPrice; 
+                            }
+                        });
+
+                        window.liveYsPrices = newLivePrices;
+                        document.getElementById('ysPasteModal').remove(); 
+                        renderSystemPricesList('ys'); 
+
+                        try {
+                            await database.ref('system_settings/liveYsPrices').set(newLivePrices);
+                            alert(`✅ HARİKA! ${Object.keys(newLivePrices).length} ürünün ANA (İndirimsiz) fiyatı listeye yansıtıldı ve kaydedildi.`);
+                        } catch (dbErr) {
+                            alert(`✅ BAŞARILI! Veriler yansıtıldı.`);
+                        }
+                    } else {
+                        alert("⚠️ Hata: Veri okunamadı.");
+                    }
+                } catch (err) {
+                    alert("⚠️ Beklenmeyen bir hata oluştu.");
+                } finally {
+                    btn.innerHTML = '✅ Veriyi İşle ve Kıyasla';
+                    btn.disabled = false;
+                }
+            });
+        };
+        // --- 🧮 SİSTEM FİYATLARI ANA MODÜLÜ (TAM EKRAN GENİŞLİK) ---
+        window.renderSystemPricesModule = function() {
             setActiveTab('showSystemPrices');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
 
-            // 🚀 EKRANI TAM YAYMAK İÇİN MAX-WIDTH KALDIRILIYOR
+            // 🚀 EKRANI TAM YAYMAK İÇİN ORTADAKİ BOŞLUKLARI SIFIRLADIK
             const container = document.getElementById('contentContainer');
             if(container) {
-                container.className = 'w-full pb-0 md:pb-0 px-2 sm:px-4 max-w-full'; 
+                container.className = 'w-full pb-0 md:pb-0 px-2 sm:px-4 !max-w-none'; 
             }
 
             let categoryNavHtml = `<div class="flex overflow-x-auto scrollbar-none gap-2 py-2 mb-1 border-b border-gray-100 flex-shrink-0" id="sysCategoryNavbar">`;
@@ -4845,20 +4980,16 @@
             });
             categoryNavHtml += `</div>`;
 
-            // xl:w-9/12 (Sol Liste %75) ve xl:w-3/12 (Sağ Hesaplayıcı %25) olarak ayarlandı
+            // Liste %75 (xl:w-9/12) , Sağ Hesap Makinesi %25 (xl:w-3/12) olarak yayıldı
             loadModule(`
                 <div class="flex flex-col xl:flex-row w-full gap-4 items-start h-[79dvh] md:h-[85dvh]">
-                    <!-- SOL PANEL (GENİŞLETİLDİ) -->
+                    <!-- SOL PANEL (GENİŞ LİSTE) -->
                     <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 animate-pop-in flex flex-col w-full xl:w-9/12 h-full">
                         <div class="flex-shrink-0">
-                            <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-1">
-                                        <span>🧮</span> ${menuTitle} Sistem Fiyatları
-                                    </h2>
-                                    <p class="text-xs text-gray-500 font-bold mb-3">Sitedeki durumunuzu net kazanç üzerinden analiz edin ve eşitsizlikleri giderin.</p>
-                                </div>
-                            </div>
+                            <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-1">
+                                <span>🧮</span> ${menuTitle} Sistem Fiyatları
+                            </h2>
+                            <p class="text-xs text-gray-500 font-bold mb-3">Sitedeki durumunuzu NET KAZANÇ üzerinden analiz edin. Yeni verileri 'Fiyatları Yükle' butonuyla ekleyin.</p>
                             
                             <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-2">
                                 <div class="flex flex-col gap-1">
@@ -4882,35 +5013,32 @@
                             </div>
                             ${categoryNavHtml}
                         </div>
-
-                        <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-6 scrollbar-none flex flex-col gap-3 pt-2 scroll-smooth relative">
-                        </div>
+                        <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-6 scrollbar-none flex flex-col gap-3 pt-2 scroll-smooth relative"></div>
                     </div>
 
-                    <!-- SAĞ PANEL (DARALTILDI) -->
-                    <div id="systemPricesCalculatorContainer" class="hidden xl:flex w-full xl:w-3/12 bg-white rounded-2xl shadow-sm p-5 border border-gray-100 animate-pop-in flex-col gap-4 sticky top-0 h-fit">
-                    </div>
+                    <!-- SAĞ PANEL (HESAPLAYICI) -->
+                    <div id="systemPricesCalculatorContainer" class="hidden xl:flex w-full xl:w-3/12 bg-white rounded-2xl shadow-sm p-5 border border-gray-100 animate-pop-in flex-col gap-4 sticky top-0 h-fit"></div>
                 </div>
             `);
             
-            if (typeof window.manualCalcBaseRestoranPrice === 'undefined') {
-                window.manualCalcBaseRestoranPrice = 0;
-            }
+            if (typeof window.manualCalcBaseRestoranPrice === 'undefined') window.manualCalcBaseRestoranPrice = 0;
 
-            // 🚀 FIREBASE'DEN CANLI FİYATLARI DİNLE (Değiştikçe listeyi otomatik günceller)
-            if (activeListeners.liveYsPrices) {
-                database.ref('system_settings/liveYsPrices').off('value', activeListeners.liveYsPrices);
+            // 🚀 FIREBASE'DEN CANLI FİYATLARI DİNLE (Değiştikçe listeyi otomatik renklendirir)
+            if (window.activeListeners && window.activeListeners.liveYsPrices) {
+                database.ref('system_settings/liveYsPrices').off('value', window.activeListeners.liveYsPrices);
             }
-            activeListeners.liveYsPrices = database.ref('system_settings/liveYsPrices').on('value', (s) => {
+            if(!window.activeListeners) window.activeListeners = {};
+            
+            window.activeListeners.liveYsPrices = database.ref('system_settings/liveYsPrices').on('value', (s) => {
                 window.liveYsPrices = s.val() || {};
-                // Eğer ekran zaten çizilmişse listeyi anında güncelle
                 if (document.getElementById('systemPricesListContainer')) {
                     const isYSAktif = document.getElementById('btnPlatformYS') && document.getElementById('btnPlatformYS').classList.contains('bg-rose-600');
-                    renderSystemPricesList(isYSAktif ? 'ys' : 'ys'); // YS'yi tetikle
+                    if (isYSAktif) renderSystemPricesList('ys'); 
                 }
             });
-        }
+        };
 
+        // --- 📋 LİSTE ÇİZİM MOTORU (İstediğin 4 Kutu Tasarımı) ---
         window.renderSystemPricesList = function(platform) {
             document.querySelectorAll('.platform-btn').forEach(btn => {
                 btn.classList.remove('bg-rose-600', 'bg-orange-500', 'bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600', 'border-orange-500', 'border-green-600');
@@ -4928,26 +5056,25 @@
                 btn.classList.remove('bg-rose-50', 'text-rose-600');
                 activeColor = 'text-rose-600'; bgLight = 'bg-rose-50'; borderClass = 'border-rose-200';
                 commissionText = '%20 İnd. + %12 Komisyon';
-                if(scanBtn) scanBtn.classList.remove('hidden'); // Tarama butonunu göster
+                if(scanBtn) scanBtn.classList.remove('hidden'); 
             } else {
-                if(scanBtn) scanBtn.classList.add('hidden'); // Diğerlerinde gizle
-            }
-            
-            if(platform === 'my') {
-                const btn = document.getElementById('btnPlatformMY');
-                btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500');
-                btn.classList.remove('bg-orange-50', 'text-orange-500');
-                activeColor = 'text-orange-600'; bgLight = 'bg-orange-50'; borderClass = 'border-orange-200';
-                commissionText = '%11 Komisyon';
-            } else if(platform === 'ue') {
-                const btn = document.getElementById('btnPlatformUE');
-                btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600');
-                btn.classList.remove('bg-green-50', 'text-green-600');
-                activeColor = 'text-green-600'; bgLight = 'bg-green-50'; borderClass = 'border-green-200';
-                commissionText = '%38 Komisyon';
+                if(scanBtn) scanBtn.classList.add('hidden');
+                if(platform === 'my') {
+                    const btn = document.getElementById('btnPlatformMY');
+                    btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500');
+                    btn.classList.remove('bg-orange-50', 'text-orange-500');
+                    activeColor = 'text-orange-600'; bgLight = 'bg-orange-50'; borderClass = 'border-orange-200';
+                    commissionText = '%11 Komisyon';
+                } else if(platform === 'ue') {
+                    const btn = document.getElementById('btnPlatformUE');
+                    btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600');
+                    btn.classList.remove('bg-green-50', 'text-green-600');
+                    activeColor = 'text-green-600'; bgLight = 'bg-green-50'; borderClass = 'border-green-200';
+                    commissionText = '%38 Komisyon';
+                }
             }
 
-            // --- SAĞ PANEL MANUEL HESAPLAYICI ---
+            // Sağ Panel (Manuel Hesaplayıcı) HTML Basımı
             let calcHtml = '';
             let rPrice = window.manualCalcBaseRestoranPrice || 0; 
             if (platform === 'ys') {
@@ -4955,154 +5082,224 @@
                 let cPrice = Math.ceil(rawCustomer * 2) / 2;
                 let pPrice = cPrice / 0.80;
                 calcHtml = `
-                    <h3 class="font-black text-rose-700 text-lg border-b border-rose-200 pb-3 mb-2 flex items-center gap-2">🧮 Manuel Hesaplayıcı (YS)</h3>
-                    <div class="flex flex-col gap-5 mt-2">
+                    <h3 class="font-black text-rose-700 text-base border-b border-rose-200 pb-2 mb-2 flex items-center gap-2">🧮 Hesaplayıcı (YS)</h3>
+                    <div class="flex flex-col gap-4 mt-2">
                         <div class="flex flex-col">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net İstediğin)</label>
-                            <div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-100 p-4 rounded-2xl font-black text-gray-800 text-xl outline-none focus:border-rose-500 bg-white shadow-sm transition" oninput="updateSysCalc('r', 'ys', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-4 font-bold text-gray-400 text-lg pointer-events-none">₺</span></div>
+                            <label class="text-[9px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net İstediğin)</label>
+                            <div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-100 p-3 rounded-xl font-black text-gray-800 text-lg outline-none focus:border-rose-500 bg-white shadow-sm transition" oninput="updateSysCalc('r', 'ys', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-3 top-3 font-bold text-gray-400 text-base pointer-events-none">₺</span></div>
                         </div>
-                        <div class="flex justify-center -my-2 z-10"><span class="bg-rose-100 text-rose-500 rounded-full w-8 h-8 flex items-center justify-center font-bold border-2 border-white shadow-sm">↓</span></div>
                         <div class="flex flex-col">
-                            <label class="text-[10px] font-black text-rose-600 uppercase bg-rose-50 px-2 py-1 rounded w-fit mb-1 border border-rose-100">Müşterinin Gördüğü (Kuruşlu)</label>
-                            <div class="relative"><input id="calc-c" type="number" value="${cPrice > 0 ? cPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-200 p-4 rounded-2xl font-black text-rose-700 text-xl outline-none focus:border-rose-500 bg-rose-50 shadow-sm transition" oninput="updateSysCalc('c', 'ys', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-4 font-bold text-rose-400 text-lg pointer-events-none">₺</span></div>
+                            <label class="text-[9px] font-black text-rose-600 uppercase bg-rose-50 px-2 py-1 rounded w-fit mb-1 border border-rose-100">Müşterinin Gördüğü (Kuruşlu)</label>
+                            <div class="relative"><input id="calc-c" type="number" value="${cPrice > 0 ? cPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-200 p-3 rounded-xl font-black text-rose-700 text-lg outline-none focus:border-rose-500 bg-rose-50 shadow-sm transition" oninput="updateSysCalc('c', 'ys', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-3 top-3 font-bold text-rose-400 text-base pointer-events-none">₺</span></div>
                         </div>
-                        <div class="flex justify-center -my-2 z-10"><span class="bg-rose-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold border-2 border-white shadow-sm">↓</span></div>
                         <div class="flex flex-col relative">
-                            <label class="text-[10px] font-black text-white bg-rose-600 px-2 py-1.5 rounded w-fit mb-1 absolute -top-4 left-3 shadow-md z-10">Siteye Girilecek Önerilen Fiyat</label>
-                            <div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? pPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-500 p-5 pt-6 rounded-2xl font-black text-rose-900 text-2xl outline-none focus:ring-4 focus:ring-rose-200 bg-rose-100 shadow-md transition" oninput="updateSysCalc('p', 'ys', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-5 font-black text-rose-500 text-2xl pointer-events-none">₺</span></div>
+                            <label class="text-[9px] font-black text-white bg-rose-600 px-2 py-1 rounded w-fit mb-1 absolute -top-3 left-3 shadow-md z-10">Siteye Girilecek Önerilen Fiyat</label>
+                            <div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? pPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-500 p-4 pt-5 rounded-xl font-black text-rose-900 text-xl outline-none focus:ring-4 focus:ring-rose-200 bg-rose-100 shadow-md transition" oninput="updateSysCalc('p', 'ys', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-3 top-4 font-black text-rose-500 text-xl pointer-events-none">₺</span></div>
                         </div>
                     </div>
                 `;
             } else if (platform === 'my') {
                 let pPrice = Math.round(rPrice / 0.89);
-                calcHtml = `<h3 class="font-black text-orange-700 text-lg border-b border-orange-200 pb-3 mb-2 flex items-center gap-2">🧮 Manuel Hesaplayıcı (MY)</h3><div class="flex flex-col gap-5 mt-2"><div class="flex flex-col"><label class="text-[10px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net İstediğin)</label><div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-orange-100 p-4 rounded-2xl font-black text-gray-800 text-xl outline-none focus:border-orange-500 bg-white shadow-sm transition" oninput="updateSysCalc('r', 'my', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-4 font-bold text-gray-400 text-lg pointer-events-none">₺</span></div></div><div class="flex justify-center -my-2 z-10"><span class="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold border-2 border-white shadow-sm">↓</span></div><div class="flex flex-col relative"><label class="text-[10px] font-black text-white bg-orange-500 px-2 py-1.5 rounded w-fit mb-1 absolute -top-4 left-3 shadow-md z-10">Siteye Girilecek Önerilen Fiyat</label><div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? Math.round(pPrice) : '0'}" class="w-full border-2 border-orange-500 p-5 pt-6 rounded-2xl font-black text-orange-900 text-2xl outline-none focus:ring-4 focus:ring-orange-200 bg-orange-50 shadow-md transition" oninput="updateSysCalc('p', 'my', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-5 font-black text-orange-500 text-2xl pointer-events-none">₺</span></div></div></div>`;
+                calcHtml = `<h3 class="font-black text-orange-700 text-base border-b border-orange-200 pb-2 mb-2 flex items-center gap-2">🧮 Hesaplayıcı (MY)</h3><div class="flex flex-col gap-4 mt-2"><div class="flex flex-col"><label class="text-[9px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net)</label><div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-orange-100 p-3 rounded-xl font-black text-gray-800 text-lg outline-none focus:border-orange-500 bg-white shadow-sm transition" oninput="updateSysCalc('r', 'my', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-3 top-3 font-bold text-gray-400 text-base pointer-events-none">₺</span></div></div><div class="flex flex-col relative mt-2"><label class="text-[9px] font-black text-white bg-orange-500 px-2 py-1 rounded w-fit mb-1 absolute -top-3 left-3 shadow-md z-10">Siteye Girilecek Önerilen Fiyat</label><div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? Math.round(pPrice) : '0'}" class="w-full border-2 border-orange-500 p-4 pt-5 rounded-xl font-black text-orange-900 text-xl outline-none focus:ring-4 focus:ring-orange-200 bg-orange-50 shadow-md transition" oninput="updateSysCalc('p', 'my', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-3 top-4 font-black text-orange-500 text-xl pointer-events-none">₺</span></div></div></div>`;
             } else if (platform === 'ue') {
                 let pPrice = Math.round(rPrice / 0.62);
-                calcHtml = `<h3 class="font-black text-green-700 text-lg border-b border-green-200 pb-3 mb-2 flex items-center gap-2">🧮 Manuel Hesaplayıcı (UE)</h3><div class="flex flex-col gap-5 mt-2"><div class="flex flex-col"><label class="text-[10px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net İstediğin)</label><div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-green-100 p-4 rounded-2xl font-black text-gray-800 text-xl outline-none focus:border-green-500 bg-white shadow-sm transition" oninput="updateSysCalc('r', 'ue', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-4 font-bold text-gray-400 text-lg pointer-events-none">₺</span></div></div><div class="flex justify-center -my-2 z-10"><span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold border-2 border-white shadow-sm">↓</span></div><div class="flex flex-col relative"><label class="text-[10px] font-black text-white bg-green-600 px-2 py-1.5 rounded w-fit mb-1 absolute -top-4 left-3 shadow-md z-10">Siteye Girilecek Önerilen Fiyat</label><div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? Math.round(pPrice) : '0'}" class="w-full border-2 border-green-500 p-5 pt-6 rounded-2xl font-black text-green-900 text-2xl outline-none focus:ring-4 focus:ring-green-200 bg-green-50 shadow-md transition" oninput="updateSysCalc('p', 'ue', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-4 top-5 font-black text-green-500 text-2xl pointer-events-none">₺</span></div></div></div>`;
+                calcHtml = `<h3 class="font-black text-green-700 text-base border-b border-green-200 pb-2 mb-2 flex items-center gap-2">🧮 Hesaplayıcı (UE)</h3><div class="flex flex-col gap-4 mt-2"><div class="flex flex-col"><label class="text-[9px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net)</label><div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-green-100 p-3 rounded-xl font-black text-gray-800 text-lg outline-none focus:border-green-500 bg-white shadow-sm transition" oninput="updateSysCalc('r', 'ue', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-3 top-3 font-bold text-gray-400 text-base pointer-events-none">₺</span></div></div><div class="flex flex-col relative mt-2"><label class="text-[9px] font-black text-white bg-green-600 px-2 py-1 rounded w-fit mb-1 absolute -top-3 left-3 shadow-md z-10">Siteye Girilecek Önerilen Fiyat</label><div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? Math.round(pPrice) : '0'}" class="w-full border-2 border-green-500 p-4 pt-5 rounded-xl font-black text-green-900 text-xl outline-none focus:ring-4 focus:ring-green-200 bg-green-50 shadow-md transition" oninput="updateSysCalc('p', 'ue', this.value)" onfocus="if(parseFloat(this.value)===0) this.value='';"><span class="absolute right-3 top-4 font-black text-green-500 text-xl pointer-events-none">₺</span></div></div></div>`;
             }
             const calcContainer = document.getElementById('systemPricesCalculatorContainer');
             if(calcContainer) calcContainer.innerHTML = calcHtml;
 
-            // --- LİSTE OLUŞTURMA ---
             const container = document.getElementById('systemPricesListContainer');
             container.innerHTML = '';
 
             let hasAnyProduct = false;
             const isYS = (platform === 'ys');
             
+            // Firebase'den çekilmiş veri var mı?
             const livePricesAvailable = isYS && window.liveYsPrices && Object.keys(window.liveYsPrices).length > 0;
 
-            categoriesTR.forEach((cat, catIndex) => {
+           categoriesTR.forEach((cat, catIndex) => {
                 const catProducts = products.filter(p => p.category === cat && !p.isArchived);
                 if(catProducts.length === 0) return;
-
                 hasAnyProduct = true;
                 
                 let html = `
-                    <div class="mb-4 sys-cat-section" id="sys-cat-${catIndex}">
+                    <div class="mb-5 sys-cat-section" id="sys-cat-${catIndex}">
                         <h3 class="font-black ${activeColor} text-sm sm:text-base mb-2 border-b ${borderClass} pb-1 flex justify-between items-center sticky top-0 bg-white z-10 pt-1 shadow-sm px-1">
                             <div class="flex items-center gap-2"><span>📌</span> ${cat}</div>
                             <span class="text-[9px] sm:text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-lg border ${borderClass} shadow-inner">${commissionText}</span>
                         </h3>
-                        <div class="flex flex-col gap-2.5 mt-2">
+                        <div class="flex flex-col gap-3 mt-3">
                 `;
                 
                 catProducts.sort((a,b) => (a.order || 9999) - (b.order || 9999)).forEach(p => {
                     const rPrice = p.discountPrice || p.price; 
                     let pPrice = 0;       
-                    let customerPrice = 0; 
+                    let cPrice = 0;
                     
                     if (isYS) {
                         const rawCustomerPrice = rPrice / 0.88;
-                        customerPrice = Math.ceil(rawCustomerPrice * 2) / 2; 
-                        pPrice = customerPrice / 0.80; 
+                        cPrice = Math.ceil(rawCustomerPrice * 2) / 2; // Önerilen Müşteri Fiyatı
+                        pPrice = cPrice / 0.80;                       // Önerilen Liste Fiyatı
                     } else if (platform === 'my') {
                         pPrice = Math.round(rPrice / 0.89);
                     } else if (platform === 'ue') {
                         pPrice = Math.round(rPrice / 0.62);
                     }
 
-                    let priceSectionHtml = "";
+                    let rightPanelHtml = "";
+                    let rowBgClass = `bg-white`;
+                    let statusIcon = `<span class="text-gray-300">➖</span>`;
+
                     if (isYS) {
-                        priceSectionHtml = `
-                            <div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 w-2/3 justify-end">
-                                <div class="flex flex-col items-center border-r border-rose-100 px-2 sm:px-3">
-                                    <span class="text-[8px] font-bold text-gray-500 uppercase tracking-wider">Restoran</span>
-                                    <span class="font-black text-gray-700 text-xs sm:text-sm">${rPrice} ₺</span>
-                                </div>
-                                <div class="flex flex-col items-center border-r border-rose-100 px-2 sm:px-3 bg-rose-50 rounded-lg py-1">
-                                    <span class="text-[8px] font-black text-rose-500 uppercase tracking-wider whitespace-nowrap">Müşterinin Gördüğü</span>
-                                    <span class="font-black text-rose-700 text-xs sm:text-sm">${customerPrice.toFixed(2)} ₺</span>
-                                </div>
-                                <div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-end px-2 sm:px-3 rounded cursor-pointer transition active:scale-95 group" title="Fiyatı Kopyalamak İçin Tıkla">
-                                    <span class="text-[8px] font-black text-rose-600 uppercase tracking-wider transition">Siteye Girilecek</span>
-                                    <div class="font-black text-white bg-rose-600 px-2 py-0.5 rounded shadow-sm text-sm sm:text-base price-val-text min-w-[70px] text-center flex items-center justify-center">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</div>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        priceSectionHtml = `
-                            <div class="flex flex-col sm:flex-row items-end sm:items-center gap-3 sm:gap-6 w-1/2 justify-end">
-                                <div class="flex flex-col items-end">
-                                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Restoran</span>
-                                    <span class="font-black text-gray-700 text-xs sm:text-sm">${rPrice} ₺</span>
-                                </div>
-                                <span class="hidden sm:flex text-gray-300 font-black text-lg">▶</span>
-                                <div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-end bg-white px-3 py-1 rounded-lg border ${borderClass} shadow-sm cursor-pointer hover:bg-gray-50 active:scale-95 transition group" title="Fiyatı Kopyalamak İçin Tıkla">
-                                    <span class="text-[9px] font-black ${activeColor} uppercase tracking-wider transition">Önerilen</span>
-                                    <div class="font-black ${activeColor} text-sm sm:text-lg price-val-text min-w-[60px] text-center flex items-center justify-center">${pPrice} ₺</div>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    // 🚀 ZARAR / KÂR RENKLENDİRME MOTORU
-                    let rowBgClass = `bg-white ${bgLight}`;
-                    let statusIcon = '';
-
-                    if (livePricesAvailable) {
-                        let searchName = p.name.toLocaleLowerCase('tr-TR').trim();
-                        // Sözlükte varsa eşleştir
-                        if (typeof productAliases !== 'undefined' && productAliases[searchName]) {
-                            searchName = productAliases[searchName];
+                        let liveData = null;
+                        if (livePricesAvailable) {
+                            let searchName = p.name.toLocaleLowerCase('tr-TR').trim();
+                            let safeSearchKey = searchName.replace(/[.#$\[\]]/g, "_");
+                            
+                            // ZEKİ EŞLEŞTİRME SÖZLÜĞÜ (Önceki adımdaki kural)
+                            if (window.ysIsimSozlugu && window.ysIsimSozlugu[searchName]) {
+                                safeSearchKey = window.ysIsimSozlugu[searchName].replace(/[.#$\[\]]/g, "_");
+                            }
+                            
+                            liveData = window.liveYsPrices[safeSearchKey];
+                            
+                            if (!liveData) {
+                                for (let ysKey in window.liveYsPrices) {
+                                    let cleanYsKey = ysKey.replace(/arası /g, "").replace(/ sandviç/g, "").replace(/ menü/g, "").trim();
+                                    let cleanSearchName = safeSearchKey.replace(/arası /g, "").replace(/ sandviç/g, "").replace(/ menü/g, "").trim();
+                                    if (cleanYsKey === cleanSearchName) {
+                                        liveData = window.liveYsPrices[ysKey];
+                                        break;
+                                    }
+                                }
+                            }
                         }
 
-                        // Sunucudan dönen datanın içindeki "price" alanını çekiyoruz
-                        const livePrice = window.liveYsPrices[searchName];
-                        
-                        if (livePrice) {
-                            if (livePrice < pPrice) {
-                                // ZARAR: Sitedeki fiyat, sistemin hesapladığından düşük! Açık kırmızı.
-                                rowBgClass = 'bg-red-100 border-red-400';
-                                statusIcon = `<span title="ZARAR EDİYORSUN! Sitedeki Fiyat: ${livePrice}₺, Olması Gereken: ${pPrice.toFixed(2)}₺" class="text-xl cursor-help bg-white rounded-full shadow-md w-7 h-7 flex items-center justify-center flex-shrink-0 animate-pulse border border-red-300">🚨</span>`;
+                       if (liveData) {
+                            // 🚀 PATRON MANTIĞI: Veritabanından sadece Liste (Orijinal) Fiyatı gelir.
+                            // Gerisini sistem kendi formülleriyle hesaplar!
+                            const liveListed = parseFloat(liveData);     // Sitedeki Üstü Çizili (Liste) Fiyat
+                            const liveCustomer = liveListed * 0.80;      // Müşteriye yansıtılan (%20 indirimli)
+                            const liveNet = liveCustomer * 0.88;         // Cebine giren (%12 komisyon çıkmış)
+                            
+                            // TOLERANS KONTROLLERİ (1.5 TL'ye kadar farkları eşit sayar)
+                            const isNetEqual = Math.abs(rPrice - liveNet) <= 1.5;
+                            const isCustomerEqual = Math.abs(cPrice - liveCustomer) <= 1.5;
+                            const isListedEqual = Math.abs(pPrice - liveListed) <= 1.5;
+
+                            // GENEL DURUM RENGİ (Zarar mı, Kâr mı?)
+                            const diff = liveNet - rPrice;
+                            if (diff < -1.5) {
+                                rowBgClass = 'bg-red-50 border-red-300'; statusIcon = `<span title="ZARAR!" class="text-lg">🚨</span>`;
+                            } else if (diff > 1.5) {
+                                rowBgClass = 'bg-green-50 border-green-300'; statusIcon = `<span title="EKSTRA KÂR" class="text-lg">🤑</span>`;
                             } else {
-                                // KÂR VEYA EŞİT: Sitedeki fiyat eşdeğer veya kârda. Açık yeşil.
-                                rowBgClass = 'bg-green-100 border-green-400';
-                                statusIcon = `<span title="KÂRDASIN VEYA EŞİT. Sitedeki Fiyat: ${livePrice}₺, Olması Gereken: ${pPrice.toFixed(2)}₺" class="text-xl cursor-help bg-white rounded-full shadow-md w-7 h-7 flex items-center justify-center flex-shrink-0 border border-green-300">✅</span>`;
+                                rowBgClass = 'bg-emerald-50 border-emerald-300'; statusIcon = `<span title="TAM EŞİT" class="text-lg">✅</span>`;
                             }
+
+                            
+
+                            // 1. BLOK: NET KAZANÇ (Eşitse tek kutu, değilse iki kutu)
+                            let netHtml = '';
+                            if (isNetEqual) {
+                                netHtml = `
+                                    <div class="flex flex-col items-center bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-lg shadow-sm">
+                                        <span class="text-[9px] font-black text-emerald-600 uppercase">Net Kazanç (Eşit)</span>
+                                        <span class="font-black text-emerald-700">${rPrice} ₺</span>
+                                    </div>`;
+                            } else {
+                                netHtml = `
+                                    <div class="flex flex-col items-center bg-gray-50 border border-gray-200 px-2 py-1.5 rounded-lg">
+                                        <span class="text-[8px] font-bold text-gray-500 uppercase">Hedef Net</span>
+                                        <span class="font-black text-gray-700">${rPrice} ₺</span>
+                                    </div>
+                                    <div class="flex flex-col items-center bg-white border border-gray-200 px-2 py-1.5 rounded-lg shadow-sm">
+                                        <span class="text-[8px] font-bold text-gray-500 uppercase">Canlı Net</span>
+                                        <span class="font-black ${diff < -0.6 ? 'text-red-600' : 'text-green-600'}">${liveNet.toFixed(2)} ₺</span>
+                                    </div>`;
+                            }
+
+                            // 2. BLOK: MÜŞTERİ FİYATI (Eşitse tek, değilse iki)
+                            let customerHtml = '';
+                            if (isCustomerEqual) {
+                                customerHtml = `
+                                    <div class="flex flex-col items-center bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg shadow-sm">
+                                        <span class="text-[9px] font-black text-blue-600 uppercase">Müşteri Fiyatı (Eşit)</span>
+                                        <span class="font-black text-blue-700">${cPrice.toFixed(2)} ₺</span>
+                                    </div>`;
+                            } else {
+                                customerHtml = `
+                                    <div class="flex flex-col items-center bg-orange-50 border border-orange-200 px-2 py-1.5 rounded-lg">
+                                        <span class="text-[8px] font-bold text-orange-600 uppercase">Önerilen Müşteri</span>
+                                        <span class="font-black text-orange-700">${cPrice.toFixed(2)} ₺</span>
+                                    </div>
+                                    <div class="flex flex-col items-center bg-white border border-gray-200 px-2 py-1.5 rounded-lg shadow-sm">
+                                        <span class="text-[8px] font-bold text-gray-500 uppercase">Sitede Müşteri</span>
+                                        <span class="font-black text-gray-800">${liveCustomer.toFixed(2)} ₺</span>
+                                    </div>`;
+                            }
+
+                            // 3. BLOK: LİSTE FİYATI (SİTEYE GİRİLECEK)
+                            let listedHtml = '';
+                            if (isListedEqual) {
+                                listedHtml = `
+                                    <div class="flex flex-col items-center bg-emerald-600 border border-emerald-700 px-4 py-1.5 rounded-lg shadow-md">
+                                        <span class="text-[9px] font-black text-emerald-100 uppercase">Site Fiyatı (TAM UYUM)</span>
+                                        <span class="font-black text-white text-lg">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</span>
+                                    </div>`;
+                            } else {
+                                listedHtml = `
+                                    <div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-center bg-rose-600 border border-rose-700 px-3 py-1.5 rounded-lg cursor-pointer hover:bg-rose-700 shadow-md transition" title="Kopyala">
+                                        <span class="text-[8px] font-black text-rose-100 uppercase">Önerilen Site</span>
+                                        <div class="font-black text-white text-base">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</div>
+                                    </div>
+                                    <div class="flex flex-col items-center bg-white border border-gray-300 px-3 py-1.5 rounded-lg shadow-sm">
+                                        <span class="text-[8px] font-black text-gray-600 uppercase">Sitedeki Liste</span>
+                                        <span class="font-black text-gray-800 text-base">${liveListed.toFixed(2)} ₺</span>
+                                    </div>`;
+                            }
+
+                            rightPanelHtml = `
+                                <div class="flex items-center justify-end gap-1.5 w-full xl:w-[85%] flex-wrap sm:flex-nowrap pl-2">
+                                    <div class="flex gap-1 border-r border-gray-200 pr-2">${netHtml}</div>
+                                    <div class="flex gap-1 border-r border-gray-200 pr-2">${customerHtml}</div>
+                                    <div class="flex gap-1">${listedHtml}</div>
+                                </div>
+                            `;
+
+                        } else {
+                            // EŞLEŞMEDİ DURUMU
+                            rowBgClass = 'bg-gray-100 border-gray-300 opacity-80 grayscale';
+                            statusIcon = `<span title="Sitede Bulunamadı" class="text-lg">❓</span>`;
+                            rightPanelHtml = `
+                                <div class="flex items-center justify-end w-full">
+                                    <div class="bg-gray-200 text-gray-500 font-black px-4 py-2 rounded-lg text-sm">SİTEDE EŞLEŞMEDİ</div>
+                                </div>
+                            `;
                         }
                     }
 
                     html += `
-                        <div class="flex items-center justify-between p-2 sm:p-3 border ${borderClass} ${rowBgClass} rounded-xl shadow-sm hover:shadow-md transition">
-                            <div class="flex items-center gap-2 w-1/3 sm:w-1/2 overflow-hidden">
-                                ${statusIcon}
-                                <img src="${p.image && p.image.trim() !== '' ? p.image : 'https://via.placeholder.com/150'}" class="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded border border-white shadow-sm flex-shrink-0">
-                                <span class="font-bold text-gray-800 text-[10px] sm:text-sm truncate" title="${p.name}">${p.name}</span>
+                        <div class="flex flex-col xl:flex-row items-center justify-between p-2.5 sm:p-3 border ${borderClass} ${rowBgClass} rounded-xl shadow-sm hover:shadow-md transition gap-3">
+                            <div class="flex items-center gap-3 w-full xl:w-fit overflow-hidden whitespace-nowrap pr-2">
+                                <div class="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm border border-gray-200 flex-shrink-0">${statusIcon}</div>
+                                <img src="${p.image && p.image.trim() !== '' ? p.image : 'https://via.placeholder.com/150'}" class="w-10 h-10 object-cover rounded border border-white shadow-sm flex-shrink-0">
+                                <span class="font-bold text-gray-800 text-sm truncate" title="${p.name}">${p.name}</span>
                             </div>
-                            ${priceSectionHtml}
+                            ${rightPanelHtml}
                         </div>
                     `;
                 });
                 html += `</div></div>`;
                 container.innerHTML += html;
             });
+                
 
             if(!hasAnyProduct) {
                 container.innerHTML += '<div class="text-center text-gray-400 font-bold mt-10">Bu menüde listelenecek ürün bulunamadı. Lütfen ürün ekleyin.</div>';
             }
 
-            // AKILLI KAYDIRICIYI BAŞLAT
+            // AKILLI KAYDIRICI
             setTimeout(() => {
                 const savedCatIndex = localStorage.getItem('last_sys_category') || "0";
                 scrollToSysCatIndex(savedCatIndex, false); 
