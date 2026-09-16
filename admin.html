@@ -5217,7 +5217,7 @@
             });
         };
 
-       // --- 📋 TABLO VE AKILLI KATLANAN KUTU MOTORU (DEDEKTİFLİ VERSİYON) ---
+      // --- 📋 TABLO VE AKILLI KATLANAN KUTU MOTORU (OK İKONLU VERSİYON) ---
         window.renderSystemPricesList = function(platform) {
             window.currentSysPlatform = platform; // Rozet geçişleri için platformu hafızaya al
 
@@ -5337,6 +5337,11 @@
             container.innerHTML = '';
             let hasAnyProduct = false;
 
+            // Kırmızı Aşağı Ok (Zarar)
+            const downArrowSVG = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>`;
+            // Yeşil Yukarı Ok (Ekstra Kar)
+            const upArrowSVG = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>`;
+
             categoriesTR.forEach((cat, catIndex) => {
                 const catProducts = products.filter(p => p.category === cat && !p.isArchived);
                 if(catProducts.length === 0) return;
@@ -5348,7 +5353,7 @@
                             <div class="flex items-center gap-2"><span>📌</span> ${cat}</div>
                             <span class="text-[9px] sm:text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-lg border ${borderClass} shadow-inner mt-0.5">${commissionText}</span>
                         </h3>
-                        <div class="flex flex-col gap-3 mt-3">
+                        <div class="flex flex-col gap-2.5 mt-3">
                 `;
                 
                 catProducts.sort((a,b) => (a.order || 9999) - (b.order || 9999)).forEach(p => {
@@ -5379,26 +5384,30 @@
                             const isListedEqual = Math.abs(pPrice - liveListed) <= 1.5;
 
                             const diff = liveNet - rPrice;
-                            if (diff < -1.5) { rowBgClass = 'bg-red-50 border-red-300'; statusIcon = `<span title="ZARAR!" class="text-lg">🚨</span>`; } 
-                            else if (diff > 1.5) { rowBgClass = 'bg-green-50 border-green-300'; statusIcon = `<span title="EKSTRA KÂR" class="text-lg">🤑</span>`; } 
+                            if (diff < -1.5) { rowBgClass = 'bg-red-50 border-red-200'; statusIcon = `<div title="ZARAR!" class="flex items-center justify-center">${downArrowSVG}</div>`; } 
+                            else if (diff > 1.5) { rowBgClass = 'bg-green-50 border-green-200'; statusIcon = `<div title="EKSTRA KÂR" class="flex items-center justify-center">${upArrowSVG}</div>`; } 
                             else { rowBgClass = 'bg-emerald-50 border-emerald-300'; statusIcon = `<span title="TAM EŞİT" class="text-lg">✅</span>`; }
 
                             let netHtml = isNetEqual 
-                                ? `<div class="flex flex-col items-center justify-center bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-lg shadow-sm w-full"><span class="text-[9px] font-black text-emerald-600 uppercase">Net Kazanç (Eşit)</span><span class="font-black text-emerald-700 text-base">${rPrice} ₺</span></div>`
-                                : `<div class="flex gap-1 w-full"><div class="flex flex-col items-center bg-gray-50 border border-gray-200 px-2 py-1.5 rounded-lg w-1/2"><span class="text-[8px] font-bold text-gray-500 uppercase text-center leading-tight">Hedef Net</span><span class="font-black text-gray-700">${rPrice} ₺</span></div><div class="flex flex-col items-center bg-white border border-gray-200 px-2 py-1.5 rounded-lg shadow-sm w-1/2"><span class="text-[8px] font-bold text-gray-500 uppercase text-center leading-tight">Canlı Net</span><span class="font-black ${diff < -1.5 ? 'text-red-600' : 'text-green-600'}">${liveNet.toFixed(2)} ₺</span></div></div>`;
+                                ? `<div class="flex flex-col items-center justify-center bg-emerald-100 border border-emerald-300 rounded-md w-full h-10 px-1"><span class="text-[8px] font-black text-emerald-600 uppercase leading-none mb-1">Net Kazanç (Eşit)</span><span class="font-black text-emerald-700 text-sm leading-none">${rPrice} ₺</span></div>`
+                                : `<div class="grid grid-cols-2 gap-1 w-full h-10"><div class="flex flex-col items-center justify-center bg-gray-50 border border-gray-200 rounded-md px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Hedef Net</span><span class="font-black text-gray-700 text-xs leading-none">${rPrice} ₺</span></div><div class="flex flex-col items-center justify-center bg-white border border-gray-200 rounded-md shadow-sm px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Canlı Net</span><span class="font-black ${diff < -1.5 ? 'text-red-600' : 'text-green-600'} text-xs leading-none">${liveNet.toFixed(2)} ₺</span></div></div>`;
 
                             let customerHtml = isCustomerEqual 
-                                ? `<div class="flex flex-col items-center justify-center bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg shadow-sm w-full"><span class="text-[9px] font-black text-blue-600 uppercase">Müşteri (Eşit)</span><span class="font-black text-blue-700 text-base">${cPrice.toFixed(2)} ₺</span></div>`
-                                : `<div class="flex gap-1 w-full"><div class="flex flex-col items-center bg-orange-50 border border-orange-200 px-2 py-1.5 rounded-lg w-1/2"><span class="text-[8px] font-bold text-orange-600 uppercase text-center leading-tight">Önerilen Müşteri</span><span class="font-black text-orange-700">${cPrice.toFixed(2)} ₺</span></div><div class="flex flex-col items-center bg-white border border-gray-200 px-2 py-1.5 rounded-lg shadow-sm w-1/2"><span class="text-[8px] font-bold text-gray-500 uppercase text-center leading-tight">Sitede Müşteri</span><span class="font-black text-gray-800">${liveCustomer.toFixed(2)} ₺</span></div></div>`;
+                                ? `<div class="flex flex-col items-center justify-center bg-blue-50 border border-blue-200 rounded-md w-full h-10 px-1"><span class="text-[8px] font-black text-blue-600 uppercase leading-none mb-1">Müşteri (Eşit)</span><span class="font-black text-blue-700 text-sm leading-none">${cPrice.toFixed(2)} ₺</span></div>`
+                                : `<div class="grid grid-cols-2 gap-1 w-full h-10"><div class="flex flex-col items-center justify-center bg-orange-50 border border-orange-200 rounded-md px-1"><span class="text-[7px] font-bold text-orange-600 uppercase text-center leading-none mb-1">Önerilen Müşteri</span><span class="font-black text-orange-700 text-xs leading-none">${cPrice.toFixed(2)} ₺</span></div><div class="flex flex-col items-center justify-center bg-white border border-gray-200 rounded-md shadow-sm px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Sitede Müşteri</span><span class="font-black text-gray-800 text-xs leading-none">${liveCustomer.toFixed(2)} ₺</span></div></div>`;
 
                             let listedHtml = isListedEqual 
-                                ? `<div class="flex flex-col items-center justify-center bg-emerald-600 border border-emerald-700 px-4 py-1.5 rounded-lg shadow-md w-full h-full"><span class="text-[9px] font-black text-emerald-100 uppercase">Site Fiyatı (TAM UYUM)</span><span class="font-black text-white text-lg">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</span></div>`
-                                : `<div class="flex gap-1 w-full h-full"><div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-center justify-center bg-rose-600 border border-rose-700 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-rose-700 shadow-md transition w-1/2" title="Kopyala"><span class="text-[8px] font-black text-rose-100 uppercase text-center leading-tight">Önerilen Liste</span><div class="font-black text-white text-base price-val-text">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</div></div><div class="flex flex-col items-center justify-center bg-white border border-gray-300 px-2 py-1.5 rounded-lg shadow-sm w-1/2"><span class="text-[8px] font-black text-gray-600 uppercase text-center leading-tight">Sitedeki Liste</span><span class="font-black text-gray-800 text-base">${liveListed.toFixed(2)} ₺</span></div></div>`;
+                                ? `<div class="flex flex-col items-center justify-center bg-emerald-600 border border-emerald-700 rounded-md shadow-sm w-full h-10 px-1"><span class="text-[8px] font-black text-emerald-100 uppercase leading-none mb-1">Site Fiyatı (TAM UYUM)</span><span class="font-black text-white text-sm leading-none">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</span></div>`
+                                : `<div class="grid grid-cols-2 gap-1 w-full h-10"><div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-center justify-center bg-rose-600 border border-rose-700 rounded-md cursor-pointer hover:bg-rose-700 shadow-sm transition px-1" title="Kopyala"><span class="text-[7px] font-black text-rose-100 uppercase text-center leading-none mb-1">Önerilen Liste</span><div class="font-black text-white text-xs leading-none price-val-text">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</div></div><div class="flex flex-col items-center justify-center bg-white border border-gray-300 rounded-md shadow-sm px-1"><span class="text-[7px] font-black text-gray-600 uppercase text-center leading-none mb-1">Sitedeki Liste</span><span class="font-black text-gray-800 text-xs leading-none">${liveListed.toFixed(2)} ₺</span></div></div>`;
 
-                            rightPanelHtml = `<div class="flex items-stretch justify-end gap-1.5 w-full xl:w-[85%] flex-wrap sm:flex-nowrap pl-2"><div class="flex flex-1 border-r border-gray-200 pr-1.5 min-w-[130px]">${netHtml}</div><div class="flex flex-1 border-r border-gray-200 pr-1.5 min-w-[130px]">${customerHtml}</div><div class="flex flex-[1.2] min-w-[150px]">${listedHtml}</div></div>`;
+                            rightPanelHtml = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2 w-full xl:w-[480px] 2xl:w-[540px] flex-shrink-0 ml-auto border-l border-gray-100 pl-2 sm:pl-3">
+                                ${netHtml}
+                                ${customerHtml}
+                                ${listedHtml}
+                            </div>`;
                         } else {
-                            rowBgClass = 'bg-gray-100 border-gray-300 opacity-80 grayscale'; statusIcon = `<span title="Sitede Bulunamadı" class="text-lg">❓</span>`;
-                            rightPanelHtml = `<div class="flex items-center justify-end w-full"><div class="bg-gray-200 text-gray-500 font-black px-4 py-2 rounded-lg text-sm">SİTEDE EŞLEŞMEDİ</div></div>`;
+                            rowBgClass = 'bg-gray-50 border-gray-200 opacity-80 grayscale'; statusIcon = `<span title="Sitede Bulunamadı" class="text-lg">❓</span>`;
+                            rightPanelHtml = `<div class="flex items-center justify-end w-full xl:w-[480px] flex-shrink-0 ml-auto border-l border-gray-100 pl-2 sm:pl-3"><div class="bg-gray-200 text-gray-500 font-black px-4 py-2 rounded-lg text-sm w-full text-center">SİTEDE EŞLEŞMEDİ</div></div>`;
                         }
                     } else if (platform === 'my') {
                         let liveData = null;
@@ -5415,29 +5424,42 @@
                             const isListedEqual = Math.abs(pPrice - liveListed) <= 1.5;
 
                             const diff = liveNet - rPrice;
-                            if (diff < -1.5) { rowBgClass = 'bg-red-50 border-red-300'; statusIcon = `<span title="ZARAR!" class="text-lg">🚨</span>`; } 
-                            else if (diff > 1.5) { rowBgClass = 'bg-green-50 border-green-300'; statusIcon = `<span title="EKSTRA KÂR" class="text-lg">🤑</span>`; } 
+                            if (diff < -1.5) { rowBgClass = 'bg-red-50 border-red-200'; statusIcon = `<div title="ZARAR!" class="flex items-center justify-center">${downArrowSVG}</div>`; } 
+                            else if (diff > 1.5) { rowBgClass = 'bg-green-50 border-green-200'; statusIcon = `<div title="EKSTRA KÂR" class="flex items-center justify-center">${upArrowSVG}</div>`; } 
                             else { rowBgClass = 'bg-emerald-50 border-emerald-300'; statusIcon = `<span title="TAM EŞİT" class="text-lg">✅</span>`; }
 
                             let netHtml = isNetEqual 
-                                ? `<div class="flex flex-col items-center justify-center bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-lg shadow-sm w-full"><span class="text-[9px] font-black text-emerald-600 uppercase">Net Kazanç (Eşit)</span><span class="font-black text-emerald-700 text-base">${rPrice} ₺</span></div>`
-                                : `<div class="flex gap-1 w-full"><div class="flex flex-col items-center bg-gray-50 border border-gray-200 px-2 py-1.5 rounded-lg w-1/2"><span class="text-[8px] font-bold text-gray-500 uppercase text-center leading-tight">Hedef Net</span><span class="font-black text-gray-700">${rPrice} ₺</span></div><div class="flex flex-col items-center bg-white border border-gray-200 px-2 py-1.5 rounded-lg shadow-sm w-1/2"><span class="text-[8px] font-bold text-gray-500 uppercase text-center leading-tight">Canlı Net</span><span class="font-black ${diff < -1.5 ? 'text-red-600' : 'text-green-600'}">${liveNet.toFixed(2)} ₺</span></div></div>`;
+                                ? `<div class="flex flex-col items-center justify-center bg-emerald-100 border border-emerald-300 rounded-md w-full h-10 px-1"><span class="text-[8px] font-black text-emerald-600 uppercase leading-none mb-1">Net Kazanç (Eşit)</span><span class="font-black text-emerald-700 text-sm leading-none">${rPrice} ₺</span></div>`
+                                : `<div class="grid grid-cols-2 gap-1 w-full h-10"><div class="flex flex-col items-center justify-center bg-gray-50 border border-gray-200 rounded-md px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Hedef Net</span><span class="font-black text-gray-700 text-xs leading-none">${rPrice} ₺</span></div><div class="flex flex-col items-center justify-center bg-white border border-gray-200 rounded-md shadow-sm px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Canlı Net</span><span class="font-black ${diff < -1.5 ? 'text-red-600' : 'text-green-600'} text-xs leading-none">${liveNet.toFixed(2)} ₺</span></div></div>`;
 
                             let listedHtml = isListedEqual 
-                                ? `<div class="flex flex-col items-center justify-center bg-orange-500 border border-orange-600 px-4 py-1.5 rounded-lg shadow-md w-full h-full"><span class="text-[9px] font-black text-orange-50 uppercase">Site Fiyatı (TAM UYUM)</span><span class="font-black text-white text-lg">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</span></div>`
-                                : `<div class="flex gap-1 w-full h-full"><div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-center justify-center bg-orange-500 border border-orange-600 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-orange-600 shadow-md transition w-1/2" title="Kopyala"><span class="text-[8px] font-black text-orange-100 uppercase text-center leading-tight">Önerilen Liste</span><div class="font-black text-white text-base price-val-text">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</div></div><div class="flex flex-col items-center justify-center bg-white border border-gray-300 px-2 py-1.5 rounded-lg shadow-sm w-1/2"><span class="text-[8px] font-black text-gray-600 uppercase text-center leading-tight">Sitedeki Liste</span><span class="font-black text-gray-800 text-base">${liveListed.toFixed(2)} ₺</span></div></div>`;
+                                ? `<div class="flex flex-col items-center justify-center bg-orange-500 border border-orange-600 rounded-md shadow-sm w-full h-10 px-1"><span class="text-[8px] font-black text-orange-50 uppercase leading-none mb-1">Site Fiyatı (TAM UYUM)</span><span class="font-black text-white text-sm leading-none">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</span></div>`
+                                : `<div class="grid grid-cols-2 gap-1 w-full h-10"><div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-center justify-center bg-orange-500 border border-orange-600 rounded-md cursor-pointer hover:bg-orange-600 shadow-sm transition px-1" title="Kopyala"><span class="text-[7px] font-black text-orange-100 uppercase text-center leading-none mb-1">Önerilen Liste</span><div class="font-black text-white text-xs leading-none price-val-text">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</div></div><div class="flex flex-col items-center justify-center bg-white border border-gray-300 rounded-md shadow-sm px-1"><span class="text-[7px] font-black text-gray-600 uppercase text-center leading-none mb-1">Sitedeki Liste</span><span class="font-black text-gray-800 text-xs leading-none">${liveListed.toFixed(2)} ₺</span></div></div>`;
 
-                            rightPanelHtml = `<div class="flex items-stretch justify-end gap-1.5 w-full xl:w-[75%] flex-wrap sm:flex-nowrap pl-2"><div class="flex flex-[1] border-r border-gray-200 pr-1.5 min-w-[130px]">${netHtml}</div><div class="flex flex-[1.2] min-w-[150px]">${listedHtml}</div></div>`;
+                            rightPanelHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 w-full xl:w-[320px] 2xl:w-[360px] flex-shrink-0 ml-auto border-l border-gray-100 pl-2 sm:pl-3">
+                                ${netHtml}
+                                ${listedHtml}
+                            </div>`;
                         } else {
-                            rowBgClass = 'bg-gray-100 border-gray-300 opacity-80 grayscale'; statusIcon = `<span title="Sitede Bulunamadı" class="text-lg">❓</span>`;
-                            rightPanelHtml = `<div class="flex items-center justify-end w-full"><div class="bg-gray-200 text-gray-500 font-black px-4 py-2 rounded-lg text-sm">SİTEDE EŞLEŞMEDİ</div></div>`;
+                            rowBgClass = 'bg-gray-50 border-gray-200 opacity-80 grayscale'; statusIcon = `<span title="Sitede Bulunamadı" class="text-lg">❓</span>`;
+                            rightPanelHtml = `<div class="flex items-center justify-end w-full xl:w-[320px] flex-shrink-0 ml-auto border-l border-gray-100 pl-2 sm:pl-3"><div class="bg-gray-200 text-gray-500 font-black px-4 py-2 rounded-lg text-sm w-full text-center">SİTEDE EŞLEŞMEDİ</div></div>`;
                         }
                     } else {
                         // Uber Eats Basit Tasarım
-                        rightPanelHtml = `<div class="flex items-center justify-end gap-3 sm:gap-6 w-full sm:w-1/2"><div class="flex flex-col items-end"><span class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Restoran Net</span><span class="font-black text-gray-700 text-sm">${rPrice} ₺</span></div><span class="hidden sm:flex text-gray-300 font-black text-lg">▶</span><div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-end bg-white px-4 py-1.5 rounded-lg border ${borderClass} shadow-sm cursor-pointer hover:bg-gray-50 active:scale-95 transition group" title="Kopyala"><span class="text-[9px] font-black ${activeColor} uppercase tracking-wider transition">Siteye Girilecek Önerilen</span><div class="font-black ${activeColor} text-lg price-val-text">${pPrice} ₺</div></div></div>`;
+                        rightPanelHtml = `<div class="flex items-center justify-end gap-3 sm:gap-6 w-full sm:w-1/2 flex-shrink-0 ml-auto border-l border-gray-100 pl-2 sm:pl-3"><div class="flex flex-col items-end"><span class="text-[8px] font-bold text-gray-500 uppercase tracking-wider mb-1">Restoran Net</span><span class="font-black text-gray-700 text-sm leading-none">${rPrice} ₺</span></div><span class="hidden sm:flex text-gray-300 font-black text-lg">▶</span><div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-end bg-white px-3 py-1.5 rounded-md border ${borderClass} shadow-sm cursor-pointer hover:bg-gray-50 active:scale-95 transition group" title="Kopyala"><span class="text-[8px] font-black ${activeColor} uppercase tracking-wider transition mb-1">Siteye Girilecek Önerilen</span><div class="font-black ${activeColor} text-sm leading-none price-val-text">${pPrice} ₺</div></div></div>`;
                     }
 
-                    html += `<div class="flex flex-col xl:flex-row items-center justify-between p-2.5 sm:p-3 border ${borderClass} ${rowBgClass} rounded-xl shadow-sm hover:shadow-md transition gap-3"><div class="flex items-center gap-3 w-full xl:w-fit overflow-hidden whitespace-nowrap pr-2"><div class="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm border border-gray-200 flex-shrink-0">${statusIcon}</div><img src="${p.image && p.image.trim() !== '' ? p.image : 'https://via.placeholder.com/150'}" class="w-10 h-10 object-cover rounded border border-white shadow-sm flex-shrink-0"><span class="font-bold text-gray-800 text-sm truncate" title="${p.name}">${p.name}</span></div>${rightPanelHtml}</div>`;
+                    // 🚀 ÜRÜN İSMİ ALANINA (SOL TARAF) DEVASA YER AÇAN YENİ YAPI
+                    html += `
+                        <div class="flex flex-col xl:flex-row items-center justify-between p-2 border ${borderClass} ${rowBgClass} rounded-xl shadow-sm hover:shadow-md transition gap-2">
+                            <div class="flex items-center gap-2.5 flex-1 min-w-0 pr-2 w-full">
+                                <div class="w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm border border-gray-200 flex-shrink-0">${statusIcon}</div>
+                                <img src="${p.image && p.image.trim() !== '' ? p.image : 'https://via.placeholder.com/150'}" class="w-9 h-9 object-cover rounded border border-white shadow-sm flex-shrink-0">
+                                <span class="font-bold text-gray-800 text-[13px] sm:text-sm truncate w-full" title="${p.name}">${p.name}</span>
+                            </div>
+                            ${rightPanelHtml}
+                        </div>
+                    `;
                 });
                 html += `</div></div>`;
                 container.innerHTML += html;
@@ -5451,36 +5473,33 @@
                             <div class="flex items-center gap-2"><span>⚠️</span> Menüde Olmayan Ürünler</div>
                             <span class="text-[9px] sm:text-[10px] font-bold text-purple-500 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200 shadow-inner mt-0.5">Sadece Sitede Var</span>
                         </h3>
-                        <div class="flex flex-col gap-3 mt-3">
+                        <div class="flex flex-col gap-2.5 mt-3">
                 `;
                 
                 let liveSource = platform === 'ys' ? window.liveYsPrices : window.liveMyPrices;
                 
                 unmatchedKeys.forEach(uKey => {
-                    // Anahtarı (key) güzel okunur bir isme dönüştür
                     let displayName = uKey.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                     let liveListed = parseFloat(liveSource[uKey]);
                     let liveCustomer = platform === 'ys' ? liveListed * 0.80 : liveListed;
                     let liveNet = platform === 'ys' ? liveCustomer * 0.88 : liveListed * 0.89;
                     
-                    let netHtml = `<div class="flex flex-col items-center justify-center bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-lg shadow-sm w-full"><span class="text-[9px] font-black text-purple-600 uppercase text-center leading-tight">Mevcut Net Kazanç</span><span class="font-black text-purple-700 text-base">${liveNet.toFixed(2)} ₺</span></div>`;
-                    
-                    let customerHtml = platform === 'ys' ? `<div class="flex flex-col items-center justify-center bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm w-full"><span class="text-[9px] font-bold text-gray-500 uppercase text-center leading-tight">Sitede Müşteri</span><span class="font-black text-gray-800 text-base">${liveCustomer.toFixed(2)} ₺</span></div>` : '';
-                    
-                    let listedHtml = `<div class="flex flex-col items-center justify-center bg-gray-100 border border-gray-300 px-4 py-1.5 rounded-lg shadow-sm w-full h-full"><span class="text-[9px] font-black text-gray-500 uppercase text-center leading-tight">Sitedeki Liste</span><span class="font-black text-gray-700 text-lg">${liveListed.toFixed(2)} ₺</span></div>`;
+                    let netHtml = `<div class="flex flex-col items-center justify-center bg-purple-50 border border-purple-200 rounded-md w-full h-10 px-1"><span class="text-[7px] font-black text-purple-600 uppercase text-center leading-none mb-1">Mevcut Net Kazanç</span><span class="font-black text-purple-700 text-xs leading-none">${liveNet.toFixed(2)} ₺</span></div>`;
+                    let customerHtml = platform === 'ys' ? `<div class="flex flex-col items-center justify-center bg-white border border-gray-200 rounded-md shadow-sm w-full h-10 px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Sitede Müşteri</span><span class="font-black text-gray-800 text-xs leading-none">${liveCustomer.toFixed(2)} ₺</span></div>` : '';
+                    let listedHtml = `<div class="flex flex-col items-center justify-center bg-gray-100 border border-gray-300 rounded-md shadow-sm w-full h-10 px-1"><span class="text-[7px] font-black text-gray-500 uppercase text-center leading-none mb-1">Sitedeki Liste</span><span class="font-black text-gray-700 text-sm leading-none">${liveListed.toFixed(2)} ₺</span></div>`;
 
-                    let rightPanelHtml = `<div class="flex items-stretch justify-end gap-1.5 w-full xl:w-[75%] flex-wrap sm:flex-nowrap pl-2">
-                        <div class="flex flex-[1] border-r border-gray-200 pr-1.5 min-w-[130px]">${netHtml}</div>
-                        ${platform === 'ys' ? `<div class="flex flex-[1] border-r border-gray-200 pr-1.5 min-w-[130px]">${customerHtml}</div>` : ''}
-                        <div class="flex flex-[1.2] min-w-[150px]">${listedHtml}</div>
+                    let rightPanelHtml = `<div class="grid grid-cols-1 sm:grid-cols-${platform === 'ys' ? '3' : '2'} gap-1.5 sm:gap-2 w-full xl:w-[${platform === 'ys' ? '480px' : '320px'}] 2xl:w-[${platform === 'ys' ? '540px' : '360px'}] flex-shrink-0 ml-auto border-l border-purple-200 pl-2 sm:pl-3">
+                        ${netHtml}
+                        ${customerHtml}
+                        ${listedHtml}
                     </div>`;
 
                     uHtml += `
-                        <div class="flex flex-col xl:flex-row items-center justify-between p-2.5 sm:p-3 border border-purple-200 bg-purple-50/20 rounded-xl shadow-sm hover:shadow-md transition gap-3">
-                            <div class="flex items-center gap-3 w-full xl:w-fit overflow-hidden whitespace-nowrap pr-2">
-                                <div class="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm border border-purple-200 flex-shrink-0"><span class="text-lg">👽</span></div>
-                                <img src="https://via.placeholder.com/150x150?text=Sitede+Var" class="w-10 h-10 object-cover rounded border border-white shadow-sm flex-shrink-0 grayscale opacity-80">
-                                <span class="font-bold text-gray-800 text-sm truncate" title="${displayName}">${displayName}</span>
+                        <div class="flex flex-col xl:flex-row items-center justify-between p-2 border border-purple-200 bg-purple-50/30 rounded-xl shadow-sm hover:shadow-md transition gap-2">
+                            <div class="flex items-center gap-2.5 flex-1 min-w-0 pr-2 w-full">
+                                <div class="w-7 h-7 flex items-center justify-center bg-white rounded-full shadow-sm border border-purple-200 flex-shrink-0"><span class="text-base">👽</span></div>
+                                <img src="https://via.placeholder.com/150x150?text=Sitede+Var" class="w-9 h-9 object-cover rounded border border-white shadow-sm flex-shrink-0 grayscale opacity-80">
+                                <span class="font-bold text-gray-800 text-[13px] sm:text-sm truncate w-full" title="${displayName}">${displayName}</span>
                             </div>
                             ${rightPanelHtml}
                         </div>
