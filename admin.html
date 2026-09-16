@@ -5088,12 +5088,50 @@
                 finally { btn.innerHTML = '✅ Veriyi İşle ve Kıyasla'; btn.disabled = false; }
             });
         };
-       // --- 🧮 SİSTEM FİYATLARI ANA EKRANI ---
+      // --- 🌐 GLOBAL PLATFORM SEÇİM MODALI ---
+        window.openPlatformSelectModal = function() {
+            const modalId = 'platformSelectModal';
+            if (document.getElementById(modalId)) document.getElementById(modalId).remove();
+
+            const html = `
+            <div id="${modalId}" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex justify-center items-center p-4">
+                <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm relative animate-pop-in border-t-8 border-blue-500">
+                    <button onclick="document.getElementById('${modalId}').remove()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-800 font-black text-xl transition">✖</button>
+                    <h2 class="text-xl font-black text-gray-800 mb-2 flex items-center gap-2"><span>🔄</span> Veri Yükle</h2>
+                    <p class="text-xs text-gray-500 mb-5 font-bold">Hangi platformun fiyat listesini güncelleyeceksiniz?</p>
+                    
+                    <div class="flex flex-col gap-3">
+                        <button onclick="document.getElementById('${modalId}').remove(); scanYemeksepetiLive();" class="bg-rose-50 border-2 border-rose-200 text-rose-600 font-black p-4 rounded-xl hover:bg-rose-600 hover:text-white transition shadow-sm active:scale-95 flex items-center justify-between group">
+                            <span class="flex items-center gap-2"><span class="text-xl">🥡</span> Yemeksepeti</span>
+                            <span class="text-rose-400 group-hover:text-rose-200">▶</span>
+                        </button>
+                        <button onclick="document.getElementById('${modalId}').remove(); scanMigrosLive();" class="bg-orange-50 border-2 border-orange-200 text-orange-500 font-black p-4 rounded-xl hover:bg-orange-500 hover:text-white transition shadow-sm active:scale-95 flex items-center justify-between group">
+                            <span class="flex items-center gap-2"><span class="text-xl">🛒</span> Migros Yemek</span>
+                            <span class="text-orange-400 group-hover:text-orange-200">▶</span>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        // 🚀 YENİ: ROZETE TIKLANINCA PLATFORMLAR ARASI GEÇİŞ YAPAN MOTOR
+        window.cyclePlatform = function() {
+            if (window.currentSysPlatform === 'ys') renderSystemPricesList('my');
+            else if (window.currentSysPlatform === 'my') renderSystemPricesList('ue');
+            else renderSystemPricesList('ys');
+        };
+
+        // --- 🧮 SİSTEM FİYATLARI ANA EKRANI ---
         window.renderSystemPricesModule = function() {
             setActiveTab('showSystemPrices');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             const container = document.getElementById('contentContainer');
             if(container) container.className = 'w-full pb-0 md:pb-0 px-2 sm:px-4 !max-w-none'; 
+            
+            // 🚀 DİPTEN SIFIRLAMA (Alttaki boşlukları yok eder)
+            const mainEl = document.querySelector('main');
+            if(mainEl) mainEl.style.paddingBottom = "0px";
 
             let categoryNavHtml = `<div class="flex overflow-x-auto scrollbar-none gap-2 py-2 mb-1 border-b border-gray-100 flex-shrink-0" id="sysCategoryNavbar">`;
             categoriesTR.forEach((cat, idx) => {
@@ -5101,48 +5139,57 @@
             });
             categoryNavHtml += `</div>`;
 
+            // DİKKAT: Yükseklik calc(100vh - 60px) olarak ayarlandı, tam sayfa aşağı akar.
             loadModule(`
-                <div class="flex flex-col xl:flex-row w-full gap-4 items-start h-[79dvh] md:h-[85dvh]">
-                    <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 animate-pop-in flex flex-col w-full xl:w-9/12 h-full">
-                        <div class="flex-shrink-0">
-                            <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 mb-1">
-                                <span>🧮</span> ${menuTitle} Fiyat Radarı
-                            </h2>
-                            <p class="text-xs text-gray-500 font-bold mb-3">Gerçek net kazancınızı görün. Sitedeki fiyatlar ile hedef fiyatlarınızı akıllı kutularla eşitleyin.</p>
+                <div class="flex flex-col xl:flex-row w-full gap-4 items-start" style="height: calc(100vh - 60px);">
+                    
+                    <!-- SOL PANEL (LİSTE ALANI) -->
+                    <div class="bg-white rounded-t-2xl shadow-sm border-t border-l border-r border-gray-100 animate-pop-in flex flex-col w-full xl:w-9/12 h-full relative overflow-hidden pt-4 sm:pt-5 px-3 sm:px-5 pb-0">
+                        
+                        <!-- 🚀 YENİ: KAYDIRINCA SAĞ ÜSTTE ÇIKAN MİNİ ROZET (BUTON) -->
+                        <div id="floatingPlatformIndicator" onclick="cyclePlatform()" class="hidden absolute top-4 right-5 z-[60] px-3 py-1.5 rounded-lg shadow-md font-black text-[10px] sm:text-xs text-white cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1" title="Platformu Değiştir"></div>
+
+                        <!-- KAYDIRMA ALANI -->
+                        <div id="radarScrollArea" class="w-full h-full overflow-y-auto scrollbar-none pb-20 relative">
                             
-                            <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-2">
-                                <div class="flex flex-col gap-1">
-                                    <button id="btnPlatformYS" class="platform-btn bg-rose-50 border-2 border-rose-200 text-rose-600 font-black py-2 sm:py-3 rounded-xl hover:bg-rose-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ys')">
+                            <!-- SABİT OLMAYAN ÜST MENÜ (Kaydırınca yukarı gider) -->
+                            <div id="radarHeaderArea" class="flex-shrink-0 mb-3">
+                                <div class="flex items-center justify-between mb-1 w-full">
+                                    <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2">
+                                        <span>🧮</span> ${menuTitle} Fiyat Radarı
+                                    </h2>
+                                    <!-- 🚀 YENİ: GÜNCELLEME SEMBOLÜ (Pop-up açar) -->
+                                    <button onclick="openPlatformSelectModal()" class="text-gray-400 hover:text-blue-600 transition hover:rotate-180 transform duration-500 bg-gray-50 hover:bg-blue-50 p-2 sm:p-2.5 rounded-xl border border-gray-200 hover:border-blue-200 shadow-sm" title="Platformdan Fiyat Yükle">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 font-bold mb-3 pr-10">Gerçek net kazancınızı görün. Sitedeki fiyatlar ile hedef fiyatlarınızı akıllı kutularla eşitleyin.</p>
+
+                                <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-2">
+                                    <button id="btnPlatformYS" class="platform-btn bg-rose-50 border-2 border-rose-200 text-rose-600 font-black py-2.5 sm:py-3 rounded-xl hover:bg-rose-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ys')">
                                         <span class="text-lg block sm:inline">🥡</span> Yemeksepeti
                                     </button>
-                                    <button id="btnScanYS" onclick="scanYemeksepetiLive()" class="hidden bg-blue-600 text-white border border-blue-700 py-2 rounded-lg font-black text-[10px] shadow-md hover:bg-blue-700 active:scale-95 transition flex items-center justify-center gap-1">
-                                        🔍 YENİ FİYATLARI YÜKLE
-                                    </button>
-                                </div>
-                                <div class="flex flex-col gap-1">
-                                    <button id="btnPlatformMY" class="platform-btn bg-orange-50 border-2 border-orange-200 text-orange-500 font-black w-full h-full py-2 sm:py-3 rounded-xl hover:bg-orange-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('my')">
+                                    <button id="btnPlatformMY" class="platform-btn bg-orange-50 border-2 border-orange-200 text-orange-500 font-black py-2.5 sm:py-3 rounded-xl hover:bg-orange-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('my')">
                                         <span class="text-lg block sm:inline">🛒</span> Migros Yemek
                                     </button>
-                                    <button id="btnScanMY" onclick="scanMigrosLive()" class="hidden bg-blue-600 text-white border border-blue-700 py-2 rounded-lg font-black text-[10px] shadow-md hover:bg-blue-700 active:scale-95 transition flex items-center justify-center gap-1">
-                                        🔍 YENİ FİYATLARI YÜKLE
-                                    </button>
-                                </div>
-                                <div>
-                                    <button id="btnPlatformUE" class="platform-btn bg-green-50 border-2 border-green-200 text-green-600 font-black w-full h-full py-2 sm:py-3 rounded-xl hover:bg-green-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ue')">
+                                    <button id="btnPlatformUE" class="platform-btn bg-green-50 border-2 border-green-200 text-green-600 font-black py-2.5 sm:py-3 rounded-xl hover:bg-green-100 transition shadow-sm text-xs sm:text-sm active:scale-95" onclick="renderSystemPricesList('ue')">
                                         <span class="text-lg block sm:inline">🚙</span> Uber Eats
                                     </button>
                                 </div>
+                                ${categoryNavHtml}
                             </div>
-                            ${categoryNavHtml}
+
+                            <!-- LİSTE KONTEYNERİ -->
+                            <div id="systemPricesListContainer" class="flex flex-col gap-3 pt-1"></div>
                         </div>
-                        <div id="systemPricesListContainer" class="flex-1 overflow-y-auto pr-2 pb-6 scrollbar-none flex flex-col gap-3 pt-2 scroll-smooth relative"></div>
                     </div>
+
+                    <!-- SAĞ PANEL (HESAPLAYICI - BURASI SABİTTİR) -->
                     <div id="systemPricesCalculatorContainer" class="hidden xl:flex w-full xl:w-3/12 bg-white rounded-2xl shadow-sm p-5 border border-gray-100 animate-pop-in flex-col gap-4 sticky top-0 h-fit"></div>
                 </div>
             `);
             
             if (typeof window.manualCalcBaseRestoranPrice === 'undefined') window.manualCalcBaseRestoranPrice = 0;
-
             if(!window.activeListeners) window.activeListeners = {};
             
             // YS Dinleyici
@@ -5151,12 +5198,10 @@
                 window.liveYsPrices = s.val() || {};
                 const listContainer = document.getElementById('systemPricesListContainer');
                 const ysBtn = document.getElementById('btnPlatformYS');
-                
                 if (listContainer) {
                     if (ysBtn && ysBtn.classList.contains('bg-rose-600')) {
                         renderSystemPricesList('ys'); 
                     } else if (ysBtn && !document.querySelector('.platform-btn.text-white')) {
-                        // 🚀 ÇÖZÜM: İlk defa açılıyorsa ve hiçbir buton tıklanmamışsa otomatik YS'yi aç
                         renderSystemPricesList('ys');
                     }
                 }
@@ -5172,8 +5217,10 @@
             });
         };
 
-        // --- 📋 TABLO VE AKILLI KATLANAN KUTU MOTORU ---
+       // --- 📋 TABLO VE AKILLI KATLANAN KUTU MOTORU (DEDEKTİFLİ VERSİYON) ---
         window.renderSystemPricesList = function(platform) {
+            window.currentSysPlatform = platform; // Rozet geçişleri için platformu hafızaya al
+
             document.querySelectorAll('.platform-btn').forEach(btn => {
                 btn.classList.remove('bg-rose-600', 'bg-orange-500', 'bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600', 'border-orange-500', 'border-green-600');
                 if(btn.id === 'btnPlatformYS') btn.classList.add('bg-rose-50', 'text-rose-600', 'border-rose-200');
@@ -5182,34 +5229,94 @@
             });
             
             let activeColor = ''; let bgLight = ''; let borderClass = ''; let commissionText = '';
-            const scanBtn = document.getElementById('btnScanYS');
-            const scanBtnMY = document.getElementById('btnScanMY');
+            
+            // 🚀 MİNİ ROZETİN GÜNCELLENMESİ VE TIKLANABİLİR YAPILMASI
+            const indicator = document.getElementById('floatingPlatformIndicator');
+            if(indicator) {
+                indicator.className = 'hidden absolute top-4 right-5 z-[60] px-3 py-2 rounded-xl shadow-lg font-black text-[10px] sm:text-xs text-white cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1';
+                if(platform === 'ys') {
+                    indicator.classList.add('bg-rose-600');
+                    indicator.innerHTML = '🥡 Yemeksepeti <span class="text-white/70 ml-1 text-base leading-none"></span>';
+                } else if(platform === 'my') {
+                    indicator.classList.add('bg-orange-500');
+                    indicator.innerHTML = '🛒 Migros Yemek <span class="text-white/70 ml-1 text-base leading-none"></span>';
+                } else if(platform === 'ue') {
+                    indicator.classList.add('bg-green-600');
+                    indicator.innerHTML = '🚙 Uber Eats <span class="text-white/70 ml-1 text-base leading-none"></span>';
+                }
+            }
 
             if(platform === 'ys') {
                 const btn = document.getElementById('btnPlatformYS');
-                if(btn) {
-                    btn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600');
-                    btn.classList.remove('bg-rose-50', 'text-rose-600');
-                }
+                if(btn) { btn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600'); btn.classList.remove('bg-rose-50', 'text-rose-600'); }
                 activeColor = 'text-rose-600'; bgLight = 'bg-rose-50'; borderClass = 'border-rose-200'; commissionText = '%20 İnd. + %12 Komisyon';
-                if(scanBtn) scanBtn.classList.remove('hidden'); if(scanBtnMY) scanBtnMY.classList.add('hidden'); 
             } else if(platform === 'my') {
                 const btn = document.getElementById('btnPlatformMY');
-                if(btn) {
-                    btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500');
-                    btn.classList.remove('bg-orange-50', 'text-orange-500');
-                }
+                if(btn) { btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500'); btn.classList.remove('bg-orange-50', 'text-orange-500'); }
                 activeColor = 'text-orange-600'; bgLight = 'bg-orange-50'; borderClass = 'border-orange-200'; commissionText = '%11 Komisyon';
-                if(scanBtn) scanBtn.classList.add('hidden'); if(scanBtnMY) scanBtnMY.classList.remove('hidden'); 
             } else if(platform === 'ue') {
                 const btn = document.getElementById('btnPlatformUE');
-                if(btn) {
-                    btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600');
-                    btn.classList.remove('bg-green-50', 'text-green-600');
-                }
+                if(btn) { btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600'); btn.classList.remove('bg-green-50', 'text-green-600'); }
                 activeColor = 'text-green-600'; bgLight = 'bg-green-50'; borderClass = 'border-green-200'; commissionText = '%38 Komisyon';
-                if(scanBtn) scanBtn.classList.add('hidden'); if(scanBtnMY) scanBtnMY.classList.add('hidden');
             }
+
+            // 🚀 DEDEKTİF MOTORU: Sitede olan ama Menüde (Localde) olmayanları ayıkla
+            let localToPlatformMap = new Map();
+            let matchedPlatformKeys = new Set();
+            let unmatchedKeys = [];
+
+            if (platform === 'ys' && window.liveYsPrices) {
+                products.forEach(p => {
+                    if (p.isArchived) return;
+                    let searchName = p.name.toLocaleLowerCase('tr-TR').trim();
+                    let safeSearchKey = searchName.replace(/[.#$\[\]\/]/g, "_");
+                    if (window.ysIsimSozlugu && window.ysIsimSozlugu[searchName]) safeSearchKey = window.ysIsimSozlugu[searchName].replace(/[.#$\[\]\/]/g, "_");
+                    
+                    let matchedKey = null;
+                    if (window.liveYsPrices[safeSearchKey]) {
+                        matchedKey = safeSearchKey;
+                    } else {
+                        for (let k in window.liveYsPrices) {
+                            let cleanK = k.replace(/arası /g, "").replace(/ sandviç/g, "").replace(/ menü/g, "").trim();
+                            let cleanS = safeSearchKey.replace(/arası /g, "").replace(/ sandviç/g, "").replace(/ menü/g, "").trim();
+                            if (cleanK === cleanS) { matchedKey = k; break; }
+                        }
+                    }
+                    if (matchedKey) {
+                        localToPlatformMap.set(p.key, matchedKey);
+                        matchedPlatformKeys.add(matchedKey);
+                    }
+                });
+                unmatchedKeys = Object.keys(window.liveYsPrices).filter(k => !matchedPlatformKeys.has(k));
+            } else if (platform === 'my' && window.liveMyPrices) {
+                products.forEach(p => {
+                    if (p.isArchived) return;
+                    let searchName = p.name.toLocaleLowerCase('tr-TR').trim();
+                    let safeSearchKey = searchName.replace(/[.#$\[\]\/]/g, "_");
+                    if (window.myIsimSozlugu && window.myIsimSozlugu[searchName]) safeSearchKey = window.myIsimSozlugu[searchName].replace(/[.#$\[\]\/]/g, "_");
+                    
+                    if (window.liveMyPrices[safeSearchKey]) {
+                        localToPlatformMap.set(p.key, safeSearchKey);
+                        matchedPlatformKeys.add(safeSearchKey);
+                    }
+                });
+                unmatchedKeys = Object.keys(window.liveMyPrices).filter(k => !matchedPlatformKeys.has(k));
+            }
+
+            // Kategori Barını (Navbar) Oluştur
+            let categoryNavHtml = '';
+            categoriesTR.forEach((cat, idx) => {
+                const catProducts = products.filter(p => p.category === cat && !p.isArchived);
+                if(catProducts.length > 0) {
+                    categoryNavHtml += `<button onclick="scrollToSysCatIndex('${idx}', true)" id="btn-sys-cat-${idx}" class="sys-cat-btn px-4 py-2 rounded-full border border-gray-200 text-[11px] font-bold text-gray-500 bg-white whitespace-nowrap hover:bg-orange-50 transition active:scale-95 flex-shrink-0 shadow-sm">${cat}</button>`;
+                }
+            });
+            // Eğer sistemde olmayan ürün yakalandıysa uyarı butonunu navbara ekle
+            if (unmatchedKeys.length > 0) {
+                categoryNavHtml += `<button onclick="scrollToSysCatIndex('unmatched', true)" id="btn-sys-cat-unmatched" class="sys-cat-btn px-4 py-2 rounded-full border border-purple-300 text-[11px] font-black text-purple-700 bg-purple-50 whitespace-nowrap hover:bg-purple-100 transition active:scale-95 flex-shrink-0 shadow-sm">⚠️ Menüde Olmayanlar (${unmatchedKeys.length})</button>`;
+            }
+            const navEl = document.getElementById('sysCategoryNavbar');
+            if (navEl) navEl.innerHTML = categoryNavHtml;
 
             // Hesaplayıcı HTML (Sağ Panel)
             let calcHtml = ''; let rPrice = window.manualCalcBaseRestoranPrice || 0; 
@@ -5237,9 +5344,9 @@
                 
                 let html = `
                     <div class="mb-5 sys-cat-section" id="sys-cat-${catIndex}">
-                        <h3 class="font-black ${activeColor} text-sm sm:text-base mb-2 border-b ${borderClass} pb-1 flex justify-between items-center sticky top-0 bg-white z-10 pt-1 shadow-sm px-1">
+                        <h3 class="font-black ${activeColor} text-sm sm:text-base mb-2 border-b ${borderClass} pb-1 flex flex-wrap items-center justify-start gap-3 sticky top-0 bg-white z-10 pt-1 shadow-sm px-1">
                             <div class="flex items-center gap-2"><span>📌</span> ${cat}</div>
-                            <span class="text-[9px] sm:text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-lg border ${borderClass} shadow-inner">${commissionText}</span>
+                            <span class="text-[9px] sm:text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded-lg border ${borderClass} shadow-inner mt-0.5">${commissionText}</span>
                         </h3>
                         <div class="flex flex-col gap-3 mt-3">
                 `;
@@ -5257,20 +5364,9 @@
 
                     if (platform === 'ys') {
                         let liveData = null;
-                        if (window.liveYsPrices && Object.keys(window.liveYsPrices).length > 0) {
-                            let searchName = p.name.toLocaleLowerCase('tr-TR').trim();
-                            // 🚀 ÇÖZÜM BURADA: Okurken de eğik çizgiyi / değiştiriyoruz!
-                            let safeSearchKey = searchName.replace(/[.#$\[\]\/]/g, "_");
-                            if (window.ysIsimSozlugu && window.ysIsimSozlugu[searchName]) safeSearchKey = window.ysIsimSozlugu[searchName].replace(/[.#$\[\]\/]/g, "_");
-                            liveData = window.liveYsPrices[safeSearchKey];
-                            
-                            if (!liveData) {
-                                for (let ysKey in window.liveYsPrices) {
-                                    let cleanYsKey = ysKey.replace(/arası /g, "").replace(/ sandviç/g, "").replace(/ menü/g, "").trim();
-                                    let cleanSearchName = safeSearchKey.replace(/arası /g, "").replace(/ sandviç/g, "").replace(/ menü/g, "").trim();
-                                    if (cleanYsKey === cleanSearchName) { liveData = window.liveYsPrices[ysKey]; break; }
-                                }
-                            }
+                        const matchedKey = localToPlatformMap.get(p.key);
+                        if (matchedKey && window.liveYsPrices) {
+                            liveData = window.liveYsPrices[matchedKey];
                         }
 
                         if (liveData) {
@@ -5306,12 +5402,9 @@
                         }
                     } else if (platform === 'my') {
                         let liveData = null;
-                        if (window.liveMyPrices && Object.keys(window.liveMyPrices).length > 0) {
-                            let searchName = p.name.toLocaleLowerCase('tr-TR').trim();
-                            // 🚀 ÇÖZÜM BURADA: Okurken de eğik çizgiyi / değiştiriyoruz!
-                            let safeSearchKey = searchName.replace(/[.#$\[\]\/]/g, "_");
-                            if (window.myIsimSozlugu && window.myIsimSozlugu[searchName]) safeSearchKey = window.myIsimSozlugu[searchName].replace(/[.#$\[\]\/]/g, "_");
-                            liveData = window.liveMyPrices[safeSearchKey];
+                        const matchedKey = localToPlatformMap.get(p.key);
+                        if (matchedKey && window.liveMyPrices) {
+                            liveData = window.liveMyPrices[matchedKey];
                         }
 
                         if (liveData) {
@@ -5350,32 +5443,148 @@
                 container.innerHTML += html;
             });
 
-            if(!hasAnyProduct) container.innerHTML += '<div class="text-center text-gray-400 font-bold mt-10">Bu menüde ürün bulunamadı.</div>';
+            // 🚀 DEDEKTİF KISMI: Sistemde olmayan ama Sitede olanlar (Sadece YS ve MY için)
+            if (unmatchedKeys.length > 0) {
+                let uHtml = `
+                    <div class="mb-5 sys-cat-section" id="sys-cat-unmatched">
+                        <h3 class="font-black text-purple-600 text-sm sm:text-base mb-2 border-b border-purple-200 pb-1 flex flex-wrap items-center justify-start gap-3 sticky top-0 bg-white z-10 pt-1 shadow-sm px-1">
+                            <div class="flex items-center gap-2"><span>⚠️</span> Menüde Olmayan Ürünler</div>
+                            <span class="text-[9px] sm:text-[10px] font-bold text-purple-500 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200 shadow-inner mt-0.5">Sadece Sitede Var</span>
+                        </h3>
+                        <div class="flex flex-col gap-3 mt-3">
+                `;
+                
+                let liveSource = platform === 'ys' ? window.liveYsPrices : window.liveMyPrices;
+                
+                unmatchedKeys.forEach(uKey => {
+                    // Anahtarı (key) güzel okunur bir isme dönüştür
+                    let displayName = uKey.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    let liveListed = parseFloat(liveSource[uKey]);
+                    let liveCustomer = platform === 'ys' ? liveListed * 0.80 : liveListed;
+                    let liveNet = platform === 'ys' ? liveCustomer * 0.88 : liveListed * 0.89;
+                    
+                    let netHtml = `<div class="flex flex-col items-center justify-center bg-purple-50 border border-purple-200 px-3 py-1.5 rounded-lg shadow-sm w-full"><span class="text-[9px] font-black text-purple-600 uppercase text-center leading-tight">Mevcut Net Kazanç</span><span class="font-black text-purple-700 text-base">${liveNet.toFixed(2)} ₺</span></div>`;
+                    
+                    let customerHtml = platform === 'ys' ? `<div class="flex flex-col items-center justify-center bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm w-full"><span class="text-[9px] font-bold text-gray-500 uppercase text-center leading-tight">Sitede Müşteri</span><span class="font-black text-gray-800 text-base">${liveCustomer.toFixed(2)} ₺</span></div>` : '';
+                    
+                    let listedHtml = `<div class="flex flex-col items-center justify-center bg-gray-100 border border-gray-300 px-4 py-1.5 rounded-lg shadow-sm w-full h-full"><span class="text-[9px] font-black text-gray-500 uppercase text-center leading-tight">Sitedeki Liste</span><span class="font-black text-gray-700 text-lg">${liveListed.toFixed(2)} ₺</span></div>`;
 
+                    let rightPanelHtml = `<div class="flex items-stretch justify-end gap-1.5 w-full xl:w-[75%] flex-wrap sm:flex-nowrap pl-2">
+                        <div class="flex flex-[1] border-r border-gray-200 pr-1.5 min-w-[130px]">${netHtml}</div>
+                        ${platform === 'ys' ? `<div class="flex flex-[1] border-r border-gray-200 pr-1.5 min-w-[130px]">${customerHtml}</div>` : ''}
+                        <div class="flex flex-[1.2] min-w-[150px]">${listedHtml}</div>
+                    </div>`;
+
+                    uHtml += `
+                        <div class="flex flex-col xl:flex-row items-center justify-between p-2.5 sm:p-3 border border-purple-200 bg-purple-50/20 rounded-xl shadow-sm hover:shadow-md transition gap-3">
+                            <div class="flex items-center gap-3 w-full xl:w-fit overflow-hidden whitespace-nowrap pr-2">
+                                <div class="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm border border-purple-200 flex-shrink-0"><span class="text-lg">👽</span></div>
+                                <img src="https://via.placeholder.com/150x150?text=Sitede+Var" class="w-10 h-10 object-cover rounded border border-white shadow-sm flex-shrink-0 grayscale opacity-80">
+                                <span class="font-bold text-gray-800 text-sm truncate" title="${displayName}">${displayName}</span>
+                            </div>
+                            ${rightPanelHtml}
+                        </div>
+                    `;
+                });
+                uHtml += `</div></div>`;
+                container.innerHTML += uHtml;
+            }
+
+            if(!hasAnyProduct && unmatchedKeys.length === 0) container.innerHTML += '<div class="text-center text-gray-400 font-bold mt-10">Bu platforma ait ürün verisi bulunamadı.</div>';
+
+            // 🚀 EKRAN KAYDIRMA VE MİNİ ROZET MOTORU (Zıplamayı Önleyen Scroll Çözümü Dahil)
             setTimeout(() => {
                 const savedCatIndex = localStorage.getItem('last_sys_category') || "0";
                 scrollToSysCatIndex(savedCatIndex, false); 
-                if (!container.dataset.spyAttached) {
-                    container.dataset.spyAttached = 'true';
-                    container.addEventListener('scroll', () => {
-                        const sections = container.querySelectorAll('.sys-cat-section');
+                
+                const scrollArea = document.getElementById('radarScrollArea');
+                const headerArea = document.getElementById('radarHeaderArea');
+                const indicatorBadge = document.getElementById('floatingPlatformIndicator');
+
+                if (scrollArea && !scrollArea.dataset.spyAttached) {
+                    scrollArea.dataset.spyAttached = 'true';
+                    scrollArea.addEventListener('scroll', () => {
+                        
+                        // 1. Üst Kısım Ekrandan Çıkınca Rozeti Göster
+                        if (headerArea && indicatorBadge) {
+                            if (scrollArea.scrollTop > headerArea.offsetHeight - 20) {
+                                indicatorBadge.classList.remove('hidden');
+                            } else {
+                                indicatorBadge.classList.add('hidden');
+                            }
+                        }
+
+                        // 2. Kategori Çubuğu Aktif Durum Yönetimi
+                        const sections = scrollArea.querySelectorAll('.sys-cat-section');
                         let currentActiveIndex = window.lastActiveSysCat || "0"; 
                         sections.forEach(sec => {
-                            if (container.scrollTop >= (sec.offsetTop - container.offsetTop) - 30) {
+                            if (scrollArea.scrollTop >= sec.offsetTop - 20) {
                                 currentActiveIndex = sec.id.replace('sys-cat-', '');
                             }
                         });
+                        
                         if(window.lastActiveSysCat !== currentActiveIndex) {
                             window.lastActiveSysCat = currentActiveIndex;
                             localStorage.setItem('last_sys_category', currentActiveIndex);
-                            document.querySelectorAll('.sys-cat-btn').forEach(b => { b.classList.remove('bg-gray-800', 'text-white', 'border-gray-800'); b.classList.add('text-gray-500', 'border-gray-200', 'bg-white'); });
+                            document.querySelectorAll('.sys-cat-btn').forEach(b => { b.classList.remove('bg-gray-800', 'text-white', 'border-gray-800', 'bg-purple-100', 'border-purple-300', 'text-purple-700'); b.classList.add('text-gray-500', 'border-gray-200', 'bg-white'); });
                             const activeBtn = document.getElementById(`btn-sys-cat-${currentActiveIndex}`);
-                            if (activeBtn) { activeBtn.classList.remove('text-gray-500', 'border-gray-200', 'bg-white'); activeBtn.classList.add('bg-gray-800', 'text-white', 'border-gray-800'); activeBtn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); }
+                            const navBar = document.getElementById('sysCategoryNavbar');
+                            if (activeBtn && navBar) { 
+                                activeBtn.classList.remove('text-gray-500', 'border-gray-200', 'bg-white'); 
+                                // Özel Kategori (Sitede Olmayanlar) için mor renk, normal kategoriler için siyah
+                                if(currentActiveIndex === 'unmatched') {
+                                    activeBtn.classList.add('bg-purple-100', 'text-purple-700', 'border-purple-300'); 
+                                } else {
+                                    activeBtn.classList.add('bg-gray-800', 'text-white', 'border-gray-800'); 
+                                }
+                                // EKRAN ZIPLAMASINI ÖNLEMEK İÇİN: scrollIntoView yerine navbar'ın scroll'unu manuel kaydırır
+                                navBar.scrollTo({
+                                    left: activeBtn.offsetLeft - navBar.offsetWidth / 2 + activeBtn.offsetWidth / 2,
+                                    behavior: 'smooth'
+                                });
+                            }
                         }
                     });
                 }
             }, 100); 
         };
+
+        // --- 🚀 YENİ: KAYDIRMA KOMUTU ARTIK YENİ SCROLL ALANINA (radarScrollArea) GÖNDERİLİR ---
+        window.scrollToSysCatIndex = function(index, smooth = true) {
+            const targetEl = document.getElementById(`sys-cat-${index}`);
+            const scrollArea = document.getElementById('radarScrollArea');
+            if (targetEl && scrollArea) {
+                scrollArea.scrollTo({
+                    top: targetEl.offsetTop - 5, // Pay bırakarak kaydır
+                    behavior: smooth ? 'smooth' : 'auto'
+                });
+                
+                document.querySelectorAll('.sys-cat-btn').forEach(btn => {
+                    btn.classList.remove('bg-gray-800', 'text-white', 'border-gray-800', 'bg-purple-100', 'border-purple-300', 'text-purple-700');
+                    btn.classList.add('text-gray-500', 'border-gray-200', 'bg-white');
+                });
+                
+                const activeBtn = document.getElementById(`btn-sys-cat-${index}`);
+                const navBar = document.getElementById('sysCategoryNavbar');
+                if (activeBtn && navBar) {
+                    activeBtn.classList.remove('text-gray-500', 'border-gray-200', 'bg-white');
+                    if(index === 'unmatched') {
+                        activeBtn.classList.add('bg-purple-100', 'text-purple-700', 'border-purple-300'); 
+                    } else {
+                        activeBtn.classList.add('bg-gray-800', 'text-white', 'border-gray-800');
+                    }
+                    // EKRAN ZIPLAMASINI ÖNLEMEK İÇİN
+                    navBar.scrollTo({
+                        left: activeBtn.offsetLeft - navBar.offsetWidth / 2 + activeBtn.offsetWidth / 2,
+                        behavior: 'smooth'
+                    });
+                }
+                
+                localStorage.setItem('last_sys_category', index);
+                window.lastActiveSysCat = String(index);
+            }
+        };
+
         // --- 💳 BORÇ YÖNETİMİ İŞLEM FONKSİYONLARI ---
 
         window.changeActiveEkstre = function (ekstreKey) {
