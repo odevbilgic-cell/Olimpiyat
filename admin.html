@@ -127,12 +127,19 @@
         /* --- OLİMPİYAT A4 BASKI TASARIMI (KOMPAKT VERSİYON - TAŞMAYI ÖNLER) --- */
         /* --- YAZDIRMA ÇAKIŞMALARINI ÖNLEYEN KESİN ÇÖZÜM --- */
         /* --- YAZDIRMA ÇAKIŞMALARINI VE SAYFA KESİLMESİNİ ÖNLEYEN KESİN ÇÖZÜM --- */
-       /* ======================================================= */
+        /* ======================================================= */
         /* 🖨️ KUSURSUZ YAZICI VE 5MM MARJ MOTORU (BOŞ SAYFA ÇÖZÜMÜ) */
         /* ======================================================= */
         @media print {
+
             /* 1. Tüm modalları, butonları ve sol siyah menüyü yazıcıda tamamen gizle */
-            .no-print, #adminLoginOverlay, #editProductModal, #missingProductsModal, #printSelectionModal, #debtPreviewModal, body > div.flex.min-h-screen > div:first-child {
+            .no-print,
+            #adminLoginOverlay,
+            #editProductModal,
+            #missingProductsModal,
+            #printSelectionModal,
+            #debtPreviewModal,
+            body>div.flex.min-h-screen>div:first-child {
                 display: none !important;
             }
 
@@ -144,7 +151,9 @@
             }
 
             /* 3. İçerik çerçevelerini kağıda tam yay (Gizlenen elementlerin boşluğunu yutar) */
-            body > div.flex.min-h-screen, main, #contentContainer {
+            body>div.flex.min-h-screen,
+            main,
+            #contentContainer {
                 display: block !important;
                 width: 100% !important;
                 height: auto !important;
@@ -155,7 +164,7 @@
             }
 
             /* Modül kutularının gölgelerini ve beyaz kutu arka planlarını sıfırla */
-            #contentContainer > div {
+            #contentContainer>div {
                 background: transparent !important;
                 border: none !important;
                 box-shadow: none !important;
@@ -167,20 +176,23 @@
             /* 4. A4 SAYFASINA KESİN ÖLÇÜLER VE 5MM BOŞLUK KURALI */
             @page {
                 size: A4 portrait;
-                margin: 5mm; /* YAZICIYA KESİN EMİR: Kağıdın dört bir yanından 5mm boşluk bırak! */
+                margin: 5mm;
+                /* YAZICIYA KESİN EMİR: Kağıdın dört bir yanından 5mm boşluk bırak! */
             }
 
-           /* YENİ EKLENEN: Alttaki gereksiz boşlukları sıfırlayıp 2. sayfaya taşmayı önler */
-            .pb-8, .mb-8 { 
-                padding-bottom: 0 !important; 
-                margin-bottom: 0 !important; 
+            /* YENİ EKLENEN: Alttaki gereksiz boşlukları sıfırlayıp 2. sayfaya taşmayı önler */
+            .pb-8,
+            .mb-8 {
+                padding-bottom: 0 !important;
+                margin-bottom: 0 !important;
             }
 
             /* Menü Çıktı Ayarları */
             .a4-menu-page {
                 margin: 0 auto !important;
-                width: 200mm !important; 
-                height: 286mm !important; /* KESİN ÇÖZÜM: 1mm tolerans bıraktık ki ikinci boş sayfaya taşırmasın */
+                width: 200mm !important;
+                height: 286mm !important;
+                /* KESİN ÇÖZÜM: 1mm tolerans bıraktık ki ikinci boş sayfaya taşırmasın */
                 background-color: #000000 !important;
                 border: 3mm solid #ffcc00 !important;
                 box-sizing: border-box !important;
@@ -226,18 +238,23 @@
             print-color-adjust: exact;
         }
 
-       .a4-menu-page {
+        .a4-menu-page {
             background-color: #000000;
-            width: 200mm; /* A4 boyutunu kesin milimetre ile kilitliyoruz */
-            height: 287mm; /* A4 boyutunu kesin milimetre ile kilitliyoruz */
-            max-width: 200mm; /* Tailwind'in vs. ekranı esnetmesini engeller */
+            width: 200mm;
+            /* A4 boyutunu kesin milimetre ile kilitliyoruz */
+            height: 287mm;
+            /* A4 boyutunu kesin milimetre ile kilitliyoruz */
+            max-width: 200mm;
+            /* Tailwind'in vs. ekranı esnetmesini engeller */
             padding: 7mm 8mm;
             border: 3mm solid #ffcc00;
             position: relative;
             page-break-inside: avoid;
             margin: 0 auto;
-            box-sizing: border-box; /* Padding'in genişliği bozmasını önler */
-            flex-shrink: 0; /* Ekran küçülünce A4'ün yamulmasını/daralmasını önler */
+            box-sizing: border-box;
+            /* Padding'in genişliği bozmasını önler */
+            flex-shrink: 0;
+            /* Ekran küçülünce A4'ün yamulmasını/daralmasını önler */
         }
 
         /* Boşluklar ve fontlar daraltıldı */
@@ -608,7 +625,7 @@
             opacity: 0;
         }
 
-     
+
 
         /* --- 📱 DEV ETİKETLER İÇİN İPHONE YAZI KAYMA ÇÖZÜMÜ --- */
         @media screen and (max-width: 768px) {
@@ -787,7 +804,7 @@
                     class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">💳
                     Borç Hesapla</button>
 
-                    <button id="showSystemPrices"
+                <button id="showSystemPrices"
                     class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">🧮
                     Sistem Fiyatları</button>
 
@@ -810,7 +827,7 @@
                         <button id="showPrintA4"
                             class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">📄
                             A4 Fiyat Listesi</button>
-                            <!-- YENİ EKLENEN BUTON -->
+                        <!-- YENİ EKLENEN BUTON -->
                         <button id="showPrintMenusA4"
                             class="tab-button bg-gray-800 md:bg-transparent text-left px-4 py-3.5 md:px-2 md:py-1.5 rounded-xl md:rounded-lg hover:bg-gray-700 md:hover:bg-white/10 transition text-sm md:text-[10px] lg:text-xs font-bold whitespace-nowrap flex items-center gap-3 md:gap-1">🖼️
                             Menüler Fiyat Listesi</button>
@@ -832,6 +849,10 @@
                 <button id="showGlobalDateUpdate"
                     class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">📅
                     Ortak Tarih</button>
+
+                <button id="showSettings"
+                    class="tab-button text-left px-2.5 py-1.5 md:p-2 rounded-lg hover:bg-white/10 transition text-[11px] sm:text-xs md:text-sm font-bold whitespace-nowrap flex items-center gap-1 flex-shrink-0">⚙️
+                    Ayarlar</button>
             </div>
 
             <button id="desktopLogoutBtn"
@@ -1014,9 +1035,21 @@
         let currentMenuType = 'in_place';
         let productsRef;
         let campaignsRef;
+        let ramadanNormalCampaignsRef; // YENİ:
+        let ramadanNormalCampaignUrls = []; // YENİ
+
+        let ramadanCampaignsRef; // YENİ: Ramazan Kampanyaları Referansı
         let campaignInfoRef;
         let priceBoxUrlRef;
         let visitorsRef = database.ref(visitorsPath);
+
+
+
+        let ramadanCampaignUrls = []; // YENİ: Ramazan Kampanyaları Dizisi
+
+
+
+
 
         let products = [];
         let campaignUrls = [];
@@ -1039,7 +1072,7 @@
         const editImagePreview = document.getElementById('editImagePreview');
         const uploadEditImageBtn = document.getElementById('uploadEditImageBtn');
         const saveEditProductButton = document.getElementById('saveEditProduct');
-
+        
         function setFirebaseRefs(menuType) {
             currentMenuType = menuType;
             statsMenuType = menuType;
@@ -1048,10 +1081,14 @@
             if (menuType === 'in_place') {
                 productsRef = database.ref(inPlaceProductsPath);
                 campaignsRef = database.ref(inPlaceCampaignsPath);
+                ramadanCampaignsRef = database.ref('ramadan_campaigns');
+                ramadanNormalCampaignsRef = database.ref('ramadan_normal_campaigns'); // YENİ
                 campaignInfoRef = database.ref(inPlaceCampaignInfoPath);
             } else {
                 productsRef = database.ref(deliveryProductsPath);
                 campaignsRef = database.ref(deliveryCampaignsPath);
+                ramadanCampaignsRef = database.ref('delivery_ramadan_campaigns');
+                ramadanNormalCampaignsRef = database.ref('delivery_ramadan_normal_campaigns'); // YENİ
                 campaignInfoRef = database.ref(deliveryCampaignInfoPath);
             }
             priceBoxUrlRef = campaignInfoRef.child('price_box_url');
@@ -1203,15 +1240,15 @@
         // --- 🚀 YENİ: OTOMATİK PAKET SERVİS FİYAT HESAPLAMA MOTORU ---
         function getAutoDeliveryPrice(name, category, inPlacePrice) {
             // KURAL 1: İçecekse paket servis fiyatını HİÇ ELLEME (Aynı kalsın)
-            if (category === 'İçecekler') return null; 
+            if (category === 'İçecekler') return null;
 
             const lowerName = name.toLocaleLowerCase('tr-TR');
-            
+
             // KURAL 2: İçinde "Tam Ekmek" geçiyorsa yerinde fiyatına +20 TL ekle
             if (lowerName.includes('tam ekmek')) {
                 return inPlacePrice + 20;
             }
-            
+
             // KURAL 3: Midye (Adet) ise yerinde fiyatına +1 TL ekle
             if (lowerName.includes('midye (adet)') || lowerName.includes('midye tane')) {
                 return inPlacePrice + 1;
@@ -1226,9 +1263,9 @@
         async function deleteCampaignUrl(key) { await campaignsRef.child(key).remove(); }
         function sortProductsByOrder(productsArray) { return productsArray.sort((a, b) => (a.order === undefined ? 9999 : a.order) - (b.order === undefined ? 9999 : b.order)); }
 
-       // YENİ EŞİTLEME MODALINI OLUŞTUR (Sayfa yüklendiğinde bir kere çalışır)
+        // YENİ EŞİTLEME MODALINI OLUŞTUR (Sayfa yüklendiğinde bir kere çalışır)
         function createSyncModal() {
-            if(document.getElementById('syncProductsModal')) return;
+            if (document.getElementById('syncProductsModal')) return;
             const div = document.createElement('div');
             div.id = 'syncProductsModal';
             div.className = 'hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[110] flex justify-center items-center p-4';
@@ -1253,23 +1290,23 @@
         createSyncModal();
 
         // MENÜLER ARASI EKSİKLERİ BULAN VE POP-UP AÇAN FONKSİYON
-        window.openSyncProductsModal = async function() {
+        window.openSyncProductsModal = async function () {
             const btn = document.getElementById('syncMenuBtn');
-            if(btn) { btn.innerHTML = "⏳ Hesaplanıyor..."; btn.disabled = true; }
+            if (btn) { btn.innerHTML = "⏳ Hesaplanıyor..."; btn.disabled = true; }
 
             try {
                 const snapInPlace = await database.ref(inPlaceProductsPath).once('value');
                 const snapDelivery = await database.ref(deliveryProductsPath).once('value');
-                
-                const inPlaceArr = Object.keys(snapInPlace.val() || {}).map(k => ({key:k, ...(snapInPlace.val()[k])})).filter(p => !p.isArchived);
-                const deliveryArr = Object.keys(snapDelivery.val() || {}).map(k => ({key:k, ...(snapDelivery.val()[k])})).filter(p => !p.isArchived);
-                
+
+                const inPlaceArr = Object.keys(snapInPlace.val() || {}).map(k => ({ key: k, ...(snapInPlace.val()[k]) })).filter(p => !p.isArchived);
+                const deliveryArr = Object.keys(snapDelivery.val() || {}).map(k => ({ key: k, ...(snapDelivery.val()[k]) })).filter(p => !p.isArchived);
+
                 // 1. Yerinde olup Pakette OLMAYANLAR (Pakete Kopyalanacaklar)
                 const missingInDelivery = inPlaceArr.filter(p1 => !deliveryArr.find(p2 => p2.name.toLowerCase().trim() === p1.name.toLowerCase().trim()));
-                
+
                 // 2. Pakette olup Yerinde OLMAYANLAR (Yerindeye Kopyalanacaklar)
                 const missingInPlace = deliveryArr.filter(p1 => !inPlaceArr.find(p2 => p2.name.toLowerCase().trim() === p1.name.toLowerCase().trim()));
-                
+
                 const container = document.getElementById('syncProductsListContainer');
                 container.innerHTML = '';
 
@@ -1325,27 +1362,27 @@
                 document.querySelectorAll('.sync-item').forEach(item => {
                     let timer;
                     const cb = item.querySelector('.sync-cb');
-                    
+
                     const toggleSelect = () => {
                         cb.checked = !cb.checked;
                         item.classList.toggle('bg-blue-50', cb.checked);
                         item.classList.toggle('border-blue-400', cb.checked);
-                        if(navigator.vibrate) navigator.vibrate(50);
+                        if (navigator.vibrate) navigator.vibrate(50);
                     };
 
                     const start = (e) => {
-                        if(e.target === cb) return; // Checkboxa direkt basılırsa elleme
+                        if (e.target === cb) return; // Checkboxa direkt basılırsa elleme
                         timer = setTimeout(toggleSelect, 400); // 0.4 saniye basılı tutunca seçer
                     };
                     const cancel = () => clearTimeout(timer);
-                    
-                    item.addEventListener('touchstart', start, {passive: true});
+
+                    item.addEventListener('touchstart', start, { passive: true });
                     item.addEventListener('touchend', cancel);
                     item.addEventListener('touchmove', cancel);
                     item.addEventListener('mousedown', start);
                     item.addEventListener('mouseup', cancel);
                     item.addEventListener('mouseleave', cancel);
-                    
+
                     // Normal tıklama ile kutucuğun renklenmesi
                     cb.addEventListener('change', () => {
                         item.classList.toggle('bg-blue-50', cb.checked);
@@ -1357,57 +1394,57 @@
             } catch (err) {
                 alert("Veriler çekilirken hata oluştu: " + err.message);
             } finally {
-                if(btn) { btn.innerHTML = "🔄 Menüleri Eşitle"; btn.disabled = false; }
+                if (btn) { btn.innerHTML = "🔄 Menüleri Eşitle"; btn.disabled = false; }
             }
         };
 
         // KOPYALAMAYI ÇALIŞTIRAN SİSTEM (Senin yazdığın fiyat kurallarına göre çalışır)
-        window.executeSyncProducts = async function() {
+        window.executeSyncProducts = async function () {
             const checkboxes = document.querySelectorAll('.sync-cb:checked');
-            if(checkboxes.length === 0) { alert("Lütfen aktarılacak en az bir ürün seçin."); return; }
-            
+            if (checkboxes.length === 0) { alert("Lütfen aktarılacak en az bir ürün seçin."); return; }
+
             let inPlaceUpdates = {};
             let deliveryUpdates = {};
-            
+
             checkboxes.forEach(cb => {
                 const data = JSON.parse(decodeURIComponent(cb.dataset.product));
-                const direction = cb.dataset.direction; 
+                const direction = cb.dataset.direction;
                 const newKey = database.ref().push().key; // Yeni kimlik oluştur
-                
+
                 if (direction === 'toDelivery') {
                     // Pakete Gidiyorsa -> Oto Zam Kuralını İşlet (+10, +20 vb.)
                     let targetPrice = getAutoDeliveryPrice(data.name, data.category, data.price);
-                    if(targetPrice === null) targetPrice = data.price; // İçecekler değişmez
-                    
+                    if (targetPrice === null) targetPrice = data.price; // İçecekler değişmez
+
                     deliveryUpdates[newKey] = { ...data, price: targetPrice, lastUpdated: Date.now() };
                 } else {
                     // Yerindeye Gidiyorsa -> Zamı Geri Alarak (İndirim Yaparak) Kaydet
                     let targetPrice = data.price;
-                    if(data.category !== 'İçecekler') {
+                    if (data.category !== 'İçecekler') {
                         const lowerName = data.name.toLowerCase();
-                        if(lowerName.includes('tam ekmek')) targetPrice -= 20;
-                        else if(lowerName.includes('midye (adet)') || lowerName.includes('midye tane')) targetPrice -= 1;
+                        if (lowerName.includes('tam ekmek')) targetPrice -= 20;
+                        else if (lowerName.includes('midye (adet)') || lowerName.includes('midye tane')) targetPrice -= 1;
                         else targetPrice -= 10;
                     }
                     inPlaceUpdates[newKey] = { ...data, price: targetPrice, lastUpdated: Date.now() };
                 }
             });
-            
+
             try {
-                if(Object.keys(inPlaceUpdates).length > 0) await database.ref(inPlaceProductsPath).update(inPlaceUpdates);
-                if(Object.keys(deliveryUpdates).length > 0) await database.ref(deliveryProductsPath).update(deliveryUpdates);
-                
+                if (Object.keys(inPlaceUpdates).length > 0) await database.ref(inPlaceProductsPath).update(inPlaceUpdates);
+                if (Object.keys(deliveryUpdates).length > 0) await database.ref(deliveryProductsPath).update(deliveryUpdates);
+
                 alert(`${checkboxes.length} ürün kurallı fiyatlarıyla başarıyla aktarıldı!`);
                 document.getElementById('syncProductsModal').classList.add('hidden');
-            } catch(e) {
+            } catch (e) {
                 alert("Hata: " + e.message);
             }
         };
-// --- 🌐 GLOBAL DURUM (STATE) YÖNETİMİ ---
+        // --- 🌐 GLOBAL DURUM (STATE) YÖNETİMİ ---
         window.currentProductMode = 'default'; // 'default', 'price_edit', 'sort_edit', 'content_edit'
         window.productSearchQuery = '';
 
-        window.setProductMode = function(mode) {
+        window.setProductMode = function (mode) {
             window.currentProductMode = mode;
             renderProductsModule();
         };
@@ -1425,13 +1462,13 @@
 
             // Ekranı Tam Genişliğe (Full Width) Çıkarma
             const container = document.getElementById('contentContainer');
-            if(container) {
-                container.className = 'w-full w-full pb-0 md:pb-0 px-2 sm:px-4'; 
+            if (container) {
+                container.className = 'w-full w-full pb-0 md:pb-0 px-2 sm:px-4';
             }
 
             // 2. ÜST KONTROL BARININ MODA GÖRE DEĞİŞMESİ
             let topBarHtml = '';
-            
+
             if (window.currentProductMode === 'default') {
                 topBarHtml = `
                     <!-- Arama Çubuğu -->
@@ -1606,8 +1643,8 @@
                     });
                     categoryHtml += `</ul></div>`;
                     listEl.innerHTML += categoryHtml;
-                } 
-                
+                }
+
                 // --- FİYAT DEĞİŞTİRME (PRICE) MODU ---
                 else if (mode === 'price_edit') {
                     categoryHtml += `<div class="flex flex-col bg-white overflow-hidden rounded-b-2xl">`;
@@ -1697,7 +1734,7 @@
                         const hasImage = p.image && p.image.trim() !== '';
                         const tempImg = hasImage ? p.image : 'https://via.placeholder.com/150x150?text=Görsel+Yok';
                         const isArchived = p.isArchived === true;
-                        
+
                         const toggleBg = !isArchived ? 'bg-[#22c55e]' : 'bg-gray-300';
                         const toggleDot = !isArchived ? 'translate-x-full border-white' : 'translate-x-0 border-gray-300';
                         const statusText = !isArchived ? 'Açık' : 'Kapalı';
@@ -1771,11 +1808,11 @@
         }
 
         // --- 🖱️ AÇILIR MENÜLER (DROPDOWN) İÇİN TIKLAMA VE KAPANMA MOTORU ---
-        window.toggleDropdown = function(event, dropdownId) {
-            event.stopPropagation(); 
+        window.toggleDropdown = function (event, dropdownId) {
+            event.stopPropagation();
             const targetDropdown = document.getElementById(dropdownId);
             const isCurrentlyHidden = targetDropdown.classList.contains('hidden');
-            
+
             // Açık olan tüm menüleri gizle
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
                 menu.classList.add('hidden');
@@ -1788,7 +1825,7 @@
         };
 
         // Herhangi bir yere tıklanınca açık menüleri kapat
-        document.addEventListener('click', function() {
+        document.addEventListener('click', function () {
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
                 if (!menu.classList.contains('hidden')) {
                     menu.classList.add('hidden');
@@ -1797,14 +1834,14 @@
         });
 
         // --- 💾 YENİ: İÇERİK (GÖRSEL VE AÇIKLAMA) KAYDETME VE YÜKLEME MOTORU ---
-        window.triggerContentImageUpload = function(productKey) {
+        window.triggerContentImageUpload = function (productKey) {
             const urlInput = document.getElementById(`content-url-${productKey}`);
             const previewImg = document.getElementById(`content-img-${productKey}`);
             // Cloudinary'yi açıp görsel yüklendiğinde kutucuğa URL'i koyar ve resmi ekranda anında günceller.
             openCloudinaryWidget(urlInput, previewImg);
         };
 
-        window.saveBulkContentModern = async function() {
+        window.saveBulkContentModern = async function () {
             const updates = {};
             let changes = 0;
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
@@ -1820,19 +1857,19 @@
                 if (!currentProduct) return;
 
                 let isChanged = false;
-                
+
                 // İsim değişmiş mi?
                 if (currentProduct.name !== newName && newName !== '') {
                     updates[`${pathPrefix}/${pKey}/name`] = newName;
                     isChanged = true;
                 }
-                
+
                 // Açıklama değişmiş mi?
                 if ((currentProduct.desc || '') !== newDesc) {
                     updates[`${pathPrefix}/${pKey}/desc`] = newDesc;
                     isChanged = true;
                 }
-                
+
                 // Görsel URL değişmiş mi?
                 if ((currentProduct.image || '') !== newUrl) {
                     updates[`${pathPrefix}/${pKey}/image`] = newUrl;
@@ -1851,19 +1888,19 @@
                 return;
             }
 
-            if(confirm(`${changes} adet ürünün görsel veya açıklama içeriği güncellenecektir. Onaylıyor musunuz?`)) {
+            if (confirm(`${changes} adet ürünün görsel veya açıklama içeriği güncellenecektir. Onaylıyor musunuz?`)) {
                 try {
                     await database.ref().update(updates);
                     alert("Tüm içerikler başarıyla kaydedildi!");
                     setProductMode('default'); // Ana ekrana dön
-                } catch(e) {
+                } catch (e) {
                     alert("Hata: " + e.message);
                 }
             }
         };
 
         // --- 💾 KAYDETME FONKSİYONLARI (Fiyat ve Sıralama) ---
-        window.saveBulkPricesModern = async function() {
+        window.saveBulkPricesModern = async function () {
             const priceInputs = document.querySelectorAll('.modern-price-input');
             const discountInputs = document.querySelectorAll('.modern-discount-input');
             const updates = {};
@@ -1874,7 +1911,7 @@
                 const pKey = input.dataset.key;
                 const newPrice = parseFloat(input.value);
                 const currentProduct = products.find(p => p.key === pKey);
-                
+
                 const discInput = discountInputs[idx];
                 const newDiscVal = discInput.value.trim() !== '' ? parseFloat(discInput.value) : null;
 
@@ -1900,18 +1937,18 @@
                 return;
             }
 
-            if(confirm(`${changes} adet fiyat güncellemesi veritabanına işlenecektir. Onaylıyor musunuz?`)) {
+            if (confirm(`${changes} adet fiyat güncellemesi veritabanına işlenecektir. Onaylıyor musunuz?`)) {
                 try {
                     await database.ref().update(updates);
                     alert("Fiyatlar başarıyla kaydedildi!");
-                    setProductMode('default'); 
-                } catch(e) {
+                    setProductMode('default');
+                } catch (e) {
                     alert("Hata: " + e.message);
                 }
             }
         };
 
-        window.saveNewSortingModern = async function() {
+        window.saveNewSortingModern = async function () {
             const updates = {};
             let changes = 0;
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
@@ -1935,16 +1972,16 @@
 
             try {
                 await database.ref().update(updates);
-                setProductMode('default'); 
-            } catch(e) {
+                setProductMode('default');
+            } catch (e) {
                 alert("Hata: " + e.message);
             }
         };
 
         // --- ➕ YARDIMCI FONKSİYONLAR ---
-        window.toggleProductVisibility = async function(productKey, currentArchivedStatus) {
+        window.toggleProductVisibility = async function (productKey, currentArchivedStatus) {
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceProductsPath : deliveryProductsPath;
-            const newArchivedStatus = !currentArchivedStatus; 
+            const newArchivedStatus = !currentArchivedStatus;
             try {
                 await database.ref(`${pathPrefix}/${productKey}`).update({
                     isArchived: newArchivedStatus,
@@ -1953,29 +1990,29 @@
             } catch (error) { alert("Durum güncellenirken hata: " + error.message); }
         };
 
-        window.openAddProductModal = function(categoryName = "") {
+        window.openAddProductModal = function (categoryName = "") {
             document.getElementById('quickProductName').value = '';
             document.getElementById('quickProductNameEN').value = '';
             document.getElementById('quickProductDesc').value = '';
             document.getElementById('quickProductDescEN').value = '';
             document.getElementById('quickProductPrice').value = '';
             document.getElementById('quickProductImageURL').value = '';
-            
+
             const imgPreview = document.getElementById('quickImagePreview');
             imgPreview.src = '';
             imgPreview.classList.add('hidden');
-            
+
             const catSelect = document.getElementById('quickProductCategory');
             catSelect.value = categoryName;
 
             document.getElementById('quickAddProductModal').classList.remove('hidden');
         };
 
-        window.openQuickUploadWidget = function() {
+        window.openQuickUploadWidget = function () {
             openCloudinaryWidget(document.getElementById('quickProductImageURL'), document.getElementById('quickImagePreview'));
         };
 
-        window.quickSaveNewProduct = async function() {
+        window.quickSaveNewProduct = async function () {
             const name = document.getElementById('quickProductName').value.trim();
             const nameEN = document.getElementById('quickProductNameEN').value.trim();
             const desc = document.getElementById('quickProductDesc').value.trim();
@@ -1984,16 +2021,16 @@
             const category = document.getElementById('quickProductCategory').value;
             let imageURL = document.getElementById('quickProductImageURL').value.trim();
 
-            if (!name || isNaN(price) || !category) { 
-                alert('Lütfen zorunlu alanları (Ad, Fiyat, Kategori) doldurunuz.'); 
-                return; 
+            if (!name || isNaN(price) || !category) {
+                alert('Lütfen zorunlu alanları (Ad, Fiyat, Kategori) doldurunuz.');
+                return;
             }
 
             const maxOrder = products.length > 0 ? Math.max(...products.map(p => p.order === undefined ? 0 : p.order)) : 0;
-            const newProduct = { 
-                name, nameEN: nameEN || name, desc, descEN: descEN || desc, 
-                price, image: imageURL, category, lastUpdated: Date.now(), 
-                order: maxOrder + 1, isArchived: false 
+            const newProduct = {
+                name, nameEN: nameEN || name, desc, descEN: descEN || desc,
+                price, image: imageURL, category, lastUpdated: Date.now(),
+                order: maxOrder + 1, isArchived: false
             };
 
             try {
@@ -2002,7 +2039,7 @@
             } catch (error) { alert("Hata: " + error.message); }
         };
 
-       
+
 
 
 
@@ -2293,22 +2330,22 @@
         }
 
         // --- YENİ EKLENEN YARDIMCI FONKSİYONLAR ---
-        
+
         // Ürünleri Pop-up İçine Basar
         function renderProductSelectionForCampaign() {
             const listEl = document.getElementById('productCampaignList');
             listEl.innerHTML = '';
-            
+
             const sortedProducts = sortProductsByOrder([...products]);
             const fallbackImg = 'https://via.placeholder.com/300x200?text=Olimpiyat+Kokoreç';
 
             let count = 0;
             sortedProducts.forEach(p => {
-                if(p.isArchived) return; // Gizli ürünleri kampanyaya sunma
-                
+                if (p.isArchived) return; // Gizli ürünleri kampanyaya sunma
+
                 const pPrice = p.discountPrice || p.price;
                 const pImg = p.image && p.image.trim() !== '' ? p.image : fallbackImg;
-                
+
                 listEl.innerHTML += `
                     <label class="flex items-center gap-3 p-2 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 transition w-full">
                         <input type="checkbox" class="campaign-product-cb w-5 h-5 accent-blue-600 cursor-pointer" data-img="${pImg}" data-price="${pPrice}">
@@ -2330,29 +2367,29 @@
         // Seçilen Ürünleri Veritabanına "Afiş" Olarak Yazar
         async function publishSelectedProductsToCampaigns() {
             const checkboxes = document.querySelectorAll('.campaign-product-cb:checked');
-            if(checkboxes.length === 0) {
-                alert("Lütfen afişe eklemek için en az bir ürün seçin."); 
+            if (checkboxes.length === 0) {
+                alert("Lütfen afişe eklemek için en az bir ürün seçin.");
                 return;
             }
 
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
             const targetCampaignsRef = database.ref(pathPrefix);
-            
+
             // Mevcut sıranın en sonuna eklemek için maksimum order değerini bul
             let maxOrder = campaignUrls.length > 0 ? Math.max(...campaignUrls.map(c => c.order === undefined ? 0 : c.order)) : 0;
-            
+
             const promises = [];
             checkboxes.forEach(cb => {
                 maxOrder++;
                 const url = cb.dataset.img;
                 const price = cb.dataset.price;
-                
+
                 // Firebase'e yeni kampanya verisini göm
-                promises.push(targetCampaignsRef.push({ 
-                    url: url, 
-                    price: price, 
-                    timestamp: Date.now(), 
-                    order: maxOrder 
+                promises.push(targetCampaignsRef.push({
+                    url: url,
+                    price: price,
+                    timestamp: Date.now(),
+                    order: maxOrder
                 }));
             });
 
@@ -2360,20 +2397,20 @@
                 // Seçilen butonun içine ufak bir yükleniyor efekti ver
                 const btn = document.getElementById('publishSelectedProductsBtn');
                 btn.innerHTML = "⏳ Ekleniyor...";
-                
+
                 await Promise.all(promises);
-                
+
                 alert(`${checkboxes.length} adet ürün başarıyla kampanya afişlerine eklendi!`);
                 document.getElementById('productCampaignModal').classList.add('hidden');
                 btn.innerHTML = "✅ Seçilenleri Yayınla";
-                
+
                 // Sistem firebase'i dinlediği için liste anında otomatik güncellenecektir
-            } catch(e) {
+            } catch (e) {
                 alert("Hata oluştu: " + e.message);
             }
         }
 
-       
+
 
         // TOPLU KAYDETME: Hem Sıralamayı Hem de Sihirbazla Değişen Tüm Fiyatları Tek Seferde Veritabanına İşler
         async function saveAllCampaignChanges() {
@@ -2489,7 +2526,7 @@
                 const startPress = (e) => {
                     // Tıklanan eleman buton veya input ise uzun basmayı tetikleme
                     if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-                    
+
                     pressTimer = setTimeout(() => {
                         openLinkCampaignModal(c.key);
                     }, 650); // 0.65 saniye basılı tutulursa çalışır
@@ -2625,7 +2662,7 @@
             }
         }
 
-       async function addCampaignUrl() {
+        async function addCampaignUrl() {
             const url = document.getElementById('newCampaignImageURL').value.trim();
             const price = document.getElementById('newCampaignPriceInput').value.trim();
             if (!url) { alert('Lütfen önce bir görsel yükleyin.'); return; }
@@ -2638,7 +2675,7 @@
                 document.getElementById('newCampaignPriceInput').value = '';
                 document.getElementById('newCampaignImagePreview').classList.add('hidden');
                 document.getElementById('addCampaignUrlBtn').classList.add('hidden');
-                
+
                 // YENİ: Başarıyla eklenince Modalı otomatik kapat
                 document.getElementById('manualCampaignModal').classList.add('hidden');
             } catch (error) { alert("Hata: " + error.message); }
@@ -2762,9 +2799,9 @@
             analyzeAndBuildPrintMenu(); // İçini verilerle doldurur
         }
 
-       function renderPrintMenusModule() {
+        function renderPrintMenusModule() {
             setActiveTab('showPrintMenusA4');
-            
+
             // 1. Veritabanındaki Fiyatları Hazırla
             const dbProductMap = {};
             products.forEach(p => {
@@ -2812,20 +2849,20 @@
 
             // 4. Her bir menünün toplam fiyatını hesapla
             const prices = {};
-            for(let i=1; i<=10; i++) {
+            for (let i = 1; i <= 10; i++) {
                 let key = "menü " + i;
                 let price = 0;
                 let aliasValue = menuAliases[key];
-                
+
                 if (Array.isArray(aliasValue)) {
                     aliasValue.forEach(subItem => {
                         let cleanSubItem = subItem.toLocaleLowerCase('tr-TR').trim();
-                        if(productAliases[cleanSubItem]) cleanSubItem = productAliases[cleanSubItem];
+                        if (productAliases[cleanSubItem]) cleanSubItem = productAliases[cleanSubItem];
                         price += Number(dbProductMap[cleanSubItem] || 0);
                     });
                 } else {
                     let cleanAlias = aliasValue.toLocaleLowerCase('tr-TR').trim();
-                    if(productAliases[cleanAlias]) cleanAlias = productAliases[cleanAlias];
+                    if (productAliases[cleanAlias]) cleanAlias = productAliases[cleanAlias];
                     price = Number(dbProductMap[cleanAlias] || 0);
                 }
                 prices[i] = price > 0 ? price : "0";
@@ -3592,9 +3629,9 @@
                 if (currentPriceRounded !== newPriceRounded) { updates[`${pathPrefix}/${productKey}/price`] = newPriceRounded; changed = true; }
                 if (currentDiscountRounded !== newDiscountRounded) { updates[`${pathPrefix}/${productKey}/discountPrice`] = newDiscountRounded; changed = true; }
 
-                if (changed) { 
-                    updates[`${pathPrefix}/${productKey}/lastUpdated`] = currentTime; 
-                    changesMade++; 
+                if (changed) {
+                    updates[`${pathPrefix}/${productKey}/lastUpdated`] = currentTime;
+                    changesMade++;
 
                     // 🔥 YENİ: OTOMATİK PAKET SERVİS EŞİTLEMESİ (Sadece Yerinde Menüdeyiz ise)
                     if (currentMenuType === 'in_place') {
@@ -3617,7 +3654,7 @@
                                     autoSyncCount++;
                                 }
                             }
-                            
+
                             // İndirimli Fiyatı Kurala Göre Hesapla ve Ekle (Varsa)
                             if (currentDiscountRounded !== newDiscountRounded) {
                                 if (newDiscountRounded !== null) {
@@ -3635,7 +3672,7 @@
             });
 
             if (changesMade === 0) { alert('Herhangi bir değişiklik bulunamadı.'); return; }
-            
+
             // Onay mesajını yapılan işleme göre dinamikleştir
             let confirmMsg = `${changesMade} ürün güncellenecektir. Onaylıyor musunuz?`;
             if (currentMenuType === 'in_place' && autoSyncCount > 0) {
@@ -3694,7 +3731,7 @@
                     database.ref(`stats/product_clicks/${statsMenuType}`).once('value'),
                     database.ref(`visitors_hourly/${statsMenuType}`).once('value')
                 ]);
-                
+
                 // ... verileri okuma satırlarından sonra şunu ekle:
                 let totalAllTimeVisitors = 0;
                 const allTimeData = snapAllTime.val() || {};
@@ -3960,7 +3997,7 @@
                 // Tüm Zamanlar Sayacını canlandır (Tam Sayı olarak)
                 setTimeout(() => {
                     const obj = document.getElementById('animTotalVisitors');
-                    if(obj) {
+                    if (obj) {
                         let start = null;
                         const step = (ts) => {
                             if (!start) start = ts;
@@ -3998,7 +4035,7 @@
                         });
 
                         const markersLayer = L.layerGroup().addTo(map);
-                        
+
                         // YENİ ÇÖZÜM: Verileri tutacak değişken ve harita çizim motoru dışarı alındı!
                         let currentLocData = {};
 
@@ -4015,7 +4052,7 @@
                             Object.keys(currentLocData).forEach(dateKey => {
                                 const [y, m, d] = dateKey.split('-');
                                 const entryDate = new Date(y, m - 1, d);
-                                
+
                                 // Kaç gün önce sipariş verildiğini hesapla
                                 const timeDiff = now.getTime() - entryDate.getTime();
                                 const daysAgo = Math.floor(timeDiff / (1000 * 3600 * 24));
@@ -4096,11 +4133,11 @@
                         }
 
                         // 🚀 ÇÖZÜM: BUTON DİNLEYİCİLERİ FİREBASE'İN DIŞINA ALINDI (Anında Tepki Verir)
-                        
+
                         // ZAMAN BUTONU DİNLEYİCİSİ
                         const filterBtns = document.querySelectorAll('.map-filter-btn');
                         filterBtns.forEach(btn => {
-                            btn.onclick = (e) => { 
+                            btn.onclick = (e) => {
                                 filterBtns.forEach(b => {
                                     b.classList.remove('bg-red-500', 'text-white', 'border-red-600');
                                     b.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
@@ -4110,10 +4147,10 @@
                                 clicked.classList.add('bg-red-500', 'text-white', 'border-red-600');
 
                                 mapFilterType = clicked.dataset.filter;
-                                
+
                                 // "Tüm Zamanlar" Seçilirse Türkiye Filtresini Göster
                                 const regionArea = document.getElementById('mapRegionFilterArea');
-                                if(mapFilterType === 'all') {
+                                if (mapFilterType === 'all') {
                                     regionArea.classList.remove('hidden');
                                 } else {
                                     regionArea.classList.add('hidden');
@@ -4126,7 +4163,7 @@
                         // BÖLGE (TÜRKİYE/TÜMÜ) BUTONU DİNLEYİCİSİ
                         const regionBtns = document.querySelectorAll('.region-filter-btn');
                         regionBtns.forEach(btn => {
-                            btn.onclick = (e) => { 
+                            btn.onclick = (e) => {
                                 regionBtns.forEach(b => {
                                     b.classList.remove('bg-blue-500', 'text-white', 'border-blue-600');
                                     b.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
@@ -4134,7 +4171,7 @@
                                 const clicked = e.currentTarget;
                                 clicked.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
                                 clicked.classList.add('bg-blue-500', 'text-white', 'border-blue-600');
-                                
+
                                 mapRegionFilter = clicked.dataset.region;
                                 updateMapDisplay(); // Tıklandığı an haritayı günceller
                             };
@@ -4677,33 +4714,33 @@
             };
         };
 
-      /// --- 📋 YENİ: ZIRHLI FİYAT KOPYALAMA MOTORU (ASLA ÇÖKMEZ) ---
-        window.copySysPrice = function(element, price) {
+        /// --- 📋 YENİ: ZIRHLI FİYAT KOPYALAMA MOTORU (ASLA ÇÖKMEZ) ---
+        window.copySysPrice = function (element, price) {
             // Fiyatı bilgisayarın hafızasına (panoya) kopyala
             navigator.clipboard.writeText(price).then(() => {
-                
+
                 // Animasyon için metin elementini bul (Özel class yoksa içindeki son yazıyı al)
                 let priceTextElement = element.querySelector('.price-val-text') || element.lastElementChild;
-                
+
                 if (priceTextElement) {
                     // Orijinal yazıyı hafızaya al
                     const originalHTML = priceTextElement.innerHTML;
-                    
+
                     // Kopyalandı yazısını bas (Küçük ve şık)
                     priceTextElement.innerHTML = '<span class="text-[10px] sm:text-xs text-white bg-green-500 px-1 rounded shadow-inner font-black">Kopyalandı!</span>';
-                    
+
                     // 1.5 saniye sonra eski haline geri getir
                     setTimeout(() => {
                         priceTextElement.innerHTML = originalHTML;
                     }, 1500);
                 }
-                
+
             }).catch(err => {
                 alert("Kopyalama işlemi tarayıcı tarafından engellendi: " + err);
             });
         };
 
-        window.scrollToSysCatIndex = function(index, smooth = true) {
+        window.scrollToSysCatIndex = function (index, smooth = true) {
             const targetEl = document.getElementById(`sys-cat-${index}`);
             const container = document.getElementById('systemPricesListContainer');
             if (targetEl && container) {
@@ -4711,29 +4748,29 @@
                     top: targetEl.offsetTop - container.offsetTop - 10,
                     behavior: smooth ? 'smooth' : 'auto'
                 });
-                
+
                 document.querySelectorAll('.sys-cat-btn').forEach(btn => {
                     btn.classList.remove('bg-gray-800', 'text-white', 'border-gray-800');
                     btn.classList.add('text-gray-500', 'border-gray-200', 'bg-white');
                 });
-                
+
                 const activeBtn = document.getElementById(`btn-sys-cat-${index}`);
                 if (activeBtn) {
                     activeBtn.classList.remove('text-gray-500', 'border-gray-200', 'bg-white');
                     activeBtn.classList.add('bg-gray-800', 'text-white', 'border-gray-800');
                     activeBtn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
                 }
-                
+
                 localStorage.setItem('last_sys_category', index);
                 window.lastActiveSysCat = String(index);
             }
         };
 
-       // --- 🧮 MANUEL HESAPLAYICI DİNAMİK MOTORU ---
-        window.updateSysCalc = function(changedInput, platform, value) {
+        // --- 🧮 MANUEL HESAPLAYICI DİNAMİK MOTORU ---
+        window.updateSysCalc = function (changedInput, platform, value) {
             let val = parseFloat(value);
             // Kutucuğu tamamen silerse (boş bırakırsa) hata vermesin, 0 kabul etsin
-            if (isNaN(val)) val = 0; 
+            if (isNaN(val)) val = 0;
 
             let rPrice, cPrice, pPrice;
 
@@ -4754,10 +4791,10 @@
                 window.manualCalcBaseRestoranPrice = rPrice; // Hafızaya al
 
                 // Güncellenen değerleri kutucuklara yaz (Sıfırsa sadece 0 yaz)
-                if(changedInput !== 'r') document.getElementById('calc-r').value = rPrice > 0 ? rPrice.toFixed(2) : "0";
-                if(changedInput !== 'c') document.getElementById('calc-c').value = cPrice > 0 ? cPrice.toFixed(2) : "0";
-                if(changedInput !== 'p') document.getElementById('calc-p').value = pPrice > 0 ? pPrice.toFixed(2) : "0";
-            } 
+                if (changedInput !== 'r') document.getElementById('calc-r').value = rPrice > 0 ? rPrice.toFixed(2) : "0";
+                if (changedInput !== 'c') document.getElementById('calc-c').value = cPrice > 0 ? cPrice.toFixed(2) : "0";
+                if (changedInput !== 'p') document.getElementById('calc-p').value = pPrice > 0 ? pPrice.toFixed(2) : "0";
+            }
             else if (platform === 'my') {
                 if (changedInput === 'r') {
                     rPrice = val;
@@ -4768,8 +4805,8 @@
                 }
                 window.manualCalcBaseRestoranPrice = rPrice;
 
-                if(changedInput !== 'r') document.getElementById('calc-r').value = rPrice > 0 ? rPrice.toFixed(2) : "0";
-                if(changedInput !== 'p') document.getElementById('calc-p').value = pPrice > 0 ? Math.round(pPrice) : "0";
+                if (changedInput !== 'r') document.getElementById('calc-r').value = rPrice > 0 ? rPrice.toFixed(2) : "0";
+                if (changedInput !== 'p') document.getElementById('calc-p').value = pPrice > 0 ? Math.round(pPrice) : "0";
             }
             else if (platform === 'ue') {
                 if (changedInput === 'r') {
@@ -4781,15 +4818,15 @@
                 }
                 window.manualCalcBaseRestoranPrice = rPrice;
 
-                if(changedInput !== 'r') document.getElementById('calc-r').value = rPrice > 0 ? rPrice.toFixed(2) : "0";
-                if(changedInput !== 'p') document.getElementById('calc-p').value = pPrice > 0 ? Math.round(pPrice) : "0";
+                if (changedInput !== 'r') document.getElementById('calc-r').value = rPrice > 0 ? rPrice.toFixed(2) : "0";
+                if (changedInput !== 'p') document.getElementById('calc-p').value = pPrice > 0 ? Math.round(pPrice) : "0";
             }
         };
 
         // -------------------------------------------------------------------
         // 📖 YEMEKSEPETİ - SİSTEM İSİM EŞLEŞTİRME SÖZLÜĞÜ (KÜÇÜK HARFLERLE YAZIN)
         // -------------------------------------------------------------------
-       // -------------------------------------------------------------------
+        // -------------------------------------------------------------------
         // 📖 YEMEKSEPETİ - SİSTEM İSİM EŞLEŞTİRME SÖZLÜĞÜ (TAM UYUMLU VERSİYON)
         // -------------------------------------------------------------------
         window.ysIsimSozlugu = {
@@ -4826,7 +4863,7 @@
             "sosisli sandiviç": "sosisli sandviç",
             "goralı sandiviç": "goralı sosisli sandviç",
             "sucuk ekmek": "yarım ekmek arası sucuk",
-            "goralı patso":"amerikanlı sosisli patso sandviç",
+            "goralı patso": "amerikanlı sosisli patso sandviç",
 
             // --- KÖFTE & CİĞER ---
             "yarım ekmek köfte": "yarım ekmek arası köfte",
@@ -4857,8 +4894,8 @@
             "ıslak burger menü": "ıslak hamburger menü",
             "yarım köfte menü": "yarım ekmek köfte menü",
             "yarım ekmek kokoreç menü": "yarım kokoreç menü",
-           
-            
+
+
             // --- İÇECEKLER (Yemeksepetindeki Noktalar Sistemde Alt Çizgiye Dönüşür) ---
             "açık ayran": "açık ayran (30 cl_)",
             "1 lt açık ayran": "açık ayran (1 l_)",
@@ -4879,7 +4916,7 @@
         // -------------------------------------------------------------------
         // 📖 MİGROS YEMEK - SİSTEM İSİM EŞLEŞTİRME SÖZLÜĞÜ
         // -------------------------------------------------------------------
-       // -------------------------------------------------------------------
+        // -------------------------------------------------------------------
         // 📖 MİGROS YEMEK İSİM EŞLEŞTİRME SÖZLÜĞÜ (TAM UYUMLU VERSİYON)
         // -------------------------------------------------------------------
         window.myIsimSozlugu = {
@@ -4916,7 +4953,7 @@
             "goralı sandiviç": "goralı sandviç",
             "sosisli sandiviç": "sosisli sandviç",
             "sucuk ekmek": "yarım ekmek sucuk",
-            "goralı patso":"amerikanlı sosisli patso sandviç",
+            "goralı patso": "amerikanlı sosisli patso sandviç",
 
             // --- KÖFTE & CİĞER ---
             "yarım ekmek köfte": "yarım ekmek köfte",
@@ -4965,8 +5002,8 @@
             "kutu içecekler": "coca cola (330 ml)"
         };
 
-       // --- 🛒 MİGROS YEMEK VAKUM MOTORU ---
-        window.scanMigrosLive = function() {
+        // --- 🛒 MİGROS YEMEK VAKUM MOTORU ---
+        window.scanMigrosLive = function () {
             if (document.getElementById('myPasteModal')) return;
             const modalHtml = `
             <div id="myPasteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex justify-center items-center p-4">
@@ -4986,44 +5023,44 @@
                 if (!pastedData || pastedData.trim() === "") { alert("Lütfen veriyi yapıştırın!"); return; }
                 btn.innerHTML = '⏳ Hesaplanıyor...';
                 btn.disabled = true;
-                
+
                 let prices = [];
                 try {
                     let jsonStart = pastedData.indexOf('[');
                     let jsonEnd = pastedData.lastIndexOf(']');
                     if (jsonStart !== -1 && jsonEnd !== -1) {
                         let pureJson = pastedData.substring(jsonStart, jsonEnd + 1);
-                        try { prices = JSON.parse(pureJson); } catch(e) {
-                            try { prices = new Function("return " + pureJson)(); } catch(e2) {}
+                        try { prices = JSON.parse(pureJson); } catch (e) {
+                            try { prices = new Function("return " + pureJson)(); } catch (e2) { }
                         }
                     }
                     if (Array.isArray(prices) && prices.length > 0) {
                         const newLivePrices = {};
                         prices.forEach(item => {
-                            if(item.name) {
+                            if (item.name) {
                                 // 🚀 ÇÖZÜM BURADA: Eğik çizgi (/) işareti de alt çizgiye (_) dönüştürüldü!
                                 let safeKey = item.name.toLocaleLowerCase('tr-TR').trim().replace(/[.#$\[\]\/]/g, "_");
-                                newLivePrices[safeKey] = parseFloat(item.price); 
+                                newLivePrices[safeKey] = parseFloat(item.price);
                             }
                         });
                         window.liveMyPrices = newLivePrices;
-                        document.getElementById('myPasteModal').remove(); 
-                        renderSystemPricesList('my'); 
+                        document.getElementById('myPasteModal').remove();
+                        renderSystemPricesList('my');
                         try {
                             await database.ref('system_settings/liveMyPrices').set(newLivePrices);
                             alert(`✅ HARİKA! ${Object.keys(newLivePrices).length} ürün FIREBASE'E KALICI OLARAK kaydedildi. Sayfayı yenileseniz de silinmeyecek!`);
-                        } catch (dbErr) { 
-                            alert(`⚠️ FİREBASE HATASI: Kayıt başarısız oldu (Hata: ${dbErr.message}). Veriler sadece geçici olarak ekranda.`); 
+                        } catch (dbErr) {
+                            alert(`⚠️ FİREBASE HATASI: Kayıt başarısız oldu (Hata: ${dbErr.message}). Veriler sadece geçici olarak ekranda.`);
                         }
                     } else { alert("⚠️ Hata: Veri okunamadı."); }
-                } catch (err) { alert("⚠️ Beklenmeyen bir hata oluştu."); } 
+                } catch (err) { alert("⚠️ Beklenmeyen bir hata oluştu."); }
                 finally { btn.innerHTML = '✅ Veriyi İşle ve Kıyasla'; btn.disabled = false; }
             });
         };
 
 
-    // --- 🥡 YEMEKSEPETİ VAKUM MOTORU (SADECE ORİJİNAL FİYAT ALIR) ---
-        window.scanYemeksepetiLive = function() {
+        // --- 🥡 YEMEKSEPETİ VAKUM MOTORU (SADECE ORİJİNAL FİYAT ALIR) ---
+        window.scanYemeksepetiLive = function () {
             if (document.getElementById('ysPasteModal')) return;
             const modalHtml = `
             <div id="ysPasteModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex justify-center items-center p-4">
@@ -5043,15 +5080,15 @@
                 if (!pastedData || pastedData.trim() === "") { alert("Lütfen veriyi yapıştırın!"); return; }
                 btn.innerHTML = '⏳ Hesaplanıyor...';
                 btn.disabled = true;
-                
+
                 let prices = [];
                 try {
                     let jsonStart = pastedData.indexOf('[');
                     let jsonEnd = pastedData.lastIndexOf(']');
                     if (jsonStart !== -1 && jsonEnd !== -1) {
                         let pureJson = pastedData.substring(jsonStart, jsonEnd + 1);
-                        try { prices = JSON.parse(pureJson); } catch(e) {
-                            try { prices = new Function("return " + pureJson)(); } catch(e2) {}
+                        try { prices = JSON.parse(pureJson); } catch (e) {
+                            try { prices = new Function("return " + pureJson)(); } catch (e2) { }
                         }
                     }
                     if (!prices || prices.length === 0) {
@@ -5065,31 +5102,31 @@
                     if (Array.isArray(prices) && prices.length > 0) {
                         const newLivePrices = {};
                         prices.forEach(item => {
-                            if(item.name) {
+                            if (item.name) {
                                 // 🚀 ÇÖZÜM BURADA: Eğik çizgi (/) işareti de alt çizgiye (_) dönüştürüldü!
                                 let safeKey = item.name.toLocaleLowerCase('tr-TR').trim().replace(/[.#$\[\]\/]/g, "_");
                                 let cPrice = parseFloat(item.price || 0);
                                 let lPrice = parseFloat(item.originalPrice || item.price);
                                 if (lPrice > 0 && lPrice === cPrice) lPrice = cPrice / 0.80;
-                                newLivePrices[safeKey] = lPrice; 
+                                newLivePrices[safeKey] = lPrice;
                             }
                         });
                         window.liveYsPrices = newLivePrices;
-                        document.getElementById('ysPasteModal').remove(); 
-                        renderSystemPricesList('ys'); 
+                        document.getElementById('ysPasteModal').remove();
+                        renderSystemPricesList('ys');
                         try {
                             await database.ref('system_settings/liveYsPrices').set(newLivePrices);
                             alert(`✅ HARİKA! ${Object.keys(newLivePrices).length} ürün FIREBASE'E KALICI OLARAK kaydedildi. Sayfayı yenileseniz de silinmeyecek!`);
-                        } catch (dbErr) { 
-                            alert(`⚠️ FİREBASE HATASI: Kayıt başarısız oldu (Hata: ${dbErr.message}). Veriler sadece geçici olarak ekranda.`); 
+                        } catch (dbErr) {
+                            alert(`⚠️ FİREBASE HATASI: Kayıt başarısız oldu (Hata: ${dbErr.message}). Veriler sadece geçici olarak ekranda.`);
                         }
                     } else { alert("⚠️ Hata: Veri okunamadı."); }
-                } catch (err) { alert("⚠️ Beklenmeyen bir hata oluştu."); } 
+                } catch (err) { alert("⚠️ Beklenmeyen bir hata oluştu."); }
                 finally { btn.innerHTML = '✅ Veriyi İşle ve Kıyasla'; btn.disabled = false; }
             });
         };
-      // --- 🌐 GLOBAL PLATFORM SEÇİM MODALI ---
-        window.openPlatformSelectModal = function() {
+        // --- 🌐 GLOBAL PLATFORM SEÇİM MODALI ---
+        window.openPlatformSelectModal = function () {
             const modalId = 'platformSelectModal';
             if (document.getElementById(modalId)) document.getElementById(modalId).remove();
 
@@ -5116,22 +5153,22 @@
         }
 
         // 🚀 YENİ: ROZETE TIKLANINCA PLATFORMLAR ARASI GEÇİŞ YAPAN MOTOR
-        window.cyclePlatform = function() {
+        window.cyclePlatform = function () {
             if (window.currentSysPlatform === 'ys') renderSystemPricesList('my');
             else if (window.currentSysPlatform === 'my') renderSystemPricesList('ue');
             else renderSystemPricesList('ys');
         };
 
         // --- 🧮 SİSTEM FİYATLARI ANA EKRANI ---
-        window.renderSystemPricesModule = function() {
+        window.renderSystemPricesModule = function () {
             setActiveTab('showSystemPrices');
             const menuTitle = currentMenuType === 'in_place' ? 'Yerinde Menü' : 'Paket Servis Menüsü';
             const container = document.getElementById('contentContainer');
-            if(container) container.className = 'w-full pb-0 md:pb-0 px-2 sm:px-4 !max-w-none'; 
-            
+            if (container) container.className = 'w-full pb-0 md:pb-0 px-2 sm:px-4 !max-w-none';
+
             // 🚀 DİPTEN SIFIRLAMA (Alttaki boşlukları yok eder)
             const mainEl = document.querySelector('main');
-            if(mainEl) mainEl.style.paddingBottom = "0px";
+            if (mainEl) mainEl.style.paddingBottom = "0px";
 
             let categoryNavHtml = `<div class="flex overflow-x-auto scrollbar-none gap-2 py-2 mb-1 border-b border-gray-100 flex-shrink-0" id="sysCategoryNavbar">`;
             categoriesTR.forEach((cat, idx) => {
@@ -5188,10 +5225,10 @@
                     <div id="systemPricesCalculatorContainer" class="hidden xl:flex w-full xl:w-3/12 bg-white rounded-2xl shadow-sm p-5 border border-gray-100 animate-pop-in flex-col gap-4 sticky top-0 h-fit"></div>
                 </div>
             `);
-            
+
             if (typeof window.manualCalcBaseRestoranPrice === 'undefined') window.manualCalcBaseRestoranPrice = 0;
-            if(!window.activeListeners) window.activeListeners = {};
-            
+            if (!window.activeListeners) window.activeListeners = {};
+
             // YS Dinleyici
             if (window.activeListeners.liveYsPrices) database.ref('system_settings/liveYsPrices').off('value', window.activeListeners.liveYsPrices);
             window.activeListeners.liveYsPrices = database.ref('system_settings/liveYsPrices').on('value', (s) => {
@@ -5200,7 +5237,7 @@
                 const ysBtn = document.getElementById('btnPlatformYS');
                 if (listContainer) {
                     if (ysBtn && ysBtn.classList.contains('bg-rose-600')) {
-                        renderSystemPricesList('ys'); 
+                        renderSystemPricesList('ys');
                     } else if (ysBtn && !document.querySelector('.platform-btn.text-white')) {
                         renderSystemPricesList('ys');
                     }
@@ -5212,51 +5249,51 @@
             window.activeListeners.liveMyPrices = database.ref('system_settings/liveMyPrices').on('value', (s) => {
                 window.liveMyPrices = s.val() || {};
                 if (document.getElementById('systemPricesListContainer') && document.getElementById('btnPlatformMY') && document.getElementById('btnPlatformMY').classList.contains('bg-orange-500')) {
-                    renderSystemPricesList('my'); 
+                    renderSystemPricesList('my');
                 }
             });
         };
 
-      // --- 📋 TABLO VE AKILLI KATLANAN KUTU MOTORU (OK İKONLU VERSİYON) ---
-        window.renderSystemPricesList = function(platform) {
+        // --- 📋 TABLO VE AKILLI KATLANAN KUTU MOTORU (OK İKONLU VERSİYON) ---
+        window.renderSystemPricesList = function (platform) {
             window.currentSysPlatform = platform; // Rozet geçişleri için platformu hafızaya al
 
             document.querySelectorAll('.platform-btn').forEach(btn => {
                 btn.classList.remove('bg-rose-600', 'bg-orange-500', 'bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600', 'border-orange-500', 'border-green-600');
-                if(btn.id === 'btnPlatformYS') btn.classList.add('bg-rose-50', 'text-rose-600', 'border-rose-200');
-                if(btn.id === 'btnPlatformMY') btn.classList.add('bg-orange-50', 'text-orange-500', 'border-orange-200');
-                if(btn.id === 'btnPlatformUE') btn.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
+                if (btn.id === 'btnPlatformYS') btn.classList.add('bg-rose-50', 'text-rose-600', 'border-rose-200');
+                if (btn.id === 'btnPlatformMY') btn.classList.add('bg-orange-50', 'text-orange-500', 'border-orange-200');
+                if (btn.id === 'btnPlatformUE') btn.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
             });
-            
+
             let activeColor = ''; let bgLight = ''; let borderClass = ''; let commissionText = '';
-            
+
             // 🚀 MİNİ ROZETİN GÜNCELLENMESİ VE TIKLANABİLİR YAPILMASI
             const indicator = document.getElementById('floatingPlatformIndicator');
-            if(indicator) {
+            if (indicator) {
                 indicator.className = 'hidden absolute top-4 right-5 z-[60] px-3 py-2 rounded-xl shadow-lg font-black text-[10px] sm:text-xs text-white cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-1';
-                if(platform === 'ys') {
+                if (platform === 'ys') {
                     indicator.classList.add('bg-rose-600');
                     indicator.innerHTML = '🥡 Yemeksepeti <span class="text-white/70 ml-1 text-base leading-none"></span>';
-                } else if(platform === 'my') {
+                } else if (platform === 'my') {
                     indicator.classList.add('bg-orange-500');
                     indicator.innerHTML = '🛒 Migros Yemek <span class="text-white/70 ml-1 text-base leading-none"></span>';
-                } else if(platform === 'ue') {
+                } else if (platform === 'ue') {
                     indicator.classList.add('bg-green-600');
                     indicator.innerHTML = '🚙 Uber Eats <span class="text-white/70 ml-1 text-base leading-none"></span>';
                 }
             }
 
-            if(platform === 'ys') {
+            if (platform === 'ys') {
                 const btn = document.getElementById('btnPlatformYS');
-                if(btn) { btn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600'); btn.classList.remove('bg-rose-50', 'text-rose-600'); }
+                if (btn) { btn.classList.add('bg-rose-600', 'text-white', 'shadow-md', 'scale-105', 'border-rose-600'); btn.classList.remove('bg-rose-50', 'text-rose-600'); }
                 activeColor = 'text-rose-600'; bgLight = 'bg-rose-50'; borderClass = 'border-rose-200'; commissionText = '%20 İnd. + %12 Komisyon';
-            } else if(platform === 'my') {
+            } else if (platform === 'my') {
                 const btn = document.getElementById('btnPlatformMY');
-                if(btn) { btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500'); btn.classList.remove('bg-orange-50', 'text-orange-500'); }
+                if (btn) { btn.classList.add('bg-orange-500', 'text-white', 'shadow-md', 'scale-105', 'border-orange-500'); btn.classList.remove('bg-orange-50', 'text-orange-500'); }
                 activeColor = 'text-orange-600'; bgLight = 'bg-orange-50'; borderClass = 'border-orange-200'; commissionText = '%11 Komisyon';
-            } else if(platform === 'ue') {
+            } else if (platform === 'ue') {
                 const btn = document.getElementById('btnPlatformUE');
-                if(btn) { btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600'); btn.classList.remove('bg-green-50', 'text-green-600'); }
+                if (btn) { btn.classList.add('bg-green-600', 'text-white', 'shadow-md', 'scale-105', 'border-green-600'); btn.classList.remove('bg-green-50', 'text-green-600'); }
                 activeColor = 'text-green-600'; bgLight = 'bg-green-50'; borderClass = 'border-green-200'; commissionText = '%38 Komisyon';
             }
 
@@ -5271,7 +5308,7 @@
                     let searchName = p.name.toLocaleLowerCase('tr-TR').trim();
                     let safeSearchKey = searchName.replace(/[.#$\[\]\/]/g, "_");
                     if (window.ysIsimSozlugu && window.ysIsimSozlugu[searchName]) safeSearchKey = window.ysIsimSozlugu[searchName].replace(/[.#$\[\]\/]/g, "_");
-                    
+
                     let matchedKey = null;
                     if (window.liveYsPrices[safeSearchKey]) {
                         matchedKey = safeSearchKey;
@@ -5294,7 +5331,7 @@
                     let searchName = p.name.toLocaleLowerCase('tr-TR').trim();
                     let safeSearchKey = searchName.replace(/[.#$\[\]\/]/g, "_");
                     if (window.myIsimSozlugu && window.myIsimSozlugu[searchName]) safeSearchKey = window.myIsimSozlugu[searchName].replace(/[.#$\[\]\/]/g, "_");
-                    
+
                     if (window.liveMyPrices[safeSearchKey]) {
                         localToPlatformMap.set(p.key, safeSearchKey);
                         matchedPlatformKeys.add(safeSearchKey);
@@ -5307,7 +5344,7 @@
             let categoryNavHtml = '';
             categoriesTR.forEach((cat, idx) => {
                 const catProducts = products.filter(p => p.category === cat && !p.isArchived);
-                if(catProducts.length > 0) {
+                if (catProducts.length > 0) {
                     categoryNavHtml += `<button onclick="scrollToSysCatIndex('${idx}', true)" id="btn-sys-cat-${idx}" class="sys-cat-btn px-4 py-2 rounded-full border border-gray-200 text-[11px] font-bold text-gray-500 bg-white whitespace-nowrap hover:bg-orange-50 transition active:scale-95 flex-shrink-0 shadow-sm">${cat}</button>`;
                 }
             });
@@ -5319,7 +5356,7 @@
             if (navEl) navEl.innerHTML = categoryNavHtml;
 
             // Hesaplayıcı HTML (Sağ Panel)
-            let calcHtml = ''; let rPrice = window.manualCalcBaseRestoranPrice || 0; 
+            let calcHtml = ''; let rPrice = window.manualCalcBaseRestoranPrice || 0;
             if (platform === 'ys') {
                 let cPrice = Math.ceil((rPrice / 0.88) * 2) / 2; let pPrice = cPrice / 0.80;
                 calcHtml = `<h3 class="font-black text-rose-700 text-base border-b border-rose-200 pb-2 mb-2 flex items-center gap-2">🧮 Hesaplayıcı (YS)</h3><div class="flex flex-col gap-4 mt-2"><div class="flex flex-col"><label class="text-[9px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net İstediğin)</label><div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-100 p-3 rounded-xl font-black text-gray-800 text-lg outline-none focus:border-rose-500 bg-white shadow-sm" oninput="updateSysCalc('r', 'ys', this.value)"><span class="absolute right-3 top-3 font-bold text-gray-400 text-base">₺</span></div></div><div class="flex flex-col"><label class="text-[9px] font-black text-rose-600 uppercase bg-rose-50 px-2 py-1 rounded w-fit mb-1 border border-rose-100">Müşterinin Gördüğü (Kuruşlu)</label><div class="relative"><input id="calc-c" type="number" value="${cPrice > 0 ? cPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-200 p-3 rounded-xl font-black text-rose-700 text-lg outline-none focus:border-rose-500 bg-rose-50 shadow-sm" oninput="updateSysCalc('c', 'ys', this.value)"><span class="absolute right-3 top-3 font-bold text-rose-400 text-base">₺</span></div></div><div class="flex flex-col relative"><label class="text-[9px] font-black text-white bg-rose-600 px-2 py-1 rounded w-fit mb-1 absolute -top-3 left-3 shadow-md z-10">Siteye Girilecek Önerilen</label><div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? pPrice.toFixed(2) : '0'}" class="w-full border-2 border-rose-500 p-4 pt-5 rounded-xl font-black text-rose-900 text-xl outline-none focus:ring-4 focus:ring-rose-200 bg-rose-100 shadow-md" oninput="updateSysCalc('p', 'ys', this.value)"><span class="absolute right-3 top-4 font-black text-rose-500 text-xl">₺</span></div></div></div>`;
@@ -5330,10 +5367,10 @@
                 let pPrice = Math.round(rPrice / 0.62);
                 calcHtml = `<h3 class="font-black text-green-700 text-base border-b border-green-200 pb-2 mb-2 flex items-center gap-2">🧮 Hesaplayıcı (UE)</h3><div class="flex flex-col gap-4 mt-2"><div class="flex flex-col"><label class="text-[9px] font-bold text-gray-500 uppercase mb-1 px-1">Restoran Fiyatı (Net)</label><div class="relative"><input id="calc-r" type="number" value="${rPrice > 0 ? rPrice.toFixed(2) : '0'}" class="w-full border-2 border-green-100 p-3 rounded-xl font-black text-gray-800 text-lg outline-none focus:border-green-500 bg-white" oninput="updateSysCalc('r', 'ue', this.value)"><span class="absolute right-3 top-3 font-bold text-gray-400 text-base">₺</span></div></div><div class="flex flex-col relative mt-2"><label class="text-[9px] font-black text-white bg-green-600 px-2 py-1 rounded w-fit mb-1 absolute -top-3 left-3 z-10">Siteye Girilecek Önerilen</label><div class="relative"><input id="calc-p" type="number" value="${pPrice > 0 ? Math.round(pPrice) : '0'}" class="w-full border-2 border-green-500 p-4 pt-5 rounded-xl font-black text-green-900 text-xl outline-none bg-green-50 shadow-md" oninput="updateSysCalc('p', 'ue', this.value)"><span class="absolute right-3 top-4 font-black text-green-500 text-xl">₺</span></div></div></div>`;
             }
-            if(document.getElementById('systemPricesCalculatorContainer')) document.getElementById('systemPricesCalculatorContainer').innerHTML = calcHtml;
+            if (document.getElementById('systemPricesCalculatorContainer')) document.getElementById('systemPricesCalculatorContainer').innerHTML = calcHtml;
 
             const container = document.getElementById('systemPricesListContainer');
-            if(!container) return;
+            if (!container) return;
             container.innerHTML = '';
             let hasAnyProduct = false;
 
@@ -5344,9 +5381,9 @@
 
             categoriesTR.forEach((cat, catIndex) => {
                 const catProducts = products.filter(p => p.category === cat && !p.isArchived);
-                if(catProducts.length === 0) return;
+                if (catProducts.length === 0) return;
                 hasAnyProduct = true;
-                
+
                 let html = `
                     <div class="mb-5 sys-cat-section" id="sys-cat-${catIndex}">
                         <h3 class="font-black ${activeColor} text-sm sm:text-base mb-2 border-b ${borderClass} pb-1 flex flex-wrap items-center justify-start gap-3 sticky top-0 bg-white z-10 pt-1 shadow-sm px-1">
@@ -5355,14 +5392,14 @@
                         </h3>
                         <div class="flex flex-col gap-2.5 mt-3">
                 `;
-                
-                catProducts.sort((a,b) => (a.order || 9999) - (b.order || 9999)).forEach(p => {
-                    const rPrice = p.discountPrice || p.price; 
+
+                catProducts.sort((a, b) => (a.order || 9999) - (b.order || 9999)).forEach(p => {
+                    const rPrice = p.discountPrice || p.price;
                     let pPrice = 0; let cPrice = 0;
-                    
+
                     if (platform === 'ys') {
-                        cPrice = Math.ceil((rPrice / 0.88) * 2) / 2; pPrice = cPrice / 0.80; 
-                    } else if (platform === 'my') { pPrice = Math.round(rPrice / 0.89); } 
+                        cPrice = Math.ceil((rPrice / 0.88) * 2) / 2; pPrice = cPrice / 0.80;
+                    } else if (platform === 'my') { pPrice = Math.round(rPrice / 0.89); }
                     else if (platform === 'ue') { pPrice = Math.round(rPrice / 0.62); }
 
                     let rightPanelHtml = ""; let rowBgClass = `bg-white`; let statusIcon = `<span class="text-gray-300">➖</span>`;
@@ -5375,28 +5412,28 @@
                         }
 
                         if (liveData) {
-                            const liveListed = parseFloat(liveData);     
-                            const liveCustomer = liveListed * 0.80;      
-                            const liveNet = liveCustomer * 0.88;         
-                            
+                            const liveListed = parseFloat(liveData);
+                            const liveCustomer = liveListed * 0.80;
+                            const liveNet = liveCustomer * 0.88;
+
                             const isNetEqual = Math.abs(rPrice - liveNet) <= 1.5;
                             const isCustomerEqual = Math.abs(cPrice - liveCustomer) <= 1.5;
                             const isListedEqual = Math.abs(pPrice - liveListed) <= 1.5;
 
                             const diff = liveNet - rPrice;
-                            if (diff < -1.5) { rowBgClass = 'bg-red-50 border-red-200'; statusIcon = `<div title="ZARAR!" class="flex items-center justify-center">${downArrowSVG}</div>`; } 
-                            else if (diff > 1.5) { rowBgClass = 'bg-green-50 border-green-200'; statusIcon = `<div title="EKSTRA KÂR" class="flex items-center justify-center">${upArrowSVG}</div>`; } 
+                            if (diff < -1.5) { rowBgClass = 'bg-red-50 border-red-200'; statusIcon = `<div title="ZARAR!" class="flex items-center justify-center">${downArrowSVG}</div>`; }
+                            else if (diff > 1.5) { rowBgClass = 'bg-green-50 border-green-200'; statusIcon = `<div title="EKSTRA KÂR" class="flex items-center justify-center">${upArrowSVG}</div>`; }
                             else { rowBgClass = 'bg-emerald-50 border-emerald-300'; statusIcon = `<span title="TAM EŞİT" class="text-lg">✅</span>`; }
 
-                            let netHtml = isNetEqual 
+                            let netHtml = isNetEqual
                                 ? `<div class="flex flex-col items-center justify-center bg-emerald-100 border border-emerald-300 rounded-md w-full h-10 px-1"><span class="text-[8px] font-black text-emerald-600 uppercase leading-none mb-1">Net Kazanç (Eşit)</span><span class="font-black text-emerald-700 text-sm leading-none">${rPrice} ₺</span></div>`
                                 : `<div class="grid grid-cols-2 gap-1 w-full h-10"><div class="flex flex-col items-center justify-center bg-gray-50 border border-gray-200 rounded-md px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Hedef Net</span><span class="font-black text-gray-700 text-xs leading-none">${rPrice} ₺</span></div><div class="flex flex-col items-center justify-center bg-white border border-gray-200 rounded-md shadow-sm px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Canlı Net</span><span class="font-black ${diff < -1.5 ? 'text-red-600' : 'text-green-600'} text-xs leading-none">${liveNet.toFixed(2)} ₺</span></div></div>`;
 
-                            let customerHtml = isCustomerEqual 
+                            let customerHtml = isCustomerEqual
                                 ? `<div class="flex flex-col items-center justify-center bg-blue-50 border border-blue-200 rounded-md w-full h-10 px-1"><span class="text-[8px] font-black text-blue-600 uppercase leading-none mb-1">Müşteri (Eşit)</span><span class="font-black text-blue-700 text-sm leading-none">${cPrice.toFixed(2)} ₺</span></div>`
                                 : `<div class="grid grid-cols-2 gap-1 w-full h-10"><div class="flex flex-col items-center justify-center bg-orange-50 border border-orange-200 rounded-md px-1"><span class="text-[7px] font-bold text-orange-600 uppercase text-center leading-none mb-1">Önerilen Müşteri</span><span class="font-black text-orange-700 text-xs leading-none">${cPrice.toFixed(2)} ₺</span></div><div class="flex flex-col items-center justify-center bg-white border border-gray-200 rounded-md shadow-sm px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Sitede Müşteri</span><span class="font-black text-gray-800 text-xs leading-none">${liveCustomer.toFixed(2)} ₺</span></div></div>`;
 
-                            let listedHtml = isListedEqual 
+                            let listedHtml = isListedEqual
                                 ? `<div class="flex flex-col items-center justify-center bg-emerald-600 border border-emerald-700 rounded-md shadow-sm w-full h-10 px-1"><span class="text-[8px] font-black text-emerald-100 uppercase leading-none mb-1">Site Fiyatı (TAM UYUM)</span><span class="font-black text-white text-sm leading-none">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</span></div>`
                                 : `<div class="grid grid-cols-2 gap-1 w-full h-10"><div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-center justify-center bg-rose-600 border border-rose-700 rounded-md cursor-pointer hover:bg-rose-700 shadow-sm transition px-1" title="Kopyala"><span class="text-[7px] font-black text-rose-100 uppercase text-center leading-none mb-1">Önerilen Liste</span><div class="font-black text-white text-xs leading-none price-val-text">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</div></div><div class="flex flex-col items-center justify-center bg-white border border-gray-300 rounded-md shadow-sm px-1"><span class="text-[7px] font-black text-gray-600 uppercase text-center leading-none mb-1">Sitedeki Liste</span><span class="font-black text-gray-800 text-xs leading-none">${liveListed.toFixed(2)} ₺</span></div></div>`;
 
@@ -5417,22 +5454,22 @@
                         }
 
                         if (liveData) {
-                            const liveListed = parseFloat(liveData);     
-                            const liveNet = liveListed * 0.89;           
-                            
+                            const liveListed = parseFloat(liveData);
+                            const liveNet = liveListed * 0.89;
+
                             const isNetEqual = Math.abs(rPrice - liveNet) <= 1.5;
                             const isListedEqual = Math.abs(pPrice - liveListed) <= 1.5;
 
                             const diff = liveNet - rPrice;
-                            if (diff < -1.5) { rowBgClass = 'bg-red-50 border-red-200'; statusIcon = `<div title="ZARAR!" class="flex items-center justify-center">${downArrowSVG}</div>`; } 
-                            else if (diff > 1.5) { rowBgClass = 'bg-green-50 border-green-200'; statusIcon = `<div title="EKSTRA KÂR" class="flex items-center justify-center">${upArrowSVG}</div>`; } 
+                            if (diff < -1.5) { rowBgClass = 'bg-red-50 border-red-200'; statusIcon = `<div title="ZARAR!" class="flex items-center justify-center">${downArrowSVG}</div>`; }
+                            else if (diff > 1.5) { rowBgClass = 'bg-green-50 border-green-200'; statusIcon = `<div title="EKSTRA KÂR" class="flex items-center justify-center">${upArrowSVG}</div>`; }
                             else { rowBgClass = 'bg-emerald-50 border-emerald-300'; statusIcon = `<span title="TAM EŞİT" class="text-lg">✅</span>`; }
 
-                            let netHtml = isNetEqual 
+                            let netHtml = isNetEqual
                                 ? `<div class="flex flex-col items-center justify-center bg-emerald-100 border border-emerald-300 rounded-md w-full h-10 px-1"><span class="text-[8px] font-black text-emerald-600 uppercase leading-none mb-1">Net Kazanç (Eşit)</span><span class="font-black text-emerald-700 text-sm leading-none">${rPrice} ₺</span></div>`
                                 : `<div class="grid grid-cols-2 gap-1 w-full h-10"><div class="flex flex-col items-center justify-center bg-gray-50 border border-gray-200 rounded-md px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Hedef Net</span><span class="font-black text-gray-700 text-xs leading-none">${rPrice} ₺</span></div><div class="flex flex-col items-center justify-center bg-white border border-gray-200 rounded-md shadow-sm px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Canlı Net</span><span class="font-black ${diff < -1.5 ? 'text-red-600' : 'text-green-600'} text-xs leading-none">${liveNet.toFixed(2)} ₺</span></div></div>`;
 
-                            let listedHtml = isListedEqual 
+                            let listedHtml = isListedEqual
                                 ? `<div class="flex flex-col items-center justify-center bg-orange-500 border border-orange-600 rounded-md shadow-sm w-full h-10 px-1"><span class="text-[8px] font-black text-orange-50 uppercase leading-none mb-1">Site Fiyatı (TAM UYUM)</span><span class="font-black text-white text-sm leading-none">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</span></div>`
                                 : `<div class="grid grid-cols-2 gap-1 w-full h-10"><div onclick="copySysPrice(this, '${pPrice}')" class="flex flex-col items-center justify-center bg-orange-500 border border-orange-600 rounded-md cursor-pointer hover:bg-orange-600 shadow-sm transition px-1" title="Kopyala"><span class="text-[7px] font-black text-orange-100 uppercase text-center leading-none mb-1">Önerilen Liste</span><div class="font-black text-white text-xs leading-none price-val-text">${Number.isInteger(pPrice) ? pPrice : pPrice.toFixed(2)} ₺</div></div><div class="flex flex-col items-center justify-center bg-white border border-gray-300 rounded-md shadow-sm px-1"><span class="text-[7px] font-black text-gray-600 uppercase text-center leading-none mb-1">Sitedeki Liste</span><span class="font-black text-gray-800 text-xs leading-none">${liveListed.toFixed(2)} ₺</span></div></div>`;
 
@@ -5475,15 +5512,15 @@
                         </h3>
                         <div class="flex flex-col gap-2.5 mt-3">
                 `;
-                
+
                 let liveSource = platform === 'ys' ? window.liveYsPrices : window.liveMyPrices;
-                
+
                 unmatchedKeys.forEach(uKey => {
                     let displayName = uKey.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                     let liveListed = parseFloat(liveSource[uKey]);
                     let liveCustomer = platform === 'ys' ? liveListed * 0.80 : liveListed;
                     let liveNet = platform === 'ys' ? liveCustomer * 0.88 : liveListed * 0.89;
-                    
+
                     let netHtml = `<div class="flex flex-col items-center justify-center bg-purple-50 border border-purple-200 rounded-md w-full h-10 px-1"><span class="text-[7px] font-black text-purple-600 uppercase text-center leading-none mb-1">Mevcut Net Kazanç</span><span class="font-black text-purple-700 text-xs leading-none">${liveNet.toFixed(2)} ₺</span></div>`;
                     let customerHtml = platform === 'ys' ? `<div class="flex flex-col items-center justify-center bg-white border border-gray-200 rounded-md shadow-sm w-full h-10 px-1"><span class="text-[7px] font-bold text-gray-500 uppercase text-center leading-none mb-1">Sitede Müşteri</span><span class="font-black text-gray-800 text-xs leading-none">${liveCustomer.toFixed(2)} ₺</span></div>` : '';
                     let listedHtml = `<div class="flex flex-col items-center justify-center bg-gray-100 border border-gray-300 rounded-md shadow-sm w-full h-10 px-1"><span class="text-[7px] font-black text-gray-500 uppercase text-center leading-none mb-1">Sitedeki Liste</span><span class="font-black text-gray-700 text-sm leading-none">${liveListed.toFixed(2)} ₺</span></div>`;
@@ -5509,13 +5546,13 @@
                 container.innerHTML += uHtml;
             }
 
-            if(!hasAnyProduct && unmatchedKeys.length === 0) container.innerHTML += '<div class="text-center text-gray-400 font-bold mt-10">Bu platforma ait ürün verisi bulunamadı.</div>';
+            if (!hasAnyProduct && unmatchedKeys.length === 0) container.innerHTML += '<div class="text-center text-gray-400 font-bold mt-10">Bu platforma ait ürün verisi bulunamadı.</div>';
 
             // 🚀 EKRAN KAYDIRMA VE MİNİ ROZET MOTORU (Zıplamayı Önleyen Scroll Çözümü Dahil)
             setTimeout(() => {
                 const savedCatIndex = localStorage.getItem('last_sys_category') || "0";
-                scrollToSysCatIndex(savedCatIndex, false); 
-                
+                scrollToSysCatIndex(savedCatIndex, false);
+
                 const scrollArea = document.getElementById('radarScrollArea');
                 const headerArea = document.getElementById('radarHeaderArea');
                 const indicatorBadge = document.getElementById('floatingPlatformIndicator');
@@ -5523,7 +5560,7 @@
                 if (scrollArea && !scrollArea.dataset.spyAttached) {
                     scrollArea.dataset.spyAttached = 'true';
                     scrollArea.addEventListener('scroll', () => {
-                        
+
                         // 1. Üst Kısım Ekrandan Çıkınca Rozeti Göster
                         if (headerArea && indicatorBadge) {
                             if (scrollArea.scrollTop > headerArea.offsetHeight - 20) {
@@ -5535,26 +5572,26 @@
 
                         // 2. Kategori Çubuğu Aktif Durum Yönetimi
                         const sections = scrollArea.querySelectorAll('.sys-cat-section');
-                        let currentActiveIndex = window.lastActiveSysCat || "0"; 
+                        let currentActiveIndex = window.lastActiveSysCat || "0";
                         sections.forEach(sec => {
                             if (scrollArea.scrollTop >= sec.offsetTop - 20) {
                                 currentActiveIndex = sec.id.replace('sys-cat-', '');
                             }
                         });
-                        
-                        if(window.lastActiveSysCat !== currentActiveIndex) {
+
+                        if (window.lastActiveSysCat !== currentActiveIndex) {
                             window.lastActiveSysCat = currentActiveIndex;
                             localStorage.setItem('last_sys_category', currentActiveIndex);
                             document.querySelectorAll('.sys-cat-btn').forEach(b => { b.classList.remove('bg-gray-800', 'text-white', 'border-gray-800', 'bg-purple-100', 'border-purple-300', 'text-purple-700'); b.classList.add('text-gray-500', 'border-gray-200', 'bg-white'); });
                             const activeBtn = document.getElementById(`btn-sys-cat-${currentActiveIndex}`);
                             const navBar = document.getElementById('sysCategoryNavbar');
-                            if (activeBtn && navBar) { 
-                                activeBtn.classList.remove('text-gray-500', 'border-gray-200', 'bg-white'); 
+                            if (activeBtn && navBar) {
+                                activeBtn.classList.remove('text-gray-500', 'border-gray-200', 'bg-white');
                                 // Özel Kategori (Sitede Olmayanlar) için mor renk, normal kategoriler için siyah
-                                if(currentActiveIndex === 'unmatched') {
-                                    activeBtn.classList.add('bg-purple-100', 'text-purple-700', 'border-purple-300'); 
+                                if (currentActiveIndex === 'unmatched') {
+                                    activeBtn.classList.add('bg-purple-100', 'text-purple-700', 'border-purple-300');
                                 } else {
-                                    activeBtn.classList.add('bg-gray-800', 'text-white', 'border-gray-800'); 
+                                    activeBtn.classList.add('bg-gray-800', 'text-white', 'border-gray-800');
                                 }
                                 // EKRAN ZIPLAMASINI ÖNLEMEK İÇİN: scrollIntoView yerine navbar'ın scroll'unu manuel kaydırır
                                 navBar.scrollTo({
@@ -5565,11 +5602,11 @@
                         }
                     });
                 }
-            }, 100); 
+            }, 100);
         };
 
         // --- 🚀 YENİ: KAYDIRMA KOMUTU ARTIK YENİ SCROLL ALANINA (radarScrollArea) GÖNDERİLİR ---
-        window.scrollToSysCatIndex = function(index, smooth = true) {
+        window.scrollToSysCatIndex = function (index, smooth = true) {
             const targetEl = document.getElementById(`sys-cat-${index}`);
             const scrollArea = document.getElementById('radarScrollArea');
             if (targetEl && scrollArea) {
@@ -5577,18 +5614,18 @@
                     top: targetEl.offsetTop - 5, // Pay bırakarak kaydır
                     behavior: smooth ? 'smooth' : 'auto'
                 });
-                
+
                 document.querySelectorAll('.sys-cat-btn').forEach(btn => {
                     btn.classList.remove('bg-gray-800', 'text-white', 'border-gray-800', 'bg-purple-100', 'border-purple-300', 'text-purple-700');
                     btn.classList.add('text-gray-500', 'border-gray-200', 'bg-white');
                 });
-                
+
                 const activeBtn = document.getElementById(`btn-sys-cat-${index}`);
                 const navBar = document.getElementById('sysCategoryNavbar');
                 if (activeBtn && navBar) {
                     activeBtn.classList.remove('text-gray-500', 'border-gray-200', 'bg-white');
-                    if(index === 'unmatched') {
-                        activeBtn.classList.add('bg-purple-100', 'text-purple-700', 'border-purple-300'); 
+                    if (index === 'unmatched') {
+                        activeBtn.classList.add('bg-purple-100', 'text-purple-700', 'border-purple-300');
                     } else {
                         activeBtn.classList.add('bg-gray-800', 'text-white', 'border-gray-800');
                     }
@@ -5598,7 +5635,7 @@
                         behavior: 'smooth'
                     });
                 }
-                
+
                 localStorage.setItem('last_sys_category', index);
                 window.lastActiveSysCat = String(index);
             }
@@ -6133,29 +6170,48 @@
         function stopAllListeners() {
             if (activeListeners.products && productsRef) productsRef.off('value', activeListeners.products);
             if (activeListeners.campaigns && campaignsRef) campaignsRef.off('value', activeListeners.campaigns);
+            if (activeListeners.ramadan && ramadanCampaignsRef) ramadanCampaignsRef.off('value', activeListeners.ramadan);
+            if (activeListeners.ramadanNormal && ramadanNormalCampaignsRef) ramadanNormalCampaignsRef.off('value', activeListeners.ramadanNormal); // YENİ
             if (activeListeners.campaignPriceText && campaignInfoRef) campaignInfoRef.child('price_text').off('value', activeListeners.campaignPriceText);
-            if (activeListeners.priceBoxUrl && priceBoxUrlRef) priceBoxUrlRef.off('value', activeListeners.priceBoxUrl);
             activeListeners = {};
         }
 
-        function setupDataListeners() {
+       function setupDataListeners() {
             activeListeners.products = productsRef.on('value', (s) => {
                 products = [];
                 s.forEach(c => { const p = c.val(); p.key = c.key; products.push(p); });
-                syncLinkedCampaignPrices(); // 🚀 Ürünler değiştiğinde kampanya fiyatlarını otomatik eşitle
+                syncLinkedCampaignPrices(); 
                 refreshActiveModule();
             });
 
             activeListeners.campaigns = campaignsRef.on('value', (s) => {
                 campaignUrls = [];
                 s.forEach(c => { const camp = c.val(); camp.key = c.key; campaignUrls.push(camp); });
-                syncLinkedCampaignPrices(); // 🚀 Kampanyalar değiştiğinde otomatik eşitle
+                syncLinkedCampaignPrices(); 
                 if (document.getElementById('sortableCampaignList')) renderCampaignList();
+                if (document.getElementById('rmzLinkedCampaign')) renderSettingsModule(); // Listeyi güncelle
+            });
+
+            activeListeners.ramadan = ramadanCampaignsRef.on('value', (s) => {
+                ramadanCampaignUrls = [];
+                s.forEach(c => { const camp = c.val(); camp.key = c.key; ramadanCampaignUrls.push(camp); });
+                syncLinkedCampaignPrices(); 
+                if (document.getElementById('ramadanCampaignList')) renderRamadanList();
+            });
+
+            // YENİ: Ramazan Temalı Normal Kampanyalar Dinleyicisi
+            activeListeners.ramadanNormal = ramadanNormalCampaignsRef.on('value', (s) => {
+                ramadanNormalCampaignUrls = [];
+                s.forEach(c => { const camp = c.val(); camp.key = c.key; ramadanNormalCampaignUrls.push(camp); });
+                syncLinkedCampaignPrices(); 
+                if (document.getElementById('ramadanNormalCampaignList')) renderRamadanNormalList();
             });
 
             activeListeners.campaignPriceText = campaignInfoRef.child('price_text').on('value', (s) => {
                 campaignPriceText = s.val() || "";
             });
+        
+
 
             activeListeners.ekstreler = ekstrelerRef.on('value', (s) => {
                 allEkstreData = s.val() || {};
@@ -6183,18 +6239,19 @@
             });
         }
 
-        // 🚀 YENİ: ÜRÜN ZAMLANDIĞINDA KAMPANYA FİYATINI OTOMATİK DEĞİŞTİREN MOTOR
-        function syncLinkedCampaignPrices() {
-            if (!campaignUrls.length || !products.length) return;
+       function syncLinkedCampaignPrices() {
+            if (!products.length) return;
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
+            const ramadanPathPrefix = currentMenuType === 'in_place' ? 'ramadan_campaigns' : 'delivery_ramadan_campaigns';
+            const ramadanNormalPathPrefix = currentMenuType === 'in_place' ? 'ramadan_normal_campaigns' : 'delivery_ramadan_normal_campaigns';
             const updates = {};
             let hasUpdate = false;
 
+            // Normal Kampanyalar
             campaignUrls.forEach(camp => {
                 if (camp.linkedProductId) {
                     const linkedProduct = products.find(p => p.key === camp.linkedProductId);
                     if (linkedProduct) {
-                        // Ürünün indirimli fiyatı varsa onu, yoksa normal fiyatını al
                         const targetPrice = String(linkedProduct.discountPrice || linkedProduct.price);
                         if (String(camp.price) !== targetPrice) {
                             updates[`${pathPrefix}/${camp.key}/price`] = targetPrice;
@@ -6204,9 +6261,35 @@
                 }
             });
 
-            if (hasUpdate) {
-                database.ref().update(updates);
-            }
+            // Ramazan İftar Menüleri Afişleri
+            ramadanCampaignUrls.forEach(camp => {
+                if (camp.linkedProductId) {
+                    const linkedProduct = products.find(p => p.key === camp.linkedProductId);
+                    if (linkedProduct) {
+                        const targetPrice = String(linkedProduct.discountPrice || linkedProduct.price);
+                        if (String(camp.price) !== targetPrice) {
+                            updates[`${ramadanPathPrefix}/${camp.key}/price`] = targetPrice;
+                            hasUpdate = true;
+                        }
+                    }
+                }
+            });
+
+            // YENİ: Ramazan Temalı Normal Kampanyaların Fiyat Eşitlemesi
+            ramadanNormalCampaignUrls.forEach(camp => {
+                if (camp.linkedCampaignId) {
+                    const parentCamp = campaignUrls.find(c => c.key === camp.linkedCampaignId);
+                    if (parentCamp) {
+                        const targetPrice = String(parentCamp.price);
+                        if (String(camp.price) !== targetPrice) {
+                            updates[`${ramadanNormalPathPrefix}/${camp.key}/price`] = targetPrice;
+                            hasUpdate = true;
+                        }
+                    }
+                }
+            });
+
+            if (hasUpdate) database.ref().update(updates);
         }
 
         // --- DOM HAZIR OLDUĞUNDA TETİKLE ---
@@ -6325,7 +6408,7 @@
             document.getElementById('showSystemPrices').addEventListener('click', renderSystemPricesModule);
             document.getElementById('showGlobalDateUpdate').addEventListener('click', renderGlobalDateModule);
 
-
+            document.getElementById('showSettings').addEventListener('click', renderSettingsModule);
 
             document.getElementById('switchToInPlace').addEventListener('click', () => setFirebaseRefs('in_place'));
             document.getElementById('switchToDelivery').addEventListener('click', () => setFirebaseRefs('delivery'));
@@ -6430,10 +6513,10 @@
         const expectedPdfLayout = [
             { cat: "KOKOREÇ", items: ["Yarım Ekmek Kokoreç", "Yarım Ekmek İzmir Kokoreç", "Üç Çeyrek Ekmek Kokoreç", "Porsiyon Kokoreç"] },
             { cat: "TAVUK KOKOREÇ", items: ["Yarım Tavuk Kokoreç", "Üç Çeyrek Tavuk Kokoreç"] },
-            { cat: "PATSO", items: ["Sade Patso", "Sosisli Patso", "Ciğerli Patso", "Köfteli Patso", "Kaşarlı Patso", "Tavuklu Patso", "Amerikanlı Patso","Sosisli Kaşarlı Patso", "Goralı Patso","Sucuklu Patso","Sucuklu Kaşarlı Patso", "Porsiyon Patates"] },
+            { cat: "PATSO", items: ["Sade Patso", "Sosisli Patso", "Ciğerli Patso", "Köfteli Patso", "Kaşarlı Patso", "Tavuklu Patso", "Amerikanlı Patso", "Sosisli Kaşarlı Patso", "Goralı Patso", "Sucuklu Patso", "Sucuklu Kaşarlı Patso", "Porsiyon Patates"] },
             { cat: "TAVUK DÖNER", items: ["Yarım Ekmek Tavuk Döner", "Tombik Ekmek Tavuk Döner", "Üç Çeyrek Ekmek Döner", "Dürüm Tavuk Döner", "Pilav Üstü Tavuk Döner"] },
-            { cat: "SANDVİÇ - TOST", items: ["Sosisli Sandviç", "Goralı Sandiviç", "Kaşarlı Tost","Sucuklu Tost", "Karışık Tost"] },
-            { cat: "HAMBURGERLER", items: ["Hamburger", "Double Hamburger", "Cheeseburger", "Islak Hamburger", "Islak Cheeseburger","Amerikanlı ıslak Hamburger"] },
+            { cat: "SANDVİÇ - TOST", items: ["Sosisli Sandviç", "Goralı Sandiviç", "Kaşarlı Tost", "Sucuklu Tost", "Karışık Tost"] },
+            { cat: "HAMBURGERLER", items: ["Hamburger", "Double Hamburger", "Cheeseburger", "Islak Hamburger", "Islak Cheeseburger", "Amerikanlı ıslak Hamburger"] },
             { cat: "KÖFTE", items: ["Yarım Ekmek Köfte", "Üç Çeyrek Ekmek Köfte", "Porsiyon Köfte"] },
             { cat: "CİĞER", items: ["Yarım Ekmek Ciğer", "Üç Çeyrek Ekmek Ciğer", "Porsiyon Ciğer"] },
             { cat: "SUCUK EKMEK", items: ["Yarım Ekmek Sucuk", "Üç Çeyrek Ekmek Sucuk"] },
@@ -6932,6 +7015,239 @@
                 `;
             });
         }
+
+
+
+       // Seçim kutusunda kampanyanın ismini güzel göstermek için yardımcı fonksiyon
+        function getCampaignLabel(c) {
+            if(c.linkedProductId) {
+                const p = products.find(prod => prod.key === c.linkedProductId);
+                if(p) return `${p.name} Afişi (${c.price} ₺)`;
+            }
+            return `Manuel Afiş (${c.price} ₺)`;
+        }
+
+        // --- ⚙️ AYARLAR MODÜLÜ VE RAMAZAN YÖNETİMİ ---
+        window.renderSettingsModule = function() {
+            setActiveTab('showSettings');
+            const container = document.getElementById('contentContainer');
+            if(container) container.className = 'w-full pb-0 md:pb-0 px-2 sm:px-4'; 
+
+            loadModule(`
+                <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-100 animate-pop-in max-w-4xl mx-auto min-h-[79dvh] mt-4 flex flex-col gap-6 pb-20">
+                    <h2 class="text-xl sm:text-2xl font-black text-gray-800 flex items-center gap-2 border-b pb-3">
+                        <span>⚙️</span> Sistem Ayarları
+                    </h2>
+                    
+                    <!-- RAMAZAN ŞALTERİ -->
+                    <div class="bg-gray-50 border border-gray-200 rounded-2xl p-5 flex items-center justify-between shadow-sm hover:shadow-md transition">
+                        <div class="flex flex-col gap-1 pr-4">
+                            <h3 class="font-black text-lg text-emerald-700 flex items-center gap-2">🌙 Ramazan Modu</h3>
+                            <p class="text-[11px] sm:text-xs font-bold text-gray-500">Açıldığında müşteri ekranı özel tasarıma geçer ve aşağıdaki Ramazan Afişleri yayınlanır.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                            <input type="checkbox" id="ramadanModeToggle" class="sr-only peer" onchange="toggleRamadanMode(this.checked)">
+                            <div class="w-14 h-7 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-600 shadow-inner"></div>
+                        </label>
+                    </div>
+
+                    <!-- 1. ALAN: İFTAR MENÜLERİ (EN ÜSTTE ÇIKAN) -->
+                    <div class="bg-white border-2 border-emerald-100 rounded-2xl p-5 shadow-sm">
+                        <h3 class="font-black text-lg text-emerald-800 mb-4 flex items-center gap-2 border-b border-emerald-50 pb-2">
+                            <span>🖼️</span> 1. İftar Menüleri Afişleri (Tam Ekran Çıkar)
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-4 font-bold">Ramazan modunda en üstte tam boyutlu olarak çıkacak ana iftar menülerinin görsellerini buraya ekleyin.</p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-3 mb-4 items-end bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
+                            <div class="w-full sm:w-1/3">
+                                <label class="text-[10px] font-bold text-emerald-700 uppercase mb-1 block">Afiş Görseli *</label>
+                                <button id="rmzImgBtn" class="bg-emerald-600 text-white px-3 py-2.5 rounded-xl font-bold w-full text-xs hover:bg-emerald-700 transition">Görsel Seç / Yükle</button>
+                                <input type="hidden" id="rmzUrl">
+                            </div>
+                            <div class="w-full sm:w-1/3">
+                                <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Manuel Fiyat</label>
+                                <input type="number" id="rmzPrice" placeholder="Örn: 350" class="border border-gray-300 p-2.5 rounded-xl w-full text-sm font-bold outline-none focus:border-emerald-500 bg-white">
+                            </div>
+                            <div class="w-full sm:w-1/3 flex items-center justify-center font-black text-gray-400 text-xs">VEYA</div>
+                            <div class="w-full sm:w-1/3">
+                                <label class="text-[10px] font-bold text-blue-600 uppercase mb-1 block">Ürüne Bağla (Oto Fiyat)</label>
+                                <select id="rmzLinkedProduct" class="border border-blue-200 p-2.5 rounded-xl w-full text-sm font-bold outline-none focus:border-blue-500 bg-white text-blue-800">
+                                    <option value="">-- Menüden Seç --</option>
+                                    ${products.filter(p=>!p.isArchived).map(p=> `<option value="${p.key}">${p.name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <button onclick="addRamadanCampaign()" class="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-black hover:bg-black transition w-full sm:w-auto flex-shrink-0 shadow-md">Ekle</button>
+                        </div>
+                        
+                        <img id="rmzPreview" class="hidden h-28 object-contain mb-4 border rounded-xl shadow-sm">
+                        <div id="ramadanCampaignList" class="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 scrollbar-none"></div>
+                    </div>
+
+                    <!-- 2. ALAN: NORMAL KAMPANYALARIN RAMAZAN TASARIMLARI -->
+                    <div class="bg-white border-2 border-orange-100 rounded-2xl p-5 shadow-sm mt-2">
+                        <h3 class="font-black text-lg text-orange-800 mb-4 flex items-center gap-2 border-b border-orange-50 pb-2">
+                            <span>🏮</span> 2. Ramazan Temalı Normal Kampanyalar (Kısa Slider)
+                        </h3>
+                        <p class="text-xs text-gray-500 mb-4 font-bold">Zaten var olan kampanyalarınızın Ramazan çizimli görsellerini buraya ekleyin. Seçtiğiniz ana kampanyadan fiyatı kendi otomatik çeker.</p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-3 mb-5 items-end bg-orange-50/50 p-3 rounded-xl border border-orange-100">
+                            <div class="w-full sm:w-1/2">
+                                <label class="text-[10px] font-bold text-orange-700 uppercase mb-1 block">Ramazan Görseli *</label>
+                                <button id="rmzNormalImgBtn" class="bg-orange-600 text-white px-3 py-2.5 rounded-xl font-bold w-full text-xs hover:bg-orange-700 transition">Görsel Seç / Yükle</button>
+                                <input type="hidden" id="rmzNormalUrl">
+                            </div>
+                            <div class="w-full sm:w-1/2">
+                                <label class="text-[10px] font-bold text-blue-600 uppercase mb-1 block">Mevcut Kampanyaya Bağla *</label>
+                                <select id="rmzLinkedCampaign" class="border border-blue-200 p-2.5 rounded-xl w-full text-sm font-bold outline-none focus:border-blue-500 bg-white text-blue-800">
+                                    <option value="">-- Kampanya Seç --</option>
+                                    ${campaignUrls.map(c => `<option value="${c.key}">${getCampaignLabel(c)}</option>`).join('')}
+                                </select>
+                            </div>
+                            <button onclick="addRamadanNormalCampaign()" class="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-black hover:bg-black transition w-full sm:w-auto flex-shrink-0 shadow-md">Ekle</button>
+                        </div>
+                        
+                        <img id="rmzNormalPreview" class="hidden h-28 object-contain mb-4 border rounded-xl shadow-sm">
+                        <div id="ramadanNormalCampaignList" class="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 scrollbar-none"></div>
+                    </div>
+
+                </div>
+            `);
+
+            // Şalter Durumunu Çek
+            database.ref('system_settings/ramadan_mode').once('value', (s) => {
+                const toggle = document.getElementById('ramadanModeToggle');
+                if(toggle) toggle.checked = s.val() === true;
+            });
+
+            // Resim Yükleme Motorları
+            document.getElementById('rmzImgBtn').addEventListener('click', (e) => {
+                e.preventDefault(); openCloudinaryWidget(document.getElementById('rmzUrl'), document.getElementById('rmzPreview'));
+            });
+            document.getElementById('rmzNormalImgBtn').addEventListener('click', (e) => {
+                e.preventDefault(); openCloudinaryWidget(document.getElementById('rmzNormalUrl'), document.getElementById('rmzNormalPreview'));
+            });
+
+            renderRamadanList();
+            renderRamadanNormalList();
+        }
+
+        // --- 1. İFTAR MENÜSÜ FONKSİYONLARI ---
+        window.renderRamadanList = function() {
+            const listEl = document.getElementById('ramadanCampaignList');
+            if(!listEl) return;
+            listEl.innerHTML = '';
+
+            if (ramadanCampaignUrls.length === 0) {
+                listEl.innerHTML = '<div class="text-center text-gray-400 text-sm py-4 border border-dashed rounded-xl">Eklenmiş İftar Afişi yok.</div>';
+                return;
+            }
+
+            ramadanCampaignUrls.forEach(c => {
+                let badge = c.linkedProductId ? '<span class="text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-black">🔗 Ürüne Bağlı</span>' : '<span class="text-[9px] bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-black">✍️ Manuel Fiyat</span>';
+                listEl.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-3 w-full overflow-hidden">
+                            <img src="${c.url}" class="w-20 h-12 object-cover rounded-lg border border-gray-100 flex-shrink-0">
+                            <div class="flex flex-col flex-1 min-w-0">
+                                <span class="font-black text-orange-600 text-sm">${c.price && c.price !== "0" ? c.price + ' ₺' : 'Fiyat Yok'}</span>
+                                ${badge}
+                            </div>
+                        </div>
+                        <button onclick="deleteRamadanCampaign('${c.key}')" class="bg-red-50 text-red-600 p-2.5 rounded-lg hover:bg-red-100 font-black text-xs transition flex-shrink-0 ml-2">🗑️ Sil</button>
+                    </div>
+                `;
+            });
+        };
+
+        window.addRamadanCampaign = async function() {
+            const priceInput = document.getElementById('rmzPrice').value.trim();
+            const linkedId = document.getElementById('rmzLinkedProduct').value;
+            const url = document.getElementById('rmzUrl').value;
+            if(!url) { alert("Lütfen afiş için bir görsel yükleyin."); return; }
+
+            let finalPrice = priceInput || "0";
+            if (linkedId) {
+                const p = products.find(prod => prod.key === linkedId);
+                if(p) finalPrice = String(p.discountPrice || p.price);
+            }
+
+            const pathPrefix = currentMenuType === 'in_place' ? 'ramadan_campaigns' : 'delivery_ramadan_campaigns';
+            try {
+                await database.ref(pathPrefix).push({ price: finalPrice, url: url, linkedProductId: linkedId || null, order: 99 });
+                document.getElementById('rmzPrice').value = '';
+                document.getElementById('rmzLinkedProduct').value = '';
+                document.getElementById('rmzUrl').value = '';
+                document.getElementById('rmzPreview').src = '';
+                document.getElementById('rmzPreview').classList.add('hidden');
+            } catch(e) { alert(e.message); }
+        };
+
+        window.deleteRamadanCampaign = async function(key) {
+            if(confirm("Bu afişi silmek istiyor musunuz?")) {
+                const pathPrefix = currentMenuType === 'in_place' ? 'ramadan_campaigns' : 'delivery_ramadan_campaigns';
+                await database.ref(`${pathPrefix}/${key}`).remove();
+            }
+        };
+
+        // --- 2. RAMAZAN TEMALI NORMAL KAMPANYA FONKSİYONLARI ---
+        window.renderRamadanNormalList = function() {
+            const listEl = document.getElementById('ramadanNormalCampaignList');
+            if(!listEl) return;
+            listEl.innerHTML = '';
+
+            if (ramadanNormalCampaignUrls.length === 0) {
+                listEl.innerHTML = '<div class="text-center text-gray-400 text-sm py-4 border border-dashed rounded-xl">Eklenmiş Ramazan Temalı Normal Kampanya yok.</div>';
+                return;
+            }
+
+            ramadanNormalCampaignUrls.forEach(c => {
+                let badge = '<span class="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-black">🔗 Kampanyadan Oto Fiyat</span>';
+                listEl.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl shadow-sm">
+                        <div class="flex items-center gap-3 w-full overflow-hidden">
+                            <img src="${c.url}" class="w-20 h-12 object-cover rounded-lg border border-gray-100 flex-shrink-0">
+                            <div class="flex flex-col flex-1 min-w-0">
+                                <span class="font-black text-orange-600 text-sm">${c.price && c.price !== "0" ? c.price + ' ₺' : 'Fiyat Yok'}</span>
+                                ${badge}
+                            </div>
+                        </div>
+                        <button onclick="deleteRamadanNormalCampaign('${c.key}')" class="bg-red-50 text-red-600 p-2.5 rounded-lg hover:bg-red-100 font-black text-xs transition flex-shrink-0 ml-2">🗑️ Sil</button>
+                    </div>
+                `;
+            });
+        };
+
+        window.addRamadanNormalCampaign = async function() {
+            const linkedCampId = document.getElementById('rmzLinkedCampaign').value;
+            const url = document.getElementById('rmzNormalUrl').value;
+            
+            if(!url || !linkedCampId) { alert("Lütfen Ramazan görselini yükleyin ve bağlanacak asıl kampanyayı seçin."); return; }
+
+            const linkedCamp = campaignUrls.find(c => c.key === linkedCampId);
+            const price = linkedCamp ? linkedCamp.price : "0";
+
+            const pathPrefix = currentMenuType === 'in_place' ? 'ramadan_normal_campaigns' : 'delivery_ramadan_normal_campaigns';
+            try {
+                await database.ref(pathPrefix).push({ price: price, url: url, linkedCampaignId: linkedCampId, order: 99 });
+                document.getElementById('rmzLinkedCampaign').value = '';
+                document.getElementById('rmzNormalUrl').value = '';
+                document.getElementById('rmzNormalPreview').src = '';
+                document.getElementById('rmzNormalPreview').classList.add('hidden');
+            } catch(e) { alert(e.message); }
+        };
+
+        window.deleteRamadanNormalCampaign = async function(key) {
+            if(confirm("Bu Ramazan tasarımlı kampanyayı silmek istiyor musunuz?")) {
+                const pathPrefix = currentMenuType === 'in_place' ? 'ramadan_normal_campaigns' : 'delivery_ramadan_normal_campaigns';
+                await database.ref(`${pathPrefix}/${key}`).remove();
+            }
+        };
+
+        window.toggleRamadanMode = async function(state) {
+            try {
+                await database.ref('system_settings/ramadan_mode').set(state);
+            } catch(e) { alert("Hata: " + e.message); }
+        };
     </script>
 </body>
 
