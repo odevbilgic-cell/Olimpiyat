@@ -1281,6 +1281,39 @@
             return product[key + language] || product[key + 'EN'] || product[key] || '';
         }
 
+        // 🚀 TATİL MODU OTOMATİK POP-UP MOTORU (3 Saniye Kuralı)
+        database.ref('system_settings/holiday_active').on('value', (s) => {
+            const data = s.val();
+            if (data && data.isActive) {
+                const now = Date.now();
+                if (now >= data.startTime && now <= data.endTime) {
+                    // Sayfa açıldığında daha önce gösterilmediyse 3 saniye sonra fırlat
+                    if (!window.holidayPopupShown) {
+                        setTimeout(() => {
+                            const existing = document.getElementById('holidayPopupModal');
+                            if(existing) existing.remove();
+
+                            const html = `
+                            <div id="holidayPopupModal" class="fixed inset-0 z-[999999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-pop-in">
+                                <div class="relative w-full max-w-lg mx-auto flex flex-col items-center">
+                                    <button onclick="document.getElementById('holidayPopupModal').remove()" class="absolute -top-12 right-0 text-white bg-white/20 hover:bg-red-500 border border-white/30 w-10 h-10 rounded-full flex items-center justify-center text-xl font-black transition backdrop-blur-sm shadow-xl z-10">✖</button>
+                                    <img src="${data.url}" class="w-full h-auto rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] object-contain max-h-[85vh] border-4 border-white/10">
+                                </div>
+                            </div>`;
+                            document.body.insertAdjacentHTML('beforeend', html);
+                            
+                            window.holidayPopupShown = true;
+                        }, 3000); 
+                    }
+                }
+            } else {
+                // Eğer admin panelden "İptal Et" basılırsa o an ekrandaki pop-up anında yokedilir
+                const existing = document.getElementById('holidayPopupModal');
+                if(existing) existing.remove();
+                window.holidayPopupShown = false; 
+            }
+        });
+
        // 🌙 RAMAZAN MODU DİNLEYİCİSİ VE KAMPANYA YÖNETİMİ
         database.ref('system_settings/ramadan_mode').on('value', (snapshot) => {
             const isRamadan = snapshot.val() === true;
