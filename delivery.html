@@ -318,10 +318,195 @@
         .animate-pop-in {
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+
+          /* --- 🌙 RAMAZAN MODU ÖZEL CSS (RESİMDEKİ BİREBİR TASARIM) --- */
+        .ramadan-bg-container {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            flex-direction: column;
+        }
+        body.ramadan-theme .ramadan-bg-container {
+            display: flex;
+        }
+        
+        /* Üst Bölüm: Resimdeki Bej/Altın İslami Desen */
+        .ramadan-bg-top {
+            height: 25vh; /* Navbar ve İftar Slider'ı arkası */
+            width: 100%;
+            background-color: #f4ebd8;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0L25 15L40 20L25 25L20 40L15 25L0 20L15 15Z' fill='%23d4af37' fill-opacity='0.15' fill-rule='evenodd'/%3E%3C/svg%3E");
+            border-bottom: 4px solid #d4af37;
+        }
+        
+        /* Alt Bölüm: Resimdeki Koyu Yeşil Baklava/Yıldız Deseni */
+        .ramadan-bg-bottom {
+            flex: 1;
+            width: 100%;
+            background-color: #0b2217;
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0L40 20L20 40L0 20Z' fill='%2306140e' fill-opacity='0.5' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        body.ramadan-theme { background-color: transparent !important; }
+        
+        /* Header: Bordo/Kırmızı */
+        body.ramadan-theme #mainHeader {
+            background: linear-gradient(135deg, #a91212, #7a0000) !important; 
+            border-bottom: 2px solid #d4af37 !important;
+        }
+        
+        /* Navbar: Koyu Yeşil, Altın Sarısı Yazı */
+        body.ramadan-theme #categoryTabs {
+            background-color: #0f3020 !important; 
+            border-bottom: 2px solid #d4af37 !important;
+        }
+        body.ramadan-theme #categoryTabs .tabBtn { color: #d4af37 !important; }
+        body.ramadan-theme #categoryTabs .tabBtn.active-tab {
+            background-color: transparent !important;
+            border: 1px solid #d4af37 !important;
+            color: #d4af37 !important;
+        }
+
+        /* Başlıklar ve Çerçeveler */
+        body.ramadan-theme .menu-category-section h2 {
+            color: white !important;
+            border-color: #d4af37 !important;
+        }
+        body.ramadan-theme .menu-category-section h2::after {
+            content: " 🌙⭐";
+            color: #d4af37;
+        }
+        body.ramadan-theme .menu-category-section > div > div {
+            border: 2px solid #166534 !important; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+       /* 🚫 KAYDIRMA ÇUBUKLARINI KÖKTEN GİZLE (KESİLMELERİ ÖNLER) */
+        .scrollbar-none::-webkit-scrollbar,
+        .slide-wrapper::-webkit-scrollbar,
+        #rmzSlideTrack::-webkit-scrollbar { 
+            display: none !important; 
+        }
+        
+        .scrollbar-none,
+        .slide-wrapper,
+        #rmzSlideTrack { 
+            -ms-overflow-style: none !important; 
+            scrollbar-width: none !important; 
+        }
+
+      /* --- 🌙 RAMAZAN MODU BOYUT VE DÜZEN AYARLARI --- */
+        
+       /* 1. ÜSTTEKİ BÜYÜK İFTAR AFİŞİ (SABİT VE TAM EKRAN) */
+        body.ramadan-theme #ramadanExclusiveSlider {
+            width: 100%; 
+            margin: 0 auto 1.5rem auto;
+            border: 2px solid #d4af37; 
+            border-radius: 0.75rem;
+            /* Sabit durduğu belli olsun diye alt gölgesi derinleştirildi */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.7); 
+            
+            /* 🚀 İŞTE EKRANDA SABİT TUTAN SİHİRLİ KODLAR */
+            position: -webkit-sticky; /* iPhone/Safari desteği */
+            position: sticky;
+            top: 115px; /* Üstteki kategori menüsünün tam altına milimetrik yapışır */
+            z-index: 10; /* Kategori menüsünün altında, ürünlerin ise üstünde kalır */
+            background-color: #0b2217; /* Ürünler altından geçerken şeffaf olup birbirine girmesin diye */
+        }
+
+        /* --- 🎯 RAMAZAN BÜYÜK AFİŞİNDEKİ FİYAT YERLEŞİM AYARLARI --- */
+        body.ramadan-theme #ramadanExclusiveSlider .campaign-price-overlay {
+            position: absolute;
+            
+            /* ↕️ DİKEY HİZALAMA (Aşağıdan ne kadar yüksekte olacağı) */
+            bottom: 22.5%; /* 💡 YUKARI ÇIKARMAK için sayıyı artır (Örn: 30%), AŞAĞI İNDİRMEK için azalt (Örn: 10%) */
+            
+            /* ↔️ YATAY HİZALAMA (Soldan ne kadar içeride olacağı) */
+            left: 8%; /* 💡 SAĞA KAYDIRMAK için sayıyı artır (Örn: 25%), SOLA KAYDIRMAK için azalt (Örn: 5%) */
+            
+            /* KUTU GENİŞLİĞİ VE YÜKSEKLİĞİ (Sıfıra sıfır oturması için) */
+            width: 20%; 
+            height: 15%; 
+            
+            /* YAZI BOYUTU (Telefona ve Tablete göre otomatik esner) */
+            font-size: clamp(1.5rem, 5vw, 3rem); 
+            
+            /* (Opsiyonel) Eğik durmasını istersen başındaki eğik çizgileri silip sayıyı değiştirebilirsin: */
+            /* transform: rotate(-2deg); */
+        }
+
+        body.ramadan-theme #ramadanExclusiveSlider .tl{
+            font-size: clamp(0.5rem, 4vw, 3rem); 
+
+            position: absolute;
+            
+            /* ↕️ DİKEY HİZALAMA (Aşağıdan ne kadar yüksekte olacağı) */
+            bottom: 0%; /* 💡 YUKARI ÇIKARMAK için sayıyı artır (Örn: 30%), AŞAĞI İNDİRMEK için azalt (Örn: 10%) */
+            
+            /* ↔️ YATAY HİZALAMA (Soldan ne kadar içeride olacağı) */
+            left: 85%; /* 💡 SAĞA KAYDIRMAK için sayıyı artır (Örn: 25%), SOLA KAYDIRMAK için azalt (Örn: 5%) */
+        }
+
+        /* 2. ALTTAKİ KÜÇÜK NORMAL KAMPANYA AFİŞİ */
+        body.ramadan-theme #campaignSlider {
+            width: 85%; /* İftar menüsüne göre belirgin şekilde KÜÇÜK */
+            margin: 0 auto 1.5rem auto;
+            border: 2px solid #d4af37;
+            border-radius: 0.75rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            background-color: transparent;
+
+            
+        }
+
+        body.ramadan-theme #campaignSlider .campaign-price-overlay{
+             position: absolute;
+            
+            /* ↕️ DİKEY HİZALAMA (Aşağıdan ne kadar yüksekte olacağı) */
+            bottom: 10%; /* 💡 YUKARI ÇIKARMAK için sayıyı artır (Örn: 30%), AŞAĞI İNDİRMEK için azalt (Örn: 10%) */
+            
+            /* ↔️ YATAY HİZALAMA (Soldan ne kadar içeride olacağı) */
+            left: 10%; /* 💡 SAĞA KAYDIRMAK için sayıyı artır (Örn: 25%), SOLA KAYDIRMAK için azalt (Örn: 5%) */
+            
+            /* KUTU GENİŞLİĞİ VE YÜKSEKLİĞİ (Sıfıra sıfır oturması için) */
+            width: 20%; 
+            height: 15%; 
+            
+            /* YAZI BOYUTU (Telefona ve Tablete göre otomatik esner) */
+            font-size: clamp(1.5rem, 5vw, 3rem); 
+        }
+
+         body.ramadan-theme #campaignSlider .tl{
+            font-size: clamp(0.5rem, 4vw, 3rem); 
+
+            position: absolute;
+            
+            /* ↕️ DİKEY HİZALAMA (Aşağıdan ne kadar yüksekte olacağı) */
+            bottom: 0%; /* 💡 YUKARI ÇIKARMAK için sayıyı artır (Örn: 30%), AŞAĞI İNDİRMEK için azalt (Örn: 10%) */
+            
+            /* ↔️ YATAY HİZALAMA (Soldan ne kadar içeride olacağı) */
+            left: 95%; /* 💡 SAĞA KAYDIRMAK için sayıyı artır (Örn: 25%), SOLA KAYDIRMAK için azalt (Örn: 5%) */
+        }
+
+        /* Fiyat yazısı dışarı taşmasın diye dinamik küçültme */
+        body.ramadan-theme .campaign-price-overlay { font-size: clamp(1.5rem, 5vw, 3rem); }
+
+        /* Ramazan modunda "Biliyor muydunuz?" alanı yokedilir */
+        body.ramadan-theme #triviaSectionWrapper { display: none !important; }
+        #rmzSlideTrack { scroll-behavior: smooth; }
+        .rmz-dot { width: 8px; height: 8px; background-color: rgba(255, 255, 255, 0.4); border-radius: 50%; transition: all 0.3s; }
+        .rmz-dot.active { background-color: #ffffff; width: 16px; border-radius: 4px; }
     </style>
 </head>
 
 <body class="text-gray-800 overflow-hidden">
+
+    <!-- 🌙 RAMAZAN SABİT ARKA PLAN KATMANLARI -->
+    <div class="ramadan-bg-container">
+        <div class="ramadan-bg-top"></div>
+        <div class="ramadan-bg-bottom"></div>
+    </div>
 
     <!-- 🚀 OLİMPİYAT KARŞILAMA EKRANI (Delivery.html'de ilk açılacak sayfa) -->
     <div id="welcomeScreenOverlay"
@@ -524,8 +709,18 @@
         </div>
     </div>
 
+
+
     <main class="p-4">
-        <div class="bg-white rounded-xl shadow mb-4 p-0">
+
+        <!-- 🌙 RAMAZAN ÖZEL KAMPANYA SLIDER'I (TAM EKRAN) -->
+        <div id="ramadanExclusiveSlider" class="hidden mb-6 relative w-full animate-pop-in">
+            <div class="slider-container">
+                <div class="slide-wrapper scrollbar-none" id="rmzSlideTrack" style="width: 100%;"></div>
+                <div class="slider-dots" id="rmzDots"></div>
+            </div>
+        </div>
+       <div >
             <section id="campaignSlider"></section>
         </div>
         <div id="menuContainer" class="flex flex-col gap-6 scroll-mt-24 pb-20"></div>
@@ -1174,20 +1369,27 @@
             }
         }
 
-        function renderCampaignSlider() {
-            if (campaignUrls.length === 0) {
+       function renderCampaignSlider() {
+            // Eğere Ramazan modundaysak ve Ramazan için yüklenmiş normal kampanya varsa ONLARI kullan
+            let activeUrls = campaignUrls;
+            if (document.body.classList.contains('ramadan-theme') && typeof ramadanNormalCampaignUrls !== 'undefined' && ramadanNormalCampaignUrls.length > 0) {
+                activeUrls = ramadanNormalCampaignUrls;
+            }
+
+            if (activeUrls.length === 0) {
                 campaignSliderSection.innerHTML = '';
                 campaignSliderSection.parentElement.classList.add('hidden');
                 return;
             }
             campaignSliderSection.parentElement.classList.remove('hidden');
-            const slidesHtml = campaignUrls.map((c, index) => {
+            
+            const slidesHtml = activeUrls.map((c, index) => {
                 const priceHtml = c.price ? `<div class="campaign-price-overlay">${c.price}<p class="tl">₺</p></div>` : '';
                 return `<div class="slide"><img src="${c.url}" alt="Kampanya Görseli" class="rounded-xl">${priceHtml}</div>`;
             }).join('');
-            const dotsHtml = campaignUrls.map((_, i) => `<div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>`).join('');
+            const dotsHtml = activeUrls.map((_, i) => `<div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>`).join('');
 
-            campaignSliderSection.innerHTML = `<div class="slider-container"><div class="slide-wrapper" style="width: 100%;">${slidesHtml}</div><div class="slider-dots">${dotsHtml}</div></div>`;
+            campaignSliderSection.innerHTML = `<div class="slider-container"><div class="slide-wrapper scrollbar-none" style="width: 100%;">${slidesHtml}</div><div class="slider-dots">${dotsHtml}</div></div>`;
 
             const sliderWrapper = document.querySelector('#campaignSlider .slide-wrapper');
             if (sliderWrapper) sliderWrapper.addEventListener('scroll', handleScroll, { passive: true });
@@ -1308,6 +1510,138 @@
                 currentSlide = 0;
                 renderCampaignSlider();
             });
+        }
+
+        let ramadanCampaignUrls = []; 
+        let ramadanNormalCampaignUrls = []; 
+        let ramzSliderInterval;
+
+        function setupHolidayAndRamadanListeners() {
+            // 🌙 1. RAMAZAN MODU DİNLEYİCİSİ
+            database.ref('system_settings/ramadan_mode').on('value', (snapshot) => {
+                const isRamadan = snapshot.val() === true;
+                const body = document.body;
+                const rmzSlider = document.getElementById('ramadanExclusiveSlider');
+                
+                if(isRamadan) {
+                    body.classList.add('ramadan-theme');
+                    if(rmzSlider) rmzSlider.classList.remove('hidden');
+                    
+                    // 🚀 AKILLI ÇEKİM: İftar Afişlerini "Yerinde Menü" veritabanından çeker ve fiyatına +10 TL ekler!
+                    database.ref('ramadan_campaigns').on('value', (snap) => {
+                        ramadanCampaignUrls = [];
+                        snap.forEach(child => { 
+                            const c = child.val(); 
+                            c.key = child.key; 
+                            if(c.price && c.price !== "0" && !isNaN(c.price)) {
+                                c.price = (parseFloat(c.price) + 10).toString(); // +10 TL EKLENDİ
+                            }
+                            ramadanCampaignUrls.push(c); 
+                        });
+                        ramadanCampaignUrls.sort((a,b) => (a.order||99) - (b.order||99));
+                        renderRamadanClientSlider();
+                    });
+
+                    // 🚀 AKILLI ÇEKİM: Ramazan Temalı Normal Kampanyaları "Yerinde Menü"den çeker ve +10 TL ekler!
+                    database.ref('ramadan_normal_campaigns').on('value', (snap) => {
+                        ramadanNormalCampaignUrls = [];
+                        snap.forEach(child => { 
+                            const c = child.val(); 
+                            c.key = child.key; 
+                            if(c.price && c.price !== "0" && !isNaN(c.price)) {
+                                c.price = (parseFloat(c.price) + 10).toString(); // +10 TL EKLENDİ
+                            }
+                            ramadanNormalCampaignUrls.push(c); 
+                        });
+                        ramadanNormalCampaignUrls.sort((a,b) => (a.order||99) - (b.order||99));
+                        renderCampaignSlider();
+                    });
+
+                } else {
+                    body.classList.remove('ramadan-theme');
+                    if(rmzSlider) rmzSlider.classList.add('hidden');
+                    if(ramzSliderInterval) clearInterval(ramzSliderInterval);
+                    renderCampaignSlider(); // Eski normal kampanyalara dön
+                }
+            });
+
+            // 🏖️ 2. TATİL MODU OTOMATİK POP-UP MOTORU (3 Saniye Kuralı)
+            database.ref('system_settings/holiday_active').on('value', (s) => {
+                const data = s.val();
+                if (data && data.isActive) {
+                    const now = Date.now();
+                    if (now >= data.startTime && now <= data.endTime) {
+                        if (!window.holidayPopupShown) {
+                            setTimeout(() => {
+                                const existing = document.getElementById('holidayPopupModal');
+                                if(existing) existing.remove();
+
+                                const html = `
+                                <div id="holidayPopupModal" class="fixed inset-0 z-[999999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-pop-in">
+                                    <div class="relative w-full max-w-lg mx-auto flex flex-col items-center">
+                                        <button onclick="document.getElementById('holidayPopupModal').remove()" class="absolute -top-12 right-0 text-white bg-white/20 hover:bg-red-500 border border-white/30 w-10 h-10 rounded-full flex items-center justify-center text-xl font-black transition backdrop-blur-sm shadow-xl z-10">✖</button>
+                                        <img src="${data.url}" class="w-full h-auto rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] object-contain max-h-[85vh] border-4 border-white/10">
+                                    </div>
+                                </div>`;
+                                document.body.insertAdjacentHTML('beforeend', html);
+                                
+                                window.holidayPopupShown = true;
+                            }, 3000); 
+                        }
+                    }
+                } else {
+                    const existing = document.getElementById('holidayPopupModal');
+                    if(existing) existing.remove();
+                    window.holidayPopupShown = false; 
+                }
+            });
+        }
+
+        // 🌙 RAMAZAN SLIDER ÇİZİM VE KAYDIRMA (İftar Afişleri)
+        function renderRamadanClientSlider() {
+            const track = document.getElementById('rmzSlideTrack');
+            const dotsContainer = document.getElementById('rmzDots');
+            const sliderWrapper = document.getElementById('ramadanExclusiveSlider');
+            
+            if(!track || !dotsContainer || !sliderWrapper) return;
+
+            track.innerHTML = ''; dotsContainer.innerHTML = '';
+
+            if(ramadanCampaignUrls.length === 0) {
+                sliderWrapper.classList.add('hidden');
+                return;
+            } else if (document.body.classList.contains('ramadan-theme')) {
+                sliderWrapper.classList.remove('hidden');
+            }
+
+            ramadanCampaignUrls.forEach((c, i) => {
+                const priceHtml = (c.price && c.price !== "0") ? `<div class="campaign-price-overlay">${c.price}<p class="tl">₺</p></div>` : '';
+                track.innerHTML += `
+                    <div class="slide min-w-full w-full flex-shrink-0 relative">
+                        <img src="${c.url}" class="w-full h-auto object-contain bg-black rounded-xl">
+                        ${priceHtml}
+                    </div>
+                `;
+                dotsContainer.innerHTML += `<div class="rmz-dot ${i === 0 ? 'active' : ''}"></div>`;
+            });
+
+            startRamadanSliderAutoScroll();
+        }
+
+        function startRamadanSliderAutoScroll() {
+            const track = document.getElementById('rmzSlideTrack');
+            const dots = document.querySelectorAll('#rmzDots .rmz-dot');
+            let currentSlide = 0;
+            const totalSlides = dots.length;
+
+            if(ramzSliderInterval) clearInterval(ramzSliderInterval);
+            if(totalSlides <= 1) return;
+            
+            ramzSliderInterval = setInterval(() => {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                track.scrollTo({ left: currentSlide * track.clientWidth, behavior: 'smooth' });
+                dots.forEach((dot, index) => dot.classList.toggle('active', index === currentSlide));
+            }, 4500); 
         }
 
         // --- 🚀 UYGULAMA TİPİ KAYDIRMALI MENÜ MOTORU (PAKET SERVİS) ---
@@ -2135,6 +2469,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             setupFirebaseListener();
+            setupHolidayAndRamadanListeners();
             trackVisitor();
             window.addEventListener('resize', setPositionByIndex);
             setupIntervals();
