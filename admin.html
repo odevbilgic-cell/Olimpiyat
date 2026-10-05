@@ -1087,22 +1087,23 @@
             if (menuType === 'in_place') {
                 productsRef = database.ref(inPlaceProductsPath);
                 campaignsRef = database.ref(inPlaceCampaignsPath);
-                ramadanCampaignsRef = database.ref('ramadan_campaigns'); 
-                ramadanNormalCampaignsRef = database.ref('ramadan_normal_campaigns'); 
-                campaignInfoRef = database.ref(inPlaceCampaignInfoPath);
             } else {
                 productsRef = database.ref(deliveryProductsPath);
                 campaignsRef = database.ref(deliveryCampaignsPath);
-                ramadanCampaignsRef = database.ref('delivery_ramadan_campaigns'); 
-                ramadanNormalCampaignsRef = database.ref('delivery_ramadan_normal_campaigns'); 
-                campaignInfoRef = database.ref(deliveryCampaignInfoPath);
             }
+            // Ramazan Ayarları DAİMA Yerinde Menü'den (ana merkezden) okunur!
+            ramadanCampaignsRef = database.ref('ramadan_campaigns');
+            ramadanNormalCampaignsRef = database.ref('ramadan_normal_campaigns'); 
+
+            campaignInfoRef = database.ref(currentMenuType === 'in_place' ? inPlaceCampaignInfoPath : deliveryCampaignInfoPath);
             priceBoxUrlRef = campaignInfoRef.child('price_box_url');
+            
             updateMenuButtonState(menuType);
             stopAllListeners();
             setupDataListeners();
             refreshActiveModule();
         }
+
         function refreshActiveModule() {
             const activeTab = document.querySelector('.tab-button.active');
             if (activeTab) {
@@ -6229,21 +6230,36 @@
                 if (document.getElementById('sortableCampaignList')) renderCampaignList();
             });
 
+           // RAMAZAN İFTAR AFİŞLERİ DİNLEYİCİSİ (+10 TL KURALI İLE)
             activeListeners.ramadan = ramadanCampaignsRef.on('value', (s) => {
                 ramadanCampaignUrls = [];
-                s.forEach(c => { const camp = c.val(); camp.key = c.key; ramadanCampaignUrls.push(camp); });
+                s.forEach(c => { 
+                    const camp = c.val(); 
+                    camp.key = c.key; 
+                    if(currentMenuType === 'delivery' && camp.price && camp.price !== "0" && !isNaN(camp.price)) {
+                        camp.price = (parseFloat(camp.price) + 10).toString();
+                    }
+                    ramadanCampaignUrls.push(camp); 
+                });
                 syncLinkedCampaignPrices(); 
                 if (document.getElementById('ramadanCampaignList')) renderRamadanList();
             });
 
+            // RAMAZAN NORMAL KAMPANYA DİNLEYİCİSİ (+10 TL KURALI İLE)
             activeListeners.ramadanNormal = ramadanNormalCampaignsRef.on('value', (s) => {
                 ramadanNormalCampaignUrls = [];
-                s.forEach(c => { const camp = c.val(); camp.key = c.key; ramadanNormalCampaignUrls.push(camp); });
+                s.forEach(c => { 
+                    const camp = c.val(); 
+                    camp.key = c.key; 
+                    if(currentMenuType === 'delivery' && camp.price && camp.price !== "0" && !isNaN(camp.price)) {
+                        camp.price = (parseFloat(camp.price) + 10).toString();
+                    }
+                    ramadanNormalCampaignUrls.push(camp); 
+                });
                 syncLinkedCampaignPrices(); 
                 if (document.getElementById('ramadanNormalCampaignList')) renderRamadanNormalList();
             });
 
-            // YENİ: TATİL MODU DİNLEYİCİLERİ
             activeListeners.holidayTpl = holidayTemplatesRef.on('value', (s) => {
                 holidayTemplates = [];
                 s.forEach(c => { holidayTemplates.push({key: c.key, ...c.val()}); });
@@ -6257,6 +6273,7 @@
             activeListeners.campaignPriceText = campaignInfoRef.child('price_text').on('value', (s) => {
                 campaignPriceText = s.val() || "";
             });
+        
 
 
 
@@ -6287,15 +6304,13 @@
             });
         }
 
-        function syncLinkedCampaignPrices() {
+       function syncLinkedCampaignPrices() {
             if (!products.length) return;
             const pathPrefix = currentMenuType === 'in_place' ? inPlaceCampaignsPath : deliveryCampaignsPath;
-            const ramadanPathPrefix = currentMenuType === 'in_place' ? 'ramadan_campaigns' : 'delivery_ramadan_campaigns';
-            const ramadanNormalPathPrefix = currentMenuType === 'in_place' ? 'ramadan_normal_campaigns' : 'delivery_ramadan_normal_campaigns';
             const updates = {};
             let hasUpdate = false;
 
-            // Normal Kampanyalar
+            // 1. Normal Kampanyalar (Hem Yerinde Hem Paket Kendi İçinde Eşitlenir)
             campaignUrls.forEach(camp => {
                 if (camp.linkedProductId) {
                     const linkedProduct = products.find(p => p.key === camp.linkedProductId);
@@ -6309,33 +6324,34 @@
                 }
             });
 
-            // Ramazan İftar Menüleri Afişleri
-            ramadanCampaignUrls.forEach(camp => {
-                if (camp.linkedProductId) {
-                    const linkedProduct = products.find(p => p.key === camp.linkedProductId);
-                    if (linkedProduct) {
-                        const targetPrice = String(linkedProduct.discountPrice || linkedProduct.price);
-                        if (String(camp.price) !== targetPrice) {
-                            updates[`${ramadanPathPrefix}/${camp.key}/price`] = targetPrice;
-                            hasUpdate = true;
+            // 2. RAMAZAN KAMPANYALARI (SADECE YERİNDE MENÜDEYKEN FİYAT GÜNCELLER - Pakete yansıması otomatik)
+            if (currentMenuType === 'in_place') {
+                ramadanCampaignUrls.forEach(camp => {
+                    if (camp.linkedProductId) {
+                        const linkedProduct = products.find(p => p.key === camp.linkedProductId);
+                        if (linkedProduct) {
+                            const targetPrice = String(linkedProduct.discountPrice || linkedProduct.price);
+                            if (String(camp.price) !== targetPrice) {
+                                updates[`ramadan_campaigns/${camp.key}/price`] = targetPrice;
+                                hasUpdate = true;
+                            }
                         }
                     }
-                }
-            });
+                });
 
-            // YENİ: Ramazan Temalı Normal Kampanyaların Fiyat Eşitlemesi
-            ramadanNormalCampaignUrls.forEach(camp => {
-                if (camp.linkedCampaignId) {
-                    const parentCamp = campaignUrls.find(c => c.key === camp.linkedCampaignId);
-                    if (parentCamp) {
-                        const targetPrice = String(parentCamp.price);
-                        if (String(camp.price) !== targetPrice) {
-                            updates[`${ramadanNormalPathPrefix}/${camp.key}/price`] = targetPrice;
-                            hasUpdate = true;
+                ramadanNormalCampaignUrls.forEach(camp => {
+                    if (camp.linkedCampaignId) {
+                        const parentCamp = campaignUrls.find(c => c.key === camp.linkedCampaignId);
+                        if (parentCamp) {
+                            const targetPrice = String(parentCamp.price);
+                            if (String(camp.price) !== targetPrice) {
+                                updates[`ramadan_normal_campaigns/${camp.key}/price`] = targetPrice;
+                                hasUpdate = true;
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
 
             if (hasUpdate) database.ref().update(updates);
         }
@@ -7176,6 +7192,80 @@
             content.classList.add('flex');
 
             if(type === 'ramadan') {
+                let ramadanUI = '';
+                
+                // 🚀 EĞER PAKET SERVİS EKRANINDAYSAK SADECE İZLEME MODU GÖSTER
+                if (currentMenuType === 'delivery') {
+                    ramadanUI = `
+                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-4 shadow-inner">
+                            <h4 class="font-black text-blue-800 flex items-center gap-2"><span>ℹ️</span> Otomatik Senkronizasyon Aktif</h4>
+                            <p class="text-xs text-blue-700 mt-1 font-medium">Paket Servis Ramazan afişleri otomatik olarak <b class="font-black">Yerinde Menü</b>'den çekilmektedir ve tüm afiş fiyatlarına otomatik olarak <b class="font-black">+10 TL</b> eklenerek gösterilmektedir.<br><br>Afiş eklemek, silmek veya değiştirmek için lütfen sol menüden <b>Yerinde Menü</b>'ye geçiş yapın.</p>
+                        </div>
+                        
+                        <div class="bg-white border-2 border-emerald-100 rounded-2xl p-5 shadow-sm mb-4">
+                            <h3 class="font-black text-lg text-emerald-800 mb-4 flex items-center gap-2 border-b border-emerald-50 pb-2"><span>🖼️</span> 1. İftar Menüleri Afişleri (Paket Fiyatı +10 TL)</h3>
+                            <div id="ramadanCampaignList" class="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 scrollbar-none opacity-80 pointer-events-none"></div>
+                        </div>
+
+                        <div class="bg-white border-2 border-orange-100 rounded-2xl p-5 shadow-sm">
+                            <h3 class="font-black text-lg text-orange-800 mb-4 flex items-center gap-2 border-b border-orange-50 pb-2"><span>🏮</span> 2. Ramazan Temalı Normal Kampanyalar (Paket Fiyatı +10 TL)</h3>
+                            <div id="ramadanNormalCampaignList" class="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 scrollbar-none opacity-80 pointer-events-none"></div>
+                        </div>
+                    `;
+                } 
+                // YERİNDE MENÜ İSE DÜZENLEME ALANLARINI GÖSTER
+                else {
+                    ramadanUI = `
+                        <!-- 1. İFTAR MENÜLERİ (EN ÜSTTE ÇIKAN) -->
+                        <div class="bg-white border-2 border-emerald-100 rounded-2xl p-5 shadow-sm mb-4">
+                            <h3 class="font-black text-lg text-emerald-800 mb-4 flex items-center gap-2 border-b border-emerald-50 pb-2"><span>🖼️</span> 1. İftar Menüleri Afişleri (Tam Ekran)</h3>
+                            <div class="flex flex-col sm:flex-row gap-3 mb-4 items-end bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
+                                <div class="w-full sm:w-1/3">
+                                    <label class="text-[10px] font-bold text-emerald-700 uppercase mb-1 block">Afiş Görseli *</label>
+                                    <button id="rmzImgBtn" class="bg-emerald-600 text-white px-3 py-2.5 rounded-xl font-bold w-full text-xs hover:bg-emerald-700 transition shadow-sm">Görsel Seç / Yükle</button>
+                                    <input type="hidden" id="rmzUrl">
+                                </div>
+                                <div class="w-full sm:w-1/3">
+                                    <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Manuel Fiyat</label>
+                                    <input type="number" id="rmzPrice" placeholder="Örn: 350" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-bold outline-none focus:border-emerald-500 bg-white">
+                                </div>
+                                <div class="w-full sm:w-1/3">
+                                    <label class="text-[10px] font-bold text-blue-600 uppercase mb-1 block">Ürüne Bağla (Oto Fiyat)</label>
+                                    <select id="rmzLinkedProduct" class="border-2 border-blue-100 p-2.5 rounded-xl w-full text-sm font-bold outline-none focus:border-blue-500 bg-white text-blue-800">
+                                        <option value="">-- Menüden Seç --</option>
+                                        ${products.filter(p=>!p.isArchived).map(p=> `<option value="${p.key}">${p.name}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <button onclick="addRamadanCampaign()" class="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-black hover:bg-black transition w-full sm:w-auto flex-shrink-0 shadow-md">Ekle</button>
+                            </div>
+                            <img id="rmzPreview" class="hidden h-28 object-contain mb-4 border rounded-xl shadow-sm">
+                            <div id="ramadanCampaignList" class="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 scrollbar-none"></div>
+                        </div>
+
+                        <!-- 2. NORMAL KAMPANYALARIN RAMAZAN TASARIMLARI -->
+                        <div class="bg-white border-2 border-orange-100 rounded-2xl p-5 shadow-sm">
+                            <h3 class="font-black text-lg text-orange-800 mb-4 flex items-center gap-2 border-b border-orange-50 pb-2"><span>🏮</span> 2. Ramazan Temalı Normal Kampanyalar</h3>
+                            <div class="flex flex-col sm:flex-row gap-3 mb-5 items-end bg-orange-50/50 p-3 rounded-xl border border-orange-100">
+                                <div class="w-full sm:w-1/2">
+                                    <label class="text-[10px] font-bold text-orange-700 uppercase mb-1 block">Ramazan Görseli *</label>
+                                    <button id="rmzNormalImgBtn" class="bg-orange-600 text-white px-3 py-2.5 rounded-xl font-bold w-full text-xs hover:bg-orange-700 transition shadow-sm">Görsel Seç / Yükle</button>
+                                    <input type="hidden" id="rmzNormalUrl">
+                                </div>
+                                <div class="w-full sm:w-1/2">
+                                    <label class="text-[10px] font-bold text-blue-600 uppercase mb-1 block">Mevcut Kampanyaya Bağla *</label>
+                                    <select id="rmzLinkedCampaign" class="border-2 border-blue-100 p-2.5 rounded-xl w-full text-sm font-bold outline-none focus:border-blue-500 bg-white text-blue-800">
+                                        <option value="">-- Kampanya Seç --</option>
+                                        ${campaignUrls.map(c => `<option value="${c.key}">${getCampaignLabel(c)}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <button onclick="addRamadanNormalCampaign()" class="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-black hover:bg-black transition w-full sm:w-auto flex-shrink-0 shadow-md">Ekle</button>
+                            </div>
+                            <img id="rmzNormalPreview" class="hidden h-28 object-contain mb-4 border rounded-xl shadow-sm">
+                            <div id="ramadanNormalCampaignList" class="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 scrollbar-none"></div>
+                        </div>
+                    `;
+                }
+
                 content.innerHTML = `
                     <button onclick="renderSettingsModule()" class="text-gray-500 font-black text-xs sm:text-sm flex items-center justify-center gap-1 hover:text-gray-800 hover:bg-gray-200 self-start mb-4 bg-gray-100 px-4 py-2 rounded-xl transition active:scale-95 border border-gray-200">⬅ Geri Dön</button>
                     
@@ -7190,53 +7280,7 @@
                         </label>
                     </div>
 
-                    <!-- 1. İFTAR MENÜLERİ (EN ÜSTTE ÇIKAN) -->
-                    <div class="bg-white border-2 border-emerald-100 rounded-2xl p-5 shadow-sm mb-4">
-                        <h3 class="font-black text-lg text-emerald-800 mb-4 flex items-center gap-2 border-b border-emerald-50 pb-2"><span>🖼️</span> 1. İftar Menüleri Afişleri (Tam Ekran)</h3>
-                        <div class="flex flex-col sm:flex-row gap-3 mb-4 items-end bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
-                            <div class="w-full sm:w-1/3">
-                                <label class="text-[10px] font-bold text-emerald-700 uppercase mb-1 block">Afiş Görseli *</label>
-                                <button id="rmzImgBtn" class="bg-emerald-600 text-white px-3 py-2.5 rounded-xl font-bold w-full text-xs hover:bg-emerald-700 transition shadow-sm">Görsel Seç / Yükle</button>
-                                <input type="hidden" id="rmzUrl">
-                            </div>
-                            <div class="w-full sm:w-1/3">
-                                <label class="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Manuel Fiyat</label>
-                                <input type="number" id="rmzPrice" placeholder="Örn: 350" class="border-2 border-gray-100 p-2.5 rounded-xl w-full text-sm font-bold outline-none focus:border-emerald-500 bg-white">
-                            </div>
-                            <div class="w-full sm:w-1/3">
-                                <label class="text-[10px] font-bold text-blue-600 uppercase mb-1 block">Ürüne Bağla (Oto Fiyat)</label>
-                                <select id="rmzLinkedProduct" class="border-2 border-blue-100 p-2.5 rounded-xl w-full text-sm font-bold outline-none focus:border-blue-500 bg-white text-blue-800">
-                                    <option value="">-- Menüden Seç --</option>
-                                    ${products.filter(p=>!p.isArchived).map(p=> `<option value="${p.key}">${p.name}</option>`).join('')}
-                                </select>
-                            </div>
-                            <button onclick="addRamadanCampaign()" class="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-black hover:bg-black transition w-full sm:w-auto flex-shrink-0 shadow-md">Ekle</button>
-                        </div>
-                        <img id="rmzPreview" class="hidden h-28 object-contain mb-4 border rounded-xl shadow-sm">
-                        <div id="ramadanCampaignList" class="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 scrollbar-none"></div>
-                    </div>
-
-                    <!-- 2. NORMAL KAMPANYALARIN RAMAZAN TASARIMLARI -->
-                    <div class="bg-white border-2 border-orange-100 rounded-2xl p-5 shadow-sm">
-                        <h3 class="font-black text-lg text-orange-800 mb-4 flex items-center gap-2 border-b border-orange-50 pb-2"><span>🏮</span> 2. Ramazan Temalı Normal Kampanyalar</h3>
-                        <div class="flex flex-col sm:flex-row gap-3 mb-5 items-end bg-orange-50/50 p-3 rounded-xl border border-orange-100">
-                            <div class="w-full sm:w-1/2">
-                                <label class="text-[10px] font-bold text-orange-700 uppercase mb-1 block">Ramazan Görseli *</label>
-                                <button id="rmzNormalImgBtn" class="bg-orange-600 text-white px-3 py-2.5 rounded-xl font-bold w-full text-xs hover:bg-orange-700 transition shadow-sm">Görsel Seç / Yükle</button>
-                                <input type="hidden" id="rmzNormalUrl">
-                            </div>
-                            <div class="w-full sm:w-1/2">
-                                <label class="text-[10px] font-bold text-blue-600 uppercase mb-1 block">Mevcut Kampanyaya Bağla *</label>
-                                <select id="rmzLinkedCampaign" class="border-2 border-blue-100 p-2.5 rounded-xl w-full text-sm font-bold outline-none focus:border-blue-500 bg-white text-blue-800">
-                                    <option value="">-- Kampanya Seç --</option>
-                                    ${campaignUrls.map(c => `<option value="${c.key}">${getCampaignLabel(c)}</option>`).join('')}
-                                </select>
-                            </div>
-                            <button onclick="addRamadanNormalCampaign()" class="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-black hover:bg-black transition w-full sm:w-auto flex-shrink-0 shadow-md">Ekle</button>
-                        </div>
-                        <img id="rmzNormalPreview" class="hidden h-28 object-contain mb-4 border rounded-xl shadow-sm">
-                        <div id="ramadanNormalCampaignList" class="flex flex-col gap-3 max-h-80 overflow-y-auto pr-2 scrollbar-none"></div>
-                    </div>
+                    ${ramadanUI}
                 `;
                 
                 // Event Listeners for Ramazan Sub-Menu
@@ -7244,8 +7288,11 @@
                     const toggle = document.getElementById('ramadanModeToggle');
                     if(toggle) toggle.checked = s.val() === true;
                 });
-                document.getElementById('rmzImgBtn').addEventListener('click', (e) => { e.preventDefault(); openCloudinaryWidget(document.getElementById('rmzUrl'), document.getElementById('rmzPreview')); });
-                document.getElementById('rmzNormalImgBtn').addEventListener('click', (e) => { e.preventDefault(); openCloudinaryWidget(document.getElementById('rmzNormalUrl'), document.getElementById('rmzNormalPreview')); });
+                
+                if (currentMenuType === 'in_place') {
+                    document.getElementById('rmzImgBtn').addEventListener('click', (e) => { e.preventDefault(); openCloudinaryWidget(document.getElementById('rmzUrl'), document.getElementById('rmzPreview')); });
+                    document.getElementById('rmzNormalImgBtn').addEventListener('click', (e) => { e.preventDefault(); openCloudinaryWidget(document.getElementById('rmzNormalUrl'), document.getElementById('rmzNormalPreview')); });
+                }
 
                 renderRamadanList();
                 renderRamadanNormalList();
